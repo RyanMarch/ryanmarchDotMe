@@ -1,0 +1,789 @@
+:root {
+    --bg-color: #030712;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-color: #38bdf8;
+    --accent-glow: rgba(56, 189, 248, 0.2);
+    --font-main: 'Outfit', sans-serif;
+    --glimmer-color: rgba(255, 255, 255, 0.15);
+
+    /* Tag Palette - Sophisticated Muted Tones */
+    --tag-blue: #38bdf8;
+    --tag-blue-bg: rgba(56, 189, 248, 0.1);
+    --tag-blue-border: rgba(56, 189, 248, 0.2);
+
+    --tag-green: #4ade80;
+    --tag-green-bg: rgba(74, 222, 128, 0.1);
+    --tag-green-border: rgba(74, 222, 128, 0.2);
+
+    --tag-purple: #c084fc;
+    --tag-purple-bg: rgba(192, 132, 252, 0.1);
+    --tag-purple-border: rgba(192, 132, 252, 0.2);
+
+    --tag-orange: #fb923c;
+    --tag-orange-bg: rgba(251, 146, 60, 0.1);
+    --tag-orange-border: rgba(251, 146, 60, 0.2);
+
+    --tag-rose: #fb7185;
+    --tag-rose-bg: rgba(251, 113, 133, 0.1);
+    --tag-rose-border: rgba(251, 113, 133, 0.2);
+
+    --tag-cyan: #22d3ee;
+    --tag-cyan-bg: rgba(34, 211, 238, 0.1);
+    --tag-cyan-border: rgba(34, 211, 238, 0.2);
+
+    --tag-amber: #fbbf24;
+    --tag-amber-bg: rgba(251, 191, 36, 0.1);
+    --tag-amber-border: rgba(251, 191, 36, 0.2);
+
+    --tag-white: #ffffff;
+    --tag-white-bg: rgba(255, 255, 255, 0.05);
+    --tag-white-border: rgba(255, 255, 255, 0.15);
+
+    --tag-gray: #94a3b8;
+    --tag-gray-bg: rgba(148, 163, 184, 0.1);
+    --tag-gray-border: rgba(148, 163, 184, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    min-height: 100vh; /* Changed from height: 100vh */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0; /* Reduced from 2rem */
+}
+
+/* --- Background --- */
+.background-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 50%, #0f172a 0%, #030712 100%);
+}
+
+.orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.3;
+    animation: float 25s infinite alternate ease-in-out;
+}
+
+.orb-1 {
+    width: 600px;
+    height: 600px;
+    background: #1e3a8a;
+    top: -200px;
+    right: -100px;
+}
+
+.orb-2 {
+    width: 500px;
+    height: 500px;
+    background: #312e81;
+    bottom: -150px;
+    left: -100px;
+    animation-delay: -5s;
+}
+
+@keyframes float {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(100px, 50px) scale(1.1); }
+}
+
+/* --- Main Layout --- */
+main {
+    width: 100%;
+    max-width: 1280px; /* Reduced from 1400px to feel less "wide" */
+    padding: 0 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Reduced from 1.5rem */
+    justify-content: center;
+    margin: auto 0; /* Helps with centering in flex containers */
+}
+
+/* Ultra-wide support */
+@media (min-width: 2000px) {
+    main {
+        max-width: 1500px; /* Reduced from 1800px */
+        gap: 2rem;
+    }
+}
+
+/* --- Glimmering Border Base --- */
+.glimmer-card {
+    position: relative;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+    /* Removed overflow: hidden to fix Safari transition bug with backdrop-filter */
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    z-index: 1;
+}
+
+.glimmer-card:hover {
+    transform: translateY(-1px) scale(1.002);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Border-only glimmer effect */
+.glimmer-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px; /* Match border width */
+    background: radial-gradient(
+        200px circle at var(--mouse-x) var(--mouse-y),
+        rgba(255, 255, 255, 0.5),
+        transparent 80%
+    );
+    -webkit-mask: linear-gradient(#fff, #fff) content-box, linear-gradient(#fff, #fff);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#fff, #fff) content-box exclude, linear-gradient(#fff, #fff);
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.glimmer-card:hover::before {
+    opacity: 1;
+}
+
+/* --- Top Row Layout --- */
+.top-row {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.bio-module {
+    flex: 1;
+    padding: 1.25rem 2.5rem; /* Trimmed vertical padding */
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+}
+
+.bio-module:hover {
+    transform: none !important; /* Prevent jumping/scaling on hover */
+    box-shadow: none !important; /* Remove extra shadow on hover */
+}
+
+.profile-links {
+    width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.top-row .profile-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    background-color: var(--card-bg); /* Back to standard */
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    transform: translateZ(0);
+
+    will-change: background-color, color, border-color;
+    transition: 
+        background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0.8;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Sync the glimmer transition */
+.top-row .profile-btn::before {
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.top-row .profile-btn:hover {
+    background-color: rgba(255, 255, 255, 0.10); /* Much stronger fill */
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px) translateZ(0);
+}
+
+.top-row .profile-btn:hover .btn-icon {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.bio-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 16px;
+    background: linear-gradient(to bottom right, #062a65, rgba(39, 42, 47, 0.27));
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    border: 1px solid var(--card-border);
+}
+
+.bio-info {
+    flex-grow: 1;
+}
+
+.bio-info h1 {
+    font-size: clamp(2.5rem, 5vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em;
+}
+
+.bio-info .subtitle {
+    color: var(--accent-color);
+    font-size: clamp(0.9rem, 2vw, 1rem);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+}
+
+.bio-info p {
+    color: var(--text-secondary);
+    line-height: 1.4;
+    max-width: 600px;
+    font-size: clamp(1.1rem, 2.2vw, 1.15rem);
+}
+
+
+/* --- Destination Grid (Projects) --- */
+.destinations-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1rem;
+    align-items: stretch; /* Ensure cards in the same row have equal height */
+}
+
+.dest-card {
+    padding: 1.5rem 2rem; /* Trimmed vertical padding */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 400px; /* Reduced from 480px */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Base card structure - unifying horizontal layout for desktop */
+.dest-card {
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+}
+
+.dest-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pins children to top, middle, bottom */
+    align-self: stretch; /* Fill card height */
+    z-index: 2;
+    padding: 0.5rem 0;
+}
+
+.dest-visual,
+.dest-standalone-visual {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    perspective: 1200px; /* Add perspective for 3D effects */
+}
+.poster-preview-img {
+    transform: rotateY(-25deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+
+.dest-image-standalone,
+.dest-icon {
+    max-width: 100%;
+    max-height: 320px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.8s cubic-bezier(0.68, 0.68, 0.3, 1);
+    filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.4));
+}
+
+.bowser-preview-img {
+    scale: 1.5;
+}
+
+.dest-card:hover .dest-image-standalone,
+.dest-card:hover .dest-icon {
+    transform: scale(1.05);
+}
+
+/* Specific override for the poster preview to handle the 3D swing */
+.dest-card:hover .poster-preview-img {
+    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
+}
+
+/* Bowserstack specific: match user's discovery for 3-line wrapping */
+.dest-card:not(.featured) .dest-content p {
+    max-width: 255px;
+    text-wrap: balance;
+}
+
+
+
+.dest-content .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.5rem; /* Control space between tags (horizontal AND vertical) */
+    margin-bottom: 1.25rem; /* Space between the whole list and the title */
+}
+
+.dest-content .tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--tag-blue);
+    background: var(--tag-blue-bg);
+    padding: 0.4rem 0.8rem;
+    border-radius: 100px;
+    display: inline-block;
+    border: 1px solid var(--tag-blue-border);
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10; /* Ensure tags are above the stretched link */
+    pointer-events: auto; /* Catch clicks so they don't hit the link below */
+    cursor: default; /* Keep standard arrow instead of text beam or pointer */
+    user-select: none; /* Prevent accidental text selection */
+}
+
+.dest-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: fit-content;
+    position: relative;
+    margin-top: auto;
+}
+
+.project-link {
+    position: absolute;
+    bottom: 5.8rem; /* Positioned above the launch button on desktop */
+    left: 2.3rem; /* Aligned with button padding */
+    color: var(--text-secondary) !important;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+                color 0.2s ease;
+    white-space: nowrap;
+    z-index: 100;
+    margin: 0 0 1rem 0.3rem;
+}
+
+/* Trigger appearance and upward slide-in */
+.glimmer-card:hover .project-link,
+.dest-card:hover .project-link,
+.glimmer-card.is-hovered .project-link {
+    opacity: 0.8 !important;
+    transform: translateY(0); /* Slide up into place */
+    pointer-events: auto !important;
+}
+
+.project-link:hover {
+    opacity: 1 !important;
+    color: white !important;
+    opacity: 1;
+    text-decoration: underline !important;
+}
+
+/* Tag Color Variants */
+.tag-green {
+    color: var(--tag-green) !important;
+    background: var(--tag-green-bg) !important;
+    border-color: var(--tag-green-border) !important;
+}
+
+.tag-purple {
+    color: var(--tag-purple) !important;
+    background: var(--tag-purple-bg) !important;
+    border-color: var(--tag-purple-border) !important;
+}
+
+.tag-orange {
+    color: var(--tag-orange) !important;
+    background: var(--tag-orange-bg) !important;
+    border-color: var(--tag-orange-border) !important;
+}
+
+.tag-rose {
+    color: var(--tag-rose) !important;
+    background: var(--tag-rose-bg) !important;
+    border-color: var(--tag-rose-border) !important;
+}
+
+.tag-cyan {
+    color: var(--tag-cyan) !important;
+    background: var(--tag-cyan-bg) !important;
+    border-color: var(--tag-cyan-border) !important;
+}
+
+.tag-amber {
+    color: var(--tag-amber) !important;
+    background: var(--tag-amber-bg) !important;
+    border-color: var(--tag-amber-border) !important;
+}
+
+.tag-white {
+    color: var(--tag-white) !important;
+    background: var(--tag-white-bg) !important;
+    border-color: var(--tag-white-border) !important;
+}
+
+.tag-gray {
+    color: var(--tag-gray) !important;
+    background: var(--tag-gray-bg) !important;
+    border-color: var(--tag-gray-border) !important;
+}
+
+.dest-content h3 {
+    font-size: clamp(2.5rem, 4vw, 2.5rem);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.dest-content h3 a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.dest-content p {
+    color: var(--text-secondary);
+    font-size: clamp(1.1rem, 2.2vw, 1.15rem);
+    line-height: 1.4;
+    max-width: 450px;
+    margin: 1rem 0; /* Consistent margin for the "middle" element */
+}
+
+/* Remove old visual styling that used backgrounds */
+.dest-visual {
+    margin: 0;
+    width: 100%;
+    height: auto;
+    background: none;
+    border: none;
+    overflow: visible;
+}
+
+/* Clean up unused image styles */
+.dest-image {
+    display: none;
+}
+
+/* --- Project Button (Polished Silver) --- */
+.project-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 2.2rem;
+    background-color: #cbd5e1; /* Silver base */
+    border: 1px solid #94a3b8;
+    border-radius: 14px;
+    color: #0f172a;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    margin-top: 0; /* Removed fixed margin to let flex handle it */
+    width: fit-content;
+    white-space: nowrap; /* Prevent button text wrapping */
+    position: relative;
+    z-index: 10;
+    overflow: hidden; /* Contains the sheen overlay */
+    
+    box-shadow: 
+        0 4px 10px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Stable Gradient Overlay */
+.project-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.project-btn:hover {
+    background-color: #e2e8f0;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.project-btn:hover::before {
+    opacity: 1; /* Brighten the sheen on hover */
+}
+
+.project-btn span {
+    position: relative;
+    z-index: 2;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+.project-btn:hover span {
+    transform: translateX(-12px);
+}
+
+.project-btn .btn-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    position: absolute;
+    right: 1.2rem;
+    z-index: 2;
+    opacity: 0;
+    transform: translateX(-20px);
+    /* Smooth Quintic easing (no overshoot) */
+    transition: 
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: 0.04s; /* Even more subtle stagger */
+    will-change: transform, opacity;
+}
+
+.project-btn:hover .btn-icon {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* Snappier exit animation when mouse leaves */
+.project-btn:not(:hover) .btn-icon {
+    transition: 
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.2s ease;
+    transition-delay: 0s;
+}
+
+.project-btn:not(:hover) span {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Responsive --- */
+@media (max-width: 950px) {
+    .background-container {
+        background: #030712; /* Solid color to remove vignette fade on mobile */
+    }
+
+    body {
+        overflow-y: auto;
+        height: auto;
+        padding: 2rem 1rem;
+        display: block; /* Allow natural flow */
+    }
+    
+    main {
+        max-height: none;
+        padding: 0;
+        gap: 1.5rem;
+    }
+
+    .top-row {
+        flex-direction: column;
+    }
+
+    .bio-module {
+        width: 100%;
+        flex-direction: column;
+        text-align: center;
+        padding: 2.5rem 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .bio-avatar {
+        width: 100px    ;
+        height: 100px;
+    }
+
+    .profile-links {
+        width: 100%;
+        flex-direction: row;
+        gap: 0.75rem;
+    }
+
+    .profile-links .profile-btn {
+        padding: 1.25rem;
+        font-size: 1rem;
+    }
+
+    .destinations-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dest-card {
+        min-height: auto;
+    }
+
+    .dest-card {
+        flex-direction: column;
+        gap: 2rem;
+        text-align: center;
+        align-items: center;
+        min-height: auto;
+    }
+
+    .dest-actions {
+        justify-content: center;
+    }
+
+    .dest-content {
+        padding: 0;
+        align-items: center;
+    }
+
+    .dest-content .tag-list {
+        justify-content: center;
+    }
+
+    .dest-visual,
+    .dest-standalone-visual {
+        width: 100%;
+        /* margin-top: 1rem; */
+    }
+
+    .dest-image-standalone,
+    .dest-icon {
+        max-height: 240px;
+    }
+
+    /* Disable tilt and hover straighten effect on mobile */
+    .poster-preview-img {
+        transform: scale(1.4) !important;
+        transition: none !important;
+    }
+
+    /* .dest-card:hover .poster-preview-img {
+        transform: scale(1.4) !important;
+    } */
+
+    .dest-actions {
+        width: 100%;
+        justify-content: center;
+        margin: 1.5rem 0 0 0;
+    }
+
+    .project-link {
+        position: static;
+        opacity: 1 !important;
+        transform: none !important;
+        margin: 0;
+        pointer-events: auto !important;
+        display: block;
+        text-align: center;
+    }
+
+    /* Remove glimmer effect on mobile */
+    .glimmer-card::before,
+    .top-row .profile-btn::before {
+        display: none !important;
+        mask: none !important;
+        -webkit-mask: none !important;
+    }
+
+    /* Fix Safari white gradient/flicker bug on mobile scrolling */
+    .glimmer-card {
+        -webkit-backdrop-filter: none !important;
+        backdrop-filter: none !important;
+        background: rgba(255, 255, 255, 0.05); /* Solidified background for mobile */
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        overflow: visible !important; /* Fix clipping artifacts */
+    }
+
+    /* Remove hover shift animation on mobile */
+    .glimmer-card:hover,
+    .top-row .profile-btn:hover {
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Ensure card content stays aligned without hover effects */
+    .dest-card:hover .dest-image-standalone,
+    .dest-card:hover .dest-icon {
+        transform: none !important;
+    }
+
+    .dest-card:hover .poster-preview-img {
+        transform: scale(1.4) !important; /* Maintain mobile scale but remove hover translateY */
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-links {
+        flex-direction: column;
+    }
+    
+    .dest-card {
+        padding: 1.5rem;
+    }
+}
+
+
