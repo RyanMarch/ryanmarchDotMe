@@ -171,6 +171,7 @@ main {
     display: flex;
     gap: 1rem;
     width: 100%;
+    align-items: stretch;
 }
 
 .bio-module {
@@ -276,18 +277,24 @@ main {
 
 .bio-info p {
     color: var(--text-secondary);
-    line-height: 1.4;
-    max-width: 600px;
-    font-size: clamp(1.1rem, 2.2vw, 1.15rem);
+    line-height: 1.35;
+    max-width: 500px;
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
 }
 
 
 /* --- Projects Grid --- */
 .destinations-grid {
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: 1fr; /* Default to 1 column for tablet/mobile */
     gap: 1rem;
     align-items: stretch;
+}
+
+@media (min-width: 1051px) {
+    .destinations-grid {
+        grid-template-columns: 1.4fr 1fr;
+    }
 }
 
 .destination-card {
@@ -309,6 +316,7 @@ main {
     align-self: stretch;
     z-index: 2;
     padding: 0.5rem 0;
+    position: relative; /* Ensure absolute children are relative to this */
 }
 
 .destination-visual,
@@ -353,9 +361,13 @@ main {
     transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
 }
 
-/* Bowserstack specific: match user's discovery for 3-line wrapping */
-.destination-card:not(.featured) .destination-content p {
-    max-width: 255px;
+/* Project description typography */
+.destination-content p {
+    color: var(--text-secondary);
+    font-size: clamp(1rem, 2vw, 1.1rem);
+    line-height: 1.4;
+    max-width: 380px;
+    margin: 0.75rem 0 1.25rem 0;
     text-wrap: balance;
 }
 
@@ -393,8 +405,8 @@ main {
 
 .project-link {
     position: absolute;
-    bottom: 5.8rem;
-    left: 2.3rem;
+    bottom: 0.5rem; /* Adjusted for being inside content div */
+    left: 0;
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
@@ -409,7 +421,7 @@ main {
                 color 0.2s ease;
     white-space: nowrap;
     z-index: 100;
-    margin: 0 0 1rem 0.3rem;
+    margin: 0 0 0.3rem 0;
 }
 
 /* Slide in on card hover */
@@ -486,13 +498,7 @@ main {
     text-decoration: none;
 }
 
-.destination-content p {
-    color: var(--text-secondary);
-    font-size: clamp(1.1rem, 2.2vw, 1.15rem);
-    line-height: 1.4;
-    max-width: 450px;
-    margin: 1rem 0; /* Consistent margin for the "middle" element */
-}
+/* (Moved to line 357 for consolidation) */
 
 
 
@@ -591,10 +597,73 @@ main {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- Responsive --- */
-@media (max-width: 950px) {
+/* --- Responsive Transitions --- */
+
+/* Medium Screens / Tablets (iPad Portrait, etc.) */
+@media (max-width: 1050px) {
+    main {
+        padding: 0 1.5rem;
+    }
+
+    .top-row {
+        gap: 1rem;
+    }
+
+    .profile-links {
+        width: 280px; /* Slightly narrower for tablets */
+    }
+
+    .bio-module {
+        padding: 1.5rem 2rem;
+        gap: 1.5rem;
+    }
+
+    .bio-avatar {
+        width: 80px;
+        height: 80px;
+        font-size: 2.2rem;
+    }
+
+    .destination-card {
+        padding: 2rem;
+        min-height: 380px;
+    }
+
+    .destination-content h3 {
+        font-size: 2.2rem;
+    }
+
+    .project-link {
+        position: static;
+        opacity: 0.8;
+        pointer-events: auto;
+        transform: none;
+        margin-top: 2rem; /* Increased for finger differentiation */
+        display: block;
+    }
+}
+
+/* Mobile & Small Tablets - The "Stack" Breakpoint */
+@media (max-width: 800px) {
+    .top-row {
+        flex-direction: column;
+    }
+
+    .profile-links {
+        width: 100%;
+        flex-direction: row;
+    }
+
+    .profile-links .profile-btn {
+        flex: 1;
+        padding: 1.2rem;
+    }
+}
+
+/* Full Mobile Layout */
+@media (max-width: 700px) {
     .background-container {
-        background: #030712; /* Solid color to remove vignette fade on mobile */
+        background: #030712; 
     }
 
     body {
@@ -610,10 +679,6 @@ main {
         gap: 1.5rem;
     }
 
-    .top-row {
-        flex-direction: column;
-    }
-
     .bio-module {
         width: 100%;
         flex-direction: column;
@@ -625,21 +690,12 @@ main {
     .bio-avatar {
         width: 100px;
         height: 100px;
+        font-size: 3rem;
     }
 
     .profile-links {
-        width: 100%;
         flex-direction: row;
         gap: 0.75rem;
-    }
-
-    .profile-links .profile-btn {
-        padding: 1.25rem;
-        font-size: 1rem;
-    }
-
-    .destinations-grid {
-        grid-template-columns: 1fr;
     }
 
     .destination-card {
@@ -695,20 +751,18 @@ main {
     .glimmer-card::before,
     .top-row .profile-btn::before {
         display: none !important;
-        mask: none !important;
-        -webkit-mask: none !important;
     }
 
     /* Fix Safari white gradient/flicker bug on mobile scrolling */
     .glimmer-card {
         -webkit-backdrop-filter: none !important;
         backdrop-filter: none !important;
-        background: rgba(255, 255, 255, 0.05); /* Solidified background for mobile */
+        background: rgba(255, 255, 255, 0.05); 
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        overflow: visible !important; /* Fix clipping artifacts */
+        overflow: visible !important; 
     }
 
     /* Remove hover shift animation on mobile */
@@ -718,14 +772,13 @@ main {
         box-shadow: none !important;
     }
 
-    /* Ensure card content stays aligned without hover effects */
     .destination-card:hover .destination-image-standalone,
     .destination-card:hover .destination-icon {
         transform: none !important;
     }
 
     .destination-card:hover .poster-preview-img {
-        transform: scale(1.4) !important; /* Maintain mobile scale but remove hover translateY */
+        transform: scale(1.4) !important; 
     }
 }
 
