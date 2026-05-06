@@ -299,35 +299,46 @@ main {
 
 .destination-card {
     padding: 1.5rem 2rem;
-    display: flex;
-    flex-direction: row;
-    gap: 2rem;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas: 
+        "tags tags"
+        "content visual";
+    row-gap: 1.5rem;
+    column-gap: 2.5rem;
     min-height: 400px;
     position: relative;
     overflow: hidden;
 }
 
+.tag-list {
+    grid-area: tags;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    position: relative;
+    z-index: 5;
+}
+
 .destination-content {
-    flex: 1;
+    grid-area: content;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    align-self: stretch;
     z-index: 2;
-    padding: 0.5rem 0;
-    position: relative; /* Ensure absolute children are relative to this */
+    position: relative;
 }
 
 .destination-visual,
 .destination-standalone-visual {
-    flex: 1;
+    grid-area: visual;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
     z-index: 1;
-    perspective: 1200px; /* Add perspective for 3D effects */
+    perspective: 1200px;
 }
 .poster-preview-img {
     transform: rotateY(-25deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
@@ -348,7 +359,7 @@ main {
 }
 
 .bowser-preview-img {
-    scale: 1.5;
+    scale: 1.4;
 }
 
 .destination-card:hover .destination-image-standalone,
@@ -364,7 +375,7 @@ main {
 /* Project description typography */
 .destination-content p {
     color: var(--text-secondary);
-    font-size: clamp(1rem, 2vw, 1.1rem);
+    font-size: clamp(1.1rem, 2vw, 1.1rem);
     line-height: 1.4;
     max-width: 380px;
     margin: 0.75rem 0 1.25rem 0;
@@ -373,14 +384,9 @@ main {
 
 
 
-.destination-content .tag-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.25rem;
-}
+/* Tag List handling is now in the .destination-card grid area definition */
 
-.destination-content .tag {
+.tag {
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -405,8 +411,8 @@ main {
 
 .project-link {
     position: absolute;
-    bottom: 0.5rem; /* Adjusted for being inside content div */
-    left: 0;
+    bottom: 5.7rem; /* Positioned above the Launch button, relative to card bottom */
+    left: 2rem; /* Aligns with card padding */
     color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
@@ -415,13 +421,14 @@ main {
     letter-spacing: 0.05em;
     opacity: 0;
     pointer-events: none;
-    transform: translateY(10px);
-    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    transform: translateY(50px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
                 color 0.2s ease;
+    transition-delay: 350ms;
     white-space: nowrap;
-    z-index: 100;
-    margin: 0 0 0.3rem 0;
+    z-index: 10;
+    margin: 0;
 }
 
 /* Slide in on card hover */
@@ -438,49 +445,49 @@ main {
 }
 
 /* Tag Color Variants */
-.destination-content .tag-green {
+.tag-green {
     color: var(--tag-green);
     background: var(--tag-green-bg);
     border-color: var(--tag-green-border);
 }
 
-.destination-content .tag-purple {
+.tag-purple {
     color: var(--tag-purple);
     background: var(--tag-purple-bg);
     border-color: var(--tag-purple-border);
 }
 
-.destination-content .tag-orange {
+.tag-orange {
     color: var(--tag-orange);
     background: var(--tag-orange-bg);
     border-color: var(--tag-orange-border);
 }
 
-.destination-content .tag-rose {
+.tag-rose {
     color: var(--tag-rose);
     background: var(--tag-rose-bg);
     border-color: var(--tag-rose-border);
 }
 
-.destination-content .tag-cyan {
+.tag-cyan {
     color: var(--tag-cyan);
     background: var(--tag-cyan-bg);
     border-color: var(--tag-cyan-border);
 }
 
-.destination-content .tag-amber {
+.tag-amber {
     color: var(--tag-amber);
     background: var(--tag-amber-bg);
     border-color: var(--tag-amber-border);
 }
 
-.destination-content .tag-white {
+.tag-white {
     color: var(--tag-white);
     background: var(--tag-white-bg);
     border-color: var(--tag-white-border);
 }
 
-.destination-content .tag-gray {
+.tag-gray {
     color: var(--tag-gray);
     background: var(--tag-gray-bg);
     border-color: var(--tag-gray-border);
@@ -488,7 +495,7 @@ main {
 
 .destination-content h3 {
     font-size: 2.5rem;
-    margin-bottom: 0.75rem;
+    /* margin-bottom: 0.75rem; */
     font-weight: 700;
     letter-spacing: -0.01em;
 }
@@ -520,7 +527,7 @@ main {
     width: fit-content;
     white-space: nowrap; /* Prevent button text wrapping */
     position: relative;
-    z-index: 10;
+    z-index: 100;
     overflow: hidden; /* Contains the sheen overlay */
     
     box-shadow: 
@@ -699,19 +706,35 @@ main {
     }
 
     .destination-card {
-        flex-direction: column;
-        gap: 2rem;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        grid-template-areas: 
+            "tags"
+            "content"
+            "visual"
+            "source";
         text-align: center;
-        align-items: center;
+        padding: 2rem 1.5rem;
+        gap: 2rem;
         min-height: auto;
+    }
+
+    .project-link {
+        position: static;
+        grid-area: source;
+        opacity: 1;
+        pointer-events: auto;
+        transform: none;
+        margin-top: -0.5rem; /* Pull it slightly closer to the image */
     }
 
     .destination-content {
         padding: 0;
         align-items: center;
+        gap: 1.5rem;
     }
 
-    .destination-content .tag-list {
+    .tag-list {
         justify-content: center;
     }
 
@@ -790,6 +813,9 @@ main {
     .destination-card {
         padding: 1.5rem;
     }
+    .bowser-preview-img {
+    scale: 1;
+}
 }
 
 
