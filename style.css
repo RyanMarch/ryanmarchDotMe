@@ -5,9 +5,7 @@
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --accent-color: #38bdf8;
-    --accent-glow: rgba(56, 189, 248, 0.2);
     --font-main: 'Outfit', sans-serif;
-    --glimmer-color: rgba(255, 255, 255, 0.15);
 
     /* Tag Palette - Sophisticated Muted Tones */
     --tag-blue: #38bdf8;
@@ -57,11 +55,11 @@ body {
     background-color: var(--bg-color);
     color: var(--text-primary);
     font-family: var(--font-main);
-    min-height: 100vh; /* Changed from height: 100vh */
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 1.5rem 0; /* Reduced from 2rem */
+    padding: 1.5rem 0;
 }
 
 /* --- Background --- */
@@ -109,39 +107,37 @@ body {
 /* --- Main Layout --- */
 main {
     width: 100%;
-    max-width: 1280px; /* Reduced from 1400px to feel less "wide" */
+    max-width: 1280px;
     padding: 0 2rem;
     display: flex;
     flex-direction: column;
-    gap: 1rem; /* Reduced from 1.5rem */
+    gap: 1rem;
     justify-content: center;
-    margin: auto 0; /* Helps with centering in flex containers */
 }
 
 /* Ultra-wide support */
 @media (min-width: 2000px) {
     main {
-        max-width: 1500px; /* Reduced from 1800px */
+        max-width: 1500px;
         gap: 2rem;
     }
 }
 
-/* --- Glimmering Border Base --- */
+/* --- Glimmering Border --- */
 .glimmer-card {
     position: relative;
     background: var(--card-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px); */
     border-radius: 20px;
     border: 1px solid var(--card-border);
-    /* Removed overflow: hidden to fix Safari transition bug with backdrop-filter */
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
     z-index: 1;
 }
 
 .glimmer-card:hover {
-    transform: translateY(-1px) scale(1.002);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    /* transform: translateY(0px) scale(1.5); */
+    /* box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25); */
 }
 
 /* Border-only glimmer effect */
@@ -170,7 +166,7 @@ main {
     opacity: 1;
 }
 
-/* --- Top Row Layout --- */
+/* --- Top Row --- */
 .top-row {
     display: flex;
     gap: 1rem;
@@ -179,7 +175,7 @@ main {
 
 .bio-module {
     flex: 1;
-    padding: 1.25rem 2.5rem; /* Trimmed vertical padding */
+    padding: 1.25rem 2.5rem;
     display: flex;
     align-items: center;
     gap: 2.5rem;
@@ -205,13 +201,11 @@ main {
     gap: 0.8rem;
     text-decoration: none;
     color: var(--text-primary);
-    background-color: var(--card-bg); /* Back to standard */
+    background-color: var(--card-bg);
     font-weight: 600;
     font-size: 1.1rem;
     letter-spacing: 0.02em;
     transform: translateZ(0);
-
-    will-change: background-color, color, border-color;
     transition: 
         background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
         color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
@@ -288,43 +282,37 @@ main {
 }
 
 
-/* --- Destination Grid (Projects) --- */
+/* --- Projects Grid --- */
 .destinations-grid {
     display: grid;
     grid-template-columns: 1.4fr 1fr;
     gap: 1rem;
-    align-items: stretch; /* Ensure cards in the same row have equal height */
+    align-items: stretch;
 }
 
-.dest-card {
-    padding: 1.5rem 2rem; /* Trimmed vertical padding */
+.destination-card {
+    padding: 1.5rem 2rem;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 400px; /* Reduced from 480px */
+    flex-direction: row;
+    gap: 2rem;
+    align-items: center;
+    min-height: 400px;
     position: relative;
     overflow: hidden;
 }
 
-/* Base card structure - unifying horizontal layout for desktop */
-.dest-card {
-    flex-direction: row;
-    gap: 2rem;
-    align-items: center;
-}
-
-.dest-content {
+.destination-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Pins children to top, middle, bottom */
-    align-self: stretch; /* Fill card height */
+    justify-content: space-between;
+    align-self: stretch;
     z-index: 2;
     padding: 0.5rem 0;
 }
 
-.dest-visual,
-.dest-standalone-visual {
+.destination-visual,
+.destination-standalone-visual {
     flex: 1;
     display: flex;
     justify-content: center;
@@ -341,8 +329,8 @@ main {
 }
 
 
-.dest-image-standalone,
-.dest-icon {
+.destination-image-standalone,
+.destination-icon {
     max-width: 100%;
     max-height: 320px;
     width: auto;
@@ -355,33 +343,32 @@ main {
     scale: 1.5;
 }
 
-.dest-card:hover .dest-image-standalone,
-.dest-card:hover .dest-icon {
+.destination-card:hover .destination-image-standalone,
+.destination-card:hover .destination-icon {
     transform: scale(1.05);
 }
 
 /* Specific override for the poster preview to handle the 3D swing */
-.dest-card:hover .poster-preview-img {
+.destination-card:hover .poster-preview-img {
     transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
 }
 
 /* Bowserstack specific: match user's discovery for 3-line wrapping */
-.dest-card:not(.featured) .dest-content p {
+.destination-card:not(.featured) .destination-content p {
     max-width: 255px;
     text-wrap: balance;
 }
 
 
 
-.dest-content .tag-list {
+.destination-content .tag-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 0.5rem; /* Control space between tags (horizontal AND vertical) */
-    margin-bottom: 1.25rem; /* Space between the whole list and the title */
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
 }
 
-.dest-content .tag {
+.destination-content .tag {
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -392,18 +379,13 @@ main {
     border-radius: 100px;
     display: inline-block;
     border: 1px solid var(--tag-blue-border);
-    transition: all 0.3s ease;
-    position: relative;
-    z-index: 10; /* Ensure tags are above the stretched link */
-    pointer-events: auto; /* Catch clicks so they don't hit the link below */
-    cursor: default; /* Keep standard arrow instead of text beam or pointer */
-    user-select: none; /* Prevent accidental text selection */
+    cursor: default;
+    user-select: none;
 }
 
-.dest-actions {
+.destination-actions {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
     width: fit-content;
     position: relative;
     margin-top: auto;
@@ -411,9 +393,9 @@ main {
 
 .project-link {
     position: absolute;
-    bottom: 5.8rem; /* Positioned above the launch button on desktop */
-    left: 2.3rem; /* Aligned with button padding */
-    color: var(--text-secondary) !important;
+    bottom: 5.8rem;
+    left: 2.3rem;
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 600;
@@ -422,92 +404,89 @@ main {
     opacity: 0;
     pointer-events: none;
     transform: translateY(10px);
-    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
-                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
                 color 0.2s ease;
     white-space: nowrap;
     z-index: 100;
     margin: 0 0 1rem 0.3rem;
 }
 
-/* Trigger appearance and upward slide-in */
-.glimmer-card:hover .project-link,
-.dest-card:hover .project-link,
-.glimmer-card.is-hovered .project-link {
-    opacity: 0.8 !important;
-    transform: translateY(0); /* Slide up into place */
-    pointer-events: auto !important;
+/* Slide in on card hover */
+.glimmer-card:hover .project-link {
+    opacity: 0.8;
+    transform: translateY(0);
+    pointer-events: auto;
 }
 
 .project-link:hover {
-    opacity: 1 !important;
-    color: white !important;
     opacity: 1;
-    text-decoration: underline !important;
+    color: white;
+    text-decoration: underline;
 }
 
 /* Tag Color Variants */
-.tag-green {
-    color: var(--tag-green) !important;
-    background: var(--tag-green-bg) !important;
-    border-color: var(--tag-green-border) !important;
+.destination-content .tag-green {
+    color: var(--tag-green);
+    background: var(--tag-green-bg);
+    border-color: var(--tag-green-border);
 }
 
-.tag-purple {
-    color: var(--tag-purple) !important;
-    background: var(--tag-purple-bg) !important;
-    border-color: var(--tag-purple-border) !important;
+.destination-content .tag-purple {
+    color: var(--tag-purple);
+    background: var(--tag-purple-bg);
+    border-color: var(--tag-purple-border);
 }
 
-.tag-orange {
-    color: var(--tag-orange) !important;
-    background: var(--tag-orange-bg) !important;
-    border-color: var(--tag-orange-border) !important;
+.destination-content .tag-orange {
+    color: var(--tag-orange);
+    background: var(--tag-orange-bg);
+    border-color: var(--tag-orange-border);
 }
 
-.tag-rose {
-    color: var(--tag-rose) !important;
-    background: var(--tag-rose-bg) !important;
-    border-color: var(--tag-rose-border) !important;
+.destination-content .tag-rose {
+    color: var(--tag-rose);
+    background: var(--tag-rose-bg);
+    border-color: var(--tag-rose-border);
 }
 
-.tag-cyan {
-    color: var(--tag-cyan) !important;
-    background: var(--tag-cyan-bg) !important;
-    border-color: var(--tag-cyan-border) !important;
+.destination-content .tag-cyan {
+    color: var(--tag-cyan);
+    background: var(--tag-cyan-bg);
+    border-color: var(--tag-cyan-border);
 }
 
-.tag-amber {
-    color: var(--tag-amber) !important;
-    background: var(--tag-amber-bg) !important;
-    border-color: var(--tag-amber-border) !important;
+.destination-content .tag-amber {
+    color: var(--tag-amber);
+    background: var(--tag-amber-bg);
+    border-color: var(--tag-amber-border);
 }
 
-.tag-white {
-    color: var(--tag-white) !important;
-    background: var(--tag-white-bg) !important;
-    border-color: var(--tag-white-border) !important;
+.destination-content .tag-white {
+    color: var(--tag-white);
+    background: var(--tag-white-bg);
+    border-color: var(--tag-white-border);
 }
 
-.tag-gray {
-    color: var(--tag-gray) !important;
-    background: var(--tag-gray-bg) !important;
-    border-color: var(--tag-gray-border) !important;
+.destination-content .tag-gray {
+    color: var(--tag-gray);
+    background: var(--tag-gray-bg);
+    border-color: var(--tag-gray-border);
 }
 
-.dest-content h3 {
-    font-size: clamp(2.5rem, 4vw, 2.5rem);
+.destination-content h3 {
+    font-size: 2.5rem;
     margin-bottom: 0.75rem;
     font-weight: 700;
     letter-spacing: -0.01em;
 }
 
-.dest-content h3 a {
+.destination-content h3 a {
     color: inherit;
     text-decoration: none;
 }
 
-.dest-content p {
+.destination-content p {
     color: var(--text-secondary);
     font-size: clamp(1.1rem, 2.2vw, 1.15rem);
     line-height: 1.4;
@@ -515,20 +494,7 @@ main {
     margin: 1rem 0; /* Consistent margin for the "middle" element */
 }
 
-/* Remove old visual styling that used backgrounds */
-.dest-visual {
-    margin: 0;
-    width: 100%;
-    height: auto;
-    background: none;
-    border: none;
-    overflow: visible;
-}
 
-/* Clean up unused image styles */
-.dest-image {
-    display: none;
-}
 
 /* --- Project Button (Polished Silver) --- */
 .project-btn {
@@ -544,7 +510,7 @@ main {
     font-weight: 700;
     font-size: 0.95rem;
     letter-spacing: 0.02em;
-    margin-top: 0; /* Removed fixed margin to let flex handle it */
+    margin-top: 0;
     width: fit-content;
     white-space: nowrap; /* Prevent button text wrapping */
     position: relative;
@@ -635,7 +601,7 @@ main {
         overflow-y: auto;
         height: auto;
         padding: 2rem 1rem;
-        display: block; /* Allow natural flow */
+        display: block;
     }
     
     main {
@@ -657,7 +623,7 @@ main {
     }
 
     .bio-avatar {
-        width: 100px    ;
+        width: 100px;
         height: 100px;
     }
 
@@ -676,11 +642,7 @@ main {
         grid-template-columns: 1fr;
     }
 
-    .dest-card {
-        min-height: auto;
-    }
-
-    .dest-card {
+    .destination-card {
         flex-direction: column;
         gap: 2rem;
         text-align: center;
@@ -688,41 +650,32 @@ main {
         min-height: auto;
     }
 
-    .dest-actions {
-        justify-content: center;
-    }
-
-    .dest-content {
+    .destination-content {
         padding: 0;
         align-items: center;
     }
 
-    .dest-content .tag-list {
+    .destination-content .tag-list {
         justify-content: center;
     }
 
-    .dest-visual,
-    .dest-standalone-visual {
+    .destination-visual,
+    .destination-standalone-visual {
         width: 100%;
-        /* margin-top: 1rem; */
     }
 
-    .dest-image-standalone,
-    .dest-icon {
+    .destination-image-standalone,
+    .destination-icon {
         max-height: 240px;
     }
 
-    /* Disable tilt and hover straighten effect on mobile */
+    /* Disable tilt effect on mobile */
     .poster-preview-img {
         transform: scale(1.4) !important;
         transition: none !important;
     }
 
-    /* .dest-card:hover .poster-preview-img {
-        transform: scale(1.4) !important;
-    } */
-
-    .dest-actions {
+    .destination-actions {
         width: 100%;
         justify-content: center;
         margin: 1.5rem 0 0 0;
@@ -766,12 +719,12 @@ main {
     }
 
     /* Ensure card content stays aligned without hover effects */
-    .dest-card:hover .dest-image-standalone,
-    .dest-card:hover .dest-icon {
+    .destination-card:hover .destination-image-standalone,
+    .destination-card:hover .destination-icon {
         transform: none !important;
     }
 
-    .dest-card:hover .poster-preview-img {
+    .destination-card:hover .poster-preview-img {
         transform: scale(1.4) !important; /* Maintain mobile scale but remove hover translateY */
     }
 }
@@ -781,7 +734,7 @@ main {
         flex-direction: column;
     }
     
-    .dest-card {
+    .destination-card {
         padding: 1.5rem;
     }
 }

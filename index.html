@@ -44,16 +44,16 @@
 
 
         <div class="destinations-grid">
-            <div class="glimmer-card dest-card featured">
-                <div class="dest-content">
-                    <div class="dest-header">
+            <div class="glimmer-card destination-card featured">
+                <div class="destination-content">
+                    <div class="destination-header">
                         <div class="tag-list">
                             <span class="tag tag-green">Active Project</span>
                         </div>
                         <h3>Motion Poster</h3>
                     </div>
                     <p>Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.</p>
-                    <div class="dest-actions">
+                    <div class="destination-actions">
                         <a href="https://motionposter.ryanmarch.me" class="project-btn" target="_blank" rel="noopener noreferrer">
                             <span>Launch Motion Poster</span>
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z"/></svg>
@@ -61,15 +61,15 @@
                     </div>
                 </div>
 
-                <div class="dest-standalone-visual">
-                    <img src="assets/motion-poster-framed.png" alt="Motion Poster Preview" class="dest-image-standalone poster-preview-img">
+                <div class="destination-standalone-visual">
+                    <img src="assets/motion-poster-framed.png" alt="Motion Poster Preview" class="destination-image-standalone poster-preview-img">
                 </div>
                 <a href="https://github.com/RyanMarch/motionEventPoster" class="project-link" target="_blank" rel="noopener noreferrer">View Project</a>
             </div>
 
-            <div class="glimmer-card dest-card">
-                <div class="dest-content">
-                    <div class="dest-header">
+            <div class="glimmer-card destination-card">
+                <div class="destination-content">
+                    <div class="destination-header">
                         <div class="tag-list">
                             <span class="tag tag-purple">Experimentation</span>
                         </div>
@@ -77,7 +77,7 @@
                     </div>
                     <p>An interactive Bowserstack testing tool to help get to the bottom of web-based issues.</p>
                     
-                    <div class="dest-actions">
+                    <div class="destination-actions">
                         <a href="https://bowserstack.ryanmarch.me" class="project-btn" target="_blank" rel="noopener noreferrer">
                             <span>Launch Bowserstack</span>
                             <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7z"/></svg>
@@ -85,8 +85,8 @@
                     </div>
                 </div>
                 
-                <div class="dest-visual">
-                     <img src="assets/bowser-icon.png" alt="Bowserstack Icon" class="dest-icon bowser-preview-img">
+                <div class="destination-visual">
+                     <img src="assets/bowser-icon.png" alt="Bowserstack Icon" class="destination-icon bowser-preview-img">
                 </div>
                 <a href="https://github.com/RyanMarch/bowserstack" class="project-link" target="_blank" rel="noopener noreferrer">View Project</a>
             </div>
@@ -96,27 +96,16 @@
     </main>
 
     <script>
-        const cards = document.querySelectorAll('.glimmer-card');
-        
-        // Glimmering border effect - Only track mouse on desktop
+        // Glimmering border effect - only on desktop
         if (window.matchMedia("(min-width: 951px)").matches) {
             document.addEventListener('mousemove', (e) => {
-                cards.forEach(card => {
+                document.querySelectorAll('.glimmer-card').forEach(card => {
                     const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    card.style.setProperty('--mouse-x', `${x}px`);
-                    card.style.setProperty('--mouse-y', `${y}px`);
+                    card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+                    card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
                 });
             });
         }
-
-        // Ensure hover state is reliably captured for the text links
-        cards.forEach(card => {
-            card.addEventListener('mouseenter', () => card.classList.add('is-hovered'));
-            card.addEventListener('mouseleave', () => card.classList.remove('is-hovered'));
-        });
     </script>
 </body>
 </html>
