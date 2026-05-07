@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <meta name="color-scheme" content="dark">
+    <link rel="stylesheet" href="style.css?v=2.1">
 </head>
 <body>
     <div class="background-container">
@@ -42,73 +43,84 @@
 
         </div>
 
-
-        <div class="destinations-grid">
-            <div class="glimmer-card destination-card featured">
-            <div class="tag-list">
-                <span class="tag tag-blue">Recently Updated</span>
-                <span class="tag tag-orange">Digital Signage</span>
-                <span class="tag tag-gray">Project</span>
-            </div>
-                <div class="destination-content">
-                    <div class="destination-header">
-                        <h3>Motion Poster</h3>
-                    </div>
-                    <p>Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.</p>
-                    <div class="destination-actions">
-                        <a href="https://motionposter.ryanmarch.me" class="project-btn" target="_blank" rel="noopener noreferrer">
-                            <span>Launch Motion Poster</span>
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
-                        </a>
-                    </div>
-                </div>
-
-                <div class="destination-standalone-visual">
-                    <img src="assets/motion-poster-framed.png" alt="Motion Poster Preview" class="destination-image-standalone poster-preview-img">
-                </div>
-                <a href="https://github.com/RyanMarch/motionEventPoster" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>
-            </div>
-
-            <div class="glimmer-card destination-card">
-            <div class="tag-list">
-                <span class="tag tag-green">Completed</span>
-                <span class="tag tag-purple">Experimentation</span>
-                <span class="tag tag-gray">Project</span>
-            </div>
-                <div class="destination-content">
-                    <div class="destination-header">
-                        <h3>Bowserstack</h3>
-                    </div>
-                    <p>An interactive Bowserstack testing tool to help get to the bottom of web-based issues.</p>
-                    
-                    <div class="destination-actions">
-                        <a href="https://bowserstack.ryanmarch.me" class="project-btn" target="_blank" rel="noopener noreferrer">
-                            <span>Launch Bowserstack</span>
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="destination-visual">
-                     <img src="assets/bowser-icon.png" alt="Bowserstack Icon" class="destination-icon bowser-preview-img">
-                </div>
-                <a href="https://github.com/RyanMarch/bowserstack" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>
-            </div>
-        </div>
-
+        <!-- The grid is now injected dynamically by JS -->
+        <div id="projects-grid" class="destinations-grid"></div>
 
     </main>
 
+    <!-- Modal Overlay -->
+    <div id="project-modal" class="modal-overlay" aria-hidden="true">
+        <div class="modal-container glimmer-card">
+            <button class="modal-close" aria-label="Close modal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <div class="modal-content" id="modal-content-area">
+                <!-- Content injected here via JS -->
+            </div>
+        </div>
+    </div>
+    <!-- Lightbox Overlay -->
+    <div id="lightbox-overlay" class="lightbox-overlay" aria-hidden="true">
+        <button class="lightbox-close" aria-label="Close lightbox">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+        <div class="lightbox-container">
+            <img id="lightbox-image" src="" alt="Enlarged view">
+            <p id="lightbox-caption" class="lightbox-caption"></p>
+        </div>
+    </div>
+
+
+
+    <!-- Data and Rendering Script -->
+    <script src="assets/js/project-data.js"></script>
+    <script src="assets/js/projects.js"></script>
+    
     <script>
         // Glimmering border effect - only on desktop
         if (window.matchMedia("(min-width: 951px)").matches) {
-            document.addEventListener('mousemove', (e) => {
+            let mouseX = 0;
+            let mouseY = 0;
+
+            const updateGlimmers = () => {
                 document.querySelectorAll('.glimmer-card').forEach(card => {
                     const rect = card.getBoundingClientRect();
-                    card.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-                    card.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+                    // The sticky positioning of ::before handles internal scroll automatically,
+                    // so we just need the coordinates relative to the visible card frame.
+                    card.style.setProperty('--mouse-x', `${mouseX - rect.left}px`);
+                    card.style.setProperty('--mouse-y', `${mouseY - rect.top}px`);
                 });
+            };
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                updateGlimmers();
             });
+
+            // Also update on scroll to keep the shimmer fixed to the mouse position 
+            // even if the content scrolls underneath it.
+            document.addEventListener('scroll', updateGlimmers, { capture: true, passive: true });
+        }
+
+        // Handle the GitHub Pages 404 Hack redirect check (Only active if not local)
+        if (window.location.protocol !== 'file:' && 
+            window.location.hostname !== 'localhost' && 
+            window.location.hostname !== '127.0.0.1') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const redirectPath = urlParams.get('p');
+            if (redirectPath) {
+                window.history.replaceState(null, '', redirectPath);
+                const pathParts = redirectPath.split('/').filter(p => p);
+                if (pathParts.length > 0) {
+                    window.initialModalProject = pathParts[pathParts.length - 1];
+                }
+            } else {
+                const pathParts = window.location.pathname.split('/').filter(p => p);
+                if (pathParts.length > 0) {
+                    window.initialModalProject = pathParts[pathParts.length - 1];
+                }
+            }
         }
     </script>
 </body>
