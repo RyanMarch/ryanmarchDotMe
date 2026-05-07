@@ -15,7 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Render Projects
     myProjects.forEach(project => {
         const card = document.createElement('div');
-        card.className = `glimmer-card destination-card ${project.featured ? 'featured' : ''}`;
+        const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
+        card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
         
         let tagsHtml = project.tags.map(tag => `<span class="tag tag-${tag.color}">${tag.label}</span>`).join('');
         
@@ -37,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }
 
-        // ONLY show source link if NOT extended content
         let sourceHtml = (project.sourceUrl && !project.hasExtendedContent) 
             ? `<a href="${project.sourceUrl}" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>` 
             : '';
@@ -53,12 +53,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p>${project.subtitle}</p>
                 <div class="destination-actions">
                     ${actionsHtml}
+                    ${sourceHtml}
                 </div>
             </div>
             <div class="${project.featured ? 'destination-standalone-visual' : 'destination-visual'}">
                  <img src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">
             </div>
-            ${sourceHtml}
         `;
         
         grid.appendChild(card);

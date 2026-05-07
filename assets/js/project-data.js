@@ -9,6 +9,7 @@ const myProjects = [
             { label: "Project", color: "gray" }
         ],
         featured: true,
+        size: "large",
         image: "assets/motion-poster-framed.png",
         imageClass: "poster-preview-img",
         actionText: "Launch Motion Poster",
@@ -26,6 +27,7 @@ const myProjects = [
             { label: "Project", color: "gray" }
         ],
         featured: false,
+        size: "medium",
         image: "assets/bowser-icon.png",
         imageClass: "bowser-preview-img",
         actionText: "Launch Bowserstack",
@@ -36,17 +38,96 @@ const myProjects = [
     {
         id: "rentpress",
         title: "RentPress for Apartments",
-        subtitle: "A comprehensive property management and marketing solution built on WordPress.",
+        subtitle: "A comprehensive property management and marketing solution to build the ultimate online leasing office.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Platform", color: "purple" }
         ],
         featured: false,
+        size: "large",
         image: "content/rentpress/images/floor-plan-grid.png",
         imageClass: "destination-icon",
         actionText: "Visit RentPress.io",
         actionUrl: "https://rentpress.io",
         sourceUrl: "https://wordpress.org/plugins/rentpress-for-websites/",
         hasExtendedContent: true
+    },
+    {
+        id: "rentpress-local",
+        title: "RentPress Local",
+        subtitle: "Local listings management product for all maps.",
+        tags: [
+            { label: "Product", color: "blue" }
+        ],
+        featured: false,
+        size: "tall",
+        image: "content/rentpress-local/images/rentpress-page-schema-phones-double.png",
+        imageClass: "destination-icon",
+        actionText: "Visit RentPress Local",
+        actionUrl: "https://rentpress.io/local/",
+        hasExtendedContent: true
+    },
+    {
+        id: "rentpress-lead-sync",
+        title: "RentPress Lead Sync",
+        subtitle: "Send and receive leads without writing code.",
+        tags: [
+            { label: "Add-on", color: "green" }
+        ],
+        featured: false,
+        size: "small",
+        image: "assets/bowser-icon.png",
+        imageClass: "destination-icon",
+        actionText: "View Plugin",
+        actionUrl: "https://wordpress.org/plugins/rentpress-gravity-forms-add-on/",
+        sourceUrl: "https://support.30lines.com/documentation/rentpress-gravity-forms-add-on/",
+        hasExtendedContent: true
+    },
+    {
+        id: "amenities-manager",
+        title: "Amenities Manager",
+        subtitle: "Powerfule management of property amenities.",
+        tags: [
+            { label: "Add-on", color: "green" }
+        ],
+        featured: false,
+        size: "small",
+        image: "assets/bowser-icon.png",
+        imageClass: "destination-icon",
+        actionText: "View Plugin",
+        actionUrl: "https://wordpress.org/plugins/rentpress-amenities-manager-add-on/",
+        sourceUrl: "https://support.30lines.com/documentation/rentpress-amenities-manager-add-on/",
+        hasExtendedContent: true
+    },
+    {
+        id: "rentpress-data-hub",
+        title: "RentPress Data Hub",
+        subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
+        tags: [
+            { label: "Backend", color: "purple" }
+        ],
+        featured: false,
+        size: "wide",
+        image: "assets/bowser-icon.png",
+        imageClass: "destination-icon",
+        actionText: "Learn More",
+        actionUrl: "#",
+        hasExtendedContent: true
+    },
+    {
+        id: "rentpress-email",
+        title: "RentPress Email",
+        subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
+        tags: [
+            { label: "Product", color: "orange" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "assets/bowser-icon.png",
+        imageClass: "destination-icon",
+        actionText: "Learn More",
+        actionUrl: "#",
+        hasExtendedContent: true
     }
 ];
+
