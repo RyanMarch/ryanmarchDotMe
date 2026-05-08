@@ -81,7 +81,7 @@ const myProjects = [
         ],
         featured: false,
         size: "small",
-        image: "assets/bowser-icon.png",
+        image: "content/rentpress-lead-sync/images/lead-sync-integration.webp",
         imageClass: "destination-icon",
         actionText: "View Plugin",
         actionUrl: "https://wordpress.org/plugins/rentpress-gravity-forms-add-on/",
