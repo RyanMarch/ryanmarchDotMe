@@ -18,7 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
         card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
         
-        let tagsHtml = project.tags.map(tag => `<span class="tag tag-${tag.color}">${tag.label}</span>`).join('');
+        let tagsHtml = project.tags.map(tag => {
+            const priorityClass = tag.priority ? `tag-priority-${tag.priority}` : '';
+            return `<span class="tag tag-${tag.color} ${priorityClass}">${tag.label}</span>`;
+        }).join('');
         
         let actionsHtml = '';
         if (project.hasExtendedContent) {
@@ -77,9 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.text();
             })
             .then(html => {
-                let tagsHtml = '';
+                let tagsHtml = '<div id="modal-top"></div>';
                 if (project && project.tags) {
-                    tagsHtml = `<div class="tag-list modal-tags">${project.tags.map(tag => `<span class="tag tag-${tag.color}">${tag.label}</span>`).join('')}</div>`;
+                    tagsHtml = `<div class="tag-list modal-tags" id="modal-top">${project.tags.map(tag => {
+                        const priorityClass = tag.priority ? `tag-priority-${tag.priority}` : '';
+                        return `<span class="tag tag-${tag.color} ${priorityClass}">${tag.label}</span>`;
+                    }).join('')}</div>`;
                 }
                 // Create footer actions for the modal
                 let footerHtml = '';
@@ -107,12 +113,41 @@ document.addEventListener('DOMContentLoaded', () => {
                         `;
                     }
 
-                    footerHtml += `<a href="#modal-content-area" class="modal-back-to-top-btn">Back to Top</a>`;
+                    footerHtml += `<a href="#modal-top" class="modal-back-to-top-btn">Back to Top</a>`;
                     
                     footerHtml += `</div>`;
                 }
 
                 modalContentArea.innerHTML = tagsHtml + html + footerHtml;
+
+                // Generate Table of Contents from h4 IDs
+                const headings = modalContentArea.querySelectorAll('h4[id]');
+                if (headings.length > 0) {
+                    const navHtml = `
+                        <nav class="project-nav">
+                            <div class="nav-links">
+                                ${Array.from(headings).map(h => `<a href="#${h.id}">${h.textContent}</a>`).join('')}
+                                ${project && (project.actionUrl || project.sourceUrl) ? '<a href="#modal-footer-actions">Links</a>' : ''}
+                            </div>
+                        </nav>
+                    `;
+                    
+                    const description = modalContentArea.querySelector('.project-description');
+                    const subtitle = modalContentArea.querySelector('.project-subtitle');
+                    
+                    if (description) {
+                        description.insertAdjacentHTML('afterend', navHtml);
+                    } else if (subtitle) {
+                        subtitle.insertAdjacentHTML('afterend', navHtml);
+                    } else {
+                        const tags = modalContentArea.querySelector('.modal-tags');
+                        if (tags) {
+                            tags.insertAdjacentHTML('afterend', navHtml);
+                        } else {
+                            modalContentArea.insertAdjacentHTML('afterbegin', navHtml);
+                        }
+                    }
+                }
                 modal.scrollTop = 0; 
                 modalContentArea.scrollTop = 0; 
                 

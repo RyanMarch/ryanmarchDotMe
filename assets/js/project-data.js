@@ -4,8 +4,8 @@ const myProjects = [
         title: "Motion Poster",
         subtitle: "Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.",
         tags: [
-            { label: "Recently Updated", color: "blue" },
-            { label: "Digital Signage", color: "orange" },
+            { label: "Recently Updated", color: "gold" },
+            { label: "Digital Signage", color: "purple" },
             { label: "Project", color: "gray" }
         ],
         featured: true,
@@ -23,7 +23,7 @@ const myProjects = [
         subtitle: "An interactive Bowserstack testing tool to help get to the bottom of web-based issues.",
         tags: [
             { label: "Completed", color: "green" },
-            { label: "Experimentation", color: "purple" },
+            { label: "Experimentation", color: "pink" },
             { label: "Project", color: "gray" }
         ],
         featured: false,
@@ -41,11 +41,12 @@ const myProjects = [
         subtitle: "A comprehensive property management and marketing solution to build the ultimate online leasing office.",
         tags: [
             { label: "Professional", color: "blue" },
-            { label: "Platform", color: "purple" }
+            { label: "Platform", color: "purple" },
+            { label: "Real Estate", color: "teal", priority: "low" }
         ],
         featured: false,
         size: "large",
-        image: "content/rentpress/images/floor-plan-grid.png",
+        image: "content/rentpress/images/floor-plan-grid.webp",
         imageClass: "destination-icon",
         actionText: "Visit RentPress.io",
         actionUrl: "https://rentpress.io",
@@ -57,7 +58,9 @@ const myProjects = [
         title: "RentPress Local",
         subtitle: "Local listings management product for all maps.",
         tags: [
-            { label: "Product", color: "blue" }
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Product", color: "gray" }
         ],
         featured: false,
         size: "tall",
@@ -69,10 +72,12 @@ const myProjects = [
     },
     {
         id: "rentpress-lead-sync",
-        title: "RentPress Lead Sync",
+        title: "RentPress Lead Sync",   
         subtitle: "Send and receive leads without writing code.",
         tags: [
-            { label: "Add-on", color: "green" }
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Product", color: "gray" }
         ],
         featured: false,
         size: "small",
@@ -88,7 +93,9 @@ const myProjects = [
         title: "Amenities Manager",
         subtitle: "Powerfule management of property amenities.",
         tags: [
-            { label: "Add-on", color: "green" }
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Add On", color: "gray" },
         ],
         featured: false,
         size: "small",
@@ -104,6 +111,8 @@ const myProjects = [
         title: "RentPress Data Hub",
         subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
         tags: [
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
             { label: "Backend", color: "purple" }
         ],
         featured: false,
@@ -119,7 +128,9 @@ const myProjects = [
         title: "RentPress Email",
         subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
         tags: [
-            { label: "Product", color: "orange" }
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Product", color: "gray" }
         ],
         featured: false,
         size: "medium",
