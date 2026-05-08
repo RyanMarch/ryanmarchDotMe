@@ -80,8 +80,8 @@ const myProjects = [
             { label: "Product", color: "gray" }
         ],
         featured: false,
-        size: "small",
-        image: "content/rentpress-lead-sync/images/lead-sync-integration.webp",
+        size: "tall",
+        image: "content/rentpress-lead-sync/images/lead-sync-icon.png",
         imageClass: "destination-icon",
         actionText: "View Plugin",
         actionUrl: "https://wordpress.org/plugins/rentpress-gravity-forms-add-on/",
@@ -91,54 +91,54 @@ const myProjects = [
     {
         id: "amenities-manager",
         title: "Amenities Manager",
-        subtitle: "Powerfule management of property amenities.",
+        subtitle: "Powerful control over property amenities and features for multifamily websites.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
-            { label: "Add On", color: "gray" },
+            { label: "Add-On", color: "gray" },
         ],
         featured: false,
-        size: "small",
-        image: "assets/bowser-icon.png",
+        size: "medium",
+        image: "content/amenities-manager/images/amenities-icon.png",
         imageClass: "destination-icon",
         actionText: "View Plugin",
         actionUrl: "https://wordpress.org/plugins/rentpress-amenities-manager-add-on/",
         sourceUrl: "https://support.30lines.com/documentation/rentpress-amenities-manager-add-on/",
         hasExtendedContent: true
     },
-    {
-        id: "rentpress-data-hub",
-        title: "RentPress Data Hub",
-        subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
-        tags: [
-            { label: "Professional", color: "blue" },
-            { label: "Real Estate", color: "teal", priority: "low" },
-            { label: "Backend", color: "purple" }
-        ],
-        featured: false,
-        size: "wide",
-        image: "assets/bowser-icon.png",
-        imageClass: "destination-icon",
-        actionText: "Learn More",
-        actionUrl: "#",
-        hasExtendedContent: true
-    },
-    {
-        id: "rentpress-email",
-        title: "RentPress Email",
-        subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
-        tags: [
-            { label: "Professional", color: "blue" },
-            { label: "Real Estate", color: "teal", priority: "low" },
-            { label: "Product", color: "gray" }
-        ],
-        featured: false,
-        size: "medium",
-        image: "assets/bowser-icon.png",
-        imageClass: "destination-icon",
-        actionText: "Learn More",
-        actionUrl: "#",
-        hasExtendedContent: true
-    }
+    // {
+    //     id: "rentpress-data-hub",
+    //     title: "RentPress Data Hub",
+    //     subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
+    //     tags: [
+    //         { label: "Professional", color: "blue" },
+    //         { label: "Real Estate", color: "teal", priority: "low" },
+    //         { label: "Backend", color: "purple" }
+    //     ],
+    //     featured: false,
+    //     size: "wide",
+    //     image: "assets/bowser-icon.png",
+    //     imageClass: "destination-icon",
+    //     actionText: "Learn More",
+    //     actionUrl: "#",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "rentpress-email",
+    //     title: "RentPress Email",
+    //     subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
+    //     tags: [
+    //         { label: "Professional", color: "blue" },
+    //         { label: "Real Estate", color: "teal", priority: "low" },
+    //         { label: "Product", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "assets/bowser-icon.png",
+    //     imageClass: "destination-icon",
+    //     actionText: "Learn More",
+    //     actionUrl: "#",
+    //     hasExtendedContent: true
+    // }
 ];
 
