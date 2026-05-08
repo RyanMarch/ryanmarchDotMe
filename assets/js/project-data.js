@@ -140,5 +140,21 @@ const myProjects = [
     //     actionUrl: "#",
     //     hasExtendedContent: true
     // }
+    // {
+    //     id: "sample-project",
+    //     title: "Sample 1x1",
+    //     subtitle: "A compact bento module for quick updates or small side experiments.",
+    //     tags: [
+    //         { label: "Experiment", color: "pink" },
+    //         { label: "1x1", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "small",
+    //     image: "assets/bowser-icon.png",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Sample",
+    //     actionUrl: "#",
+    //     hasExtendedContent: false
+    // }
 ];
 

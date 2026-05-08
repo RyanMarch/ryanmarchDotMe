@@ -1340,8 +1340,8 @@ margin-top: 3rem;
         width: 100%;
         flex-direction: column;
         text-align: center;
-        padding: 2.5rem 1.5rem;
-        gap: 1.5rem;
+        padding: 2rem 1.25rem; /* Slightly more compact */
+        gap: 1rem;
     }
 
     .bio-avatar {
@@ -1363,10 +1363,80 @@ margin-top: 3rem;
             "content"
             "visual"
             "source";
-        text-align: center;
-        padding: 2rem 1.5rem;
-        gap: 2rem;
+        text-align: left; /* Unified left alignment */
+        padding: 1rem; /* Even tighter padding for mobile bento */
+        gap: 1rem; /* Reduced gap */
         min-height: auto;
+        grid-column: span 2; /* Default to full-width */
+    }
+
+    /* --- Mobile Bento Grid Logic --- */
+    .destinations-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.6rem; /* Slightly tighter gap between cards */
+    }
+
+    /* Smaller modules take 1 column on mobile to restore bento effect */
+    .destination-card.size-medium,
+    .destination-card.size-small {
+        grid-column: span 1;
+        gap: 0.75rem; /* Even tighter internal gap for small tiles */
+    }
+
+    /* Horizontal Module Override for Mobile (RentPress Local & Lead Sync) */
+    .destination-card.size-tall {
+        grid-column: span 2; /* Full width */
+        grid-row: span 1; /* Standard height */
+        grid-template-columns: 1fr 110px; /* Content left, Visual right */
+        grid-template-rows: auto 1fr;
+        grid-template-areas: 
+            "tags tags"
+            "content visual";
+        text-align: left;
+        padding: 1.25rem;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    /* Adjust typography for narrow mobile modules (1-column only) */
+    .destination-card.size-medium .destination-content h3,
+    .destination-card.size-small .destination-content h3 {
+        font-size: 1.35rem; /* Down from 2.2rem */
+        line-height: 1.2;
+    }
+
+    .destination-card.size-medium .destination-content p,
+    .destination-card.size-small .destination-content p {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        display: block; /* Remove line-clamp */
+        overflow: visible;
+        margin: 0.5rem 0;
+    }
+
+    /* Horizontal card specific typography */
+    .destination-card.size-tall .destination-content h3 {
+        font-size: 1.6rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .destination-card.size-tall .destination-content p {
+        font-size: 0.95rem;
+        max-width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    /* Adjust tags for narrow modules */
+    .destination-card.size-medium .tag,
+    .destination-card.size-small .tag {
+        font-size: 0.55rem; /* Even smaller to fit better */
+        padding: 0.2rem 0.4rem;
+        letter-spacing: 0.05em;
+    }
+
+    .destination-card.size-tall .tag-list,
+    .tag-list {
+        justify-content: flex-start;
     }
 
     .project-link {
@@ -1380,8 +1450,12 @@ margin-top: 3rem;
 
     .destination-content {
         padding: 0;
-        align-items: center;
-        gap: 1.5rem;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .destination-card.size-tall .destination-content {
+        align-items: flex-start;
     }
 
     .tag-list {
@@ -1391,11 +1465,22 @@ margin-top: 3rem;
     .destination-visual,
     .destination-standalone-visual {
         width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .destination-image-standalone,
     .destination-icon {
-        max-height: 240px;
+        max-height: 200px; /* Slightly shorter for mobile bento tiles */
+        width: auto;
+        object-fit: contain;
+    }
+
+    /* Specific image height for 1x1 modules on mobile */
+    .size-medium .destination-icon,
+    .size-small .destination-icon {
+        max-height: 140px;
     }
 
     /* Disable tilt effect on mobile */
@@ -1406,8 +1491,40 @@ margin-top: 3rem;
 
     .destination-actions {
         width: 100%;
-        justify-content: center;
-        margin: 1.5rem 0 0 0;
+        justify-content: flex-start;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .destination-card.size-tall .destination-actions {
+        justify-content: flex-start;
+    }
+
+    /* Adjust button for narrow mobile modules */
+    .destination-card.size-medium .project-btn,
+    .destination-card.size-small .project-btn {
+        padding: 0.6rem 0.75rem; /* Tighter horizontal padding */
+        font-size: 0.75rem; /* Smaller font */
+        border-radius: 10px;
+        width: 100%; /* Fill available width */
+        white-space: normal; /* Allow text to wrap if it's too long */
+        line-height: 1.2;
+    }
+    
+    .destination-card.size-tall .project-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+    }
+
+    .destination-card.size-tall .project-btn .btn-icon,
+    .destination-card.size-medium .project-btn .btn-icon,
+    .destination-card.size-small .project-btn .btn-icon {
+        display: none; /* Icon takes too much space on half-width mobile buttons */
+    }
+
+    .destination-card.size-tall .project-btn:hover span,
+    .destination-card.size-medium .project-btn:hover span,
+    .destination-card.size-small .project-btn:hover span {
+        transform: none !important;
     }
 
     .project-link {
@@ -1417,7 +1534,7 @@ margin-top: 3rem;
         margin: 0;
         pointer-events: auto !important;
         display: block;
-        text-align: center;
+        text-align: left;
     }
 
     /* Remove glimmer effect on mobile */
