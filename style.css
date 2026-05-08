@@ -73,6 +73,11 @@ button, input, select, textarea {
     font-family: inherit;
 }
 
+html, body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
 html {
     background-color: var(--bg-color);
 }
@@ -473,7 +478,11 @@ margin-top: 3rem;
 }
 
 .bowser-preview-img {
-    scale: 1.2; /* Slightly smaller as requested */
+    scale: 1.2;
+}
+
+#project-image-rentpress-lead-sync {
+    scale: 0.75;
 }
 
 .destination-card:hover .destination-image-standalone,
@@ -1426,7 +1435,7 @@ margin-top: 3rem;
         transform: translateZ(0);
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        overflow: visible !important; 
+        overflow: hidden !important; 
     }
 
     /* Remove hover shift animation on mobile */

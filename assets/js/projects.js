@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
             <div class="${project.featured ? 'destination-standalone-visual' : 'destination-visual'}">
-                 <img src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">
+                 <img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">
             </div>
         `;
         
