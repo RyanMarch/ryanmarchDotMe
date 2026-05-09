@@ -2,6 +2,27 @@
 <html lang="en" class="dark" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <script>
+        // Handle the GitHub Pages 404 Hack redirect check (Only active if not local)
+        if (window.location.protocol !== 'file:' && 
+            window.location.hostname !== 'localhost' && 
+            window.location.hostname !== '127.0.0.1') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const p = urlParams.get('p');
+            const q = urlParams.get('q');
+            if (p) {
+                // Set initial project but don't replaceState yet to avoid asset resolution issues
+                window.initialModalProject = p.split('/').filter(Boolean).pop();
+                window.pendingRedirect = p + (q ? '?' + q : '') + window.location.hash;
+            } else {
+                const pathParts = window.location.pathname.split('/').filter(Boolean);
+                if (pathParts.length > 0) {
+                    window.initialModalProject = pathParts.pop();
+                }
+            }
+        }
+    </script>
+    <base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ryan March | Product & Technology</title>
     <meta name="description" content="Personal landing page for Ryan March, a Product Manager and creative technologist.">
@@ -102,25 +123,11 @@
             // even if the content scrolls underneath it.
             document.addEventListener('scroll', updateGlimmers, { capture: true, passive: true });
         }
-
-        // Handle the GitHub Pages 404 Hack redirect check (Only active if not local)
-        if (window.location.protocol !== 'file:' && 
-            window.location.hostname !== 'localhost' && 
-            window.location.hostname !== '127.0.0.1') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const redirectPath = urlParams.get('p');
-            if (redirectPath) {
-                window.history.replaceState(null, '', redirectPath);
-                const pathParts = redirectPath.split('/').filter(p => p);
-                if (pathParts.length > 0) {
-                    window.initialModalProject = pathParts[pathParts.length - 1];
-                }
-            } else {
-                const pathParts = window.location.pathname.split('/').filter(p => p);
-                if (pathParts.length > 0) {
-                    window.initialModalProject = pathParts[pathParts.length - 1];
-                }
-            }
+    </script>
+    <script>
+        // Finalize the redirect if one was pending
+        if (window.pendingRedirect) {
+            window.history.replaceState(null, '', window.pendingRedirect);
         }
     </script>
 </body>
