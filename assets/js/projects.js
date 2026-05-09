@@ -249,13 +249,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Lightbox Event Listeners
     lightboxClose.addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox || e.target === lightboxImg) closeLightbox();
+        if (e.target === lightbox) closeLightbox();
     });
 
     // Event Delegation for clicks in modal
     modalContentArea.addEventListener('click', (e) => {
         // 1. Handle Lightbox for images
         if (e.target.tagName === 'IMG') {
+            e.stopPropagation();
             const parent = e.target.closest('.gallery-item');
             const caption = parent ? parent.querySelector('.gallery-caption') : null;
             const captionText = caption ? caption.textContent : '';
