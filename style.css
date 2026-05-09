@@ -94,8 +94,9 @@ body {
     padding: 1.5rem 0;
 }
 
-.pa-1 {
-    padding: 1rem !important;
+/* Padded gallery images — specificity beats .modal-content img without !important */
+.modal-content .gallery-item .gallery-padded-img {
+    padding: 1rem;
 }
 
 /* --- Background --- */
@@ -177,14 +178,11 @@ margin-top: 3rem;
 .glimmer-card {
     position: relative;
     background: var(--card-bg);
-    /* backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px); */
     border-radius: 20px;
     border: 1px solid var(--card-border);
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
     z-index: 1;
 }
-
 
 
 /* Border-only glimmer effect */
@@ -228,8 +226,6 @@ margin-top: 3rem;
     align-items: center;
     gap: 2.5rem;
 }
-
-
 
 .profile-links {
     width: 320px;
@@ -991,9 +987,6 @@ margin-top: 3rem;
     }
 }
 
-/* Mobile Modal Adjustments */
-/* Mobile Modal styles moved to consolidate with other mobile styles below */
-/* Tag List handling is now in the .destination-card grid area definition */
 
 .tag {
     font-size: 0.7rem;
@@ -1044,7 +1037,6 @@ margin-top: 3rem;
     padding-top: 2px;
 }
 
-/* Removed absolute hover slide-in */
 
 .project-link:hover {
     opacity: 1;
