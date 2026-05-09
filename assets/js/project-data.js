@@ -106,40 +106,42 @@ const myProjects = [
         sourceUrl: "https://support.30lines.com/documentation/rentpress-amenities-manager-add-on/",
         hasExtendedContent: true
     },
-    // {
-    //     id: "rentpress-data-hub",
-    //     title: "RentPress Data Hub",
-    //     subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
-    //     tags: [
-    //         { label: "Professional", color: "blue" },
-    //         { label: "Real Estate", color: "teal", priority: "low" },
-    //         { label: "Backend", color: "purple" }
-    //     ],
-    //     featured: false,
-    //     size: "wide",
-    //     image: "assets/bowser-icon.png",
-    //     imageClass: "destination-icon",
-    //     actionText: "Learn More",
-    //     actionUrl: "#",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "rentpress-email",
-    //     title: "RentPress Email",
-    //     subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
-    //     tags: [
-    //         { label: "Professional", color: "blue" },
-    //         { label: "Real Estate", color: "teal", priority: "low" },
-    //         { label: "Product", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "assets/bowser-icon.png",
-    //     imageClass: "destination-icon",
-    //     actionText: "Learn More",
-    //     actionUrl: "#",
-    //     hasExtendedContent: true
-    // }
+    {
+        id: "rentpress-data-hub",
+        title: "RentPress Data Hub",
+        subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
+        tags: [
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Backend", color: "purple" }
+        ],
+        featured: false,
+        size: "large",
+        image: "",
+        symbol: "",
+        imageClass: "destination-icon",
+        actionText: "Learn More",
+        actionUrl: "",
+        hasExtendedContent: false
+    },
+    {
+        id: "rentpress-email",
+        title: "RentPress Email",
+        subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
+        tags: [
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Product", color: "gray" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "",
+        symbol: "email",
+        imageClass: "destination-icon",
+        actionText: "Learn More",
+        actionUrl: "",
+        hasExtendedContent: false
+    }
     // {
     //     id: "sample-project",
     //     title: "Sample 1x1",
