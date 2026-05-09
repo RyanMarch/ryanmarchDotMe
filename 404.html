@@ -4,17 +4,11 @@
     <meta charset="utf-8">
     <title>Ryan March</title>
     <script type="text/javascript">
-      // GitHub Pages SPA router hack
-      // Takes the requested path (e.g., /motion-poster/) and redirects to root with a query param
-      var pathSegmentsToKeep = 0; 
+      // Robust SPA router hack
+      // Encodes the entire path and redirects to root
       var l = window.location;
-      l.replace(
-        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?p=/' +
-        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-        (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-        l.hash
-      );
+      var path = l.pathname + l.search + l.hash;
+      l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/?p=' + encodeURIComponent(path));
     </script>
   </head>
   <body>

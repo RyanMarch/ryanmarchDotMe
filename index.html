@@ -9,11 +9,11 @@
             window.location.hostname !== '127.0.0.1') {
             const urlParams = new URLSearchParams(window.location.search);
             const p = urlParams.get('p');
-            const q = urlParams.get('q');
             if (p) {
-                // Set initial project but don't replaceState yet to avoid asset resolution issues
-                window.initialModalProject = p.split('/').filter(Boolean).pop();
-                window.pendingRedirect = p + (q ? '?' + q : '') + window.location.hash;
+                const decodedPath = decodeURIComponent(p);
+                // Set initial project and clean URL
+                window.initialModalProject = decodedPath.split('/').filter(Boolean).pop();
+                window.pendingRedirect = decodedPath;
             } else {
                 const pathParts = window.location.pathname.split('/').filter(Boolean);
                 if (pathParts.length > 0) {
