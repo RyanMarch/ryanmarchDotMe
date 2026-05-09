@@ -3,23 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <script>
-        // Handle the GitHub Pages 404 Hack redirect check (Only active if not local)
-        if (window.location.protocol !== 'file:' && 
-            window.location.hostname !== 'localhost' && 
-            window.location.hostname !== '127.0.0.1') {
-            const urlParams = new URLSearchParams(window.location.search);
-            const p = urlParams.get('p');
-            if (p) {
-                const decodedPath = decodeURIComponent(p);
-                // Set initial project and clean URL
-                window.initialModalProject = decodedPath.split('/').filter(Boolean).pop();
-                window.pendingRedirect = decodedPath;
-            } else {
-                const pathParts = window.location.pathname.split('/').filter(Boolean);
-                if (pathParts.length > 0) {
-                    window.initialModalProject = pathParts.pop();
-                }
-            }
+        // Detection for deep-linked project pages
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+        if (pathParts.length > 0) {
+            // This works for /project/project-id/ by taking the last part
+            window.initialModalProject = pathParts[pathParts.length - 1];
         }
     </script>
     <base href="/">
@@ -122,12 +110,6 @@
             // Also update on scroll to keep the shimmer fixed to the mouse position 
             // even if the content scrolls underneath it.
             document.addEventListener('scroll', updateGlimmers, { capture: true, passive: true });
-        }
-    </script>
-    <script>
-        // Finalize the redirect if one was pending
-        if (window.pendingRedirect) {
-            window.history.replaceState(null, '', window.pendingRedirect);
         }
     </script>
 </body>
