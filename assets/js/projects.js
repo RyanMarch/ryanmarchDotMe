@@ -172,8 +172,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 } else {
                     // Production clean routing (preserves hash)
-                    if (window.location.pathname !== `/${projectId}/`) {
-                        history.pushState(null, null, `/${projectId}/${window.location.hash}`);
+                    const targetPath = `/project/${projectId}/`;
+                    if (window.location.pathname !== targetPath) {
+                        history.pushState(null, null, targetPath + window.location.hash);
                     }
                 }
             })

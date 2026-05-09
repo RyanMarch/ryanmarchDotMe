@@ -6,8 +6,8 @@
         // Detection for deep-linked project pages
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         if (pathParts.length > 0) {
-            // This works for both /project-id/ and /project/project-id/
-            window.initialModalProject = pathParts.pop();
+            // This works for /project/project-id/ by taking the last part
+            window.initialModalProject = pathParts[pathParts.length - 1];
             console.log("Initial project detected from URL:", window.initialModalProject);
         }
     </script>

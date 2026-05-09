@@ -1,0 +1,2 @@
+# SPA routing using the /project/ prefix to avoid loops
+/project/* /index.html 200
