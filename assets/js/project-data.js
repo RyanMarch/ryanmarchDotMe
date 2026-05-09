@@ -10,7 +10,7 @@ const myProjects = [
         ],
         featured: true,
         size: "large",
-        image: "assets/motion-poster-framed.png",
+        image: "assets/img/motion-poster-framed.png",
         imageClass: "poster-preview-img",
         actionText: "Launch Motion Poster",
         actionUrl: "https://motionposter.ryanmarch.me",
@@ -28,7 +28,7 @@ const myProjects = [
         ],
         featured: false,
         size: "medium",
-        image: "assets/bowser-icon.png",
+        image: "assets/img/bowser-icon.png",
         imageClass: "bowser-preview-img",
         actionText: "Launch Bowserstack",
         actionUrl: "https://bowserstack.ryanmarch.me",
@@ -118,7 +118,7 @@ const myProjects = [
         featured: false,
         size: "large",
         image: "",
-        symbol: "",
+        symbol: "data",
         imageClass: "destination-icon",
         actionText: "Learn More",
         actionUrl: "",
@@ -142,21 +142,4 @@ const myProjects = [
         actionUrl: "",
         hasExtendedContent: false
     }
-    // {
-    //     id: "sample-project",
-    //     title: "Sample 1x1",
-    //     subtitle: "A compact bento module for quick updates or small side experiments.",
-    //     tags: [
-    //         { label: "Experiment", color: "pink" },
-    //         { label: "1x1", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "small",
-    //     image: "assets/bowser-icon.png",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Sample",
-    //     actionUrl: "#",
-    //     hasExtendedContent: false
-    // }
 ];
-
