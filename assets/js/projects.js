@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(projectId) {
         const project = myProjects.find(p => p.id === projectId);
-        fetch(`content/${projectId}.html?t=${Date.now()}`)
+        fetch(`/content/${projectId}.html?t=${Date.now()}`)
             .then(response => {
                 if (!response.ok) throw new Error("Content not found");
                 return response.text();
