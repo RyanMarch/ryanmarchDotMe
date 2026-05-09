@@ -5,10 +5,12 @@
     <title>Ryan March</title>
     <script type="text/javascript">
       // Robust SPA router hack
-      // Encodes the entire path and redirects to root
+      console.log("404 Redirect Triggered for path: " + window.location.pathname);
       var l = window.location;
       var path = l.pathname + l.search + l.hash;
-      l.replace(l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/?p=' + encodeURIComponent(path));
+      var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + '/?p=' + encodeURIComponent(path);
+      console.log("Redirecting to: " + redirectUrl);
+      l.replace(redirectUrl);
     </script>
   </head>
   <body>

@@ -11,12 +11,14 @@
             const p = urlParams.get('p');
             if (p) {
                 const decodedPath = decodeURIComponent(p);
+                console.log("Unpacking redirect for path:", decodedPath);
                 // Set initial project and clean URL
                 window.initialModalProject = decodedPath.split('/').filter(Boolean).pop();
                 window.pendingRedirect = decodedPath;
             } else {
                 const pathParts = window.location.pathname.split('/').filter(Boolean);
                 if (pathParts.length > 0) {
+                    console.log("Direct deep-link detected:", window.location.pathname);
                     window.initialModalProject = pathParts.pop();
                 }
             }
