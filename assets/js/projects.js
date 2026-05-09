@@ -179,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(err => {
-                console.error(err);
                 if (isLocal) {
                     modalContentArea.innerHTML = `
                         <div style="text-align:center; padding: 2rem;">
@@ -198,6 +197,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeModal() {
         if (!modal.classList.contains('open')) return;
+
+        // Instant URL update for better UX
+        if (isLocal) {
+            const searchParams = new URLSearchParams(window.location.search);
+            if (searchParams.has('project')) {
+                searchParams.delete('project');
+                const qs = searchParams.toString();
+                history.pushState(null, null, qs ? `?${qs}${window.location.hash}` : window.location.pathname + window.location.hash);
+            }
+        } else {
+            if (window.location.pathname !== '/') {
+                history.pushState(null, null, `/${window.location.hash}`);
+            }
+        }
         
         // Hide close button immediately for a cleaner exit
         closeBtn.classList.add('modal-close-hidden');
@@ -210,22 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.remove('closing');
             modal.setAttribute('aria-hidden', 'true');
             document.body.style.overflow = '';
-            
-            if (isLocal) {
-                // Remove query param
-                const searchParams = new URLSearchParams(window.location.search);
-                if (searchParams.has('project')) {
-                    searchParams.delete('project');
-                    const qs = searchParams.toString();
-                    history.pushState(null, null, qs ? `?${qs}${window.location.hash}` : window.location.pathname + window.location.hash);
-                }
-            } else {
-                // Revert clean URL
-                if (window.location.pathname !== '/') {
-                    history.pushState(null, null, `/${window.location.hash}`);
-                }
-            }
-        }, 500); // Increased to 500ms for smoother exit
+        }, 500); 
     }
 
     // 3. Lightbox Logic
