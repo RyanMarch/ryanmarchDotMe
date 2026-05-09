@@ -45,6 +45,24 @@ document.addEventListener('DOMContentLoaded', () => {
             ? `<a href="${project.sourceUrl}" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>` 
             : '';
 
+        let visualHtml = '';
+        if (project.image) {
+            visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+        } else {
+            // Placeholder Icon / Symbol
+            let iconSvg = '';
+            if (project.symbol === 'data') {
+                iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0v3.75" /></svg>`;
+            } else if (project.symbol === 'email') {
+                iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>`;
+            } else {
+                // Default generic icon
+                iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>`;
+            }
+            
+            visualHtml = `<div class="project-placeholder-icon">${iconSvg}</div>`;
+        }
+
         card.innerHTML = `
             <div class="tag-list">
                 ${tagsHtml}
@@ -60,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             </div>
             <div class="${project.featured ? 'destination-standalone-visual' : 'destination-visual'}">
-                 <img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">
+                 ${visualHtml}
             </div>
         `;
         
@@ -295,30 +313,38 @@ document.addEventListener('DOMContentLoaded', () => {
         const target = e.target;
         const scrollTop = target.scrollTop;
         
+        // On mobile, the modal overlay scrolls. On desktop, the content area scrolls.
+        // We must ignore the non-scrolling element to prevent 'lastScrollTop' clashing.
+        const isMobile = window.matchMedia("(max-width: 700px)").matches;
+        if (isMobile && target !== modal) return;
+        if (!isMobile && target !== modalContentArea) return;
+
+        const scrollHeight = target.scrollHeight;
+        const clientHeight = target.clientHeight;
+        
+        // Detect if we are at or very near the bottom of the scroll
+        const isAtBottom = (scrollTop + clientHeight) >= (scrollHeight - 50);
+        
         // Detect if footer is visible to force close button to show
         const footer = document.getElementById('modal-footer-actions');
         let footerVisible = false;
         if (footer) {
             const rect = footer.getBoundingClientRect();
-            // Show if footer top enters the viewport (with a small buffer)
-            footerVisible = rect.top < window.innerHeight - 50;
+            footerVisible = rect.top < window.innerHeight - 20;
         }
 
-        // Show button if:
-        // 1. We are near the top (scrollTop < 50)
-        // 2. The footer is visible
-        // 3. We are scrolling UP (scrollTop < lastScrollTop)
-        const isScrollingUp = scrollTop < lastScrollTop;
+        const isScrollingUp = scrollTop < lastScrollTop - 4;
+        const isScrollingDown = scrollTop > lastScrollTop + 6;
         const isNearTop = scrollTop < 50;
 
-        if (isNearTop || footerVisible || isScrollingUp) {
+        if (isNearTop || isAtBottom || footerVisible || isScrollingUp) {
             closeBtn.classList.remove('modal-close-hidden');
-        } else if (scrollTop > 100) {
-            // Hide button if scrolling down and past 100px
+        } else if (isScrollingDown && scrollTop > 100) {
+            // Only hide if we are explicitly scrolling DOWN and past the threshold
             closeBtn.classList.add('modal-close-hidden');
         }
         
-        lastScrollTop = Math.max(0, scrollTop); // Avoid negative values from rubber banding
+        lastScrollTop = Math.max(0, scrollTop);
     };
 
     // Listen to both the content area (desktop) and the modal overlay (mobile)

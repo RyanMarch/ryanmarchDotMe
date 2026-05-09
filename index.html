@@ -59,15 +59,17 @@
 
     <!-- Modal Overlay -->
     <div id="project-modal" class="modal-overlay" aria-hidden="true">
-        <div class="modal-container glimmer-card">
-            <button class="modal-close" aria-label="Close modal">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
-            <div class="modal-content" id="modal-content-area">
-                <!-- Content injected here via JS -->
+        <div class="modal-frame">
+            <div class="modal-container glimmer-card">
+                <div class="modal-content" id="modal-content-area">
+                    <!-- Content injected here via JS -->
+                </div>
             </div>
         </div>
     </div>
+    <button class="modal-close modal-close-hidden" aria-label="Close modal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
     <!-- Lightbox Overlay -->
     <div id="lightbox-overlay" class="lightbox-overlay" aria-hidden="true">
         <button class="lightbox-close" aria-label="Close lightbox">
