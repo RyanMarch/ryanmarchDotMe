@@ -7,6 +7,12 @@
 ehthumbs.db
 Thumbs.db
 
+# Dev-only notes (keep local, don't deploy)
+scratch/
+content/readme.txt
+content/rentpress_notes.txt
+BENTO_REFERENCE.md
+
 # Code workspace files
 *.code-workspace
 

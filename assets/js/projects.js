@@ -1,4 +1,9 @@
 
+const buildTagsHtml = (tags) => tags.map(({ label, color, priority }) => {
+    const cls = priority ? ` tag-priority-${priority}` : '';
+    return `<span class="tag tag-${color}${cls}">${label}</span>`;
+}).join('');
+
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('projects-grid');
     const modal = document.getElementById('project-modal');
@@ -12,16 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightboxCaption = document.getElementById('lightbox-caption');
     const lightboxClose = document.querySelector('.lightbox-close');
 
+    let isMobile = window.matchMedia('(max-width: 700px)').matches;
+    window.addEventListener('resize', () => {
+        isMobile = window.matchMedia('(max-width: 700px)').matches;
+    }, { passive: true });
+
     // 1. Render Projects
     myProjects.forEach(project => {
         const card = document.createElement('div');
         const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
         card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
         
-        let tagsHtml = project.tags.map(tag => {
-            const priorityClass = tag.priority ? `tag-priority-${tag.priority}` : '';
-            return `<span class="tag tag-${tag.color} ${priorityClass}">${tag.label}</span>`;
-        }).join('');
+        const tagsHtml = buildTagsHtml(project.tags);
         
         let actionsHtml = '';
         if (project.hasExtendedContent) {
@@ -47,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let visualHtml = '';
         if (project.image) {
-            visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+            visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" loading="lazy" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
         } else {
             // Placeholder Icon / Symbol
             let iconSvg = '';
@@ -92,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(projectId) {
         const project = myProjects.find(p => p.id === projectId);
-        fetch(`/content/${projectId}.html?t=${Date.now()}`)
+        fetch(`/content/${projectId}.html`)
             .then(response => {
                 if (!response.ok) throw new Error("Content not found");
                 return response.text();
@@ -100,10 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(html => {
                 let tagsHtml = '<div id="modal-top"></div>';
                 if (project && project.tags) {
-                    tagsHtml = `<div class="tag-list modal-tags" id="modal-top">${project.tags.map(tag => {
-                        const priorityClass = tag.priority ? `tag-priority-${tag.priority}` : '';
-                        return `<span class="tag tag-${tag.color} ${priorityClass}">${tag.label}</span>`;
-                    }).join('')}</div>`;
+                    tagsHtml = `<div class="tag-list modal-tags" id="modal-top">${buildTagsHtml(project.tags)}</div>`;
                 }
                 // Create footer actions for the modal
                 let footerHtml = '';
@@ -315,7 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // On mobile, the modal overlay scrolls. On desktop, the content area scrolls.
         // We must ignore the non-scrolling element to prevent 'lastScrollTop' clashing.
-        const isMobile = window.matchMedia("(max-width: 700px)").matches;
         if (isMobile && target !== modal) return;
         if (!isMobile && target !== modalContentArea) return;
 
@@ -383,16 +386,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial load check
+    // Initial load check — double-rAF guarantees DOM is painted before opening
     if (isLocal) {
         const urlParams = new URLSearchParams(window.location.search);
         const pId = urlParams.get('project');
         if (pId) {
-            setTimeout(() => openModal(pId), 50);
+            requestAnimationFrame(() => requestAnimationFrame(() => openModal(pId)));
         }
     } else {
         if (window.initialModalProject) {
-            setTimeout(() => openModal(window.initialModalProject), 50);
+            requestAnimationFrame(() => requestAnimationFrame(() => openModal(window.initialModalProject)));
         }
     }
 });

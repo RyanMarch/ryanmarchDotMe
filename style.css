@@ -61,6 +61,7 @@
     --tag-gray-border: rgba(203, 213, 225, 0.2);
     
     color-scheme: dark;
+    --divider-gradient: linear-gradient(90deg, transparent 2%, rgba(255,255,255,0.2) 21%, rgba(255,255,255,0.2) 74%, transparent 91%);
 }
 
 * {
@@ -115,7 +116,7 @@ body {
     filter: blur(140px);
     opacity: 0.4;
     animation: orbFloat1 30s infinite alternate ease-in-out;
-    will-change: transform, filter;
+    will-change: transform;
 }
 
 .orb-1 {
@@ -137,15 +138,15 @@ body {
 }
 
 @keyframes orbFloat1 {
-    0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); filter: blur(140px) hue-rotate(0deg); }
-    50% { transform: translate3d(80px, 40px, 0) rotate(5deg) scale(1.1); filter: blur(160px) hue-rotate(15deg); }
-    100% { transform: translate3d(-40px, 80px, 0) rotate(-5deg) scale(1); filter: blur(140px) hue-rotate(-10deg); }
+    0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+    50% { transform: translate3d(80px, 40px, 0) rotate(5deg) scale(1.1); }
+    100% { transform: translate3d(-40px, 80px, 0) rotate(-5deg) scale(1); }
 }
 
 @keyframes orbFloat2 {
-    0% { transform: translate3d(0, 0, 0) scale(1.1); filter: blur(140px) hue-rotate(0deg); }
-    50% { transform: translate3d(-60px, 100px, 0) scale(1); filter: blur(170px) hue-rotate(-20deg); }
-    100% { transform: translate3d(40px, -20px, 0) scale(1.1); filter: blur(140px) hue-rotate(10deg); }
+    0% { transform: translate3d(0, 0, 0) scale(1.1); }
+    50% { transform: translate3d(-60px, 100px, 0) scale(1); }
+    100% { transform: translate3d(40px, -20px, 0) scale(1.1); }
 }
 
 /* --- Main Layout --- */
@@ -184,10 +185,7 @@ margin-top: 3rem;
     z-index: 1;
 }
 
-.glimmer-card:hover {
-    /* transform: translateY(0px) scale(1.5); */
-    /* box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25); */
-}
+
 
 /* Border-only glimmer effect */
 .glimmer-card::before {
@@ -231,10 +229,7 @@ margin-top: 3rem;
     gap: 2.5rem;
 }
 
-.bio-module:hover {
-    transform: none !important; /* Prevent jumping/scaling on hover */
-    box-shadow: none !important; /* Remove extra shadow on hover */
-}
+
 
 .profile-links {
     width: 320px;
@@ -421,8 +416,8 @@ margin-top: 3rem;
 .destination-card.size-large .destination-content p,
 .destination-card.size-medium .destination-content p,
 .destination-card.size-wide .destination-content p {
-    max-width: 100% !important; /* Force text to take full available width */
-    text-wrap: wrap; /* Standard wrap to ensure it fills the width */
+    max-width: 100%;
+    text-wrap: wrap;
 }
 
 .destination-card.size-large .destination-visual img {
@@ -541,10 +536,7 @@ margin-top: 3rem;
     position: fixed;
     inset: 0;
     z-index: 1000;
-    /* background: rgba(3, 7, 18, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(50px); */
-    -webkit-backdrop-filter:blur(50px);
+    -webkit-backdrop-filter: blur(50px);
     backdrop-filter: blur(40px);
     display: flex;
     align-items: center;
@@ -589,7 +581,6 @@ margin-top: 3rem;
     transform: translate3d(0, 20px, 0) scale(0.95);
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     opacity: 0;
-    /* box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.877); Deep shadow */
     filter: drop-shadow(5px 5px 250px #232323e2);
 }
 
@@ -659,12 +650,12 @@ margin-top: 3rem;
 }
 
 .modal-close-hidden {
-    transform: translateY(-100px) scale(0.8) !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
+    transform: translateY(-100px) scale(0.8);
+    opacity: 0;
+    pointer-events: none;
 }
 
-.modal-close:hover {
+.modal-close:not(.modal-close-hidden):hover {
     background: rgba(255, 255, 255, 0.15);
     color: white;
     transform: scale(1.05);
@@ -675,11 +666,6 @@ margin-top: 3rem;
     height: 20px;
 }
 
-.modal-content {
-    color: var(--text-primary);
-    line-height: 1.7;
-    font-size: 1.1rem;
-}
 
 .modal-content h2,
 .modal-content .project-subtitle,
@@ -804,7 +790,7 @@ margin-top: 3rem;
     }
 
     .modal-content .nav-links a:hover {
-        opacity: 1 !important;
+        opacity: 1;
         color: white;
     }
 }
@@ -814,10 +800,8 @@ margin-top: 3rem;
 .modal-content hr {
     border: none;
     height: 1px;
-    /* background-color: #ffffff33; */
-    /* background-image: linear-gradient(to right, transparent, #3a3a3a, transparent); */
-    background: linear-gradient(90deg, #00000000 2%, #ffffff33 21%, #ffffff33 74%, #00000000 91%);
-    margin: 3rem 0 -1.4rem; 
+    background: var(--divider-gradient);
+    margin: 3rem 0 -1.4rem;
     opacity: 1;
 }
 
@@ -856,7 +840,7 @@ margin-top: 3rem;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, #00000000 2%, #ffffff33 21%, #ffffff33 74%, #00000000 91%);
+    background: var(--divider-gradient);
     z-index: 1;
     pointer-events: none;
 }
@@ -901,7 +885,7 @@ margin-top: 3rem;
 
 /* --- Modal Footer Actions --- */
 .modal-footer-divider {
-    margin: 4rem 0 2rem !important;
+    margin: 4rem 0 2rem;
 }
 
 .modal-footer-actions {
@@ -914,38 +898,20 @@ margin-top: 3rem;
 }
 
 .modal-full-btn {
-    width: 280px !important; /* Force equal width, overriding base fit-content */
-    max-width: 100% !important;
+    width: 280px;
+    max-width: 100%;
     justify-content: center;
-    padding: 0.85rem 1.5rem !important;
-    font-size: 0.95rem !important;
-    border-radius: 14px !important;
-}
-
-.btn-secondary {
-    /* background-color: transparent !important; */
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    color: #ecf4ff !important;
-    box-shadow: none !important;
-}
-
-.btn-secondary::before {
-    display: none !important;
-}
-
-.btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.05) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
 }
 
 .modal-full-btn span {
-    transform: none !important;
+    transform: none;
 }
 
 .modal-full-btn:hover span {
-    transform: translateX(-10px) !important;
+    transform: translateX(-10px);
 }
 
 /* --- Project Gallery (CSS Scroll Snap) --- */
@@ -977,7 +943,7 @@ margin-top: 3rem;
 }
 
 .gallery-item img {
-    margin: 0 !important;
+    margin: 0;
     width: 100%;
     height: auto;
     aspect-ratio: 16 / 9;
@@ -1007,8 +973,8 @@ margin-top: 3rem;
 }
 
 .gallery-image-container img {
-    border-radius: 0 !important; /* Managed by container */
-    margin: 0 !important;
+    border-radius: 0; /* Managed by container */
+    margin: 0;
     width: 100%;
 }
 
@@ -1188,7 +1154,6 @@ margin-top: 3rem;
 
 .destination-content h3 {
     font-size: 2.5rem;
-    /* margin-bottom: 0.75rem; */
     font-weight: 700;
     letter-spacing: -0.01em;
 }
@@ -1292,6 +1257,24 @@ margin-top: 3rem;
 
 .project-btn:not(:hover) span {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- .btn-secondary variant (must come after .project-btn to win cascade) --- */
+.project-btn.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #ecf4ff;
+    box-shadow: none;
+}
+
+.project-btn.btn-secondary::before {
+    display: none;
+}
+
+.project-btn.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
 }
 
 .modal-back-to-top-btn {
@@ -1536,8 +1519,8 @@ margin-top: 3rem;
 
     /* Disable tilt effect on mobile */
     .poster-preview-img {
-        transform: scale(1.4) !important;
-        transition: none !important;
+        transform: scale(1.4);
+        transition: none;
     }
 
     .destination-actions {
@@ -1575,117 +1558,91 @@ margin-top: 3rem;
     .destination-card.size-tall .project-btn:hover span,
     .destination-card.size-medium .project-btn:hover span,
     .destination-card.size-small .project-btn:hover span {
-        transform: none !important;
+        transform: none;
     }
 
     .project-link {
         position: static;
-        opacity: 1 !important;
-        transform: none !important;
+        opacity: 1;
+        transform: none;
         margin: 0;
-        pointer-events: auto !important;
+        pointer-events: auto;
         display: block;
         text-align: left;
     }
 
-    /* Remove glimmer effect on mobile */
-    .glimmer-card::before,
-    .top-row .profile-btn::before {
-        display: none !important;
-    }
-
     /* Fix Safari white gradient/flicker bug on mobile scrolling */
     .glimmer-card {
-        -webkit-backdrop-filter: none !important;
-        backdrop-filter: none !important;
-        background: rgba(255, 255, 255, 0.05); 
+        background: rgba(255, 255, 255, 0.05);
         -webkit-transform: translateZ(0);
         transform: translateZ(0);
         -webkit-backface-visibility: hidden;
         backface-visibility: hidden;
-        overflow: hidden !important; 
+        overflow: hidden;
     }
 
-    /* Remove hover shift animation on mobile */
-    .glimmer-card:hover,
-    .top-row .profile-btn:hover {
-        transform: none !important;
-        box-shadow: none !important;
-    }
-
-    .destination-card:hover .destination-image-standalone,
-    .destination-card:hover .destination-icon {
-        transform: none !important;
-    }
-
-    .destination-card:hover .poster-preview-img {
-        transform: scale(1.4) !important; 
-    }
-
-    /* --- ULTRA-AGGRESSIVE MOBILE MODAL OVERRIDES --- */
+    /* --- Mobile Modal Overrides --- */
     #project-modal.modal-overlay {
-        padding: 0 !important;
-        background: rgba(3, 7, 18, 0.5) !important; /* Semi-transparent so we can see the slide */
-        backdrop-filter: blur(10px) !important; /* Add some blur back for premium feel */
-        -webkit-backdrop-filter: blur(10px) !important;
-        display: block !important;
-        overflow-y: auto !important;
-        overflow-x: hidden !important; 
+        padding: 0;
+        background: rgba(3, 7, 18, 0.5);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: block;
+        overflow-y: auto;
+        overflow-x: hidden;
         -webkit-overflow-scrolling: touch;
         overscroll-behavior: contain;
-        z-index: 9999 !important;
+        z-index: 9999;
     }
     
     #project-modal .modal-container.glimmer-card {
-        width: 100vw !important;
-        max-width: 100vw !important;
-        min-height: 101vh !important; 
-        height: auto !important;
-        max-height: none !important;
-        border-radius: 0 !important;
-        margin: 0 !important;
-        left: 0 !important;
-        top: 0 !important;
-        padding: 6rem 0 8rem !important; /* Remove horizontal padding to allow absolute bleed */
-        overflow-y: visible !important;
-        overflow-x: visible !important; /* Ensure no clipping of bleeding elements */
-        border: none !important;
-        transform: translate3d(0, 100%, 0) !important; 
-        opacity: 1 !important;
-        background: #0f172a !important; /* Match overlay exactly */
-        box-shadow: none !important;
-        filter: none !important; /* Remove heavy shadow for mobile performance */
-        display: block !important;
-        position: relative !important;
+        width: 100vw;
+        max-width: 100vw;
+        min-height: 101vh;
+        height: auto;
+        max-height: none;
+        border-radius: 0;
+        margin: 0;
+        left: 0;
+        top: 0;
+        padding: 6rem 0 8rem;
+        overflow-y: visible;
+        overflow-x: visible;
+        border: none;
+        transform: translate3d(0, 100%, 0);
+        opacity: 1;
+        background: #0f172a;
+        box-shadow: none;
+        filter: none;
+        display: block;
+        position: relative;
     }
 
     #project-modal.modal-overlay.open .modal-container.glimmer-card {
-        transform: translate3d(0, 0, 0) !important;
+        transform: translate3d(0, 0, 0);
         transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     #project-modal.modal-overlay.closing .modal-container.glimmer-card {
-        transform: translate3d(0, 100%, 0) !important;
-        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Faster, more linear exit */
+        transform: translate3d(0, 100%, 0);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
+
     #project-modal .modal-close {
-        position: fixed !important;
-        top: 1.5rem !important;
-        right: 1.5rem !important;
-        left: auto !important;
-        margin-bottom: 0 !important;
-        background: rgba(30, 41, 59, 0.9) !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
-        display: flex !important;
-        z-index: 10005 !important;
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        left: auto;
+        background: rgba(30, 41, 59, 0.9);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        z-index: 10005;
     }
 
     .modal-content {
-        padding: 1rem 1.4rem; /* Restore global breathing room for all text */
-        display: block !important;
-        width: 100% !important;
-        box-sizing: border-box !important;
+        padding: 1rem 1.4rem;
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     /* H4 and HR now inherit their perfect desktop styles automatically */
@@ -1749,40 +1706,40 @@ margin-top: 3rem;
 
     /* FULL-WIDTH GALLERY BLEED (Separated from Text Padding) */
     .project-gallery {
-        margin: 2.5rem -1.4rem !important; /* Bleed past the 1.4rem modal padding */
-        padding: 0 1.4rem 1.25rem !important; /* Re-align internal content with text */
-        width: calc(100% + 2.8rem) !important;
-        display: flex !important;
-        overflow-x: auto !important;
+        margin: 2.5rem -1.4rem;
+        padding: 0 1.4rem 1.25rem;
+        width: calc(100% + 2.8rem);
+        display: flex;
+        overflow-x: auto;
         scroll-snap-type: x mandatory;
-        gap: 1.25rem !important;
+        gap: 1.25rem;
         -webkit-overflow-scrolling: touch;
     }
 
     .gallery-item {
-        flex: 0 0 85% !important; 
+        flex: 0 0 85%;
         scroll-snap-align: center;
     }
 
     .modal-content hr {
-        margin: 3.5rem 0 !important;
-        background: linear-gradient(90deg, transparent, #ffffff33, transparent) !important;
-        height: 1px !important;
-        border: none !important;
-        width: 100% !important;
+        margin: 3.5rem 0;
+        background: var(--divider-gradient);
+        height: 1px;
+        border: none;
+        width: 100%;
     }
 
     .modal-content h4 {
-        margin: 2rem auto !important;
+        margin: 2rem auto;
         padding: 0.6rem 0.75rem;
     }
 
     .modal-content h4.section-divider {
-        margin: 3.5rem 0 2rem 0 !important;
+        margin: 3.5rem 0 2rem 0;
     }
 
     .modal-content h4.section-divider span {
-        padding: 0.6rem 0.75rem !important;
+        padding: 0.6rem 0.75rem;
     }
 }
 
