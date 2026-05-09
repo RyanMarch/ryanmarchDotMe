@@ -566,6 +566,15 @@ margin-top: 3rem;
     transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.05s; /* Slight delay on fade out */
 }
 
+.modal-frame {
+    position: relative;
+    width: 100%;
+    max-width: 850px;
+    display: flex;
+    flex-direction: column;
+    z-index: 1001;
+}
+
 .modal-container {
     width: 100%;
     max-width: 850px;
@@ -614,10 +623,10 @@ margin-top: 3rem;
 }
 
 .modal-close {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    z-index: 1000;
+    position: fixed;
+    top: calc(5vh + 1.25rem); /* Align with modal top on desktop */
+    left: calc(50% + 425px - 1.25rem - 44px); /* Align with modal right on desktop */
+    z-index: 10005; /* Between modal and lightbox */
     background: rgba(14, 23, 36, 0.50);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
@@ -634,6 +643,19 @@ margin-top: 3rem;
                 opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
                 background 0.2s ease,
                 color 0.2s ease;
+}
+
+@media (max-width: 900px) {
+    .modal-close {
+        left: auto;
+        right: calc(50% - 425px + 1.25rem); /* Stay with box as it shrinks */
+    }
+}
+
+@media (max-width: 850px) {
+    .modal-close {
+        right: 1.25rem;
+    }
 }
 
 .modal-close-hidden {
@@ -1016,7 +1038,9 @@ margin-top: 3rem;
     background: var(--tag-blue-bg);
     padding: 0.4rem 0.8rem;
     border-radius: 100px;
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
     border: 1px solid var(--tag-blue-border);
     cursor: default;
     user-select: none;
@@ -1060,6 +1084,33 @@ margin-top: 3rem;
     opacity: 1;
     color: white;
     text-decoration: underline;
+}
+
+/* --- Placeholder Icon --- */
+.project-placeholder-icon {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 30px;
+    color: var(--accent-color);
+    opacity: 0.5;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.destination-card:hover .project-placeholder-icon {
+    opacity: 1;
+    transform: scale(1.1) rotate(5deg);
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
+    border-color: rgba(56, 189, 248, 0.3);
+}
+
+.project-placeholder-icon svg {
+    width: 50px;
+    height: 50px;
 }
 
 /* Tag Color Variants */
@@ -1622,11 +1673,12 @@ margin-top: 3rem;
         position: fixed !important;
         top: 1.5rem !important;
         right: 1.5rem !important;
+        left: auto !important;
         margin-bottom: 0 !important;
         background: rgba(30, 41, 59, 0.9) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         display: flex !important;
-        z-index: 10000 !important;
+        z-index: 10005 !important;
     }
 
     .modal-content {
