@@ -1,4 +1,9 @@
 
+const buildTagsHtml = (tags) => tags.map(({ label, color, priority }) => {
+    const cls = priority ? ` tag-priority-${priority}` : '';
+    return `<span class="tag tag-${color}${cls}">${label}</span>`;
+}).join('');
+
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('projects-grid');
     const modal = document.getElementById('project-modal');
@@ -12,16 +17,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const lightboxCaption = document.getElementById('lightbox-caption');
     const lightboxClose = document.querySelector('.lightbox-close');
 
+    let isMobile = window.matchMedia('(max-width: 700px)').matches;
+    window.addEventListener('resize', () => {
+        isMobile = window.matchMedia('(max-width: 700px)').matches;
+    }, { passive: true });
+
     // 1. Render Projects
     myProjects.forEach(project => {
         const card = document.createElement('div');
         const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
         card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
         
-        let tagsHtml = project.tags.map(tag => {
-            const priorityClass = tag.priority ? `tag-priority-${tag.priority}` : '';
-            return `<span class="tag tag-${tag.color} ${priorityClass}">${tag.label}</span>`;
-        }).join('');
+        const tagsHtml = buildTagsHtml(project.tags);
         
         let actionsHtml = '';
         if (project.hasExtendedContent) {
@@ -47,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let visualHtml = '';
         if (project.image) {
-            visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+            visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" loading="lazy" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
         } else {
             // Placeholder Icon / Symbol
             let iconSvg = '';
@@ -92,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(projectId) {
         const project = myProjects.find(p => p.id === projectId);
-        fetch(`/content/${projectId}.html?t=${Date.now()}`)
+        fetch(`/content/${projectId}.html`)
             .then(response => {
                 if (!response.ok) throw new Error("Content not found");
                 return response.text();
@@ -100,10 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(html => {
                 let tagsHtml = '<div id="modal-top"></div>';
                 if (project && project.tags) {
-                    tagsHtml = `<div class="tag-list modal-tags" id="modal-top">${project.tags.map(tag => {
-                        const priorityClass = tag.priority ? `tag-priority-${tag.priority}` : '';
-                        return `<span class="tag tag-${tag.color} ${priorityClass}">${tag.label}</span>`;
-                    }).join('')}</div>`;
+                    tagsHtml = `<div class="tag-list modal-tags" id="modal-top">${buildTagsHtml(project.tags)}</div>`;
                 }
                 // Create footer actions for the modal
                 let footerHtml = '';
@@ -117,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         footerHtml += `
                             <a href="${project.sourceUrl}" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
                                 <span>View More</span>
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
                             </a>
                         `;
                     }
@@ -252,22 +256,29 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxCaption.style.display = captionText ? 'block' : 'none';
         lightbox.classList.add('open');
         lightbox.setAttribute('aria-hidden', 'false');
+        lightbox.focus();
     }
 
     function closeLightbox() {
         lightbox.classList.remove('open');
         lightbox.setAttribute('aria-hidden', 'true');
+        
+        // Restore focus to the scrollable container to ensure immediate scroll response
+        if (isMobile) {
+            modal.focus();
+        } else {
+            modalContentArea.focus();
+        }
+
         setTimeout(() => {
             lightboxImg.src = '';
             lightboxCaption.textContent = '';
-        }, 500);
+        }, 400);
     }
 
     // Lightbox Event Listeners
     lightboxClose.addEventListener('click', closeLightbox);
-    lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeLightbox();
-    });
+    lightbox.addEventListener('click', closeLightbox);
 
     // Event Delegation for clicks in modal
     modalContentArea.addEventListener('click', (e) => {
@@ -315,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // On mobile, the modal overlay scrolls. On desktop, the content area scrolls.
         // We must ignore the non-scrolling element to prevent 'lastScrollTop' clashing.
-        const isMobile = window.matchMedia("(max-width: 700px)").matches;
         if (isMobile && target !== modal) return;
         if (!isMobile && target !== modalContentArea) return;
 
@@ -383,16 +393,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial load check
+    // Initial load check — double-rAF guarantees DOM is painted before opening
     if (isLocal) {
         const urlParams = new URLSearchParams(window.location.search);
         const pId = urlParams.get('project');
         if (pId) {
-            setTimeout(() => openModal(pId), 50);
+            requestAnimationFrame(() => requestAnimationFrame(() => openModal(pId)));
         }
     } else {
         if (window.initialModalProject) {
-            setTimeout(() => openModal(window.initialModalProject), 50);
+            requestAnimationFrame(() => requestAnimationFrame(() => openModal(window.initialModalProject)));
         }
     }
 });
