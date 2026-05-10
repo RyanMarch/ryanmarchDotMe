@@ -207,8 +207,10 @@ margin-top: 3rem;
     z-index: 2;
 }
 
-.glimmer-card:hover::before {
-    opacity: 1;
+@media (min-width: 1025px) {
+    .glimmer-card:hover::before {
+        opacity: 1;
+    }
 }
 
 /* --- Top Row --- */
@@ -267,17 +269,19 @@ margin-top: 3rem;
     transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.top-row .profile-btn:hover {
-    background-color: rgba(255, 255, 255, 0.10); /* Much stronger fill */
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.3);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-    transform: translateY(-2px) translateZ(0);
-}
+@media (min-width: 1025px) {
+    .top-row .profile-btn:hover {
+        background-color: rgba(255, 255, 255, 0.10); /* Much stronger fill */
+        color: #fff;
+        border-color: rgba(255, 255, 255, 0.3);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        transform: translateY(-2px) translateZ(0);
+    }
 
-.top-row .profile-btn:hover .btn-icon {
-    opacity: 1;
-    transform: scale(1.1);
+    .top-row .profile-btn:hover .btn-icon {
+        opacity: 1;
+        transform: scale(1.1);
+    }
 }
 
 .bio-avatar {
@@ -476,14 +480,16 @@ margin-top: 3rem;
     scale: 0.75;
 }
 
-.destination-card:hover .destination-image-standalone,
-.destination-card:hover .destination-icon {
-    transform: scale(1.05);
-}
+@media (min-width: 1025px) {
+    .destination-card:hover .destination-image-standalone,
+    .destination-card:hover .destination-icon {
+        transform: scale(1.05);
+    }
 
-/* Specific override for the poster preview to handle the 3D swing */
-.destination-card:hover .poster-preview-img {
-    transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
+    /* Specific override for the poster preview to handle the 3D swing */
+    .destination-card:hover .poster-preview-img {
+        transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
+    }
 }
 
 /* Project description typography */
@@ -651,10 +657,12 @@ margin-top: 3rem;
     pointer-events: none;
 }
 
-.modal-close:not(.modal-close-hidden):hover {
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
-    transform: scale(1.05);
+@media (min-width: 1025px) {
+    .modal-close:not(.modal-close-hidden):hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        transform: scale(1.05);
+    }
 }
 
 .modal-close svg {
@@ -782,7 +790,7 @@ margin-top: 3rem;
 }
 
 /* Hover focus effect: dim others (Desktop only) */
-@media (hover: hover) {
+@media (min-width: 1025px) {
     .modal-content .nav-links:hover a {
         opacity: 0.35;
     }
@@ -882,8 +890,8 @@ margin-top: 3rem;
 }
 
 /* --- Modal Footer Actions --- */
-.modal-footer-divider {
-    margin: 4rem 0 2rem;
+.modal-content hr.modal-footer-divider {
+    margin: 4rem 0 3rem;
 }
 
 .modal-footer-actions {
@@ -895,22 +903,7 @@ margin-top: 3rem;
     width: 100%;
 }
 
-.modal-full-btn {
-    width: 280px;
-    max-width: 100%;
-    justify-content: center;
-    padding: 0.85rem 1.5rem;
-    font-size: 0.95rem;
-    border-radius: 14px;
-}
 
-.modal-full-btn span {
-    transform: none;
-}
-
-.modal-full-btn:hover span {
-    transform: translateX(-10px);
-}
 
 /* --- Project Gallery (CSS Scroll Snap) --- */
 .project-gallery {
@@ -1040,10 +1033,12 @@ margin-top: 3rem;
 }
 
 
-.project-link:hover {
-    opacity: 1;
-    color: white;
-    text-decoration: underline;
+@media (min-width: 1025px) {
+    .project-link:hover {
+        opacity: 1;
+        color: white;
+        text-decoration: underline;
+    }
 }
 
 /* --- Placeholder Icon --- */
@@ -1061,11 +1056,13 @@ margin-top: 3rem;
     transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.destination-card:hover .project-placeholder-icon {
-    opacity: 1;
-    transform: scale(1.1) rotate(5deg);
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
-    border-color: rgba(56, 189, 248, 0.3);
+@media (min-width: 1025px) {
+    .destination-card:hover .project-placeholder-icon {
+        opacity: 1;
+        transform: scale(1.1) rotate(5deg);
+        background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
+        border-color: rgba(56, 189, 248, 0.3);
+    }
 }
 
 .project-placeholder-icon svg {
@@ -1189,6 +1186,23 @@ margin-top: 3rem;
     transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
+.project-btn span {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.project-btn .btn-icon {
+    position: absolute;
+    right: 1.2rem;
+    opacity: 0;
+    transform: translateX(10px);
+    transition: 
+        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), 
+        opacity 0.3s ease;
+    pointer-events: none;
+}
+
 /* Stable Gradient Overlay */
 .project-btn::before {
     content: '';
@@ -1200,57 +1214,24 @@ margin-top: 3rem;
     pointer-events: none;
 }
 
-.project-btn:hover {
-    background-color: #e2e8f0;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-}
+@media (min-width: 1025px) {
+    .project-btn:hover {
+        background-color: #e2e8f0;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
 
-.project-btn:hover::before {
-    opacity: 1; /* Brighten the sheen on hover */
-}
+    .project-btn:hover::before {
+        opacity: 1; /* Brighten the sheen on hover */
+    }
 
-.project-btn span {
-    position: relative;
-    z-index: 2;
-    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
-    will-change: transform;
-}
+    .project-btn:hover span {
+        transform: translateX(-10px);
+    }
 
-.project-btn:hover span {
-    transform: translateX(-12px);
-}
-
-.project-btn .btn-icon {
-    width: 1.1rem;
-    height: 1.1rem;
-    position: absolute;
-    right: 1.2rem;
-    z-index: 2;
-    opacity: 0;
-    transform: translateX(-20px);
-    /* Smooth Quintic easing (no overshoot) */
-    transition: 
-        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-    transition-delay: 0.04s; /* Even more subtle stagger */
-    will-change: transform, opacity;
-}
-
-.project-btn:hover .btn-icon {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* Snappier exit animation when mouse leaves */
-.project-btn:not(:hover) .btn-icon {
-    transition: 
-        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        opacity 0.2s ease;
-    transition-delay: 0s;
-}
-
-.project-btn:not(:hover) span {
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .project-btn:hover .btn-icon {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* --- .btn-secondary variant (must come after .project-btn to win cascade) --- */
@@ -1265,10 +1246,21 @@ margin-top: 3rem;
     display: none;
 }
 
-.project-btn.btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: white;
+@media (min-width: 1025px) {
+    .project-btn.btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+}
+
+.modal-full-btn {
+    width: 280px;
+    max-width: 100%;
+    justify-content: center;
+    padding: 0.85rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
 }
 
 .modal-back-to-top-btn {
@@ -1549,11 +1541,6 @@ margin-top: 3rem;
         display: none; /* Icon takes too much space on half-width mobile buttons */
     }
 
-    .destination-card.size-tall .project-btn:hover span,
-    .destination-card.size-medium .project-btn:hover span,
-    .destination-card.size-small .project-btn:hover span {
-        transform: none;
-    }
 
     .project-link {
         position: static;
@@ -1766,7 +1753,8 @@ margin-top: 3rem;
     padding: 2rem;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
 }
 
 @media (max-width: 700px) {
@@ -1796,7 +1784,7 @@ margin-top: 3rem;
     justify-content: center;
     gap: 1.5rem;
     transform: scale(0.9) translateY(20px);
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .lightbox-overlay.open .lightbox-container {
@@ -1810,7 +1798,7 @@ margin-top: 3rem;
     border-radius: 12px;
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    cursor: zoom-out;
+    cursor: pointer;
 }
 
 .lightbox-close {
@@ -1833,10 +1821,12 @@ margin-top: 3rem;
     transition: all 0.3s ease;
 }
 
-.lightbox-close:hover {
-    background: rgba(255, 255, 255, 0.15);
-    transform: rotate(90deg) scale(1.1);
-    border-color: rgba(255, 255, 255, 0.4);
+@media (min-width: 1025px) {
+    .lightbox-close:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: rotate(90deg) scale(1.1);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
 }
 
 .lightbox-close svg {
@@ -1861,8 +1851,10 @@ margin-top: 3rem;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
 }
 
-.modal-content img:hover,
-.gallery-item img:hover {
-    /* Removed hover-scale effect as requested */
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+@media (min-width: 1025px) {
+    .modal-content img:hover,
+    .gallery-item img:hover {
+        /* Removed hover-scale effect as requested */
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
 }

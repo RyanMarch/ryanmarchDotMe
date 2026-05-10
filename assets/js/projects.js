@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         footerHtml += `
                             <a href="${project.sourceUrl}" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
                                 <span>View More</span>
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
                             </a>
                         `;
                     }
@@ -256,22 +256,29 @@ document.addEventListener('DOMContentLoaded', () => {
         lightboxCaption.style.display = captionText ? 'block' : 'none';
         lightbox.classList.add('open');
         lightbox.setAttribute('aria-hidden', 'false');
+        lightbox.focus();
     }
 
     function closeLightbox() {
         lightbox.classList.remove('open');
         lightbox.setAttribute('aria-hidden', 'true');
+        
+        // Restore focus to the scrollable container to ensure immediate scroll response
+        if (isMobile) {
+            modal.focus();
+        } else {
+            modalContentArea.focus();
+        }
+
         setTimeout(() => {
             lightboxImg.src = '';
             lightboxCaption.textContent = '';
-        }, 500);
+        }, 400);
     }
 
     // Lightbox Event Listeners
     lightboxClose.addEventListener('click', closeLightbox);
-    lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeLightbox();
-    });
+    lightbox.addEventListener('click', closeLightbox);
 
     // Event Delegation for clicks in modal
     modalContentArea.addEventListener('click', (e) => {
