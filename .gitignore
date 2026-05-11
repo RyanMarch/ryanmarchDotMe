@@ -7,6 +7,9 @@
 ehthumbs.db
 Thumbs.db
 
+# Dev-only notes (keep local, don't deploy)
+dev/
+
 # Code workspace files
 *.code-workspace
 
