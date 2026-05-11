@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentPress Data Hub Diagram</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --accent-color: #38bdf8;
+            --tag-blue: #38bdf8;
+            --tag-blue-bg: rgba(56, 189, 248, 0.15);
+            --tag-orange: #fb923c;
+            --tag-green: #4ade80;
+            --font-main: 'Outfit', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            display: flex;
+            align-items: center; /* Center vertically */
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .hub-diagram-container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 1rem; /* No top/bottom padding */
+            position: relative;
+        }
+
+        .hub-diagram {
+            display: grid;
+            grid-template-columns: 130px auto 240px;
+            justify-content: center;
+            gap: 3rem;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        .diagram-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 2;
+        }
+
+        .sources-column {
+            align-items: flex-start;
+        }
+
+        .modules-column {
+            align-items: flex-end;
+        }
+
+        .diagram-node {
+            padding: 0.4rem 0.75rem; /* Balanced padding */
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            backdrop-filter: blur(12px);
+            cursor: default;
+            width: 100%;
+        }
+
+        .sources-column .diagram-node {
+            width: fit-content; /* Tight wrap around logos */
+        }
+
+        .node-icon-wrapper {
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sources-column .node-icon-wrapper {
+            width: 75px; /* Large readable space for brand logos */
+        }
+
+        .modules-column .node-icon-wrapper {
+            width: 28px; /* Compact space for product icons */
+        }
+
+        .node-icon {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .node-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .sources-column .diagram-node {
+            flex-direction: row;
+        }
+
+        .modules-column .diagram-node {
+            flex-direction: row-reverse;
+        }
+
+        .modules-column .node-icon-wrapper {
+            justify-content: center;
+        }
+
+        .hub-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 3;
+        }
+
+        .hub-core-outer {
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .hub-core-inner {
+            width: 180px;
+            height: 180px;
+            background: rgba(30, 41, 59, 0.9);
+            border: 2px solid rgba(56, 189, 248, 0.4);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 60px rgba(56, 189, 248, 0.25);
+        }
+
+        .hub-core-inner img {
+            width: 80%;
+            height: auto;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+        }
+
+        .hub-label {
+            margin-top: 2rem;
+            font-weight: 800;
+            color: var(--accent-color);
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-size: 1.2rem;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+        }
+
+        /* SVG Connections */
+        .connections-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .connection-path {
+            fill: none;
+            stroke: var(--accent-color);
+            stroke-width: 1.5;
+            stroke-dasharray: 4 6;
+            opacity: 0.35;
+            transition: opacity 0.5s ease;
+        }
+
+        .data-particle {
+            fill: var(--accent-color);
+            filter: blur(1px);
+        }
+
+        .data-particle.reverse {
+            fill: #a855f7; /* Brand Purple */
+        }
+
+        /* Animation for particles */
+        @keyframes flow {
+            from { offset-distance: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            to { offset-distance: 100%; opacity: 0; }
+        }
+
+
+        .background-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle at center, rgba(56, 189, 248, 0.05) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background-glow"></div>
+
+    <div class="hub-diagram-container">
+        <div class="hub-diagram">
+            <div class="diagram-column sources-column">
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/1-rentcafe.png" alt="" style="filter: brightness(0) invert(1);"></div>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/2-entrata.png" alt=""></div>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/realpage-logo.svg" alt=""></div>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/4-funnel.png" alt=""></div>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/resman-logo.png" alt=""></div>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/3-appfolio.png" alt="" style="filter: brightness(0) invert(1);"></div>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/mri-logo.png" alt=""></div>
+                </div>
+            </div>
+
+            <div class="hub-center">
+                <div class="hub-core-outer">
+                    <div class="hub-core-inner">
+                        <img src="../../assets/img/rentpress-logo.svg" alt="RentPress">
+                    </div>
+                </div>
+            </div>
+
+            <div class="diagram-column modules-column">
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="https://ps.w.org/rentpress-for-websites/assets/icon-256x256.png" alt=""></div>
+                    <span class="node-label">RentPress for Websites</span>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper">
+                        <svg class="node-icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    </div>
+                    <span class="node-label">Email Automation</span>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper">
+                        <img class="node-icon" src="../amenities-manager/images/amenities-icon.png" alt="">
+                    </div>
+                    <span class="node-label">Amenities Manager</span>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper"><img class="node-icon" src="../../assets/img/facebook-logo.svg" alt=""></div>
+                    <span class="node-label">Facebook Audiences</span>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper">
+                        <svg class="node-icon" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <span class="node-label">Google Search and SEO</span>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper">
+                        <img class="node-icon" src="../rentpress-lead-sync/images/lead-sync-icon.png" alt="">
+                    </div>
+                    <span class="node-label">Lead Sync</span>
+                </div>
+                <div class="diagram-node">
+                    <div class="node-icon-wrapper">
+                        <svg class="node-icon" viewBox="0 0 24 24" fill="none" stroke="var(--accent-color)" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <span class="node-label">Local Listings</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- We will use a script to draw actual paths between nodes and the hub -->
+    <script>
+        function createConnections() {
+            const container = document.querySelector('.hub-diagram-container');
+            const hub = document.querySelector('.hub-core-inner');
+            const nodes = document.querySelectorAll('.diagram-node');
+            
+            // Create SVG element
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("class", "connections-layer");
+            container.appendChild(svg);
+
+            const hubRect = hub.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const hubX = (hubRect.left + hubRect.width / 2) - containerRect.left;
+            const hubY = (hubRect.top + hubRect.height / 2) - containerRect.top;
+
+            nodes.forEach((node, index) => {
+                const nodeRect = node.getBoundingClientRect();
+                const isLeft = node.closest('.sources-column');
+                
+                const nodeX = isLeft 
+                    ? (nodeRect.right - containerRect.left) 
+                    : (nodeRect.left - containerRect.left);
+                const nodeY = (nodeRect.top + nodeRect.height / 2) - containerRect.top;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("class", "connection-path");
+                
+                // Curve towards the hub
+                const cp1X = isLeft ? nodeX + 100 : nodeX - 100;
+                const d = `M ${nodeX} ${nodeY} C ${cp1X} ${nodeY}, ${hubX - (isLeft ? 100 : -100)} ${hubY}, ${hubX} ${hubY}`;
+                
+                path.setAttribute("d", d);
+                svg.appendChild(path);
+
+                // Create one particle in each direction for a balanced bidirectional stream
+                createParticle(svg, d, false); // Forward flow
+                createParticle(svg, d, true);  // Reverse flow
+            });
+        }
+
+        function createParticle(svg, pathD, reverse) {
+            const particle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            particle.setAttribute("r", "1.5");
+            particle.setAttribute("class", "data-particle" + (reverse ? " reverse" : ""));
+            svg.appendChild(particle);
+
+            // Use a negative delay to start the animation at a random point in its cycle
+            const randomDelay = Math.random() * -4;
+
+            // Animate along path - slowed down to 4s to reduce noise
+            particle.style.offsetPath = `path('${pathD}')`;
+            if (reverse) {
+                particle.style.animation = `flow 4s infinite linear ${randomDelay}s reverse`;
+            } else {
+                particle.style.animation = `flow 4s infinite linear ${randomDelay}s`;
+            }
+        }
+
+        window.addEventListener('load', createConnections);
+        window.addEventListener('resize', () => {
+            document.querySelector('.connections-layer').remove();
+            createConnections();
+        });
+    </script>
+</body>
+</html>
