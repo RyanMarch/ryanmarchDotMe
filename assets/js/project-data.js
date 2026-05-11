@@ -109,7 +109,7 @@ const myProjects = [
     {
         id: "rentpress-data-hub",
         title: "RentPress Data Hub",
-        subtitle: "Server-side component connecting RentPress with third-party property management APIs.",
+        subtitle: "The centralized data engine bridging the gap between property management APIs and modern marketing platforms.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -118,16 +118,16 @@ const myProjects = [
         featured: false,
         size: "large",
         image: "",
-        symbol: "data",
+        symbol: "hub",
         imageClass: "destination-icon",
         actionText: "Learn More",
         actionUrl: "",
-        hasExtendedContent: false
+        hasExtendedContent: true
     },
     {
         id: "rentpress-email",
         title: "RentPress Email",
-        subtitle: "Connects property management CRMs to deliver leads and manage email campaigns.",
+        subtitle: "Automated lifecycle marketing that transforms property management data into personalized resident journeys.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -140,6 +140,6 @@ const myProjects = [
         imageClass: "destination-icon",
         actionText: "Learn More",
         actionUrl: "",
-        hasExtendedContent: false
+        hasExtendedContent: true
     }
 ];
