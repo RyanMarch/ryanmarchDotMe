@@ -1,12 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" class="dark" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <script>
+        // Theme initialization
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            // If no theme is saved, default to 'dark' (as requested)
+            // If theme is 'system', we leave data-theme unset to let CSS media queries take over
+            const theme = savedTheme || 'dark'; 
+            
+            if (theme === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            document.documentElement.className = theme;
+        })();
+
         // Detection for deep-linked project pages
         const pathParts = window.location.pathname.split('/').filter(Boolean);
         if (pathParts.length > 0) {
-            // This works for /project/project-id/ by taking the last part
             window.initialModalProject = pathParts[pathParts.length - 1];
         }
     </script>
@@ -19,6 +33,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <meta name="color-scheme" content="dark">
     <link rel="stylesheet" href="/style.css?v=2.1">
+    <link rel="me" href="https://mastodon.social/@ryanmarch">
 </head>
 <body>
     <div class="background-container">
@@ -83,11 +98,60 @@
 
 
 
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+        <span id="theme-status" class="theme-status"></span>
+    </button>
+
     <!-- Data and Rendering Script -->
     <script src="/assets/js/project-data.js"></script>
     <script src="/assets/js/projects.js"></script>
     
     <script>
+        // Theme Toggle Logic
+        let themeStatusTimeout;
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeStatus = document.getElementById('theme-status');
+
+        const showThemeStatus = (text) => {
+            themeStatus.textContent = text;
+            themeStatus.classList.add('visible');
+            clearTimeout(themeStatusTimeout);
+            themeStatusTimeout = setTimeout(() => {
+                themeStatus.classList.remove('visible');
+            }, 2000);
+        };
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            let newTheme;
+            let statusText;
+            
+            // Cycle: Dark -> Light -> System -> Dark
+            if (currentTheme === 'dark') {
+                newTheme = 'light';
+                statusText = 'Light Theme';
+            } else if (currentTheme === 'light') {
+                newTheme = 'system';
+                statusText = 'System Theme';
+            } else {
+                newTheme = 'dark';
+                statusText = 'Dark Theme';
+            }
+            
+            if (newTheme === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+            
+            document.documentElement.className = newTheme;
+            localStorage.setItem('theme', newTheme);
+            showThemeStatus(statusText);
+        });
+
         // Glimmering border effect - only on desktop
         if (window.matchMedia("(min-width: 951px)").matches) {
             let mouseX = 0;
@@ -96,8 +160,6 @@
             const updateGlimmers = () => {
                 document.querySelectorAll('.glimmer-card').forEach(card => {
                     const rect = card.getBoundingClientRect();
-                    // The sticky positioning of ::before handles internal scroll automatically,
-                    // so we just need the coordinates relative to the visible card frame.
                     card.style.setProperty('--mouse-x', `${mouseX - rect.left}px`);
                     card.style.setProperty('--mouse-y', `${mouseY - rect.top}px`);
                 });
@@ -109,8 +171,6 @@
                 updateGlimmers();
             });
 
-            // Also update on scroll to keep the shimmer fixed to the mouse position 
-            // even if the content scrolls underneath it.
             document.addEventListener('scroll', updateGlimmers, { capture: true, passive: true });
         }
     </script>
