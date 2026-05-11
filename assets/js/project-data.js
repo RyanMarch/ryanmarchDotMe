@@ -135,7 +135,7 @@ const myProjects = [
         ],
         featured: false,
         size: "medium",
-        image: "",
+        image: "content/rentpress-email/images/rentpress-email-icon.png",
         symbol: "email",
         imageClass: "destination-icon",
         actionText: "Learn More",
