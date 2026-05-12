@@ -20,7 +20,8 @@
 
         // Detection for deep-linked project pages
         const pathParts = window.location.pathname.split('/').filter(Boolean);
-        if (pathParts.length > 0) {
+        // Only trigger if the path follows the /project/ID pattern
+        if (pathParts.length >= 2 && pathParts[0] === 'project') {
             window.initialModalProject = pathParts[pathParts.length - 1];
         }
     </script>
