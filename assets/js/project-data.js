@@ -141,5 +141,23 @@ const myProjects = [
         actionText: "Learn More",
         actionUrl: "",
         hasExtendedContent: true
+    },
+    {
+        id: "icon-badge-studio",
+        title: "Icon Badge Studio",
+        subtitle: "Generate custom icons with badges and backgrounds.",
+        tags: [
+            { label: "Completed", color: "green" },
+            { label: "Experimentation", color: "pink" },
+            { label: "Project", color: "gray" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "assets/img/icon-badge-studio.png",
+        imageClass: "destination-icon",
+        actionText: "Launch Icon Badge Studio",
+        actionUrl: "https://iconbadgestudio.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/iconBadgeStudio",
+        hasExtendedContent: false
     }
 ];

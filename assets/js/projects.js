@@ -34,10 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (project.hasExtendedContent) {
             // ONLY Read More button if extended content exists
             actionsHtml = `
-                <button class="project-btn read-more-btn" data-project-id="${project.id}">
+                <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}">
                     <span>Read More</span>
                     <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                </button>
+                </a>
             `;
         } else if (project.actionUrl) {
             actionsHtml = `
@@ -102,6 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(projectId) {
         const project = myProjects.find(p => p.id === projectId);
+        if (!project) return; // Don't attempt to open if project doesn't exist
+
+        // Update metadata for SEO
+        document.title = `${project.title} | Ryan March`;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', project.subtitle || `Detailed view of the ${project.title} project.`);
+        }
+
         fetch(`/content/${projectId}.html`)
             .then(response => {
                 if (!response.ok) throw new Error("Content not found");
@@ -222,6 +231,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeModal() {
         if (!modal.classList.contains('open')) return;
+
+        // Reset metadata for SEO
+        document.title = "Ryan March | Product & Technology";
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) {
+            metaDesc.setAttribute('content', "Personal landing page for Ryan March, a Product Manager and creative technologist.");
+        }
 
         // Instant URL update for better UX
         if (isLocal) {
@@ -388,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             const pathParts = window.location.pathname.split('/').filter(p => p);
-            if (pathParts.length > 0) {
+            if (pathParts.length >= 2 && pathParts[0] === 'project') {
                 openModal(pathParts[pathParts.length - 1]);
             } else {
                 closeModal();
