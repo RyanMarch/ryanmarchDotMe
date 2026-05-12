@@ -792,6 +792,46 @@ margin-top: 3rem;
     pointer-events: auto;
 }
 
+/* Standalone Page Styles */
+.standalone-page .modal-overlay {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative; /* Use relative instead of fixed for the main page layout */
+    padding: 0;
+    min-height: 100vh;
+    backdrop-filter: none; /* Already on the background */
+    background: transparent;
+}
+
+.standalone-page .modal-frame {
+    opacity: 1; /* Force visibility */
+    transform: none; /* Reset animation transform */
+    max-width: 900px;
+    width: 100%;
+    margin: 2rem auto;
+    height: auto; /* Allow content to dictate height */
+}
+
+.standalone-page .modal-container {
+    opacity: 1;
+    transform: none; /* Force reset of the translate/scale animation */
+    height: auto;
+    max-height: none;
+    border: 1px solid var(--card-border);
+}
+
+.standalone-page .modal-content {
+    opacity: 1;
+}
+
+.standalone-page .modal-close {
+    position: fixed;
+    top: 2rem;
+    right: 2rem;
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .modal-overlay.closing {
     opacity: 0;
     pointer-events: none;
