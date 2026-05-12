@@ -1,4 +1,38 @@
-<h2 class="project-title">RentPress for Websites</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentPress for Apartments | Ryan March</title>
+    <meta name="description" content="A comprehensive property management and marketing solution to build the ultimate online leasing office.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=2.4">
+</head>
+<body class="standalone-page">
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div id="project-modal" class="modal-overlay" aria-hidden="false">
+            <div class="modal-frame">
+                <div class="modal-container glimmer-card">
+                    <div class="modal-content" id="modal-content-area">
+                        <div class="tag-list modal-tags">
+                            
+                        </div>
+                        <h2 class="project-title">RentPress for Websites</h2>
 <p class="project-subtitle">Apartment Marketing Platform</p>
 <p class="project-description">Product Manager</p>
 
@@ -96,3 +130,28 @@
         <div class="gallery-caption">Low-Code Content Implementation</div>
     </div>
 </div>
+                        <div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="modal-close" aria-label="Close modal" onclick="if(document.referrer.includes(window.location.hostname)){history.back();return false;}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </a>
+    </main>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
+            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>

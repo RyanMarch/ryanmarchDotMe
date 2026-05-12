@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RentPress Lead Sync | Ryan March</title>
+    <meta name="description" content="Send and receive leads without writing code.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=2.4">
+</head>
+<body class="standalone-page">
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div id="project-modal" class="modal-overlay" aria-hidden="false">
+            <div class="modal-frame">
+                <div class="modal-container glimmer-card">
+                    <div class="modal-content" id="modal-content-area">
+                        <div class="tag-list modal-tags">
+                            
+                        </div>
+                        <h2 class="project-title">RentPress Lead Sync</h2>
+<p class="project-subtitle">Lead Synchronization Add-on</p>
+<p class="project-description">Product Manager</p>
+
+<h4 id="the-product" class="section-divider"><span>The Product</span></h4>
+<p>RentPress Lead Sync Add-on bridges the gap between a property's website and their leasing office. Experience seamless lead delivery at the moment it matters most: getting that lead into the CRM quickly and accurately is what drives leases.</p>
+<p>This add-on allows marketers to use the power and flexibility of popular form-building tools while ensuring every submission flows seamlessly into industry-standard CRMs without requiring custom API development for every site.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <div class="gallery-image-container">
+        <img src="content/rentpress-lead-sync/images/lead-sync-diagram.webp" alt="RentPress Lead Sync Integration" loading="lazy">
+        </div>
+        <div class="gallery-caption">Automated Lead Flow From Website to CRM</div>
+    </div>
+</div>
+
+<h4 id="key-features" class="section-divider"><span>Key Features</span></h4>
+<ul>
+    <li><strong>Broad CRM Support:</strong> Direct integrations with the most popular multifamily CRMs, including RentCafe, Entrata, Knock, Funnel, AppFolio, and Anyone Home.</li>
+    <li><strong>Flexible Field Mapping:</strong> A custom interface to map any form field to CRM-specific attributes, including custom lead sources and move-in dates.</li>
+    <li><strong>Multi-Destination Routing:</strong> Send a single form submission to multiple CRMs or notification services simultaneously.</li>
+    <li><strong>Advanced Troubleshooting:</strong> Built-in API response logging and submission tracking to ensure no lead is ever lost.</li>
+    <li><strong>Dynamic Data Population:</strong> Automatically pass property, floor plan, and unit-specific data from RentPress templates into hidden form fields for better attribution.</li>
+</ul>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <div class="gallery-image-container">
+            <img src="content/rentpress-lead-sync/images/lead-sync-banner.png" alt="RentPress Lead Sync Banner" loading="lazy">
+        </div>
+        <div class="gallery-caption">Marketing Banner</div>
+    </div>
+</div>
+
+<h4 id="my-role" class="section-divider"><span>My Role & Impact</span></h4>
+<p>As the Product Manager, I defined the roadmap for our integrations ecosystem. My focus was on reviewing the details of multifamily APIs and turning them into a user-friendly interface that anybody could easily configure.</p>
+<br>
+<p>My key contributions included:</p>
+<ul>
+    <li><strong>API Strategy:</strong> Researched and documented the technical requirements for each CRM partner, managing the authentication and data mapping logic for multiple enterprise-scale APIs.</li>
+    <li><strong>Product Development:</strong> Led the engineering team through the development of the mapping UI, ensuring it was flexible enough for power users and simple enough for standard property setups.</li>
+    <li><strong>Conversion Optimization:</strong> Implemented the "API Response" logging feature, allowing clients to see why a lead might have been rejected by a CRM (e.g., missing required fields), which significantly reduced "lost lead" support tickets.</li>
+    <li><strong>Documentation & Enablement:</strong> Authored the comprehensive support documentation and training materials to empower our operations team to deploy lead sync across hundreds of sites.</li>
+</ul>
+
+<h4 id="screenshots" class="section-divider"><span>Settings Screenshots</span></h4>
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img src="content/rentpress-lead-sync/images/mapping-settings.png" alt="RentPress Lead Sync Mapping Settings" loading="lazy">
+        <div class="gallery-caption">Customizable Field Mapping Interface</div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/rentpress-lead-sync/images/multi-destination.png" alt="Multi-Destination Support" loading="lazy">
+        <div class="gallery-caption">Simultaneous Lead Delivery to Multiple CRMs</div>
+    </div>
+</div>
+
+                        <div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="modal-close" aria-label="Close modal" onclick="if(document.referrer.includes(window.location.hostname)){history.back();return false;}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </a>
+    </main>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
+            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>
