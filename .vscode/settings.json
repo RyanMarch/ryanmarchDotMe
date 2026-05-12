@@ -1,0 +1,15 @@
+{
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "**/*.code-search": true,
+        "project/": true
+    },
+    "files.exclude": {
+        "project/": true,
+        "wrangler.jsonc": true,
+        "package.json": true,
+        "sitemap.xml": true,
+        "robots.txt": true
+    }
+}
