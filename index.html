@@ -20,7 +20,8 @@
 
         // Detection for deep-linked project pages
         const pathParts = window.location.pathname.split('/').filter(Boolean);
-        if (pathParts.length > 0) {
+        // Only trigger if the path follows the /project/ID pattern
+        if (pathParts.length >= 2 && pathParts[0] === 'project') {
             window.initialModalProject = pathParts[pathParts.length - 1];
         }
     </script>
@@ -32,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <meta name="color-scheme" content="light dark">
-    <link rel="stylesheet" href="/style.css?v=2.3">
+    <link rel="stylesheet" href="/style.css?v=2.4">
     <link rel="me" href="https://mastodon.social/@ryanmarch">
 </head>
 <body>
@@ -67,7 +68,7 @@
 
         </div>
 
-        <!-- The grid is now injected dynamically by JS -->
+        <!-- The grid is injected dynamically by JS -->
         <div id="projects-grid" class="destinations-grid"></div>
 
     </main>
@@ -96,8 +97,6 @@
         </div>
     </div>
 
-
-
     <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
         <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
         <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -116,6 +115,7 @@
         const themeStatus = document.getElementById('theme-status');
 
         const showThemeStatus = (text) => {
+            if (!themeStatus) return;
             themeStatus.textContent = text;
             themeStatus.classList.add('visible');
             clearTimeout(themeStatusTimeout);
@@ -124,33 +124,33 @@
             }, 2000);
         };
 
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            let newTheme;
-            let statusText;
-            
-            // Cycle: Dark -> Light -> System -> Dark
-            if (currentTheme === 'dark') {
-                newTheme = 'light';
-                statusText = 'Light Theme';
-            } else if (currentTheme === 'light') {
-                newTheme = 'system';
-                statusText = 'System Theme';
-            } else {
-                newTheme = 'dark';
-                statusText = 'Dark Theme';
-            }
-            
-            if (newTheme === 'system') {
-                document.documentElement.removeAttribute('data-theme');
-            } else {
-                document.documentElement.setAttribute('data-theme', newTheme);
-            }
-            
-            document.documentElement.className = newTheme;
-            localStorage.setItem('theme', newTheme);
-            showThemeStatus(statusText);
-        });
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = localStorage.getItem('theme') || 'dark';
+                let newTheme;
+                let statusText;
+                
+                if (currentTheme === 'dark') {
+                    newTheme = 'light';
+                    statusText = 'Light Theme';
+                } else if (currentTheme === 'light') {
+                    newTheme = 'system';
+                    statusText = 'System Theme';
+                } else {
+                    newTheme = 'dark';
+                    statusText = 'Dark Theme';
+                }
+                
+                if (newTheme === 'system') {
+                    document.documentElement.removeAttribute('data-theme');
+                } else {
+                    document.documentElement.setAttribute('data-theme', newTheme);
+                }
+                
+                localStorage.setItem('theme', newTheme);
+                showThemeStatus(statusText);
+            });
+        }
 
         // Glimmering border effect - only on desktop
         if (window.matchMedia("(min-width: 951px)").matches) {
