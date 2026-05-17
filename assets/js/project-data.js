@@ -143,21 +143,232 @@ const myProjects = [
         hasExtendedContent: true
     },
     {
-        id: "icon-badge-studio",
-        title: "Icon Badge Studio",
-        subtitle: "Generate custom icons with badges and backgrounds.",
+        id: "icon-studio",
+        title: "Icon Studio",
+        subtitle: "A premium, web-based design toolkit for crafting custom app icons with rich gradients, skeuomorphic frames, and integrated badges.",
         tags: [
-            { label: "Completed", color: "green" },
-            { label: "Experimentation", color: "pink" },
+            { label: "Recently Updated", color: "gold" },
+            { label: "Design Tool", color: "purple" },
             { label: "Project", color: "gray" }
         ],
         featured: false,
-        size: "medium",
-        image: "assets/img/icon-badge-studio.png",
+        size: "large",
+        image: "assets/img/icon-studio-multi-theme-framed.png",
         imageClass: "destination-icon",
-        actionText: "Launch Icon Badge Studio",
-        actionUrl: "https://iconbadgestudio.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/iconBadgeStudio",
-        hasExtendedContent: false
+        actionText: "Launch Icon Studio",
+        actionUrl: "https://iconstudio.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/iconStudio",
+        hasExtendedContent: true
     }
+    // ,
+    // {
+    //     id: "jeanie-end-theme",
+    //     title: "Jeanie - 'End Theme'",
+    //     subtitle: "Music Video",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "night-riots-interview",
+    //     title: "Night Riots Interview",
+    //     subtitle: "Interview & Podcast",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "breaking-winter",
+    //     title: "Breaking Winter",
+    //     subtitle: "Original Composition",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "the-danger-ranger",
+    //     title: "The Danger Ranger",
+    //     subtitle: "A Foul-Mouthed Truck Review",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "taylor-swift-analysis-hour",
+    //     title: "Taylor Swift Analysis Hour",
+    //     subtitle: "Podcast",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "sbut-feel-right",
+    //     title: "Sbut - 'Feel Right'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "forecast-weather",
+    //     title: "Forecast Weather",
+    //     subtitle: "Windows App",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "nonstop-megakill-deathblood-slaughterfest-facemelter-20-two-point-oh",
+    //     title: "Nonstop Megakill Deathblood Slaughterfest Facemelter 2.0 (TWO POINT OH)",
+    //     subtitle: "Radio Sweeper",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "making-of-a-masterpiece",
+    //     title: "Making of A Masterpiece",
+    //     subtitle: "Mockumentary",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "wxcu-radio",
+    //     title: "WXCU Radio",
+    //     subtitle: "Radio Station",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "chris-jamison-unaware",
+    //     title: "Chris Jamison - 'Unaware'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "chris-jamison-treasure",
+    //     title: "Chris Jamison - 'Treasure'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "fesss-mess-paris",
+    //     title: "Fess's Mess - Paris",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "furniture-bank-promo",
+    //     title: "Furniture Bank Promo",
+    //     subtitle: "Non-Profit Promo",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // }
 ];
