@@ -143,21 +143,21 @@ const myProjects = [
         hasExtendedContent: true
     },
     {
-        id: "icon-badge-studio",
-        title: "Icon Badge Studio",
-        subtitle: "Generate custom icons with badges and backgrounds.",
+        id: "icon-studio",
+        title: "Icon Studio",
+        subtitle: "A premium, web-based design toolkit for crafting custom app icons with rich gradients, skeuomorphic frames, and integrated badges.",
         tags: [
-            { label: "Completed", color: "green" },
-            { label: "Experimentation", color: "pink" },
+            { label: "Recently Updated", color: "gold" },
+            { label: "Design Tool", color: "purple" },
             { label: "Project", color: "gray" }
         ],
         featured: false,
-        size: "medium",
-        image: "assets/img/icon-badge-studio.png",
+        size: "large",
+        image: "assets/img/icon-studio-multi-theme-framed.png",
         imageClass: "destination-icon",
-        actionText: "Launch Icon Badge Studio",
-        actionUrl: "https://iconbadgestudio.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/iconBadgeStudio",
-        hasExtendedContent: false
+        actionText: "Launch Icon Studio",
+        actionUrl: "https://iconstudio.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/iconStudio",
+        hasExtendedContent: true
     }
 ];
