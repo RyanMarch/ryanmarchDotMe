@@ -11,5 +11,12 @@
         "package.json": true,
         "sitemap.xml": true,
         "robots.txt": true
-    }
+    },
+    "liveServer.settings.ignoreFiles": [
+        "**/.git/**",
+        "**/.vscode/**",
+        "**/.DS_Store",
+        "**/node_modules/**"
+    ],
+    "liveServer.settings.wait": 1000
 }

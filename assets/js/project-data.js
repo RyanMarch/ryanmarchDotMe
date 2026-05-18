@@ -159,216 +159,230 @@ const myProjects = [
         actionUrl: "https://iconstudio.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/iconStudio",
         hasExtendedContent: true
+    },
+    {
+        id: "night-riots-interview",
+        title: "Night Riots Interview",
+        subtitle: "An exclusive on-tour artist interview broadcast on WXCU Radio.",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Interview", color: "cyan" },
+            { label: "Radio", color: "purple" },
+            { label: "Podcast", color: "amber", priority: "low" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/night-riots-interview/images/nightRiots.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Interview",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "breaking-winter",
+        title: "Breaking Winter",
+        subtitle: "Original Composition",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Composition", color: "purple" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "small",
+        image: "content/breaking-winter/images/bw.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Project",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "wxcu-radio",
+        title: "WXCU Radio",
+        subtitle: "Broadcasting, branding, and WordPress web development for Capital University's student radio station.",
+        tags: [
+            { label: "Web Development", color: "green" },
+            { label: "Audio Production", color: "blue" },
+            { label: "Branding", color: "purple", priority: "low" },
+            { label: "Marketing", color: "orange" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "large",
+        image: "content/wxcu-radio/images/wxcuStreamingLive.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Case Study",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+        {
+        id: "forecast-weather",
+        title: "Forecast Weather",
+        subtitle: "Get the seven day forecast for an entered location.",
+        tags: [
+            { label: "App", color: "green" },
+            { label: "Award-Winning", color: "gold" },
+            { label: "Archive", color: "gray" },
+            { label: "Hackathon", color: "purple", priority: "low" },
+
+        ],
+        featured: false,
+        size: "tall",
+        image: "content/forecast-weather/images/icon.webp",
+        imageClass: "destination-icon",
+        actionText: "View Project",
+        actionUrl: "https://web.archive.org/web/20150715014523/http://apps.microsoft.com/windows/en-us/app/forecast-weather/de8bdabd-1707-4512-9866-f1c3c0652914",
+        hasExtendedContent: true
+    },
+    {
+        id: "the-danger-ranger",
+        title: "The Danger Ranger",
+        subtitle: "A satirical, high-energy truck review with comedic timing and fast cuts.",
+        tags: [
+            { label: "Video Production", color: "rose" },
+            { label: "Comedy", color: "amber" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/the-danger-ranger/images/dangerRanger.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Film",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "jeanie-end-theme",
+        title: "Jeanie - 'End Theme'",
+        subtitle: "A highly atmospheric, stylized indie music video with custom digital lighting effects.",
+        tags: [
+            { label: "Video Production", color: "rose" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/jeanie-end-theme/images/endThemePoster.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Music Video",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "taylor-swift-analysis-hour",
+        title: "Taylor Swift Analysis Hour",
+        subtitle: "A dynamic pop music songwriting and marketing analysis podcast segment.",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Podcast", color: "amber" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/taylor-swift-analysis-hour/images/taylorHero.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Podcast",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "sbut-feel-right",
+        title: "Sbut - 'Feel Right'",
+        subtitle: "Song Recording",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/sbut-feel-right/images/feelright.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Project",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "music-festival-radio-spot",
+        title: "Music Festival Radio Spot",
+        subtitle: "Radio Sweeper",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Marketing", color: "orange" },
+            { label: "Archive", color: "gray", priority: "low" },
+        ],
+        featured: false,
+        size: "small",
+        image: "",
+        imageClass: "destination-icon",
+        actionText: "View Project",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "making-of-a-masterpiece",
+        title: "Making of A Masterpiece",
+        subtitle: "Mockumentary Short Film",
+        tags: [
+            { label: "Video Production", color: "rose" },
+            { label: "Award-Winning", color: "gold" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/making-of-a-masterpiece/images/masterpieceTitleCard.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Project",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "chris-jamison-covers",
+        title: "Chris Jamison Covers",
+        subtitle: "A series of high-fidelity studio cover recordings and multitrack mixes.",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Mixing", color: "indigo" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/chris-jamison-covers/images/chris-jamison-covers.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Covers",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "fesss-mess-paris",
+        title: "Fess's Mess - 'Paris'",
+        subtitle: "Song recording.",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Mixing", color: "indigo" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "small",
+        image: "content/fesss-mess-paris/images/paris.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Cover",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "furniture-bank-promo",
+        title: "Furniture Bank Promo",
+        subtitle: "A documentary-style volunteer recruitment video detailing local community impact.",
+        tags: [
+            { label: "Video Production", color: "rose" },
+            { label: "Non-Profit", color: "teal" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/furniture-bank-promo/images/furniture-bank.jpg",
+        imageClass: "destination-icon",
+        actionText: "View Promo",
+        actionUrl: "",
+        hasExtendedContent: true
     }
-    // ,
-    // {
-    //     id: "jeanie-end-theme",
-    //     title: "Jeanie - 'End Theme'",
-    //     subtitle: "Music Video",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "night-riots-interview",
-    //     title: "Night Riots Interview",
-    //     subtitle: "Interview & Podcast",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "breaking-winter",
-    //     title: "Breaking Winter",
-    //     subtitle: "Original Composition",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "the-danger-ranger",
-    //     title: "The Danger Ranger",
-    //     subtitle: "A Foul-Mouthed Truck Review",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "taylor-swift-analysis-hour",
-    //     title: "Taylor Swift Analysis Hour",
-    //     subtitle: "Podcast",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "sbut-feel-right",
-    //     title: "Sbut - 'Feel Right'",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "forecast-weather",
-    //     title: "Forecast Weather",
-    //     subtitle: "Windows App",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "nonstop-megakill-deathblood-slaughterfest-facemelter-20-two-point-oh",
-    //     title: "Nonstop Megakill Deathblood Slaughterfest Facemelter 2.0 (TWO POINT OH)",
-    //     subtitle: "Radio Sweeper",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "making-of-a-masterpiece",
-    //     title: "Making of A Masterpiece",
-    //     subtitle: "Mockumentary",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "wxcu-radio",
-    //     title: "WXCU Radio",
-    //     subtitle: "Radio Station",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "chris-jamison-unaware",
-    //     title: "Chris Jamison - 'Unaware'",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "chris-jamison-treasure",
-    //     title: "Chris Jamison - 'Treasure'",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "fesss-mess-paris",
-    //     title: "Fess's Mess - Paris",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "furniture-bank-promo",
-    //     title: "Furniture Bank Promo",
-    //     subtitle: "Non-Profit Promo",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // }
 ];
