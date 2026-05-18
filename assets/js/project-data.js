@@ -385,4 +385,109 @@ const myProjects = [
         actionUrl: "",
         hasExtendedContent: true
     }
+    // {
+    //     id: "nonstop-megakill-deathblood-slaughterfest-facemelter-20-two-point-oh",
+    //     title: "Nonstop Megakill Deathblood Slaughterfest Facemelter 2.0 (TWO POINT OH)",
+    //     subtitle: "Radio Sweeper",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "making-of-a-masterpiece",
+    //     title: "Making of A Masterpiece",
+    //     subtitle: "Mockumentary",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "wxcu-radio",
+    //     title: "WXCU Radio",
+    //     subtitle: "Radio Station",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "chris-jamison-unaware",
+    //     title: "Chris Jamison - 'Unaware'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "chris-jamison-treasure",
+    //     title: "Chris Jamison - 'Treasure'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "fesss-mess-paris",
+    //     title: "Fess's Mess - Paris",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "furniture-bank-promo",
+    //     title: "Furniture Bank Promo",
+    //     subtitle: "Non-Profit Promo",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // }
 ];
