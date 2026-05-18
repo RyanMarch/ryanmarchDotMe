@@ -159,5 +159,219 @@ const myProjects = [
         actionUrl: "https://iconstudio.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/iconStudio",
         hasExtendedContent: true
+    },
+    // {
+    //     id: "jeanie-end-theme",
+    //     title: "Jeanie - 'End Theme'",
+    //     subtitle: "Music Video",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "night-riots-interview",
+    //     title: "Night Riots Interview",
+    //     subtitle: "Interview & Podcast",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "breaking-winter",
+    //     title: "Breaking Winter",
+    //     subtitle: "Original Composition",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "the-danger-ranger",
+    //     title: "The Danger Ranger",
+    //     subtitle: "A Foul-Mouthed Truck Review",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "taylor-swift-analysis-hour",
+    //     title: "Taylor Swift Analysis Hour",
+    //     subtitle: "Podcast",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "sbut-feel-right",
+    //     title: "Sbut - 'Feel Right'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    {
+        id: "forecast-weather",
+        title: "Forecast Weather",
+        subtitle: "Get the seven day forecast for an entered location.",
+        tags: [
+            { label: "App", color: "green" },
+            { label: "Award", color: "gold" },
+            { label: "Archive", color: "gray" },
+            { label: "Hackathon", color: "purple", priority: "low" },
+
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/forecast-weather/images/icon.webp",
+        imageClass: "destination-icon",
+        actionText: "View Project",
+        actionUrl: "",
+        hasExtendedContent: true
     }
+    // {
+    //     id: "nonstop-megakill-deathblood-slaughterfest-facemelter-20-two-point-oh",
+    //     title: "Nonstop Megakill Deathblood Slaughterfest Facemelter 2.0 (TWO POINT OH)",
+    //     subtitle: "Radio Sweeper",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "making-of-a-masterpiece",
+    //     title: "Making of A Masterpiece",
+    //     subtitle: "Mockumentary",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "wxcu-radio",
+    //     title: "WXCU Radio",
+    //     subtitle: "Radio Station",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "chris-jamison-unaware",
+    //     title: "Chris Jamison - 'Unaware'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "chris-jamison-treasure",
+    //     title: "Chris Jamison - 'Treasure'",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "fesss-mess-paris",
+    //     title: "Fess's Mess - Paris",
+    //     subtitle: "Cover",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // },
+    // {
+    //     id: "furniture-bank-promo",
+    //     title: "Furniture Bank Promo",
+    //     subtitle: "Non-Profit Promo",
+    //     tags: [
+    //         { label: "Archive", color: "gray" }
+    //     ],
+    //     featured: false,
+    //     size: "medium",
+    //     image: "",
+    //     imageClass: "destination-icon",
+    //     actionText: "View Project",
+    //     actionUrl: "",
+    //     hasExtendedContent: true
+    // }
 ];
