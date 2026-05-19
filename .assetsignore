@@ -2,5 +2,12 @@
 content/taylor-swift-analysis-hour/audio/TSanalysis.mp3
 content/night-riots-interview/audio/night-riots-interview.mp3
 
+# Exclude Git, tool configurations, and local logs/caches
+.git/
+.wrangler/
+.vscode/
+.DS_Store
+node_modules/
+
 # Exclude development scripts and templates from deployed assets
 dev/
