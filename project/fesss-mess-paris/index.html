@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fess's Mess - 'Paris' | Ryan March</title>
+    <meta name="description" content="A driving, bluesy rock studio cover and multitrack mix of Grace Potter's single.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=2.4">
+</head>
+<body class="standalone-page">
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div id="project-modal" class="modal-overlay" aria-hidden="false">
+            <div class="modal-frame">
+                <div class="modal-container glimmer-card">
+                    <div class="modal-content" id="modal-content-area">
+                        <div class="tag-list modal-tags">
+                            
+                        </div>
+                        <h2 class="project-title">Fess's Mess - "Paris"</h2>
+<p class="project-subtitle">Studio Cover Recording</p>
+<p class="project-description">Audio Production & Mixing • April 2013 • Fess's Mess</p>
+
+<h4 id="the-project" class="section-divider"><span>The Project</span></h4>
+
+<p>A bluesy and hard-hitting studio cover of Grace Potter & The Nocturnals' hit song "Paris (Ooh La La)," performed by Columbus local band Fess's Mess. This project, recorded, mixed, and mastered by Ryan March in April 2013, highlights crunchy distorted guitar tones, punchy acoustic drums, and a driving rock groove.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="Fess's Mess Paris Cover Artwork" src="content/fesss-mess-paris/images/paris" loading="lazy" class="aspect-auto"/>
+        <div class="gallery-caption">Single artwork for Fess's Mess's cover of "Paris".</div>
+    </div>
+</div>
+
+<div class="custom-audio-player" data-title="Paris (Grace Potter Cover)" data-subtitle="Fess's Mess • Mixed by Ryan March">
+    <audio src="content/fesss-mess-paris/audio/fesssMessParis.mp3" preload="metadata"></audio>
+</div>
+
+<div style="display: flex; justify-content: center; margin: 2rem 0;">
+    <a class="project-btn" download="fesssMessParis.mp3" href="content/fesss-mess-paris/audio/fesssMessParis.mp3">
+        <span>Download MP3</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </a>
+</div>
+
+<h4 id="details" class="section-divider"><span>Details & Skills</span></h4>
+
+<ul>
+    <li><strong>Tools Used:</strong> Pro Tools, Logic Pro X, Music Studio</li>
+    <li><strong>Skills Used:</strong> Rock Mixing, Drum Mixing & Phase Alignment, Guitar Amp Re-amping, Vocal Compression, Stereo Widening</li>
+</ul>
+                        <div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="modal-close" aria-label="Close modal" onclick="if(document.referrer.includes(window.location.hostname)){history.back();return false;}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </a>
+    </main>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
+            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>
