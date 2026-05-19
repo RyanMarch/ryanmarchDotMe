@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WXCU Radio | Ryan March</title>
+    <meta name="description" content="Broadcasting, branding, and WordPress web development for Capital University's student radio station.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=2.4">
+</head>
+<body class="standalone-page">
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div id="project-modal" class="modal-overlay" aria-hidden="false">
+            <div class="modal-frame">
+                <div class="modal-container glimmer-card">
+                    <div class="modal-content" id="modal-content-area">
+                        <div class="tag-list modal-tags">
+                            
+                        </div>
+                        <h2 class="project-title">WXCU Radio</h2>
+<p class="project-subtitle">Radio Station Case Study</p>
+<p class="project-description">Logo Design, Web Development & Audio Production • September 2013 – May 2016 • WXCU Radio</p>
+
+<h4 id="about" class="section-divider"><span>About WXCU</span></h4>
+
+<p>WXCU Radio is a student-run internet radio station at Capital University in Columbus, Ohio. WXCU Radio broadcasts exclusively online through its website, streaming 24/7. My time at WXCU was transformational, spanning roles from on-air DJ to completely rebranding the station, coding their new WordPress website, organizing major philanthropic events, and winning community awards.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="WXCU Radio Live Stream Station" src="content/wxcu-radio/images/wxcuStreamingLive.jpg" loading="lazy" class="aspect-auto"/>
+        <div class="gallery-caption">On-air master control room at WXCU Radio.</div>
+    </div>
+</div>
+
+<h4 id="starting-as-a-dj" class="section-divider"><span>Starting as a DJ</span></h4>
+
+<p>I first took to the airwaves on my own show in mid-September 2013. With training on the RCS Master Control software, I started developing what songs my show would play and what personality my show would have. Shortly after, I joined up with future regular collaborator, Maura, to do a weekly themed specialty show. Each week, we chose a theme, and picked music that fit with the theme.</p>
+
+<!-- Premium Accordion to list WXCU radio shows without jQuery or UIkit modals -->
+<details class="premium-details">
+    <summary class="premium-summary">View Fall 2013 Show Schedule</summary>
+    <div class="details-content">
+        <ul>
+            <li><strong>October 1, 2013:</strong> Big Hair, Big Bands: Best Songs from The '80s</li>
+            <li><strong>October 8, 2013:</strong> Game Over: The Wild World of Video Game Music</li>
+            <li><strong>October 15, 2013:</strong> Midterms: Take a Break from Studying (with a special surprise guest!)</li>
+            <li><strong>October 22, 2013:</strong> Showtime!: Movie Soundtracks</li>
+            <li><strong>October 29, 2013:</strong> DJ's Choice: AFI</li>
+            <li><strong>November 12, 2013:</strong> Middle School: Songs We Enjoyed From Our Middle School Years</li>
+            <li><strong>December 3, 2013:</strong> Tis The Season: The Coolest Non-Traditional Christmas Songs</li>
+        </ul>
+    </div>
+</details>
+
+<h4 id="branding-logo" class="section-divider"><span>Rebranding & Design</span></h4>
+
+<p>When I first came to WXCU, it had no consistent brand message, no consistent idea, and the website was in dire straights. Working with the student Management Team, I created a new logo and brand identity for WXCU. The only direction I got as far as creating a new logo was “Modern.” Since "modern" seems to mostly just mean simple, bold, and thin, I started in that direction.</p>
+
+<p>With some criticism and a suggestion to include the school colors purple and white, we eventually settled on a refined, bold version set in Myriad Pro Black. The WXCU purple and black color variants became standard across the station.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="Rejected logo design iterations" src="content/wxcu-radio/images/rev1.jpg" loading="lazy"/>
+        <div class="gallery-caption">First round of logo concepts exploring various geometric styles.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="Refined logo design concepts" src="content/wxcu-radio/images/rev2.jpg" loading="lazy"/>
+        <div class="gallery-caption">Refining the chosen layout and preparing final variations.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="WXCU final purple logo" src="content/wxcu-radio/images/final_purple.png" loading="lazy" class="aspect-auto"/>
+        <div class="gallery-caption">Final approved purple WXCU Radio logo.</div>
+    </div>
+</div>
+
+<p>To promote WXCU around campus, I created a series of "punny" typographic posters. I also designed station sticker giveaways and official WXCU t-shirts that helped the student body immediately recognize our organization and handle.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="WXCU promotional pun posters" src="content/wxcu-radio/images/posters.jpg" loading="lazy"/>
+        <div class="gallery-caption">Creative "punny" posters displayed across the Capital University campus.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="WXCU sticker placed on a MacBook" src="content/wxcu-radio/images/stickerOnMacbook.jpg" loading="lazy"/>
+        <div class="gallery-caption">WXCU Radio stickers placed on a MacBook.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="WXCU Radio station t-shirt" src="content/wxcu-radio/images/wxcuShirt.jpg" loading="lazy"/>
+        <div class="gallery-caption">Approved official station staff t-shirt.</div>
+    </div>
+</div>
+
+<h4 id="web-development" class="section-divider"><span>Web Development</span></h4>
+
+<p>Having completed a web development class at Capital, I asked the station team if I could completely rebuild and modernize their website. After teaching myself how to integrate custom HTML, CSS, and PHP into WordPress, we launched a modern, media-friendly streaming portal at the end of January 2014.</p>
+
+<p>For the fall 2015 semester, I completely revamped the website with a modern responsive grid, prominent live-stream player controls, dynamic show scheduling, and a clean backend structure for DJs to publish content easily.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="Original wxcuradio.com design from 2013" src="content/wxcu-radio/images/wxcuradioSiteOld.jpg" loading="lazy"/>
+        <div class="gallery-caption">The old, outdated wxcuradio.com site circa October 2013.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="New responsive wxcuradio.com homepage from 2014" src="content/wxcu-radio/images/oldWxcuSite.jpg" loading="lazy"/>
+        <div class="gallery-caption">Rebuilt wxcuradio.com stream launch in January 2014.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="Upgraded, fully responsive 2015 WXCU WordPress site" src="content/wxcu-radio/images/WXCUradioSiteImage.jpg" loading="lazy"/>
+        <div class="gallery-caption">Upgraded, responsive WordPress portal deployed in 2015.</div>
+    </div>
+</div>
+
+<h4 id="events" class="section-divider"><span>Events & Radiothon</span></h4>
+
+<p>In the fall of 2014, we began drafting plans for a charity event. Radio and charity have collaborated for years, so we organized Capital University's first-ever Radiothon for the spring of 2015—a 24-hour non-stop broadcasting event designed to raise funds for the Furniture Bank of Central Ohio.</p>
+
+<p>As part of the 24-hour event, we filled the airwaves with creative specialty shows, live local band performances, and on-air challenges that raised significant support and established WXCU as a philanthropic force on campus.</p>
+
+<h4 id="awards" class="section-divider"><span>Awards & Recognition</span></h4>
+
+<p>Our hard work culminated in multiple major recognitions:</p>
+<ul>
+    <li>In Spring 2015, WXCU Radio won Capital University's <strong>Organization of the Year</strong> award.</li>
+    <li>In December 2015, the station received an official nomination from the <strong>Intercollegiate Broadcasting System (IBS)</strong> for best Streaming/Online only Radio Station in the nation.</li>
+    <li>In April 2016, Capital University recognized Radiothon 2016 as the <strong>Community Engagement Program of The Year</strong>.</li>
+</ul>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="WXCU Community Engagement Leadership Award" src="content/wxcu-radio/images/WXCUcommunityEngagment.jpg" loading="lazy" class="aspect-auto"/>
+        <div class="gallery-caption">Community Engagement Program of The Year award from Leadership Awards, 2016.</div>
+    </div>
+</div>
+
+<h4 id="details" class="section-divider"><span>Details & Skills</span></h4>
+
+<ul>
+    <li><strong>Tools Used:</strong> WordPress, Photoshop, Pixelmator, Shoutcast, RCS Master Control, Station Playlist</li>
+    <li><strong>Skills Used:</strong> Logo Design, Brand Identity, Website Development, PHP, HTML/CSS, Audio Production, Event Planning, Philanthropic Organization</li>
+    <li><strong>Links:</strong> <a href="https://web.archive.org/web/20210928070407/http://wxcuradio.com/" target="_blank" rel="noopener noreferrer">WXCUradio.com (Archive)</a></li>
+</ul>
+                        <div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="/" class="modal-close" aria-label="Close modal" onclick="if(document.referrer.includes(window.location.hostname)){history.back();return false;}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </a>
+    </main>
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
+            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+    </script>
+</body>
+</html>

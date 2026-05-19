@@ -9,6 +9,7 @@ Thumbs.db
 
 # Dev-only notes (keep local, don't deploy)
 dev/
+projectsFromOldWebsite/
 
 # Code workspace files
 *.code-workspace
