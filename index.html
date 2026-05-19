@@ -18,22 +18,16 @@
             // document.documentElement.className = theme; // Redundant since we use [data-theme]
         })();
 
-        // Detection for deep-linked project pages
-        const pathParts = window.location.pathname.split('/').filter(Boolean);
-        // Only trigger if the path follows the /project/ID pattern
-        if (pathParts.length >= 2 && pathParts[0] === 'project') {
-            window.initialModalProject = pathParts[pathParts.length - 1];
-        }
     </script>
     <base href="/">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ryan March | Product & Technology</title>
     <meta name="description" content="Personal landing page for Ryan March, a Product Manager and creative technologist.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <meta name="color-scheme" content="light dark">
-    <link rel="stylesheet" href="/style.css?v=2.6">
+    <link rel="stylesheet" href="/style.css">
     <link rel="me" href="https://mastodon.social/@ryanmarch">
 </head>
 <body>
@@ -41,6 +35,23 @@
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
     </div>
+
+
+
+    <header class="slim-header" id="slim-header">
+        <div class="slim-header-container">
+            <a href="/" class="slim-header-brand">
+                <div class="slim-avatar">RM</div>
+                <span class="slim-name">Ryan March</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
+        </div>
+    </header>
 
     <main>
         <div class="top-row">
@@ -65,7 +76,21 @@
                     <span>GitHub</span>
                 </a>
             </nav>
+        </div>
 
+        <!-- Filter Bar -->
+        <div class="filter-container">
+            <div class="filter-bar glimmer-card">
+                <div class="filter-header">
+                    <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                    <span>Filter Projects:</span>
+                </div>
+                <div class="filter-pills" id="filter-pills">
+                    <!-- Curated filter pills will be injected here via projects.js -->
+                </div>
+            </div>
         </div>
 
         <!-- The grid is injected dynamically by JS -->
@@ -73,19 +98,7 @@
 
     </main>
 
-    <!-- Modal Overlay -->
-    <div id="project-modal" class="modal-overlay" aria-hidden="true">
-        <div class="modal-frame">
-            <div class="modal-container glimmer-card">
-                <div class="modal-content" id="modal-content-area">
-                    <!-- Content injected here via JS -->
-                </div>
-            </div>
-        </div>
-    </div>
-    <button class="modal-close modal-close-hidden" aria-label="Close modal">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-    </button>
+
     <!-- Lightbox Overlay -->
     <div id="lightbox-overlay" class="lightbox-overlay" aria-hidden="true">
         <button class="lightbox-close" aria-label="Close lightbox">
@@ -97,60 +110,33 @@
         </div>
     </div>
 
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-        <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
-        <span id="theme-status" class="theme-status"></span>
-    </button>
+
 
     <!-- Data and Rendering Script -->
     <script src="/assets/js/project-data.js"></script>
-    <script src="/assets/js/projects.js?v=2.6"></script>
-    
+    <script src="/assets/js/projects.js"></script>
+    <script src="/assets/js/theme.js"></script>
+
     <script>
-        // Theme Toggle Logic
-        let themeStatusTimeout;
-        const themeToggle = document.getElementById('theme-toggle');
-        const themeStatus = document.getElementById('theme-status');
+        // Slim header scroll trigger
+        (function () {
+            const slimHeader = document.getElementById('slim-header');
+            const topRow = document.querySelector('.top-row');
 
-        const showThemeStatus = (text) => {
-            if (!themeStatus) return;
-            themeStatus.textContent = text;
-            themeStatus.classList.add('visible');
-            clearTimeout(themeStatusTimeout);
-            themeStatusTimeout = setTimeout(() => {
-                themeStatus.classList.remove('visible');
-            }, 2000);
-        };
-
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = localStorage.getItem('theme') || 'dark';
-                let newTheme;
-                let statusText;
-                
-                if (currentTheme === 'dark') {
-                    newTheme = 'light';
-                    statusText = 'Light Theme';
-                } else if (currentTheme === 'light') {
-                    newTheme = 'system';
-                    statusText = 'System Theme';
-                } else {
-                    newTheme = 'dark';
-                    statusText = 'Dark Theme';
-                }
-                
-                if (newTheme === 'system') {
-                    document.documentElement.removeAttribute('data-theme');
-                } else {
-                    document.documentElement.setAttribute('data-theme', newTheme);
-                }
-                
-                localStorage.setItem('theme', newTheme);
-                showThemeStatus(statusText);
-            });
-        }
+            if (slimHeader && topRow) {
+                const observer = new IntersectionObserver(
+                    ([entry]) => {
+                        if (!entry.isIntersecting) {
+                            slimHeader.classList.add('visible');
+                        } else {
+                            slimHeader.classList.remove('visible');
+                        }
+                    },
+                    { threshold: 0, rootMargin: '0px' }
+                );
+                observer.observe(topRow);
+            }
+        })();
 
         // Glimmering border effect - only on desktop
         if (window.matchMedia("(min-width: 951px)").matches) {
