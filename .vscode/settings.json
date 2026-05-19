@@ -18,5 +18,24 @@
         "**/.DS_Store",
         "**/node_modules/**"
     ],
-    "liveServer.settings.wait": 1000
+    "liveServer.settings.wait": 1000,
+
+    // --- Auto-Compilation Extensions Settings ---
+    // Option 1: For "Trigger Task on Save" extension (ID: gardne.trigger-task-on-save)
+    "triggerTaskOnSave.tasks": {
+        "Build Project Pages": [
+            "content/*.html",
+            "assets/js/project-data.js"
+        ]
+    },
+
+    // Option 2: For "Run on Save" extension (ID: emeraldwalk.runonsave)
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "content/.*\\.html$|assets/js/project-data\\.js$",
+                "cmd": "python3 dev/generate.py"
+            }
+        ]
+    }
 }
