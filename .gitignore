@@ -8,7 +8,9 @@ ehthumbs.db
 Thumbs.db
 
 # Dev-only notes (keep local, don't deploy)
-dev/
+dev/*
+!dev/generate.py
+!dev/project-template.html
 projectsFromOldWebsite/
 
 # Code workspace files
