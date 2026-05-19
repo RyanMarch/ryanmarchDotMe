@@ -89,21 +89,21 @@ const myProjects = [
         hasExtendedContent: true
     },
     {
-        id: "amenities-manager",
-        title: "Amenities Manager",
-        subtitle: "Powerful control over property amenities and features for multifamily websites.",
+        id: "icon-studio",
+        title: "Icon Studio",
+        subtitle: "A premium, web-based design toolkit for crafting custom app icons with rich gradients, skeuomorphic frames, and integrated badges.",
         tags: [
-            { label: "Professional", color: "blue" },
-            { label: "Real Estate", color: "teal", priority: "low" },
-            { label: "Add-On", color: "gray" },
+            { label: "Recently Updated", color: "gold" },
+            { label: "Design Tool", color: "purple" },
+            { label: "Project", color: "gray" }
         ],
         featured: false,
-        size: "medium",
-        image: "content/amenities-manager/images/amenities-icon.png",
+        size: "large",
+        image: "assets/img/icon-studio-multi-theme-framed.png",
         imageClass: "destination-icon",
-        actionText: "View Plugin",
-        actionUrl: "https://wordpress.org/plugins/rentpress-amenities-manager-add-on/",
-        sourceUrl: "https://support.30lines.com/documentation/rentpress-amenities-manager-add-on/",
+        actionText: "Launch Icon Studio",
+        actionUrl: "https://iconstudio.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/iconStudio",
         hasExtendedContent: true
     },
     {
@@ -125,6 +125,24 @@ const myProjects = [
         hasExtendedContent: true
     },
     {
+        id: "amenities-manager",
+        title: "Amenities Manager",
+        subtitle: "Powerful control over property amenities and features for multifamily websites.",
+        tags: [
+            { label: "Professional", color: "blue" },
+            { label: "Real Estate", color: "teal", priority: "low" },
+            { label: "Add-On", color: "gray" },
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/amenities-manager/images/amenities-icon.png",
+        imageClass: "destination-icon",
+        actionText: "View Plugin",
+        actionUrl: "https://wordpress.org/plugins/rentpress-amenities-manager-add-on/",
+        sourceUrl: "https://support.30lines.com/documentation/rentpress-amenities-manager-add-on/",
+        hasExtendedContent: true
+    },
+    {
         id: "rentpress-email",
         title: "RentPress Email",
         subtitle: "Automated lifecycle marketing that transforms property management data into personalized resident journeys.",
@@ -143,24 +161,6 @@ const myProjects = [
         hasExtendedContent: true
     },
     {
-        id: "icon-studio",
-        title: "Icon Studio",
-        subtitle: "A premium, web-based design toolkit for crafting custom app icons with rich gradients, skeuomorphic frames, and integrated badges.",
-        tags: [
-            { label: "Recently Updated", color: "gold" },
-            { label: "Design Tool", color: "purple" },
-            { label: "Project", color: "gray" }
-        ],
-        featured: false,
-        size: "large",
-        image: "assets/img/icon-studio-multi-theme-framed.png",
-        imageClass: "destination-icon",
-        actionText: "Launch Icon Studio",
-        actionUrl: "https://iconstudio.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/iconStudio",
-        hasExtendedContent: true
-    },
-    {
         id: "night-riots-interview",
         title: "Night Riots Interview",
         subtitle: "An exclusive on-tour artist interview broadcast on WXCU Radio.",
@@ -168,7 +168,7 @@ const myProjects = [
             { label: "Audio Production", color: "blue" },
             { label: "Interview", color: "cyan" },
             { label: "Radio", color: "purple" },
-            { label: "Podcast", color: "amber", priority: "low" },
+            { label: "Podcast", color: "gold", priority: "low" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -237,10 +237,10 @@ const myProjects = [
     {
         id: "the-danger-ranger",
         title: "The Danger Ranger",
-        subtitle: "A satirical, high-energy truck review with comedic timing and fast cuts.",
+        subtitle: "A satirical truck review with comedic timing and unexpected turns.",
         tags: [
             { label: "Video Production", color: "rose" },
-            { label: "Comedy", color: "amber" },
+            { label: "Comedy", color: "gold" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -273,7 +273,7 @@ const myProjects = [
         subtitle: "A dynamic pop music songwriting and marketing analysis podcast segment.",
         tags: [
             { label: "Audio Production", color: "blue" },
-            { label: "Podcast", color: "amber" },
+            { label: "Podcast", color: "gold" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
