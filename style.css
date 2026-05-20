@@ -621,7 +621,7 @@ margin-top: 3rem;
 }
 
 /* Responsive Layout Logic */
-@media (min-width: 768px) {
+@media (min-width: 1051px) {
     /* Only modules that are strictly wider than they are tall (2x1, 3x1) should be side-by-side */
     .destination-card.size-medium,
     .destination-card.size-wide {
@@ -742,9 +742,28 @@ margin-top: 3rem;
         "content";
 }
 
-.size-small .destination-visual,
-.size-small .destination-standalone-visual {
-    display: none;
+@media (min-width: 1051px) {
+    .size-small .destination-visual,
+    .size-small .destination-standalone-visual {
+        display: none;
+    }
+}
+
+@media (max-width: 1050px) {
+    /* Constrain stacked card image heights on tablet viewports to look unified */
+    .destination-icon,
+    .destination-image-standalone {
+        max-height: 180px;
+    }
+
+    /* Override small cards to use standard stacked layout on tablets and mobile to support image display */
+    .destination-card.size-small {
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas: 
+            "tags"
+            "content"
+            "visual";
+    }
 }
 
 .size-small .destination-header h3 {
@@ -884,51 +903,6 @@ body.standalone-page {
     }
 }
 
-/* --- Theme Toggle inside slim header (homepage) --- */
-.slim-header .theme-toggle {
-    position: static;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    bottom: auto;
-    right: auto;
-    box-shadow: none;
-    opacity: 1;
-    flex-shrink: 0;
-}
-
-.slim-header .theme-toggle:hover {
-    transform: scale(1.08);
-}
-
-.slim-header .theme-toggle:active {
-    transform: scale(0.95);
-}
-
-/* Reposition the tooltip to drop below the button (it's at the top of the screen) */
-.slim-header .theme-status {
-    bottom: auto;
-    top: calc(100% + 10px);
-    right: 0;
-    left: auto;
-    transform: translateY(-10px) scale(0.9);
-}
-
-.slim-header .theme-status.visible {
-    transform: translateY(0) scale(1);
-}
-
-/* Flip the tail to point upward */
-.slim-header .theme-status::after {
-    top: auto;
-    bottom: 100%;
-    right: 14px;
-    transform: translateY(50%) rotate(45deg);
-    border-right: none;
-    border-bottom: none;
-    border-left: 1px solid var(--card-border);
-    border-top: 1px solid var(--card-border);
-}
 
 .modal-content {
     color: var(--text-primary);
@@ -1361,6 +1335,13 @@ body.standalone-page {
     .gallery-item {
         flex: 0 0 100%;
     }
+    .gallery-item:has(img.aspect-auto) {
+        flex: 0 0 100%;
+        min-width: 0;
+    }
+    .gallery-item img.aspect-auto {
+        width: 100%;
+    }
 }
 
 
@@ -1399,28 +1380,7 @@ body.standalone-page {
     margin-top: auto;
 }
 
-.project-link {
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    opacity: 0.7;
-    transition: color 0.2s ease, opacity 0.2s ease;
-    white-space: nowrap;
-    margin: 0 0 0 1rem;
-    padding-top: 2px;
-}
-
-
-@media (min-width: 1025px) {
-    .project-link:hover {
-        opacity: 1;
-        color: var(--glass-hover-text);
-        text-decoration: underline;
-    }
-}
+/* Note: .project-link removed as View Source buttons are deprecated */
 
 /* --- Placeholder Icon --- */
 .project-placeholder-icon {
@@ -1726,14 +1686,6 @@ body.standalone-page {
         font-size: 2.2rem;
     }
 
-    .project-link {
-        position: static;
-        opacity: 0.8;
-        pointer-events: auto;
-        transform: none;
-        margin-top: 2rem; /* Increased for finger differentiation */
-        display: block;
-    }
 }
 
 /* Mobile & Small Tablets - The "Stack" Breakpoint */
@@ -1895,16 +1847,7 @@ body.standalone-page {
         justify-content: flex-start;
     }
 
-    .project-link {
-        position: static;
-        grid-area: source;
-        opacity: 1;
-        pointer-events: auto;
-        transform: none;
-        margin: 0;
-        display: block;
-        text-align: left;
-    }
+
 
     .destination-content {
         padding: 0;
@@ -2070,6 +2013,10 @@ body.standalone-page {
     .gallery-item {
         flex: 0 0 85%;
         scroll-snap-align: center;
+    }
+    .gallery-item:has(img.aspect-auto) {
+        flex: 0 0 85%;
+        min-width: 0;
     }
 
     .modal-content hr {
@@ -2251,37 +2198,31 @@ body.standalone-page {
     }
 }
 
-/* --- Theme Toggle --- */
+/* --- Theme Toggle (Slim Header Native) --- */
 .theme-toggle {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: var(--header-bg);
+    position: relative; /* Anchor for absolute .theme-status */
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: transparent;
     border: 1px solid var(--card-border);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     color: var(--text-primary);
     cursor: pointer;
-    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
                 background-color 0.3s ease,
-                border-color 0.3s ease,
-                opacity 0.3s ease;
-    box-shadow: var(--shadow-md);
-    opacity: 0.85;
+                border-color 0.3s ease;
+    flex-shrink: 0;
 }
 
 .theme-toggle:hover {
-    transform: scale(1.1);
+    transform: scale(1.08);
     background: var(--glass-hover-bg);
     border-color: var(--btn-hover-border);
-    opacity: 1; /* Full opacity on interaction */
 }
 
 .theme-toggle:active {
@@ -2290,7 +2231,7 @@ body.standalone-page {
 
 .theme-status {
     position: absolute;
-    bottom: calc(100% + 12px);
+    top: calc(100% + 10px);
     right: 0;
     background: var(--header-bg);
     border: 1px solid var(--card-border);
@@ -2304,9 +2245,10 @@ body.standalone-page {
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transform: translateY(10px) scale(0.9);
+    transform: translateY(-10px) scale(0.9);
     transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: var(--shadow-lg);
+    z-index: 10000;
 }
 
 .theme-status.visible {
@@ -2314,18 +2256,18 @@ body.standalone-page {
     transform: translateY(0) scale(1);
 }
 
-/* Small speech bubble tail */
+/* Small speech bubble tail pointing up to toggle */
 .theme-status::after {
     content: '';
     position: absolute;
-    top: 100%;
-    right: 18px;
+    bottom: 100%;
+    right: 14px;
     width: 10px;
     height: 10px;
     background: inherit;
-    border-right: 1px solid var(--card-border);
-    border-bottom: 1px solid var(--card-border);
-    transform: translateY(-50%) rotate(45deg);
+    border-left: 1px solid var(--card-border);
+    border-top: 1px solid var(--card-border);
+    transform: translateY(50%) rotate(45deg);
 }
 
 .theme-toggle svg {
@@ -2368,16 +2310,6 @@ body.standalone-page {
 :root:not([data-theme]) .system-icon {
     opacity: 1;
     transform: rotate(0) scale(1);
-}
-
-/* Responsive adjustment for mobile */
-@media (max-width: 768px) {
-    .theme-toggle {
-        bottom: 1.5rem;
-        right: 1.5rem;
-        width: 44px;
-        height: 44px;
-    }
 }
 
 /* --- Premium Custom Audio Player --- */

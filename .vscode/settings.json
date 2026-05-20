@@ -32,34 +32,26 @@
         "dev/**",
         "**/.wrangler/**",
         ".wrangler/**",
-        "sitemap.xml",
-        "robots.txt",
-        "package.json",
-        "package-lock.json",
-        "wrangler.jsonc",
-        ".gitignore",
-        "README.md"
+        "**/sitemap.xml",
+        "**/robots.txt",
+        "**/package.json",
+        "**/package-lock.json",
+        "**/wrangler.jsonc",
+        "**/.gitignore",
+        "**/README.md",
+        "**/.r2_cache.json"
     ],
     "liveServer.settings.wait": 1000,
-
-    // --- Auto-Compilation Extensions Settings ---
-    // Option 1: For "Trigger Task on Save" extension (ID: gardne.trigger-task-on-save)
+    "liveServer.settings.port": 5588,
+    // --- Auto-Compilation Configuration ---
+    // Using your already-installed "Trigger Task on Save" extension (gardne.trigger-task-on-save)
+    // configured to run silently in the background without popups or alerts.
     "triggerTaskOnSave.on": true,
-    "triggerTaskOnSave.showNotifications": true,
+    "triggerTaskOnSave.showNotifications": false,
     "triggerTaskOnSave.tasks": {
         "Build Project Pages": [
             "**/content/*.html",
             "**/assets/js/project-data.js"
-        ]
-    },
-
-    // Option 2: For "Run on Save" extension (ID: emeraldwalk.runonsave)
-    "emeraldwalk.runonsave": {
-        "commands": [
-            {
-                "match": "content/.*\\.html$|assets/js/project-data\\.js$",
-                "cmd": "python3 dev/generate.py"
-            }
         ]
     }
 }
