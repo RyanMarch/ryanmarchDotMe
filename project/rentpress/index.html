@@ -17,28 +17,44 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/style.css?v=2.4">
+    <link rel="stylesheet" href="/style.css">
 </head>
-<body class="standalone-page">
+<body class="standalone-page" id="top">
+    <header class="slim-header">
+        <div class="slim-header-container">
+            <a href="/" class="slim-header-brand">
+                <div class="slim-avatar">RM</div>
+                <span class="slim-name">Ryan March</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
+        </div>
+    </header>
     <div class="background-container">
         <div class="orb orb-1"></div>
         <div class="orb orb-2"></div>
     </div>
     <main>
-        <div id="project-modal" class="modal-overlay" aria-hidden="false">
-            <div class="modal-frame">
-                <div class="modal-container glimmer-card">
-                    <div class="modal-content" id="modal-content-area">
-                        <div class="tag-list modal-tags">
-                            
-                        </div>
-                        <h2 class="project-title">RentPress for Websites</h2>
+        <div class="modal-content" id="modal-content-area">
+            <div class="tag-list modal-tags">
+                <span class="tag tag-blue">Professional</span>
+<span class="tag tag-purple">Platform</span>
+<span class="tag tag-teal tag-priority-low">Real Estate</span>
+            </div>
+            <h2 class="project-title">RentPress for Websites</h2>
 <p class="project-subtitle">Apartment Marketing Platform</p>
 <p class="project-description">Product Manager</p>
+<nav class="project-nav"><div class="nav-links"><a href="#the-product">The Product</a><a href="#the-market">The Market</a><a href="#key-features">Key Features</a><a href="#my-role">My Role & Impact</a><a href="#modal-footer-actions">Links</a></div></nav>
 
 <h4 id="the-product" class="section-divider"><span>The Product</span></h4>
 
-<p>RentPress for Websites is a powerful, extendable WordPress plugin that transforms any website into a high-performance online leasing office. Built for the multi-family housing industry, it delivers real-time pricing and availability from leading property management software directly into native, SEO-friendly WordPress elements.</p>
+<p>RentPress for Websites is a powerful, extendable WordPress plugin that transforms any website into a high-performance
+    online leasing office. Built for the multi-family housing industry, it delivers real-time pricing and availability
+    from leading property management software directly into native, SEO-friendly WordPress elements.</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
@@ -67,19 +83,27 @@
     </div>
 </div>
 
-<p> With out-of-the-box templates and Gutenberg blocks, it empowers marketing teams to build powerful search pages for floor plans and properties without writing a line of code.</p>
+<p> With out-of-the-box templates and Gutenberg blocks, it empowers marketing teams to build powerful search pages for
+    floor plans and properties without writing a line of code.</p>
 
 <h4 id="the-market" class="section-divider"><span>The Market</span></h4>
-<p>When an apartment shopper visits a community website, they immediately want to know two things: <em>what's available</em> and <em>what it costs</em>. Because rent prices change daily based on complex internal management systems, property websites often rely on clunky, un-stylable iframes or kick users out to third-party portals.</p>
-<p>RentPress allows anyone to create a modern, flexible website for an apartment community, built for any device a shopper may use to visit.</p>
+<p>When an apartment shopper visits a community website, they immediately want to know two things: <em>what's
+        available</em> and <em>what it costs</em>. Because rent prices change daily based on complex internal management
+    systems, property websites often rely on clunky, un-stylable iframes or kick users out to third-party portals.</p>
+<p>RentPress allows anyone to create a modern, flexible website for an apartment community, built for any device a
+    shopper may use to visit.</p>
 
 <h4 id="key-features" class="section-divider"><span>Key Features</span></h4>
-<p>Over its lifetime, RentPress evolved into a robust ecosystem. Some of the standout features I helped bring to customers include:</p>
+<p>Over its lifetime, RentPress evolved into a robust ecosystem. Some of the standout features I helped bring to
+    customers include:</p>
 
 <ul>
-    <li><strong>Real-time Data Sync:</strong> Integrations with 12 major multifamily CRMs to keep property, floor plan, unit, and customer information up to date.</li>
-    <li><strong>Advanced Search & Filtering:</strong> Dynamic and customizable pages allow marketing teams to create unique search pages for properties and floor plans.</li>
-    <li><strong>Deep Integrations:</strong> Expanded capabilities with Google Maps and Mapbox for location browsing, Engrain SightMap for interactive floor plans, and Google Analytics for in-depth shopper journey tracking.</li>
+    <li><strong>Real-time Data Sync:</strong> Integrations with 12 major multifamily CRMs to keep property, floor plan,
+        unit, and customer information up to date.</li>
+    <li><strong>Advanced Search & Filtering:</strong> Dynamic and customizable pages allow marketing teams to create
+        unique search pages for properties and floor plans.</li>
+    <li><strong>Deep Integrations:</strong> Expanded capabilities with Google Maps and Mapbox for location browsing,
+        Engrain SightMap for interactive floor plans, and Google Analytics for in-depth shopper journey tracking.</li>
     <li><strong>Lead & Data Control:</strong> Purpose-built extensions for seamless lead delivery and retrieval.</li>
 </ul>
 
@@ -104,25 +128,35 @@
 
 <h4 id="my-role" class="section-divider"><span>My Role & Impact</span></h4>
 
-<p>As the Senior Software Product Manager, I drove the product vision from a growing tool into a market-defining platform used by thousands of customers internationally. Acting as Product Owner, I managed the backlog, and led cross-functional teams across engineering, design, and operations.</p>
+<p>As the Senior Software Product Manager, I drove the product vision from a growing tool into a market-defining
+    platform used by thousands of customers internationally. Acting as Product Owner, I managed the backlog, and led
+    cross-functional teams across engineering, design, and operations.</p>
 <br>
 <p>My key contributions and impact included:</p>
 <ul>
-    <li><strong>Revenue Growth:</strong> Grew product revenue by over 50% in two years through strategic feature development and close collaboration with marketing and data science.</li>
-    <li><strong>Cross-Functional Leadership:</strong> Led cross-functional teams across engineering, design, and operations to deliver product updates and new features.</li>
-    <li><strong>Team Efficiency:</strong> Supervised the software development team as Product Owner, resulting in faster turnaround time and shorter product release cycles.</li>
-    <li><strong>Next-Generation Platform:</strong> Led the development of the next generation of the product, working on scalable solutions to serve customers for the long-term.</li>
-    <li><strong>Customer Support & Training:</strong> Documented product usage by creating 216 “how-to” guides and training videos, leading to a decrease in support ticket submissions.</li>
-    <li><strong>Customer Success:</strong> Hosted demos, gathered feedback, and worked directly with new and current clients to drive product improvements.</li>
+    <li><strong>Revenue Growth:</strong> Grew product revenue by over 50% in two years through strategic feature
+        development and close collaboration with marketing and data science.</li>
+    <li><strong>Cross-Functional Leadership:</strong> Led cross-functional teams across engineering, design, and
+        operations to deliver product updates and new features.</li>
+    <li><strong>Team Efficiency:</strong> Supervised the software development team as Product Owner, resulting in faster
+        turnaround time and shorter product release cycles.</li>
+    <li><strong>Next-Generation Platform:</strong> Led the development of the next generation of the product, working on
+        scalable solutions to serve customers for the long-term.</li>
+    <li><strong>Customer Support & Training:</strong> Documented product usage by creating 216 “how-to” guides and
+        training videos, leading to a decrease in support ticket submissions.</li>
+    <li><strong>Customer Success:</strong> Hosted demos, gathered feedback, and worked directly with new and current
+        clients to drive product improvements.</li>
 </ul>
 
 <div class="project-gallery">
     <div class="gallery-item">
-        <img src="content/rentpress/images/google-analytics.webp" alt="Google Analytics" loading="lazy" class="gallery-padded-img">
+        <img src="content/rentpress/images/google-analytics.webp" alt="Google Analytics" loading="lazy"
+            class="gallery-padded-img">
         <div class="gallery-caption">Shopper Journey Insights & Analytics</div>
     </div>
     <div class="gallery-item">
-        <img src="content/rentpress/images/admin-settings.webp" alt="Admin Settings" loading="lazy" class="gallery-padded-img">
+        <img src="content/rentpress/images/admin-settings.webp" alt="Admin Settings" loading="lazy"
+            class="gallery-padded-img">
         <div class="gallery-caption">Enterprise Configuration Dashboard</div>
     </div>
     <div class="gallery-item">
@@ -130,28 +164,22 @@
         <div class="gallery-caption">Low-Code Content Implementation</div>
     </div>
 </div>
-                        <div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>
-                    </div>
-                </div>
-            </div>
+            <hr class="modal-footer-divider">
+<div class="modal-footer-actions" id="modal-footer-actions">
+    <a href="https://wordpress.org/plugins/rentpress-for-websites/" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
+        <span>View More</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>
+    <a href="https://rentpress.io" class="project-btn modal-full-btn" target="_blank" rel="noopener noreferrer">
+        <span>Visit RentPress.io</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>
+    <a href="#top" class="modal-back-to-top-btn">Back to Top</a>
+</div>
         </div>
-        <a href="/" class="modal-close" aria-label="Close modal" onclick="if(document.referrer.includes(window.location.hostname)){history.back();return false;}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </a>
     </main>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-    </button>
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
-            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
-            else document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    </script>
+    <script src="/assets/js/theme.js" defer></script>
+    <script src="/assets/js/project-data.js" defer></script>
+    <script src="/assets/js/projects.js" defer></script>
 </body>
 </html>

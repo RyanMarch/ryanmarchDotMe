@@ -1,0 +1,12 @@
+# Exclude large audio files from Wrangler static asset upload
+*.mp3
+
+# Exclude Git, tool configurations, and local logs/caches
+.git/
+.wrangler/
+.vscode/
+.DS_Store
+node_modules/
+
+# Exclude development scripts and templates from deployed assets
+dev/
