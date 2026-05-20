@@ -581,6 +581,8 @@ margin-top: 3rem;
     .destination-card.size-small {
         grid-column: span 1;
         grid-row: span 1;
+        padding: 1.2rem;
+        row-gap: 0.75rem;
     }
     
     .destination-card.size-medium {
@@ -601,6 +603,8 @@ margin-top: 3rem;
     .destination-card.size-tall {
         grid-column: span 1;
         grid-row: span 2;
+        padding: 1.2rem;
+        row-gap: 0.75rem;
     }
 }
 
@@ -1363,8 +1367,8 @@ body.standalone-page {
     transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-/* Hide low-priority tags in narrow modules (e.g. 1x1 modules on desktop) */
-@container (max-width: 340px) {
+/* Hide low-priority tags in narrow modules (e.g. 1x1 or narrow medium modules) */
+@container (max-width: 550px) {
     .tag-priority-low {
         display: none;
     }
@@ -2828,6 +2832,43 @@ body.standalone-page {
         flex: 0 0 auto; /* Ensure pills do not shrink and remain inline */
         padding: 0.45rem 0.95rem;
         font-size: 0.8rem;
+    }
+}
+
+/* Container query adjustments for narrow cards/modules to prevent button cropping */
+@container (max-width: 550px) {
+    .destination-content h3 {
+        font-size: 2rem;
+    }
+    
+    .destination-content p {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        margin: 0.4rem 0 0.8rem 0;
+    }
+    
+    .tag {
+        font-size: 0.65rem;
+        padding: 0.3rem 0.6rem;
+    }
+}
+
+/* Container query adjustments for extremely narrow cards/modules (e.g. 1x1 size-small or 1x2 size-tall) */
+@container (max-width: 300px) {
+    .destination-content h3 {
+        font-size: 1.35rem;
+        line-height: 1.25;
+    }
+    
+    .destination-content p {
+        font-size: 0.85rem;
+        line-height: 1.35;
+        margin: 0.3rem 0 0.6rem 0;
+    }
+    
+    .tag {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.45rem;
     }
 }
 
