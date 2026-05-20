@@ -95,6 +95,33 @@ def build_tags_html(tags):
     return '\n'.join(tags_html)
 
 def upload_audio_to_r2():
+    # 1. Fast Check: Scan local files and compare with cache to see if any uploads are actually needed.
+    cache_path = './dev/.r2_cache.json'
+    cache = {}
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, 'r') as f:
+                cache = json.load(f)
+        except Exception:
+            pass
+
+    has_changes = False
+    for root, dirs, files in os.walk('./content'):
+        for file in files:
+            if file.endswith('.mp3'):
+                local_path = os.path.join(root, file)
+                mtime = os.path.getmtime(local_path)
+                if local_path not in cache or cache[local_path] != mtime:
+                    has_changes = True
+                    break
+        if has_changes:
+            break
+
+    if not has_changes:
+        # No audio files are new or changed; exit instantly (takes < 1ms)
+        return
+
+    # 2. Audio files changed; proceed with R2 upload credentials & setup
     secrets_path = './dev/.r2_secrets.json'
     if not os.path.exists(secrets_path):
         # Gracefully skip in environments that don't have local secrets (like Cloudflare build)
@@ -125,15 +152,6 @@ def upload_audio_to_r2():
         return
         
     print("🎙️ R2 Upload: Checking and uploading audio files to R2...")
-    cache_path = './dev/.r2_cache.json'
-    
-    cache = {}
-    if os.path.exists(cache_path):
-        try:
-            with open(cache_path, 'r') as f:
-                cache = json.load(f)
-        except Exception:
-            pass
             
     try:
         r2 = boto3.client(
@@ -141,7 +159,12 @@ def upload_audio_to_r2():
             endpoint_url=f'https://{account_id}.r2.cloudflarestorage.com',
             aws_access_key_id=access_key_id,
             aws_secret_access_key=secret_access_key,
-            config=Config(signature_version='s3v4')
+            config=Config(
+                signature_version='s3v4',
+                connect_timeout=1.5,
+                read_timeout=1.5,
+                retries={'max_attempts': 0}
+            )
         )
     except Exception as e:
         print(f"⚠️ R2 Upload: Failed to initialize R2 client: {e}")
@@ -177,13 +200,14 @@ def upload_audio_to_r2():
         except Exception:
             pass
 
-def generate(target_id=None):
+def generate(target_id=None, skip_r2=False):
     if target_id:
         print(f"🚀 Starting Single-Page Build for: {target_id}...")
     else:
         print("🚀 Starting Full Build Process...")
         # Only attempt to upload audio to R2 during full build (runs locally)
-        upload_audio_to_r2()
+        if not skip_r2:
+            upload_audio_to_r2()
     
     projects = get_projects()
     if not projects: return
@@ -283,5 +307,11 @@ def generate(target_id=None):
 
 if __name__ == "__main__":
     import sys
-    target = sys.argv[1] if len(sys.argv) > 1 else None
-    generate(target)
+    args = sys.argv[1:]
+    skip_r2 = False
+    if '--skip-r2' in args:
+        skip_r2 = True
+        args.remove('--skip-r2')
+        
+    target = args[0] if len(args) > 0 else None
+    generate(target, skip_r2)
