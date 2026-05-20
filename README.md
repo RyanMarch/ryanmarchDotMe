@@ -161,12 +161,10 @@ If `hasExtendedContent` is `true`, the compiler expects a matching HTML file in 
     gallery container to display comparisons.
 </p>
 
-<!-- Optional: Audio Player -->
-<!-- 
+<!-- Optional: Premium Audio Player (rewritten automatically to R2 in production!) -->
 <div class="custom-audio-player" data-title="Audio Track Title" data-subtitle="Artist/Description">
-    <audio src="https://media.ryanmarch.me/my-audio-track.mp3" preload="metadata"></audio>
+    <audio src="content/my-awesome-project/audio/my-audio-track.mp3" preload="metadata"></audio>
 </div>
--->
 
 <h4 id="details" class="section-divider"><span>Details & Skills</span></h4>
 <ul>
@@ -180,6 +178,36 @@ If `hasExtendedContent` is `true`, the compiler expects a matching HTML file in 
 * **Automatic Table of Contents:** The build script automatically parses all `<h4>` tags containing an `id` attribute (e.g., `<h4 id="journey" ...>`) and generates a beautiful, floating navigation bar at the top of the case study page! **Ensure you provide unique `id` values on your `<h4>` tags.**
 * **Automatic Lightbox:** Any image inside a `.project-gallery` container is automatically hooked up via JavaScript to open in a gorgeous, full-screen interactive lightbox when clicked.
 * **Audio Players:** To embed audios, use the `.custom-audio-player` template above. The script will render it as a custom, high-end player with custom scrubber timelines and volume toggles.
+
+---
+
+### Step 3.5: Adding High-Performance Audio (Zero-Bloat R2 Workflow)
+
+To prevent repository bloat and Cloudflare size limits, the build system automatically intercepts, uploads, and rewrites raw audio assets (`*.mp3`) using a seamless local-to-Cloudflare R2 workflow.
+
+#### How It Works
+1. **Zero Git Bloat:** All `*.mp3` files are automatically ignored by Git ([.gitignore](file:///Users/ryan/Sites/ryanmarchDotMe/.gitignore)) and Wrangler ([.assetsignore](file:///Users/ryan/Sites/ryanmarchDotMe/.assetsignore)). They will never be pushed to GitHub or Cloudflare's static server.
+2. **Local Previews:** You store and path the audio files locally. This allows you to run a local server and listen to your audios offline during development.
+3. **Automated Cloud Uploads:** When the local build script runs, it uses secure credentials ([dev/.r2_secrets.json](file:///Users/ryan/Sites/ryanmarchDotMe/dev/.r2_secrets.json)) to upload new/modified audios to your Cloudflare R2 bucket.
+4. **URL Rewriting:** The compiler rewrites the HTML paths to point to your high-performance CDN: `https://media.ryanmarch.me/<filename>.mp3`.
+
+#### Step-by-Step Audio Guide
+1. **Create an `audio/` folder** inside your project content directory: `content/my-awesome-project/audio/`
+2. **Save your MP3** inside that folder: `content/my-awesome-project/audio/my-audio-track.mp3`
+3. **Embed the local path** in your case study HTML fragment:
+   ```html
+   <div class="custom-audio-player" data-title="My Track" data-subtitle="My Description">
+       <audio src="content/my-awesome-project/audio/my-audio-track.mp3" preload="metadata"></audio>
+   </div>
+   ```
+4. **Save the file (`Cmd+S`)**:
+   - If using the VS Code auto-save task, the compiler runs in the background. It will automatically upload the MP3 to R2 and replace the paths in the generated `project/` directory.
+   - If running manually, execute the build command in your terminal:
+     ```bash
+     python3 dev/generate.py
+     ```
+5. **Verify and Push**: Once the compiler outputs the built page with the rewritten `https://media.ryanmarch.me/...` URL, push your code changes to GitHub. The staging and production environments will build and stream the audio perfectly!
+
 
 ---
 
