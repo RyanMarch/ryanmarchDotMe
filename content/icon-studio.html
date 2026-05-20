@@ -4,40 +4,58 @@
 
 <h4 id="the-product" class="section-divider"><span>The Product</span></h4>
 
-<p>Icon Studio is a professional, browser-based design suite engineered to craft beautiful, high-fidelity app icons. It offers a robust, user-friendly interface packed with powerful features and options, including frame options, mesh gradients, a searchable icon library, and instant dynamic sharing capabilities.</p>
+<p>Icon Studio is a professional, browser-based design suite engineered to craft beautiful, high-fidelity app icons. It
+    offers a robust, user-friendly interface packed with powerful features and options, including frame options, mesh
+    gradients, a searchable icon library, and instant dynamic sharing capabilities.</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
-        <img src="content/icon-studio/images/icon-studio-multi-theme-framed.png" alt="Icon Studio Multi-Theme Gallery" loading="lazy">
+        <img src="content/icon-studio/images/icon-studio-multi-theme-framed.png" alt="Icon Studio Multi-Theme Gallery"
+            loading="lazy">
         <div class="gallery-caption">Design and build icons in many styles, in dark or light modes, in seconds.</div>
     </div>
 </div>
 
-<p>Every element is optimized for real-time manipulation. The editor bridges the gap between complex graphic design software and speed, allowing developers and product teams to iterate rapidly and generate polished, production-ready assets in seconds.</p>
+<p>Every element is optimized for real-time manipulation. The editor bridges the gap between complex graphic design
+    software and speed, allowing developers and product teams to iterate rapidly and generate polished, production-ready
+    assets in seconds.</p>
 
 <h4 id="features" class="section-divider"><span>Key Features</span></h4>
 <p>Icon Studio wraps extensive design power inside an elegant, lightweight workspace:</p>
 
 <ul>
-    <li><strong>Skeuomorphic Finishes & Frames:</strong> Give icons realistic tactile depth with premium Glossy Shine, Metallic, Glassmorphism, Embossed, and bordered frames.</li>
-    <li><strong>Rich Background Engine:</strong> Craft complex visuals with support for Linear, Radial, Conic, and multi-color Mesh gradients, complete with adjustable angles, zoom, and noise textures.</li>
-    <li><strong>Precision Badge Controls:</strong> Snap custom badges to any corner. Select from Circle, RoundRect, Squircle, Hexagons, Diamond, or Shield shapes, and customize size, rotation, and icon scale.</li>
-    <li><strong>Searchable Icon Library:</strong> Deeply integrated with the Lucide Icon library, featuring persistent local indexing and smart suggestions for instant icon lookups.</li>
+    <li><strong>Skeuomorphic Finishes & Frames:</strong> Give icons realistic tactile depth with premium Glossy Shine,
+        Metallic, Glassmorphism, Embossed, and bordered frames.</li>
+    <li><strong>Rich Background Engine:</strong> Craft complex visuals with support for Linear, Radial, Conic, and
+        multi-color Mesh gradients, complete with adjustable angles, zoom, and noise textures.</li>
+    <li><strong>Precision Badge Controls:</strong> Snap custom badges to any corner. Select from Circle, RoundRect,
+        Squircle, Hexagons, Diamond, or Shield shapes, and customize size, rotation, and icon scale.</li>
+    <li><strong>Searchable Icon Library:</strong> Deeply integrated with the Lucide Icon library, featuring persistent
+        local indexing and smart suggestions for instant icon lookups.</li>
 </ul>
 
 <div class="project-gallery">
     <div class="gallery-item">
-        <img src="content/icon-studio/images/icon-studio-pwa.png" alt="Icon Studio Desktop Web App Workspace" loading="lazy">
+        <img src="content/icon-studio/images/icon-studio-pwa.png" alt="Icon Studio Desktop Web App Workspace"
+            loading="lazy">
         <div class="gallery-caption">Install to a device for the best editing experience.</div>
     </div>
 </div>
 
 <h4 id="engineering" class="section-divider"><span>Technical Architecture</span></h4>
-<p>Building a high-performance visual editor using a <strong>100% Vanilla JS stack</strong> required solving several key front-end engineering challenges:</p>
+<p>Building a high-performance visual editor using a <strong>100% Vanilla JS stack</strong> required solving several key
+    front-end engineering challenges:</p>
 
 <ul>
-    <li><strong>Custom Canvas 2D Pipeline:</strong> Traditional exporters often fail to correctly compile nested drop shadows, custom SVGs, and web fonts. This app solves this by parsing the editor DOM states onto a hidden HTML5 Canvas to output pixel-perfect, high-resolution 1024x1024 PNGs.</li>
-    <li><strong>Real-time URL Updates:</strong> Every slider value, color swatch, and custom text input is instantly added into the URL, making designs immediately shareable via a single link. No database required.</li>
-    <li><strong>Optimized PWA & Offline Support:</strong> A custom Service Worker caches search icons and Google Fonts for offline editing. Smart, device-aware install prompts encourage full-screen usage right from the user's dock.</li>
-    <li><strong>Adaptive Layout & Haptics:</strong> The app automatically transitions to a single-column layout with a persistent sticky preview on mobile. Sliding adjustments and button snaps trigger a native tactile haptic pulse.</li>
+    <li><strong>Custom Canvas 2D Pipeline:</strong> Traditional exporters often fail to correctly compile nested drop
+        shadows, custom SVGs, and web fonts. This app solves this by parsing the editor DOM states onto a hidden HTML5
+        Canvas to output pixel-perfect, high-resolution 1024x1024 PNGs.</li>
+    <li><strong>Real-time URL Updates:</strong> Every slider value, color swatch, and custom text input is instantly
+        added into the URL, making designs immediately shareable via a single link. No database required.</li>
+    <li><strong>Optimized PWA & Offline Support:</strong> A custom Service Worker caches search icons and Google Fonts
+        for offline editing. Smart, device-aware install prompts encourage full-screen usage right from the user's dock.
+    </li>
+    <li><strong>Adaptive Layout & Haptics:</strong> The app automatically transitions to a single-column layout with a
+        persistent sticky preview on mobile. Sliding adjustments and button snaps trigger a native tactile haptic pulse.
+    </li>
 </ul>

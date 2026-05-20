@@ -8,7 +8,11 @@ ehthumbs.db
 Thumbs.db
 
 # Dev-only notes (keep local, don't deploy)
-dev/
+dev/*
+!dev/generate.py
+!dev/project-template.html
+!dev/r2_cleanup.py
+projectsFromOldWebsite/
 
 # Code workspace files
 *.code-workspace
@@ -19,3 +23,10 @@ dev/
 !.dev.vars.example
 .env*
 !.env.example
+
+# Exclude large binary audio files from Git (they are uploaded to R2 automatically)
+*.mp3
+
+# Build/upload cache files
+dev/.r2_cache.json
+

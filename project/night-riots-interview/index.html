@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night Riots Interview | Ryan March</title>
+    <meta name="description" content="An exclusive on-tour artist interview broadcast on WXCU Radio.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="standalone-page" id="top">
+    <header class="slim-header">
+        <div class="slim-header-container">
+            <a href="/" class="slim-header-brand">
+                <div class="slim-avatar">RM</div>
+                <span class="slim-name">Ryan March</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
+        </div>
+    </header>
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div class="modal-content" id="modal-content-area">
+            <div class="tag-list modal-tags">
+                <span class="tag tag-blue">Audio Production</span>
+<span class="tag tag-cyan">Interview</span>
+<span class="tag tag-purple">Radio</span>
+<span class="tag tag-gold tag-priority-low">Podcast</span>
+<span class="tag tag-gray tag-priority-low">Archive</span>
+            </div>
+            <h2 class="project-title">Night Riots Interview</h2>
+<p class="project-subtitle">Podcast • Artist Interview</p>
+<p class="project-description">Audio Production & Recording • April 2015 • WXCU Radio</p>
+<nav class="project-nav"><div class="nav-links"><a href="#the-project">The Interview</a><a href="#station-identification">Station Identification</a><a href="#details">Details & Skills</a></div></nav>
+
+<h4 id="the-project" class="section-divider"><span>The Interview</span></h4>
+
+<p>Out on tour with The Mowgli's, alternative rock band Night Riots played at the A&R Music Bar in Columbus, Ohio on
+    April 7, 2015. WXCU DJs Ryan March and Maura O'Donnell had a chance to interview Matt (guitar, keyboard) and Mikel
+    (bass) before the show. Questions ranged from favorite tour foods, the writing process of their hit EP
+    <em>Howl</em>, and even their memorable Warped Tour Prom experiences.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img alt="Night Riots Interview Cover" src="content/night-riots-interview/images/nightRiots.jpg"
+            loading="lazy" />
+        <div class="gallery-caption">Promotional header artwork featuring alternative rockers Night Riots.</div>
+    </div>
+    <div class="gallery-item">
+        <img alt="Night Riots Interview Cover" src="content/night-riots-interview/images/nightRiotsInterview.jpg"
+            loading="lazy" />
+        <div class="gallery-caption">Artwork from WXCU Radio promoting the interview.</div>
+    </div>
+</div>
+
+<div class="custom-audio-player" data-title="Night Riots Interview" data-subtitle="WXCU Radio Exclusive">
+    <audio src="https://media.ryanmarch.me/night-riots-interview.mp3" preload="metadata"></audio>
+</div>
+
+<div style="display: flex; justify-content: center; margin: 2rem 0;">
+    <a class="project-btn" download="night-riots-interview.mp3"
+        href="https://media.ryanmarch.me/night-riots-interview.mp3">
+        <span>Download MP3</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        </svg>
+    </a>
+</div>
+
+<p>Take a listen to the full interview above and find out more about the band at <a href="https://nightriots.com/"
+        target="_blank" rel="noopener noreferrer">nightriots.com</a>.</p>
+
+<h4 id="station-identification" class="section-divider"><span>Station Identification</span></h4>
+
+<p>As a bonus, take a listen to the station identification spot featuring the band.</p>
+
+<div class="custom-audio-player" data-title="Night Riots Identification - WXCU Radio"
+    data-subtitle='featuring "Contagious"'>
+    <audio src="https://media.ryanmarch.me/nightRiotsSweeper-Contagious.mp3" preload="metadata"></audio>
+</div>
+
+<div style="display: flex; justify-content: center; margin: 2rem 0;">
+    <a class="project-btn" download="nightRiotsSweeper-Contagious.mp3"
+        href="https://media.ryanmarch.me/nightRiotsSweeper-Contagious.mp3">
+        <span>Download MP3</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        </svg>
+    </a>
+</div>
+
+<h4 id="details" class="section-divider"><span>Details & Skills</span></h4>
+
+<ul>
+    <li><strong>Tools Used:</strong> Zoom H4n Recorder, Pro Tools</li>
+    <li><strong>Skills Used:</strong> On-Air Interviewing, Live Field Recording, Vocal Leveling, Audio Editing, Audio
+        Post-Production, Interviewing</li>
+    <li><strong>Links:</strong> <a
+            href="https://web.archive.org/web/20150524034649/http://wxcuradio.com/interview-with-night-riots/"
+            target="_blank" rel="noopener noreferrer">WXCU Radio Interview (Archive)</a></li>
+</ul>
+            <div class="modal-footer-actions"><a href="#top" class="modal-back-to-top-btn">Back to Top</a></div>
+        </div>
+    </main>
+    <script src="/assets/js/theme.js" defer></script>
+    <script src="/assets/js/project-data.js" defer></script>
+    <script src="/assets/js/projects.js" defer></script>
+</body>
+</html>

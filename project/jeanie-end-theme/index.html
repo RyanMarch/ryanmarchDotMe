@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeanie - 'End Theme' | Ryan March</title>
+    <meta name="description" content="A highly atmospheric, stylized indie music video with custom digital lighting effects.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="standalone-page" id="top">
+    <header class="slim-header">
+        <div class="slim-header-container">
+            <a href="/" class="slim-header-brand">
+                <div class="slim-avatar">RM</div>
+                <span class="slim-name">Ryan March</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
+        </div>
+    </header>
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div class="modal-content" id="modal-content-area">
+            <div class="tag-list modal-tags">
+                <span class="tag tag-rose">Video Production</span>
+<span class="tag tag-gray tag-priority-low">Archive</span>
+            </div>
+            <h2 class="project-title">Jeanie - "End Theme"</h2>
+<p class="project-subtitle">Music Video</p>
+<p class="project-description">Directing, Production & Post-Effects • March 2015 • Big Guap Productions</p>
+<nav class="project-nav"><div class="nav-links"><a href="#the-project">The Project</a><a href="#details">Details & Skills</a></div></nav>
+
+<h4 id="the-project" class="section-divider"><span>The Project</span></h4>
+
+<p>A highly stylized music video for Jack Jeanie's "End Theme" featuring eye-catching experimental visuals, creative
+    storyboarding, and custom color-graded digital video effects. The video was filmed on location with multi-camera
+    setups to establish a unique atmospheric tone.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <iframe src="https://www.youtube-nocookie.com/embed/rnRzwg82gQE?rel=0&modestbranding=1"
+            title="Watch Jeanie's End Theme Music Video on YouTube"
+            style="aspect-ratio: 16/9; width: 100%; border-radius: 12px; border: 1px solid var(--img-border);"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <div class="gallery-caption">Watch Jeanie's "End Theme" Music Video on YouTube.</div>
+    </div>
+</div>
+
+<h4 id="details" class="section-divider"><span>Details & Skills</span></h4>
+
+<ul>
+    <li><strong>Tools Used:</strong> Nikon D3200, Adobe Premiere Pro</li>
+    <li><strong>Skills Used:</strong> Directing, Storyboarding, Acting, Video Post-Production, Video Editing, Creative
+        Direction, Color Grading</li>
+    <li><strong>Links:</strong> <a href="https://web.archive.org/web/20211020010006/https://youtu.be/rnRzwg82gQE"
+            target="_blank" rel="noopener noreferrer nofollow">Watch on YouTube (Archive)</a></li>
+</ul>
+            <div class="modal-footer-actions"><a href="#top" class="modal-back-to-top-btn">Back to Top</a></div>
+        </div>
+    </main>
+    <script src="/assets/js/theme.js" defer></script>
+    <script src="/assets/js/project-data.js" defer></script>
+    <script src="/assets/js/projects.js" defer></script>
+</body>
+</html>

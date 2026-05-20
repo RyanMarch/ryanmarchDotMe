@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Studio | Ryan March</title>
+    <meta name="description" content="A premium, web-based design toolkit for crafting custom app icons with rich gradients, skeuomorphic frames, and integrated badges.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="standalone-page" id="top">
+    <header class="slim-header">
+        <div class="slim-header-container">
+            <a href="/" class="slim-header-brand">
+                <div class="slim-avatar">RM</div>
+                <span class="slim-name">Ryan March</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
+        </div>
+    </header>
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div class="modal-content" id="modal-content-area">
+            <div class="tag-list modal-tags">
+                <span class="tag tag-gold">Recently Updated</span>
+<span class="tag tag-purple">Design Tool</span>
+<span class="tag tag-gray">Project</span>
+            </div>
+            <h2 class="project-title">Icon Studio</h2>
+<p class="project-subtitle">Icon Design Web App</p>
+<p class="project-description">Designer, Developer & Creative</p>
+<nav class="project-nav"><div class="nav-links"><a href="#the-product">The Product</a><a href="#features">Key Features</a><a href="#engineering">Technical Architecture</a><a href="#modal-footer-actions">Links</a></div></nav>
+
+<h4 id="the-product" class="section-divider"><span>The Product</span></h4>
+
+<p>Icon Studio is a professional, browser-based design suite engineered to craft beautiful, high-fidelity app icons. It
+    offers a robust, user-friendly interface packed with powerful features and options, including frame options, mesh
+    gradients, a searchable icon library, and instant dynamic sharing capabilities.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img src="content/icon-studio/images/icon-studio-multi-theme-framed.png" alt="Icon Studio Multi-Theme Gallery"
+            loading="lazy">
+        <div class="gallery-caption">Design and build icons in many styles, in dark or light modes, in seconds.</div>
+    </div>
+</div>
+
+<p>Every element is optimized for real-time manipulation. The editor bridges the gap between complex graphic design
+    software and speed, allowing developers and product teams to iterate rapidly and generate polished, production-ready
+    assets in seconds.</p>
+
+<h4 id="features" class="section-divider"><span>Key Features</span></h4>
+<p>Icon Studio wraps extensive design power inside an elegant, lightweight workspace:</p>
+
+<ul>
+    <li><strong>Skeuomorphic Finishes & Frames:</strong> Give icons realistic tactile depth with premium Glossy Shine,
+        Metallic, Glassmorphism, Embossed, and bordered frames.</li>
+    <li><strong>Rich Background Engine:</strong> Craft complex visuals with support for Linear, Radial, Conic, and
+        multi-color Mesh gradients, complete with adjustable angles, zoom, and noise textures.</li>
+    <li><strong>Precision Badge Controls:</strong> Snap custom badges to any corner. Select from Circle, RoundRect,
+        Squircle, Hexagons, Diamond, or Shield shapes, and customize size, rotation, and icon scale.</li>
+    <li><strong>Searchable Icon Library:</strong> Deeply integrated with the Lucide Icon library, featuring persistent
+        local indexing and smart suggestions for instant icon lookups.</li>
+</ul>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img src="content/icon-studio/images/icon-studio-pwa.png" alt="Icon Studio Desktop Web App Workspace"
+            loading="lazy">
+        <div class="gallery-caption">Install to a device for the best editing experience.</div>
+    </div>
+</div>
+
+<h4 id="engineering" class="section-divider"><span>Technical Architecture</span></h4>
+<p>Building a high-performance visual editor using a <strong>100% Vanilla JS stack</strong> required solving several key
+    front-end engineering challenges:</p>
+
+<ul>
+    <li><strong>Custom Canvas 2D Pipeline:</strong> Traditional exporters often fail to correctly compile nested drop
+        shadows, custom SVGs, and web fonts. This app solves this by parsing the editor DOM states onto a hidden HTML5
+        Canvas to output pixel-perfect, high-resolution 1024x1024 PNGs.</li>
+    <li><strong>Real-time URL Updates:</strong> Every slider value, color swatch, and custom text input is instantly
+        added into the URL, making designs immediately shareable via a single link. No database required.</li>
+    <li><strong>Optimized PWA & Offline Support:</strong> A custom Service Worker caches search icons and Google Fonts
+        for offline editing. Smart, device-aware install prompts encourage full-screen usage right from the user's dock.
+    </li>
+    <li><strong>Adaptive Layout & Haptics:</strong> The app automatically transitions to a single-column layout with a
+        persistent sticky preview on mobile. Sliding adjustments and button snaps trigger a native tactile haptic pulse.
+    </li>
+</ul>
+            <hr class="modal-footer-divider">
+<div class="modal-footer-actions" id="modal-footer-actions">
+    <a href="https://github.com/RyanMarch/iconStudio" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
+        <span>View More</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>
+    <a href="https://iconstudio.ryanmarch.me" class="project-btn modal-full-btn" target="_blank" rel="noopener noreferrer">
+        <span>Launch Icon Studio</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>
+    <a href="#top" class="modal-back-to-top-btn">Back to Top</a>
+</div>
+        </div>
+    </main>
+    <script src="/assets/js/theme.js" defer></script>
+    <script src="/assets/js/project-data.js" defer></script>
+    <script src="/assets/js/projects.js" defer></script>
+</body>
+</html>
