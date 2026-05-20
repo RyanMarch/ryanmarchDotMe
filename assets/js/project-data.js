@@ -15,7 +15,8 @@ const myProjects = [
         actionText: "Launch Motion Poster",
         actionUrl: "https://motionposter.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/motionEventPoster",
-        hasExtendedContent: false
+        hasExtendedContent: false,
+        showLaunchButton: true
     },
     {
         id: "bowserstack",
@@ -33,7 +34,8 @@ const myProjects = [
         actionText: "Launch Bowserstack",
         actionUrl: "https://bowserstack.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/bowserstack",
-        hasExtendedContent: false
+        hasExtendedContent: false,
+        showLaunchButton: true
     },
     {
         id: "rentpress",
@@ -104,7 +106,8 @@ const myProjects = [
         actionText: "Launch Icon Studio",
         actionUrl: "https://iconstudio.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/iconStudio",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: true
     },
     {
         id: "rentpress-data-hub",
@@ -287,7 +290,7 @@ const myProjects = [
     {
         id: "sbut-feel-right",
         title: "Sbut - 'Feel Right'",
-        subtitle: "Song Recording",
+        subtitle: "Recording & producing a cover of Mark Ronson & Mystikal's song.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Archive", color: "gray", priority: "low" }
@@ -303,7 +306,7 @@ const myProjects = [
     {
         id: "music-festival-radio-spot",
         title: "Music Festival Radio Spot",
-        subtitle: "Radio Sweeper",
+        subtitle: "Radio sweeper for an extremely loud concert.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Marketing", color: "orange" },
@@ -311,7 +314,7 @@ const myProjects = [
         ],
         featured: false,
         size: "small",
-        image: "",
+        image: "content/music-festival-radio-spot/images/radio-sweeper-artwork.jpg",
         imageClass: "destination-icon",
         actionText: "View Project",
         actionUrl: "",
@@ -320,7 +323,7 @@ const myProjects = [
     {
         id: "making-of-a-masterpiece",
         title: "Making of A Masterpiece",
-        subtitle: "Mockumentary Short Film",
+        subtitle: "A mockumentary short film produced in 24 hours.",
         tags: [
             { label: "Video Production", color: "rose" },
             { label: "Award-Winning", color: "gold" },
@@ -354,7 +357,7 @@ const myProjects = [
     {
         id: "fesss-mess-paris",
         title: "Fess's Mess - 'Paris'",
-        subtitle: "Song recording.",
+        subtitle: "Recording and mixing of Grace Potter's hit song.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Mixing", color: "indigo" },
@@ -385,109 +388,4 @@ const myProjects = [
         actionUrl: "",
         hasExtendedContent: true
     }
-    // {
-    //     id: "nonstop-megakill-deathblood-slaughterfest-facemelter-20-two-point-oh",
-    //     title: "Nonstop Megakill Deathblood Slaughterfest Facemelter 2.0 (TWO POINT OH)",
-    //     subtitle: "Radio Sweeper",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "making-of-a-masterpiece",
-    //     title: "Making of A Masterpiece",
-    //     subtitle: "Mockumentary",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "wxcu-radio",
-    //     title: "WXCU Radio",
-    //     subtitle: "Radio Station",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "chris-jamison-unaware",
-    //     title: "Chris Jamison - 'Unaware'",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "chris-jamison-treasure",
-    //     title: "Chris Jamison - 'Treasure'",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "fesss-mess-paris",
-    //     title: "Fess's Mess - Paris",
-    //     subtitle: "Cover",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // },
-    // {
-    //     id: "furniture-bank-promo",
-    //     title: "Furniture Bank Promo",
-    //     subtitle: "Non-Profit Promo",
-    //     tags: [
-    //         { label: "Archive", color: "gray" }
-    //     ],
-    //     featured: false,
-    //     size: "medium",
-    //     image: "",
-    //     imageClass: "destination-icon",
-    //     actionText: "View Project",
-    //     actionUrl: "",
-    //     hasExtendedContent: true
-    // }
 ];
