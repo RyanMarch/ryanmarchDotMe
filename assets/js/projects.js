@@ -319,8 +319,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const tagsHtml = buildTagsHtml(project.tags);
 
             let actionsHtml = '';
-            if (project.hasExtendedContent) {
-                // ONLY Read More button if extended content exists (navigates naturally!)
+            if (project.showLaunchButton && project.hasExtendedContent) {
+                // TWO buttons: Launch (Primary) & Read More (Secondary)
+                actionsHtml = `
+                    <a href="${project.actionUrl}" class="project-btn" target="_blank" rel="noopener noreferrer">
+                        <span>${project.actionText}</span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+                    </a>
+                    <a href="/project/${project.id}/" class="project-btn btn-secondary read-more-btn" data-project-id="${project.id}">
+                        <span>Read More</span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </a>
+                `;
+            } else if (project.hasExtendedContent) {
+                // ONE button: Read More (Primary)
                 actionsHtml = `
                     <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}">
                         <span>Read More</span>
@@ -328,6 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </a>
                 `;
             } else if (project.actionUrl) {
+                // ONE button: Launch (Primary)
                 actionsHtml = `
                     <a href="${project.actionUrl}" class="project-btn" target="_blank" rel="noopener noreferrer">
                         <span>${project.actionText}</span>
@@ -335,10 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     </a>
                 `;
             }
-
-            let sourceHtml = (project.sourceUrl && !project.hasExtendedContent)
-                ? `<a href="${project.sourceUrl}" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>`
-                : '';
 
             let visualHtml = '';
             if (project.image) {
@@ -370,7 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p>${project.subtitle}</p>
                     <div class="destination-actions">
                         ${actionsHtml}
-                        ${sourceHtml}
                     </div>
                 </div>
                 <div class="${project.featured ? 'destination-standalone-visual' : 'destination-visual'}">
@@ -619,8 +627,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = e.target.closest('.destination-card');
             if (!card) return;
 
-            // External links and source links navigate on their own
-            if (e.target.closest('.project-btn:not(.read-more-btn), .project-link')) {
+            // External links navigate on their own
+            if (e.target.closest('.project-btn:not(.read-more-btn)')) {
                 return;
             }
 
