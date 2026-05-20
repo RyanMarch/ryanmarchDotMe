@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'dark'; 
+            if (theme === 'system') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion Poster | Ryan March</title>
+    <meta name="description" content="Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body class="standalone-page" id="top">
+    <header class="slim-header">
+        <div class="slim-header-container">
+            <a href="/" class="slim-header-brand">
+                <div class="slim-avatar">RM</div>
+                <span class="slim-name">Ryan March</span>
+            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
+        </div>
+    </header>
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+    <main>
+        <div class="modal-content" id="modal-content-area">
+            <div class="tag-list modal-tags">
+                <span class="tag tag-gold">Recently Updated</span>
+<span class="tag tag-purple">Digital Signage</span>
+<span class="tag tag-gray">Project</span>
+            </div>
+            <h2 class="project-title">Motion Poster</h2>
+<p class="project-subtitle">Atmospheric Digital Event Display</p>
+<p class="project-description">Creator, Designer, Developer</p>
+<nav class="project-nav"><div class="nav-links"><a href="#the-product">The Product</a><a href="#curated-themes">Curated Visual Themes</a><a href="#live-customization">Live Editor & Name Management</a><a href="#technical-architecture">Event-Day Reliability</a><a href="#modal-footer-actions">Links</a></div></nav>
+
+<h4 id="the-product" class="section-divider"><span>The Product</span></h4>
+<p><strong>Motion Poster</strong> is an easy-to-use, browser-based digital signage solution designed for fundraisers,
+    galas, and corporate gatherings. It transforms static event displays into dynamic, interactive art that acts as a
+    living, breathing centerpiece to elevate the atmosphere of any physical space.</p>
+
+<p>Built with a "set and forget" philosophy, it allows event hosts to customize text, branding, and layouts in
+    real-time. The display updates inside the browser without requiring developer support, server deploys, or an active
+    internet connection during the event.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/eventPoster.png" alt="Motion Poster Spring Blossom Theme Preview"
+            loading="lazy">
+        <div class="gallery-caption">Living Centerpiece: The Spring Blossom theme layers organic falling cherry blossom
+            particles behind an elegant typography layout.</div>
+    </div>
+</div>
+
+<h4 id="curated-themes" class="section-divider"><span>Curated Visual Themes</span></h4>
+<p>Instantly adapt to any brand identity or event mood. Motion Poster features <strong>five built-in visual
+        environments</strong>, each delivering a carefully styled combination of fluid background physics, premium
+    typography layouts, and ornamental frames:</p>
+
+<ul>
+    <li><strong>Spring Blossom:</strong> Soft cherry blossom petals drifting gracefully over a floral watercolor
+        backdrop.</li>
+    <li><strong>Digital Grid:</strong> A high-tech neon matrix with glowing coordinate beams—perfect for tech
+        conferences and hackathons.</li>
+    <li><strong>Alpine Winter:</strong> Frosted window borders and tumbling snowflakes framed in rustic wood textures.
+    </li>
+    <li><strong>Vintage Radio:</strong> Warm glow particles and nostalgic wood grain surrounding a mechanical tuning
+        dial.</li>
+    <li><strong>Corporate Pro:</strong> Clean, minimalist gradients and sleek geometric lines designed for upscale
+        business forums.</li>
+</ul>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/poster-digital.png" alt="Digital Grid Theme Design Showcase"
+            loading="lazy">
+        <div class="gallery-caption">Digital Grid</div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/poster-winter.png" alt="Alpine Winter Theme Design Showcase"
+            loading="lazy">
+        <div class="gallery-caption">Alpine Winter
+        </div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/poster-radio.png" alt="Vintage Radio Theme Design Showcase"
+            loading="lazy">
+        <div class="gallery-caption">Vintage Radio</div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/poster-corporate.png" alt="Corporate Pro Theme Design Showcase"
+            loading="lazy">
+        <div class="gallery-caption">Corporate Pro
+        </div>
+    </div>
+</div>
+
+<h4 id="live-customization" class="section-divider"><span>Live Editor & Name Management</span></h4>
+<p>Adjust settings seamlessly on the fly using a slide-out control drawer. Accessible via keyboard shortcuts or a
+    discreet corner tap, the editor empowers hosts to calibrate the display in real-time without disrupting the viewer
+    experience:</p>
+
+<ul>
+    <li><strong>Drag-and-Drop Branding:</strong> Upload logos and donation QR codes directly in the browser—saved
+        locally to load instantly, even when offline.</li>
+    <li><strong>Smart Typography Layouts:</strong> An auto-scaling host list engine that fits between 5 and 50 names
+        perfectly, automatically adjusting padding and font sizes across centered, justified, or multi-column grids.
+    </li>
+    <li><strong>On-Screen Touch Correction:</strong> Tap and hold a name directly on the display to instantly remove
+        it—perfect for making quick typo fixes or last-minute additions—with full undo history in the panel.</li>
+    <li><strong>Live Aesthetic Calibrations:</strong> Quick-adjust sliders for background transparency, margin spacing,
+        text sizes, custom color matching, and frame-rate limits.</li>
+</ul>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/mgmt-main.png" alt="Main Management Control Drawer" loading="lazy">
+        <div class="gallery-caption">Quick Controls Panel: Real-time FPS monitoring, wake lock, primary settings
+            toggles.</div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/mgmt-hosts.png" alt="Host Committee Real-time Editor" loading="lazy">
+        <div class="gallery-caption">Host Name Management: Live editing of host names with automatic duplicate
+            filtering.</div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/mgmt-content.png" alt="Logo Branding & QR Code Content Editor"
+            loading="lazy">
+        <div class="gallery-caption">Branding and Content: Live text configurations, logo and QR code
+            upload fields.</div>
+    </div>
+    <div class="gallery-item">
+        <img src="content/motion-poster/images/mgmt-appearance.png" alt="Visual Adjustments and Performance Sliders"
+            loading="lazy">
+        <div class="gallery-caption">Appearance Customizer: Control particle speeds, counts, margins, backdrops,
+            layouts, and more.</div>
+    </div>
+</div>
+
+<h4 id="technical-architecture" class="section-divider"><span>Event-Day Reliability</span></h4>
+<p>A digital kiosk must be rock solid on event day. Motion Poster is built to run continuously and
+    autonomously, eliminating the stress of live tech glitches:</p>
+
+<ul>
+    <li><strong>Screen Wake Lock:</strong> Automatically blocks screensavers and sleep modes, keeping the display
+        perfectly active and bright for the entire event.</li>
+    <li><strong>Instant State Recovery:</strong> Remembers all customized text and settings, automatically relaunching
+        in full-screen presentation mode if a browser or kiosk power flicker occurs.</li>
+    <li><strong>Fluid Multi-Device Scaling:</strong> Buttery-smooth graphics optimized to scale beautifully from mobile
+        tablets to large 4K TV displays.</li>
+    <li><strong>100% Offline Resilience:</strong> The application runs fully client-side, ensuring the display never
+        freezes or turns blank even if the venue loses internet connectivity entirely.</li>
+</ul>
+
+<div class="diagram-title-wrapper">
+    <span class="diagram-title-label">Technical Specifications</span>
+</div>
+<ul class="specs-list">
+    <li><strong>Language Core:</strong> Vanilla ES6+ Javascript, HTML5, CSS3</li>
+    <li><strong>Rendering Pipeline:</strong> Dynamic HTML5 Canvas 2D &amp; hardware-accelerated CSS transforms</li>
+    <li><strong>Asset Persistence:</strong> LocalStorage using Base64 data-URI media serialization</li>
+    <li><strong>System Integration:</strong> Screen Wake Lock API (with silent video loop fallback) and Fullscreen API
+    </li>
+    <li><strong>Device Targets:</strong> Pixel-perfect fluid scaling optimized for 1080p and 4K digital signage</li>
+</ul>
+            <hr class="modal-footer-divider">
+<div class="modal-footer-actions" id="modal-footer-actions">
+    <a href="https://github.com/RyanMarch/motionEventPoster" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
+        <span>View More</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>
+    <a href="https://motionposter.ryanmarch.me" class="project-btn modal-full-btn" target="_blank" rel="noopener noreferrer">
+        <span>Launch Motion Poster</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>
+    <a href="#top" class="modal-back-to-top-btn">Back to Top</a>
+</div>
+        </div>
+    </main>
+    <script src="/assets/js/theme.js" defer></script>
+    <script src="/assets/js/project-data.js" defer></script>
+    <script src="/assets/js/projects.js" defer></script>
+</body>
+</html>
