@@ -208,8 +208,19 @@ To prevent repository bloat and Cloudflare size limits, the build system automat
      ```
 5. **Verify and Push**: Once the compiler outputs the built page with the rewritten `https://media.ryanmarch.me/...` URL, push your code changes to GitHub. The staging and production environments will build and stream the audio perfectly!
 
+#### Cleaning Up Old/Renamed Audio Files Safely
+If you delete a project, rename an MP3 file, or remove an audio track locally, the file remains stored securely in your Cloudflare R2 bucket to prevent breaking historical links.
+
+To safely prune these orphaned files without logging into the Cloudflare dashboard, we've created an interactive cleanup utility:
+1. Open your terminal in the repository root directory.
+2. Run the interactive cleanup command:
+   ```bash
+   python3 dev/r2_cleanup.py
+   ```
+3. The script connects to Cloudflare R2, compares it to your local files, lists any orphaned audio files, and prompts you for confirmation before safely deleting them.
 
 ---
+
 
 ### Step 4: Build and Verify
 Once you've updated `project-data.js` and created your `content/<id>.html` file:
