@@ -15,7 +15,7 @@ const myProjects = [
         actionText: "Launch Motion Poster",
         actionUrl: "https://motionposter.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/motionEventPoster",
-        hasExtendedContent: false,
+        hasExtendedContent: true,
         showLaunchButton: true
     },
     {
