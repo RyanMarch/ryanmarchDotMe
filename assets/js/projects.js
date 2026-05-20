@@ -1,15 +1,15 @@
 function initializeCustomAudioPlayers(container) {
     const players = container.querySelectorAll('.custom-audio-player');
-    
+
     players.forEach(player => {
         const initialAudio = player.querySelector('audio');
         if (!initialAudio) return;
-        
+
         const src = initialAudio.getAttribute('src');
         const title = player.getAttribute('data-title') || 'Audio Track';
         const subtitle = player.getAttribute('data-subtitle') || 'Local File';
-        
-        // Dynamically build premium Spotify player UI inside the container.
+
+        // Dynamically build audio player UI inside the container.
         player.innerHTML = `
             <audio src="${src}" preload="metadata"></audio>
             
@@ -52,7 +52,7 @@ function initializeCustomAudioPlayers(container) {
                 <div class="player-right-spacer"></div>
             </div>
         `;
-        
+
         const audio = player.querySelector('audio');
         const playPauseBtn = player.querySelector('.player-play-pause');
         const iconPlay = player.querySelector('.icon-play');
@@ -142,7 +142,7 @@ function initializeCustomAudioPlayers(container) {
                 const clickX = e.clientX - rect.left;
                 const width = rect.width;
                 const percent = Math.min(Math.max(clickX / width, 0), 1);
-                
+
                 if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
                     audio.currentTime = percent * audio.duration;
                     if (progressBar) progressBar.style.width = `${percent * 100}%`;
@@ -172,10 +172,10 @@ function initializeCustomAudioPlayers(container) {
                 const clickX = e.clientX - rect.left;
                 const width = rect.width;
                 const percent = Math.min(Math.max(clickX / width, 0), 1);
-                
+
                 audio.volume = percent;
                 if (volumeSliderBar) volumeSliderBar.style.width = `${percent * 100}%`;
-                
+
                 if (percent === 0) {
                     audio.muted = true;
                     if (iconVolume) iconVolume.style.display = 'none';
@@ -264,18 +264,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 pill.className = `filter-pill${cat.id === 'all' ? ' active' : ''}`;
                 pill.setAttribute('data-category', cat.id);
                 pill.innerHTML = `${cat.label}`;
-                
+
                 pill.addEventListener('click', () => {
                     if (pill.classList.contains('active')) return;
-                    
+
                     // Toggle active class on pills
                     filterPillsContainer.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
                     pill.classList.add('active');
-                    
+
                     // Filter the projects
                     filterProjects(cat.id);
                 });
-                
+
                 filterPillsContainer.appendChild(pill);
             });
 
@@ -283,21 +283,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const updateScrollFade = () => {
                 const scrollLeft = filterPillsContainer.scrollLeft;
                 const maxScrollLeft = filterPillsContainer.scrollWidth - filterPillsContainer.clientWidth;
-                
+
                 // Use a small 2px threshold to avoid subpixel rounding issues on some screens
                 if (scrollLeft > 2) {
                     filterPillsContainer.classList.add('scrolled-left');
                 } else {
                     filterPillsContainer.classList.remove('scrolled-left');
                 }
-                
+
                 if (scrollLeft < maxScrollLeft - 2) {
                     filterPillsContainer.classList.add('scrolled-right');
                 } else {
                     filterPillsContainer.classList.remove('scrolled-right');
                 }
             };
-            
+
             filterPillsContainer.addEventListener('scroll', updateScrollFade);
             // Run initial check after rendering (slight delay to let CSS rendering happen)
             setTimeout(updateScrollFade, 50);
@@ -309,15 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
             card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
-            
+
             // Map matching categories to this card for fast filtering
             const matchingCats = filterCategories
                 .filter(cat => cat.match(project))
                 .map(cat => cat.id);
             card.setAttribute('data-categories', matchingCats.join(' '));
-            
+
             const tagsHtml = buildTagsHtml(project.tags);
-            
+
             let actionsHtml = '';
             if (project.hasExtendedContent) {
                 // ONLY Read More button if extended content exists (navigates naturally!)
@@ -336,8 +336,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
 
-            let sourceHtml = (project.sourceUrl && !project.hasExtendedContent) 
-                ? `<a href="${project.sourceUrl}" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>` 
+            let sourceHtml = (project.sourceUrl && !project.hasExtendedContent)
+                ? `<a href="${project.sourceUrl}" class="project-link" target="_blank" rel="noopener noreferrer">View Source</a>`
                 : '';
 
             let visualHtml = '';
@@ -354,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>`;
                 }
-                
+
                 const hubClass = project.symbol === 'hub' ? ' hub-motif' : '';
                 visualHtml = `<div class="project-placeholder-icon${hubClass}">${iconSvg}</div>`;
             }
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                      ${visualHtml}
                 </div>
             `;
-            
+
             grid.appendChild(card);
         });
     }
@@ -394,11 +394,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function filterProjects(categoryId) {
         const cards = grid.querySelectorAll('.destination-card');
-        
+
         // Temporarily lock the grid height to prevent sudden layout collapses during the FLIP transition
         const currentGridHeight = grid.getBoundingClientRect().height;
         grid.style.minHeight = `${currentGridHeight}px`;
-        
+
         // 1. Record the "First" state of currently visible cards
         const firstPositions = new Map();
         cards.forEach(card => {
@@ -416,12 +416,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         });
-        
+
         // 2. Update classes to trigger reflow instantly so browser knows final positions
         cards.forEach(card => {
             const categories = card.getAttribute('data-categories').split(' ');
             const matches = categories.includes(categoryId);
-            
+
             if (matches) {
                 if (card.classList.contains('filtered-out')) {
                     card.classList.remove('filtered-out');
@@ -432,23 +432,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.style.display = 'none'; // Instantly hide exiting cards
             }
         });
-        
+
         // 3. Force layout recalculation and set the "Invert" state
         requestAnimationFrame(() => {
             cards.forEach(card => {
                 const first = firstPositions.get(card);
-                
+
                 if (card.classList.contains('filtered-out')) {
                     return; // Skip hidden cards
                 }
-                
+
                 const rect = card.getBoundingClientRect();
-                
+
                 if (first.wasVisible) {
                     // Shifting element: calculate transition from its exact previous position
                     const deltaX = first.left - rect.left;
                     const deltaY = first.top - rect.top;
-                    
+
                     if (deltaX !== 0 || deltaY !== 0) {
                         card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
                         card.style.transition = 'none';
@@ -460,17 +460,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     card.style.transition = 'none';
                 }
             });
-            
+
             // 4. "Play" phase: trigger the transitions in the next layout frame
             requestAnimationFrame(() => {
                 cards.forEach(card => {
                     if (card.classList.contains('filtered-out')) return;
-                    
+
                     card.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
                     card.style.transform = '';
                     card.style.opacity = '1';
                 });
-                
+
                 // Clean up inline styles after transition completes to restore default CSS hover and transition behaviors
                 setTimeout(() => {
                     cards.forEach(card => {
@@ -504,13 +504,45 @@ document.addEventListener('DOMContentLoaded', () => {
         lightbox.focus();
     }
 
+    function openDiagramLightbox(src, captionText) {
+        if (!lightbox) return;
+        if (lightboxImg) lightboxImg.style.display = 'none';
+        if (lightboxCaption) {
+            lightboxCaption.textContent = captionText || '';
+            lightboxCaption.style.display = captionText ? 'block' : 'none';
+        }
+        let lightboxIframe = lightbox.querySelector('.lightbox-iframe');
+        if (!lightboxIframe) {
+            lightboxIframe = document.createElement('iframe');
+            lightboxIframe.className = 'lightbox-iframe';
+            const container = lightbox.querySelector('.lightbox-container');
+            container.insertBefore(lightboxIframe, lightboxCaption);
+        }
+        lightboxIframe.src = src + '?lightbox=true';
+        lightboxIframe.style.display = 'block';
+        lightbox.classList.add('open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        lightbox.focus();
+    }
+
     function closeLightbox() {
         if (!lightbox) return;
         lightbox.classList.remove('open');
         lightbox.setAttribute('aria-hidden', 'true');
         setTimeout(() => {
-            if (lightboxImg) lightboxImg.src = '';
-            if (lightboxCaption) lightboxCaption.textContent = '';
+            if (lightboxImg) {
+                lightboxImg.src = '';
+                lightboxImg.style.display = 'block';
+            }
+            if (lightboxCaption) {
+                lightboxCaption.textContent = '';
+                lightboxCaption.style.display = 'none';
+            }
+            const lightboxIframe = lightbox.querySelector('.lightbox-iframe');
+            if (lightboxIframe) {
+                lightboxIframe.src = '';
+                lightboxIframe.style.display = 'none';
+            }
         }, 400);
     }
 
@@ -525,6 +557,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // searchRoot lets hash links be resolved within a scoped container (e.g. SPA frame).
     function setupContentClicks(container, searchRoot) {
         container.addEventListener('click', (e) => {
+            // Handle Diagram click to open lightbox
+            const diagramSection = e.target.closest('.diagram-section');
+            if (diagramSection) {
+                e.stopPropagation();
+                const iframe = diagramSection.querySelector('iframe');
+                if (iframe) {
+                    const caption = diagramSection.nextElementSibling;
+                    const captionText = (caption && caption.classList.contains('gallery-caption')) ? caption.textContent : '';
+                    openDiagramLightbox(iframe.getAttribute('src'), captionText);
+                }
+                return;
+            }
+
             // 1. Handle Lightbox for images
             if (e.target.tagName === 'IMG') {
                 e.stopPropagation();

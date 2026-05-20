@@ -14,18 +14,42 @@
     },
     "liveServer.settings.ignoreFiles": [
         "**/.git/**",
+        ".git/**",
         "**/.vscode/**",
+        ".vscode/**",
         "**/.DS_Store",
-        "**/node_modules/**"
+        "**/.DS_Store?",
+        "**/._*",
+        "**/.Spotlight-V100/**",
+        "**/.Trashes/**",
+        "**/node_modules/**",
+        "node_modules/**",
+        "**/content/**",
+        "content/**",
+        "**/assets/js/project-data.js",
+        "assets/js/project-data.js",
+        "**/dev/**",
+        "dev/**",
+        "**/.wrangler/**",
+        ".wrangler/**",
+        "sitemap.xml",
+        "robots.txt",
+        "package.json",
+        "package-lock.json",
+        "wrangler.jsonc",
+        ".gitignore",
+        "README.md"
     ],
     "liveServer.settings.wait": 1000,
 
     // --- Auto-Compilation Extensions Settings ---
     // Option 1: For "Trigger Task on Save" extension (ID: gardne.trigger-task-on-save)
+    "triggerTaskOnSave.on": true,
+    "triggerTaskOnSave.showNotifications": true,
     "triggerTaskOnSave.tasks": {
         "Build Project Pages": [
-            "content/*.html",
-            "assets/js/project-data.js"
+            "**/content/*.html",
+            "**/assets/js/project-data.js"
         ]
     },
 

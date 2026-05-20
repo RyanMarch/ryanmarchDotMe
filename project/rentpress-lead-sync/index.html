@@ -19,17 +19,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
 </head>
-<body class="standalone-page">
+<body class="standalone-page" id="top">
     <header class="slim-header">
         <div class="slim-header-container">
             <a href="/" class="slim-header-brand">
                 <div class="slim-avatar">RM</div>
                 <span class="slim-name">Ryan March</span>
             </a>
-            <a href="/" class="back-btn" aria-label="Back to homepage">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span>Back</span>
-            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
         </div>
     </header>
     <div class="background-container">
@@ -49,13 +51,17 @@
 <nav class="project-nav"><div class="nav-links"><a href="#the-product">The Product</a><a href="#key-features">Key Features</a><a href="#my-role">My Role & Impact</a><a href="#screenshots">Settings Screenshots</a><a href="#modal-footer-actions">Links</a></div></nav>
 
 <h4 id="the-product" class="section-divider"><span>The Product</span></h4>
-<p>RentPress Lead Sync Add-on bridges the gap between a property's website and their leasing office. Experience seamless lead delivery at the moment it matters most: getting that lead into the CRM quickly and accurately is what drives leases.</p>
-<p>This add-on allows marketers to use the power and flexibility of popular form-building tools while ensuring every submission flows seamlessly into industry-standard CRMs without requiring custom API development for every site.</p>
+<p>RentPress Lead Sync Add-on bridges the gap between a property's website and their leasing office. Experience seamless
+    lead delivery at the moment it matters most: getting that lead into the CRM quickly and accurately is what drives
+    leases.</p>
+<p>This add-on allows marketers to use the power and flexibility of popular form-building tools while ensuring every
+    submission flows seamlessly into industry-standard CRMs without requiring custom API development for every site.</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
         <div class="gallery-image-container">
-        <img src="content/rentpress-lead-sync/images/lead-sync-diagram.webp" alt="RentPress Lead Sync Integration" loading="lazy">
+            <img src="content/rentpress-lead-sync/images/lead-sync-diagram.webp" alt="RentPress Lead Sync Integration"
+                loading="lazy">
         </div>
         <div class="gallery-caption">Automated Lead Flow From Website to CRM</div>
     </div>
@@ -63,45 +69,58 @@
 
 <h4 id="key-features" class="section-divider"><span>Key Features</span></h4>
 <ul>
-    <li><strong>Broad CRM Support:</strong> Direct integrations with the most popular multifamily CRMs, including RentCafe, Entrata, Knock, Funnel, AppFolio, and Anyone Home.</li>
-    <li><strong>Flexible Field Mapping:</strong> A custom interface to map any form field to CRM-specific attributes, including custom lead sources and move-in dates.</li>
-    <li><strong>Multi-Destination Routing:</strong> Send a single form submission to multiple CRMs or notification services simultaneously.</li>
-    <li><strong>Advanced Troubleshooting:</strong> Built-in API response logging and submission tracking to ensure no lead is ever lost.</li>
-    <li><strong>Dynamic Data Population:</strong> Automatically pass property, floor plan, and unit-specific data from RentPress templates into hidden form fields for better attribution.</li>
+    <li><strong>Broad CRM Support:</strong> Direct integrations with the most popular multifamily CRMs, including
+        RentCafe, Entrata, Knock, Funnel, AppFolio, and Anyone Home.</li>
+    <li><strong>Flexible Field Mapping:</strong> A custom interface to map any form field to CRM-specific attributes,
+        including custom lead sources and move-in dates.</li>
+    <li><strong>Multi-Destination Routing:</strong> Send a single form submission to multiple CRMs or notification
+        services simultaneously.</li>
+    <li><strong>Advanced Troubleshooting:</strong> Built-in API response logging and submission tracking to ensure no
+        lead is ever lost.</li>
+    <li><strong>Dynamic Data Population:</strong> Automatically pass property, floor plan, and unit-specific data from
+        RentPress templates into hidden form fields for better attribution.</li>
 </ul>
 
 <div class="project-gallery">
     <div class="gallery-item">
         <div class="gallery-image-container">
-            <img src="content/rentpress-lead-sync/images/lead-sync-banner.png" alt="RentPress Lead Sync Banner" loading="lazy">
+            <img src="content/rentpress-lead-sync/images/lead-sync-banner.png" alt="RentPress Lead Sync Banner"
+                loading="lazy">
         </div>
         <div class="gallery-caption">Marketing Banner</div>
     </div>
 </div>
 
 <h4 id="my-role" class="section-divider"><span>My Role & Impact</span></h4>
-<p>As the Product Manager, I defined the roadmap for our integrations ecosystem. My focus was on reviewing the details of multifamily APIs and turning them into a user-friendly interface that anybody could easily configure.</p>
+<p>As the Product Manager, I defined the roadmap for our integrations ecosystem. My focus was on reviewing the details
+    of multifamily APIs and turning them into a user-friendly interface that anybody could easily configure.</p>
 <br>
 <p>My key contributions included:</p>
 <ul>
-    <li><strong>API Strategy:</strong> Researched and documented the technical requirements for each CRM partner, managing the authentication and data mapping logic for multiple enterprise-scale APIs.</li>
-    <li><strong>Product Development:</strong> Led the engineering team through the development of the mapping UI, ensuring it was flexible enough for power users and simple enough for standard property setups.</li>
-    <li><strong>Conversion Optimization:</strong> Implemented the "API Response" logging feature, allowing clients to see why a lead might have been rejected by a CRM (e.g., missing required fields), which significantly reduced "lost lead" support tickets.</li>
-    <li><strong>Documentation & Enablement:</strong> Authored the comprehensive support documentation and training materials to empower our operations team to deploy lead sync across hundreds of sites.</li>
+    <li><strong>API Strategy:</strong> Researched and documented the technical requirements for each CRM partner,
+        managing the authentication and data mapping logic for multiple enterprise-scale APIs.</li>
+    <li><strong>Product Development:</strong> Led the engineering team through the development of the mapping UI,
+        ensuring it was flexible enough for power users and simple enough for standard property setups.</li>
+    <li><strong>Conversion Optimization:</strong> Implemented the "API Response" logging feature, allowing clients to
+        see why a lead might have been rejected by a CRM (e.g., missing required fields), which significantly reduced
+        "lost lead" support tickets.</li>
+    <li><strong>Documentation & Enablement:</strong> Authored the comprehensive support documentation and training
+        materials to empower our operations team to deploy lead sync across hundreds of sites.</li>
 </ul>
 
 <h4 id="screenshots" class="section-divider"><span>Settings Screenshots</span></h4>
 <div class="project-gallery">
     <div class="gallery-item">
-        <img src="content/rentpress-lead-sync/images/mapping-settings.png" alt="RentPress Lead Sync Mapping Settings" loading="lazy">
+        <img src="content/rentpress-lead-sync/images/mapping-settings.png" alt="RentPress Lead Sync Mapping Settings"
+            loading="lazy">
         <div class="gallery-caption">Customizable Field Mapping Interface</div>
     </div>
     <div class="gallery-item">
-        <img src="content/rentpress-lead-sync/images/multi-destination.png" alt="Multi-Destination Support" loading="lazy">
+        <img src="content/rentpress-lead-sync/images/multi-destination.png" alt="Multi-Destination Support"
+            loading="lazy">
         <div class="gallery-caption">Simultaneous Lead Delivery to Multiple CRMs</div>
     </div>
 </div>
-
             <hr class="modal-footer-divider">
 <div class="modal-footer-actions" id="modal-footer-actions">
     <a href="https://support.30lines.com/documentation/rentpress-gravity-forms-add-on/" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
@@ -112,24 +131,11 @@
         <span>View Plugin</span>
         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
     </a>
-    <a href="/" class="modal-back-to-top-btn">Back to Home</a>
+    <a href="#top" class="modal-back-to-top-btn">Back to Top</a>
 </div>
         </div>
     </main>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-    </button>
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
-            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
-            else document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    </script>
+    <script src="/assets/js/theme.js" defer></script>
     <script src="/assets/js/project-data.js" defer></script>
     <script src="/assets/js/projects.js" defer></script>
 </body>
