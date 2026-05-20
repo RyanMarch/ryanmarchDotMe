@@ -34,10 +34,172 @@
         }
 
         .hub-diagram-container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 0 1rem; /* No top/bottom padding */
+            width: 720px;
             position: relative;
+            flex-shrink: 0;
+        }
+
+        /* Responsive Layout Overrides for Lightbox on Desktop */
+        body.in-lightbox .hub-diagram-container {
+            width: 950px;
+            transform: scale(1.35);
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 1200px) {
+            body.in-lightbox .hub-diagram-container {
+                transform: scale(1.2);
+            }
+        }
+
+        @media (max-height: 800px) and (min-width: 951px) {
+            body.in-lightbox .hub-diagram-container {
+                transform: scale(1.15);
+            }
+        }
+
+        /* Responsive Scaling for Small Viewports (Standard Content & Lightbox) */
+        @media (max-width: 950px) {
+            body {
+                display: block;
+                position: relative;
+            }
+            .hub-diagram-container {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 720px !important;
+                transform: translate(-50%, -50%) scale(0.72) !important;
+                transform-origin: center center;
+                transition: transform 0.3s ease;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hub-diagram-container {
+                transform: translate(-50%, -50%) scale(0.58) !important;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .hub-diagram-container {
+                transform: translate(-50%, -50%) scale(0.50) !important;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .hub-diagram-container {
+                transform: translate(-50%, -50%) scale(0.44) !important;
+            }
+        }
+
+        body.in-lightbox .hub-diagram {
+            grid-template-columns: 180px auto 300px;
+            gap: 5rem;
+            width: 950px;
+        }
+
+        body.in-lightbox .diagram-node {
+            padding: 0.6rem 0.9rem;
+            border-radius: 16px;
+        }
+
+        body.in-lightbox .sources-column .node-icon-wrapper {
+            width: 105px;
+            height: 38px;
+        }
+
+        body.in-lightbox .modules-column .node-icon-wrapper {
+            width: 38px;
+            height: 38px;
+        }
+
+        body.in-lightbox .node-label {
+            font-size: 0.85rem;
+        }
+
+        body.in-lightbox .hub-core-outer {
+            width: 310px;
+            height: 310px;
+        }
+
+        body.in-lightbox .hub-core-inner {
+            width: 230px;
+            height: 230px;
+            border-radius: 50px;
+            box-shadow: 0 0 80px rgba(56, 189, 248, 0.35);
+        }
+
+        body.in-lightbox .hub-label {
+            margin-top: 2.5rem;
+            font-size: 1.5rem;
+        }
+
+        body.in-lightbox .connection-path {
+            stroke-width: 2.2;
+        }
+
+        /* Responsive safety limits for short viewports inside the lightbox */
+        @media (max-height: 800px) {
+            body.in-lightbox .hub-diagram {
+                grid-template-columns: 150px auto 260px;
+                gap: 4rem;
+            }
+            body.in-lightbox .hub-core-outer {
+                width: 270px;
+                height: 270px;
+            }
+            body.in-lightbox .hub-core-inner {
+                width: 200px;
+                height: 200px;
+                border-radius: 42px;
+            }
+            body.in-lightbox .hub-label {
+                margin-top: 2rem;
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 950px) {
+            /* Reset to standard sizing on narrow mobile/tablet viewports */
+            body.in-lightbox .hub-diagram {
+                grid-template-columns: 130px auto 240px;
+                gap: 3rem;
+                width: 720px;
+            }
+            body.in-lightbox .diagram-node {
+                padding: 0.4rem 0.75rem;
+                border-radius: 12px;
+            }
+            body.in-lightbox .sources-column .node-icon-wrapper {
+                width: 75px;
+                height: 28px;
+            }
+            body.in-lightbox .modules-column .node-icon-wrapper {
+                width: 28px;
+                height: 28px;
+            }
+            body.in-lightbox .node-label {
+                font-size: 0.7rem;
+            }
+            body.in-lightbox .hub-core-outer {
+                width: 240px;
+                height: 240px;
+            }
+            body.in-lightbox .hub-core-inner {
+                width: 180px;
+                height: 180px;
+                border-radius: 40px;
+            }
+            body.in-lightbox .hub-label {
+                margin-top: 2rem;
+                font-size: 1.2rem;
+            }
+            body.in-lightbox .connection-path {
+                stroke-width: 1.5;
+            }
         }
 
         .hub-diagram {
@@ -47,7 +209,8 @@
             gap: 3rem;
             align-items: center;
             position: relative;
-            width: 100%;
+            width: 720px;
+            margin: 0 auto;
         }
 
         .diagram-column {
@@ -309,6 +472,10 @@
 
     <!-- We will use a script to draw actual paths between nodes and the hub -->
     <script>
+        if (window.location.search.includes('lightbox=true')) {
+            document.body.classList.add('in-lightbox');
+        }
+
         function createConnections() {
             const container = document.querySelector('.hub-diagram-container');
             const hub = document.querySelector('.hub-core-inner');
@@ -322,22 +489,26 @@
             const hubRect = hub.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
             
-            const hubX = (hubRect.left + hubRect.width / 2) - containerRect.left;
-            const hubY = (hubRect.top + hubRect.height / 2) - containerRect.top;
+            // Determine scale factor if the container is scaled (e.g. in lightbox)
+            const scaleX = containerRect.width / container.offsetWidth || 1;
+            const scaleY = containerRect.height / container.offsetHeight || 1;
+            
+            const hubX = ((hubRect.left + hubRect.width / 2) - containerRect.left) / scaleX;
+            const hubY = ((hubRect.top + hubRect.height / 2) - containerRect.top) / scaleY;
 
             nodes.forEach((node, index) => {
                 const nodeRect = node.getBoundingClientRect();
                 const isLeft = node.closest('.sources-column');
                 
-                const nodeX = isLeft 
+                const nodeX = (isLeft 
                     ? (nodeRect.right - containerRect.left) 
-                    : (nodeRect.left - containerRect.left);
-                const nodeY = (nodeRect.top + nodeRect.height / 2) - containerRect.top;
+                    : (nodeRect.left - containerRect.left)) / scaleX;
+                const nodeY = ((nodeRect.top + nodeRect.height / 2) - containerRect.top) / scaleY;
 
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("class", "connection-path");
                 
-                // Curve towards the hub
+                // Curve towards the hub (coordinates in local unscaled space)
                 const cp1X = isLeft ? nodeX + 100 : nodeX - 100;
                 const d = `M ${nodeX} ${nodeY} C ${cp1X} ${nodeY}, ${hubX - (isLeft ? 100 : -100)} ${hubY}, ${hubX} ${hubY}`;
                 
@@ -352,7 +523,8 @@
 
         function createParticle(svg, pathD, reverse) {
             const particle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            particle.setAttribute("r", "1.5");
+            const r = document.body.classList.contains('in-lightbox') ? "2.2" : "1.5";
+            particle.setAttribute("r", r);
             particle.setAttribute("class", "data-particle" + (reverse ? " reverse" : ""));
             svg.appendChild(particle);
 

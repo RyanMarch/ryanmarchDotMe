@@ -19,17 +19,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/style.css">
 </head>
-<body class="standalone-page">
+<body class="standalone-page" id="top">
     <header class="slim-header">
         <div class="slim-header-container">
             <a href="/" class="slim-header-brand">
                 <div class="slim-avatar">RM</div>
                 <span class="slim-name">Ryan March</span>
             </a>
-            <a href="/" class="back-btn" aria-label="Back to homepage">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                <span>Back</span>
-            </a>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                <span id="theme-status" class="theme-status"></span>
+            </button>
         </div>
     </header>
     <div class="background-container">
@@ -50,15 +52,23 @@
 
 <h4 id="the-project" class="section-divider"><span>The Project</span></h4>
 
-<p>This promotional video, produced for the Furniture Bank of Central Ohio, details how individuals can get involved through volunteering and tells the powerful story of how the non-profit organization serves the Greater Columbus community. It features deep interviews with President Steve Votaw, Volunteer Manager Colin Veatch, and dedicated volunteer Barbara Powell.</p>
+<p>This promotional video, produced for the Furniture Bank of Central Ohio, details how individuals can get involved
+    through volunteering and tells the powerful story of how the non-profit organization serves the Greater Columbus
+    community. It features deep interviews with President Steve Votaw, Volunteer Manager Colin Veatch, and dedicated
+    volunteer Barbara Powell.</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
-        <iframe src="https://www.youtube-nocookie.com/embed/GrfILnwN-5M?rel=0&modestbranding=1" title="Watch the Furniture Bank Promo on YouTube" style="aspect-ratio: 16/9; width: 100%; border-radius: 12px; border: 1px solid var(--img-border);" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+        <iframe src="https://www.youtube-nocookie.com/embed/GrfILnwN-5M?rel=0&modestbranding=1"
+            title="Watch the Furniture Bank Promo on YouTube"
+            style="aspect-ratio: 16/9; width: 100%; border-radius: 12px; border: 1px solid var(--img-border);"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
         <div class="gallery-caption">Watch the "Furniture Bank Promo" on YouTube.</div>
     </div>
     <div class="gallery-item">
-        <img alt="Funiture Bank Promo Scene" src="content/furniture-bank-promo/images/furniture-bank.jpg" loading="lazy"/>
+        <img alt="Funiture Bank Promo Scene" src="content/furniture-bank-promo/images/furniture-bank.jpg"
+            loading="lazy" />
         <div class="gallery-caption">Furniture Bank of Central Ohio.</div>
     </div>
 </div>
@@ -67,26 +77,15 @@
 
 <ul>
     <li><strong>Tools Used:</strong> Sony Video Camera, Adobe Premiere Pro, Pro Tools, Logic Pro X</li>
-    <li><strong>Skills Used:</strong> Directing, Scriptwriting, Interviewing, Audio Post-Production, Video Post-Production, Video Editing, Color Grading</li>
-    <li><strong>Links:</strong> <a href="https://furniturebankcoh.org/" target="_blank" rel="noopener noreferrer">Furniture Bank of Central Ohio</a></li>
+    <li><strong>Skills Used:</strong> Directing, Scriptwriting, Interviewing, Audio Post-Production, Video
+        Post-Production, Video Editing, Color Grading</li>
+    <li><strong>Links:</strong> <a href="https://furniturebankcoh.org/" target="_blank"
+            rel="noopener noreferrer">Furniture Bank of Central Ohio</a></li>
 </ul>
-            <div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>
+            <div class="modal-footer-actions"><a href="#top" class="modal-back-to-top-btn">Back to Top</a></div>
         </div>
     </main>
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle></svg>
-        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-    </button>
-    <script>
-        const themeToggle = document.getElementById('theme-toggle');
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme') || 'dark';
-            let newTheme = currentTheme === 'dark' ? 'light' : currentTheme === 'light' ? 'system' : 'dark';
-            if (newTheme === 'system') document.documentElement.removeAttribute('data-theme');
-            else document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-        });
-    </script>
+    <script src="/assets/js/theme.js" defer></script>
     <script src="/assets/js/project-data.js" defer></script>
     <script src="/assets/js/projects.js" defer></script>
 </body>

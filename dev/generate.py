@@ -10,6 +10,20 @@ CONTENT_DIR = './content'
 OUTPUT_DIR = './project'
 TEMPLATE_PATH = './dev/project-template.html'
 
+def write_if_changed(path, content):
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                existing = f.read()
+            if existing == content:
+                return
+        except Exception:
+            pass
+            
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as f:
+        f.write(content)
+
 def get_projects():
     if not os.path.exists(PROJECTS_DATA_PATH):
         print(f"❌ Error: {PROJECTS_DATA_PATH} not found. Are you in the root directory?")
@@ -57,8 +71,7 @@ def generate_seo_files(project_ids):
     
     sitemap.append('</urlset>')
     
-    with open('./sitemap.xml', 'w') as f:
-        f.write('\n'.join(sitemap))
+    write_if_changed('./sitemap.xml', '\n'.join(sitemap))
         
     # Robots.txt
     robots = [
@@ -67,8 +80,7 @@ def generate_seo_files(project_ids):
         "",
         f"Sitemap: {BASE_URL}/sitemap.xml"
     ]
-    with open('./robots.txt', 'w') as f:
-        f.write('\n'.join(robots))
+    write_if_changed('./robots.txt', '\n'.join(robots))
 
 def build_tags_html(tags):
     if not tags:
@@ -82,8 +94,96 @@ def build_tags_html(tags):
         tags_html.append(f'<span class="tag tag-{color}{cls}">{label}</span>')
     return '\n'.join(tags_html)
 
-def generate():
-    print("🚀 Starting Build Process...")
+def upload_audio_to_r2():
+    secrets_path = './dev/.r2_secrets.json'
+    if not os.path.exists(secrets_path):
+        # Gracefully skip in environments that don't have local secrets (like Cloudflare build)
+        return
+        
+    try:
+        with open(secrets_path, 'r') as f:
+            secrets = json.load(f)
+    except Exception as e:
+        print(f"⚠️ R2 Upload: Failed to load local secrets: {e}")
+        return
+        
+    account_id = secrets.get("account_id")
+    access_key_id = secrets.get("access_key_id")
+    secret_access_key = secrets.get("secret_access_key")
+    bucket_name = "ryanmarchdotme-media"
+    
+    if not all([account_id, access_key_id, secret_access_key]):
+        print("⚠️ R2 Upload: Missing credentials in local secrets file.")
+        return
+        
+    try:
+        import boto3
+        from botocore.config import Config
+    except ImportError:
+        print("⚠️ R2 Upload: boto3 library not installed locally.")
+        print("👉 Please run: python3 -m pip install boto3")
+        return
+        
+    print("🎙️ R2 Upload: Checking and uploading audio files to R2...")
+    cache_path = './dev/.r2_cache.json'
+    
+    cache = {}
+    if os.path.exists(cache_path):
+        try:
+            with open(cache_path, 'r') as f:
+                cache = json.load(f)
+        except Exception:
+            pass
+            
+    try:
+        r2 = boto3.client(
+            service_name='s3',
+            endpoint_url=f'https://{account_id}.r2.cloudflarestorage.com',
+            aws_access_key_id=access_key_id,
+            aws_secret_access_key=secret_access_key,
+            config=Config(signature_version='s3v4')
+        )
+    except Exception as e:
+        print(f"⚠️ R2 Upload: Failed to initialize R2 client: {e}")
+        return
+        
+    uploaded_any = False
+    
+    for root, dirs, files in os.walk('./content'):
+        for file in files:
+            if file.endswith('.mp3'):
+                local_path = os.path.join(root, file)
+                mtime = os.path.getmtime(local_path)
+                
+                if local_path not in cache or cache[local_path] != mtime:
+                    print(f"⬆️ Uploading {file} to R2...")
+                    try:
+                        r2.upload_file(
+                            Filename=local_path,
+                            Bucket=bucket_name,
+                            Key=file,
+                            ExtraArgs={'ContentType': 'audio/mpeg'}
+                        )
+                        cache[local_path] = mtime
+                        uploaded_any = True
+                        print(f"✅ Successfully uploaded {file}")
+                    except Exception as e:
+                        print(f"⚠️ Failed to upload {file}: {e}")
+                        
+    if uploaded_any:
+        try:
+            with open(cache_path, 'w') as f:
+                json.dump(cache, f)
+        except Exception:
+            pass
+
+def generate(target_id=None):
+    if target_id:
+        print(f"🚀 Starting Single-Page Build for: {target_id}...")
+    else:
+        print("🚀 Starting Full Build Process...")
+        # Only attempt to upload audio to R2 during full build (runs locally)
+        upload_audio_to_r2()
     
     projects = get_projects()
     if not projects: return
@@ -103,6 +203,9 @@ def generate():
 
         p_id = project['id']
         generated_ids.append(p_id)
+        
+        if target_id and p_id != target_id:
+            continue
         
         project_dir = os.path.join(OUTPUT_DIR, p_id)
         if not os.path.exists(project_dir):
@@ -151,9 +254,9 @@ def generate():
         <span>{project.get('actionText', 'Visit')}</span>
         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
     </a>\n'''
-            footer_html += '    <a href="/" class="modal-back-to-top-btn">Back to Home</a>\n</div>'
+            footer_html += '    <a href="#top" class="modal-back-to-top-btn">Back to Top</a>\n</div>'
         else:
-            footer_html = '<div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn">Back to Home</a></div>'
+            footer_html = '<div class="modal-footer-actions"><a href="#top" class="modal-back-to-top-btn">Back to Top</a></div>'
 
         # Injection
         page_html = template.replace('{{title}}', project.get('title', p_id))
@@ -162,13 +265,23 @@ def generate():
         page_html = page_html.replace('{{tags}}', build_tags_html(project.get('tags', [])))
         page_html = page_html.replace('{{footer}}', footer_html)
 
-        with open(os.path.join(project_dir, 'index.html'), 'w') as f:
-            f.write(page_html)
+        # Automatically rewrite local audio file paths to high-performance R2 URLs
+        page_html = re.sub(
+            r'(src|href)="(?:\./)?content/[^"]+/audio/([^"]+\.mp3)"',
+            r'\1="https://media.ryanmarch.me/\2"',
+            page_html
+        )
+
+        write_if_changed(os.path.join(project_dir, 'index.html'), page_html)
             
     # SEO Files
-    generate_seo_files(generated_ids)
-
-    print("✅ Build Complete! Your site is ready for search engines.")
+    if not target_id:
+        generate_seo_files(generated_ids)
+        print("✅ Full Build Complete! Your site is ready for search engines.")
+    else:
+        print(f"✅ Single-Page Build Complete for {target_id}!")
 
 if __name__ == "__main__":
-    generate()
+    import sys
+    target = sys.argv[1] if len(sys.argv) > 1 else None
+    generate(target)

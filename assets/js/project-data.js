@@ -56,7 +56,7 @@ const myProjects = [
     {
         id: "rentpress-local",
         title: "RentPress Local",
-        subtitle: "Local listings management product for all maps.",
+        subtitle: "Local listings management product for automatic map updates.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -72,7 +72,7 @@ const myProjects = [
     },
     {
         id: "rentpress-lead-sync",
-        title: "RentPress Lead Sync",   
+        title: "RentPress Lead Sync",
         subtitle: "Send and receive leads without writing code.",
         tags: [
             { label: "Professional", color: "blue" },
@@ -91,7 +91,7 @@ const myProjects = [
     {
         id: "icon-studio",
         title: "Icon Studio",
-        subtitle: "A premium, web-based design toolkit for crafting custom app icons with rich gradients, skeuomorphic frames, and integrated badges.",
+        subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },
@@ -215,7 +215,7 @@ const myProjects = [
         actionUrl: "",
         hasExtendedContent: true
     },
-        {
+    {
         id: "forecast-weather",
         title: "Forecast Weather",
         subtitle: "Get the seven day forecast for an entered location.",

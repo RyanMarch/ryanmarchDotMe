@@ -1,6 +1,5 @@
-# Exclude large audio files that exceed Cloudflare Workers' 25MB limit
-content/taylor-swift-analysis-hour/audio/TSanalysis.mp3
-content/night-riots-interview/audio/night-riots-interview.mp3
+# Exclude large audio files from Wrangler static asset upload
+*.mp3
 
 # Exclude Git, tool configurations, and local logs/caches
 .git/

@@ -11,6 +11,7 @@ Thumbs.db
 dev/*
 !dev/generate.py
 !dev/project-template.html
+!dev/r2_cleanup.py
 projectsFromOldWebsite/
 
 # Code workspace files
@@ -22,3 +23,10 @@ projectsFromOldWebsite/
 !.dev.vars.example
 .env*
 !.env.example
+
+# Exclude large binary audio files from Git (they are uploaded to R2 automatically)
+*.mp3
+
+# Build/upload cache files
+dev/.r2_cache.json
+
