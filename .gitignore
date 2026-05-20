@@ -22,3 +22,10 @@ projectsFromOldWebsite/
 !.dev.vars.example
 .env*
 !.env.example
+
+# Exclude large binary audio files from Git (they are uploaded to R2 automatically)
+*.mp3
+
+# Build/upload cache files
+dev/.r2_cache.json
+
