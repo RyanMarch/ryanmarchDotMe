@@ -1260,17 +1260,25 @@ body.standalone-page {
 
 /* --- Ecosystem Diagram --- */
 .diagram-section {
-    margin: 0 -2.5rem;
-    background: var(--modal-bg);
-    border-top: 1px solid var(--card-border);
-    border-bottom: 1px solid var(--card-border);
-    border-radius: 24px;
+    margin: 2rem auto;
+    background: none;
+    border: 1px solid var(--img-border);
+    border-radius: 16px;
     padding: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
-    box-shadow: var(--shadow-lg), inset 0 20px 40px rgba(0,0,0,0.3);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
+    cursor: zoom-in;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+
+@media (min-width: 1025px) {
+    .diagram-section:hover {
+        transform: scale(1.01);
+        box-shadow: var(--shadow-lg);
+    }
 }
 
 .diagram-frame {
@@ -1279,10 +1287,35 @@ body.standalone-page {
     max-width: 850px;
 }
 
+@media (max-width: 950px) {
+    .diagram-frame {
+        height: 17rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .diagram-frame {
+        height: 14rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .diagram-frame {
+        height: 12.5rem;
+    }
+}
+
+@media (max-width: 400px) {
+    .diagram-frame {
+        height: 11rem;
+    }
+}
+
 .diagram-iframe {
     width: 100%;
     height: 100%;
     border: none;
+    pointer-events: none; /* Let clicks pass through to parent */
 }
 
 .diagram-title-wrapper {
@@ -2136,6 +2169,18 @@ body.standalone-page {
     box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
     border: 1px solid var(--img-border);
     cursor: pointer;
+}
+
+.lightbox-iframe {
+    width: 100%;
+    max-width: 1200px;
+    height: 85vh;
+    border: none;
+    border-radius: 20px;
+    background-color: #0f172a;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--img-border);
+    pointer-events: none; /* Clicking the iframe itself closes the lightbox */
 }
 
 .lightbox-close {

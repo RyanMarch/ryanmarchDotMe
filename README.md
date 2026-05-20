@@ -161,7 +161,7 @@ If `hasExtendedContent` is `true`, the compiler expects a matching HTML file in 
     gallery container to display comparisons.
 </p>
 
-<!-- Optional: Premium Spotify-Style Audio Player -->
+<!-- Optional: Audio Player -->
 <!-- 
 <div class="custom-audio-player" data-title="Audio Track Title" data-subtitle="Artist/Description">
     <audio src="https://media.ryanmarch.me/my-audio-track.mp3" preload="metadata"></audio>
@@ -288,4 +288,7 @@ Here is the core technical architecture of my codebase:
 6. Local Server & Deployment: Run locally using `python3 -m http.server 8000` and build with `python3 dev/generate.py`. Deployed globally on Cloudflare Pages using Wrangler (wrangler.jsonc). High-fidelity audio assets are hosted on a custom Cloudflare bucket (media.ryanmarch.me).
 
 When helping me, ensure your code proposals follow clean vanilla styling, respect our python-compilation schema, and don't introduce heavy modern frameworks unless explicitly asked.
+
+Do not generate images unless explictly asked.
+
 ```
