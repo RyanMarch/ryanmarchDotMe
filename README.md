@@ -1,5 +1,7 @@
 # Ryan March Personal Site (`ryanmarch.me`)
 
-A personal landing page, bento-box portfolio, and case study showcase built with vanilla HTML, CSS, and JavaScript — deployed on Cloudflare Pages. No build step, no frameworks.
+Welcome to **ryanmarch.me**, a personal landing page, bento-box portfolio, and case study showcase for Ryan March (Product Manager & Creative Technologist). 
 
-For full documentation, local development setup, and authoring guides, see **[dev/README.md](dev/README.md)**.
+This site is built with **modern vanilla technologies** (HTML, CSS, JavaScript, and Cloudflare Pages) to deliver a fast user experience featuring sleek dark/light/system theme toggles, smooth grid filtering animations, custom interactive media players, and lazy-loaded galleries.
+
+---
