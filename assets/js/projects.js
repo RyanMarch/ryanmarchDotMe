@@ -615,13 +615,130 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // On standalone project pages, wire up audio players and lightbox/hash links
-    // (on the homepage modalContentArea is null, so these are no-ops)
+    // === SPA ROUTER ===
+    
+    async function loadProject(projectId) {
+        const project = myProjects.find(p => p.id === projectId);
+        if (!project) return;
+        
+        try {
+            // 1. Fetch content
+            const response = await fetch(`/content/${projectId}/index.html`);
+            if (!response.ok) throw new Error("Content missing");
+            let htmlContent = await response.text();
+            
+            // 2. Rewrite Audio URLs to R2
+            htmlContent = htmlContent.replace(/(src|href)="(?:\.\/)?content\/[^\/]+\/audio\/([^\"]+\.mp3)"/g, '$1="https://media.ryanmarch.me/$2"');
+            
+            // 3. Extract Headings for TOC
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const headings = tempDiv.querySelectorAll('h4[id]');
+            let navHtml = '';
+            if (headings.length > 0) {
+                const links = Array.from(headings).map(h => `<a href="#${h.id}">${h.querySelector('span') ? h.querySelector('span').innerHTML : h.innerHTML}</a>`);
+                if (project.actionUrl || project.sourceUrl) {
+                    links.push('<a href="#modal-footer-actions">Links</a>');
+                }
+                navHtml = `<nav class="project-nav"><div class="nav-links">${links.join('')}</div></nav>`;
+            }
+            
+            // 4. Inject TOC
+            if (navHtml) {
+                const desc = tempDiv.querySelector('.project-description');
+                const sub = tempDiv.querySelector('.project-subtitle');
+                if (desc) {
+                    desc.insertAdjacentHTML('afterend', navHtml);
+                } else if (sub) {
+                    sub.insertAdjacentHTML('afterend', navHtml);
+                }
+                htmlContent = tempDiv.innerHTML;
+            }
+            
+            // 5. Build Tags
+            const tagsHtml = `<div class="tag-list modal-tags">${buildTagsHtml(project.tags)}</div>`;
+            
+            // 6. Build Footer
+            let footerHtml = '';
+            if (project.actionUrl || project.sourceUrl) {
+                footerHtml += '<hr class="modal-footer-divider">\n<div class="modal-footer-actions" id="modal-footer-actions">\n';
+                if (project.sourceUrl) {
+                    footerHtml += `    <a href="${project.sourceUrl}" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
+        <span>View More</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>\n`;
+                }
+                if (project.actionUrl) {
+                    footerHtml += `    <a href="${project.actionUrl}" class="project-btn modal-full-btn" target="_blank" rel="noopener noreferrer">
+        <span>${project.actionText || 'Visit'}</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>\n`;
+                }
+                footerHtml += '    <a href="/" class="modal-back-to-top-btn data-spa-link">Back to Home</a>\n</div>';
+            } else {
+                footerHtml = '<div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn data-spa-link">Back to Home</a></div>';
+            }
+            
+            // 7. Inject everything
+            modalContentArea.innerHTML = tagsHtml + htmlContent + footerHtml;
+            
+            // 8. Wire up handlers
+            initializeCustomAudioPlayers(modalContentArea);
+            
+            // Re-bind back button inside footer
+            const backBtns = modalContentArea.querySelectorAll('.data-spa-link');
+            backBtns.forEach(b => b.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateHome();
+            }));
+            
+            // 9. Show Modal, Hide Home
+            document.querySelector('.top-row').style.display = 'none';
+            document.querySelector('.filter-container').style.display = 'none';
+            document.getElementById('projects-grid').style.display = 'none';
+            document.body.classList.add('standalone-page');
+            modalContentArea.style.display = 'block';
+            window.scrollTo(0,0);
+            document.title = `${project.title} | Ryan March`;
+            
+        } catch (e) {
+            console.error("Failed to load project", e);
+        }
+    }
+    
+    function navigateHome(pushState = true) {
+        document.querySelector('.top-row').style.display = 'flex';
+        document.querySelector('.filter-container').style.display = 'block';
+        document.getElementById('projects-grid').style.display = 'grid';
+        document.body.classList.remove('standalone-page');
+        modalContentArea.style.display = 'none';
+        modalContentArea.innerHTML = '';
+        if (pushState && window.location.pathname !== '/') {
+            history.pushState(null, '', '/');
+        }
+        document.title = 'Ryan March | Product & Technology';
+        window.scrollTo(0,0);
+    }
+
+    // Listen for History popstate (Back/Forward buttons)
+    window.addEventListener('popstate', handleUrlRoute);
+
+    function handleUrlRoute() {
+        const path = window.location.pathname;
+        const match = path.match(/^\/project\/([^\/]+)\/?/);
+        if (match) {
+            const projectId = match[1];
+            loadProject(projectId);
+        } else {
+            navigateHome(false);
+        }
+    }
+
     if (modalContentArea) {
         setupContentClicks(modalContentArea, modalContentArea);
     }
 
-    // Card clicks — let the browser navigate naturally to the standalone project page
+    // Card clicks — SPA interception
     if (grid) {
         grid.addEventListener('click', (e) => {
             const card = e.target.closest('.destination-card');
@@ -632,12 +749,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Clicking anywhere on a card with a Read More button navigates to it
+            // SPA Interception
             const readMoreBtn = card.querySelector('.read-more-btn');
-            if (readMoreBtn && !e.target.closest('a')) {
-                window.location.href = readMoreBtn.getAttribute('href');
+            if (readMoreBtn && !e.target.closest('a:not(.read-more-btn)')) {
+                e.preventDefault();
+                const url = readMoreBtn.getAttribute('href');
+                const projectId = readMoreBtn.getAttribute('data-project-id');
+                history.pushState(null, '', url);
+                loadProject(projectId);
             }
         });
     }
+
+    // Initial Route Check
+    handleUrlRoute();
 });
 
