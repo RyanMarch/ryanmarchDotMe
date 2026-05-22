@@ -2,18 +2,18 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Build Project Pages",
+            "label": "Start SPA Server",
             "type": "shell",
-            "command": "python3 dev/generate.py",
-            "group": {
-                "kind": "build",
-                "isDefault": true
+            "command": "python3 dev/serve.py",
+            "isBackground": true,
+            "runOptions": {
+                "runOn": "folderOpen"
             },
             "presentation": {
                 "reveal": "never",
-                "panel": "dedicated"
-            },
-            "problemMatcher": []
+                "panel": "shared",
+                "echo": false
+            }
         }
     ]
 }
