@@ -2919,3 +2919,41 @@ body.standalone-page {
     }
 }
 
+/* --- Keyboard Focus Indicator (WCAG Compliance) --- */
+:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 4px;
+}
+
+/* Custom focus adjustments for specific rounded elements */
+.theme-toggle:focus-visible,
+.player-play-pause:focus-visible,
+.player-mute:focus-visible,
+.lightbox-close:focus-visible {
+    outline-offset: 2px;
+    border-radius: 50%;
+}
+
+.filter-pill:focus-visible {
+    border-radius: 99px;
+    outline-offset: 2px;
+}
+
+.theme-toggle:focus-visible {
+    border-radius: 8px;
+    outline-offset: 2px;
+}
+
+.premium-summary:focus-visible {
+    outline-offset: -2px;
+    border-radius: 16px;
+}
+
+/* Ensure slider containers show clear, visible focus when tabbed to */
+.player-progress-container:focus-visible,
+.player-volume-slider-container:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 6px;
+}
+
+
