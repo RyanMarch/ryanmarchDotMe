@@ -39,33 +39,40 @@ class MetaRewriter {
 
 export default {
     async fetch(request, env) {
-        const url = new URL(request.url);
-        const path = url.pathname;
+        try {
+            const url = new URL(request.url);
+            const path = url.pathname;
 
-        // Fetch the original asset from Cloudflare Pages / Static handling
-        const response = await env.ASSETS.fetch(request);
+            // Fetch the original asset from Cloudflare Pages / Static handling
+            const response = await env.ASSETS.fetch(request);
 
-        // Check if the route is a project route
-        const projectMatch = path.match(/^\/project\/([^\/]+)\/?/);
+            // Check if the route is a project route
+            const projectMatch = path.match(/^\/project\/([^\/]+)\/?/);
 
-        // If it's a project route and the response is HTML, rewrite the meta tags
-        if (projectMatch && response.headers.get('content-type')?.includes('text/html')) {
-            const projectId = projectMatch[1];
-            const project = myProjects.find(p => p.id === projectId);
+            // If it's a project route and the response is HTML, rewrite the meta tags
+            if (projectMatch && response.headers.get('content-type')?.includes('text/html')) {
+                const projectId = projectMatch[1];
+                const project = myProjects.find(p => p.id === projectId);
 
-            if (project) {
-                // Return the rewritten HTML
-                return new HTMLRewriter()
-                    .on('title', new MetaRewriter(project))
-                    .on('meta[property="og:title"]', new MetaRewriter(project))
-                    .on('meta[property="og:description"]', new MetaRewriter(project))
-                    .on('meta[name="description"]', new MetaRewriter(project))
-                    .on('link[rel="canonical"]', new MetaRewriter(project))
-                    .transform(response);
+                if (project) {
+                    // Return the rewritten HTML
+                    return new HTMLRewriter()
+                        .on('title', new MetaRewriter(project))
+                        .on('meta[property="og:title"]', new MetaRewriter(project))
+                        .on('meta[property="og:description"]', new MetaRewriter(project))
+                        .on('meta[name="description"]', new MetaRewriter(project))
+                        .on('link[rel="canonical"]', new MetaRewriter(project))
+                        .transform(response);
+                }
             }
-        }
 
-        // Return unchanged response for all other paths
-        return response;
+            // Return unchanged response for all other paths
+            return response;
+        } catch (err) {
+            return new Response(`Worker Error: ${err.message}\nStack: ${err.stack}`, {
+                status: 500,
+                headers: { 'Content-Type': 'text/plain' }
+            });
+        }
     }
 };

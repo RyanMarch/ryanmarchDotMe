@@ -804,7 +804,7 @@ margin-top: 3rem;
     }
 }
 
-.size-small .destination-header h3 {
+.size-small .destination-header h2 {
     font-size: clamp(1.8rem, 5vw, 2.2rem); /* Restored to be closer to main titles */
     line-height: 1.1;
     margin-bottom: 0.5rem;
@@ -1560,13 +1560,13 @@ body.standalone-page {
     border-color: var(--tag-pink-border);
 }
 
-.destination-content h3 {
+.destination-content h2 {
     font-size: 2.5rem;
     font-weight: 700;
     letter-spacing: -0.01em;
 }
 
-.destination-content h3 a {
+.destination-content h2 a {
     color: inherit;
     text-decoration: none;
 }
@@ -1724,7 +1724,7 @@ body.standalone-page {
         min-height: 380px;
     }
 
-    .destination-content h3 {
+    .destination-content h2 {
         font-size: 2.2rem;
     }
 
@@ -1846,8 +1846,8 @@ body.standalone-page {
     }
 
     /* Adjust typography for narrow mobile modules (1-column only) */
-    .destination-card.size-medium .destination-content h3,
-    .destination-card.size-small .destination-content h3 {
+    .destination-card.size-medium .destination-content h2,
+    .destination-card.size-small .destination-content h2 {
         font-size: 1.35rem; /* Down from 2.2rem */
         line-height: 1.2;
     }
@@ -1862,7 +1862,7 @@ body.standalone-page {
     }
 
     /* Horizontal card specific typography */
-    .destination-card.size-tall .destination-content h3 {
+    .destination-card.size-tall .destination-content h2 {
         font-size: 1.6rem;
         margin-bottom: 0.25rem;
     }
@@ -2112,7 +2112,8 @@ body.standalone-page {
     padding: 2rem;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: hidden;
+    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     cursor: pointer;
     /* GPU-accelerate the heavy backdrop-filter blur */
     will-change: backdrop-filter, opacity;
@@ -2135,6 +2136,7 @@ body.standalone-page {
 .lightbox-overlay.open {
     opacity: 1;
     pointer-events: auto;
+    visibility: visible;
 }
 
 .lightbox-container {
@@ -2884,7 +2886,7 @@ body.standalone-page {
 
 /* Container query adjustments for narrow cards/modules to prevent button cropping */
 @container (max-width: 550px) {
-    .destination-content h3 {
+    .destination-content h2 {
         font-size: 2rem;
     }
     
@@ -2902,7 +2904,7 @@ body.standalone-page {
 
 /* Container query adjustments for extremely narrow cards/modules (e.g. 1x1 size-small or 1x2 size-tall) */
 @container (max-width: 300px) {
-    .destination-content h3 {
+    .destination-content h2 {
         font-size: 1.35rem;
         line-height: 1.25;
     }
