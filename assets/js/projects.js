@@ -24,7 +24,7 @@ function initializeCustomAudioPlayers(container) {
             <!-- Middle Row: Timeline Scrubber -->
             <div class="player-timeline">
                 <span class="player-time-current">0:00</span>
-                <div class="player-progress-container" aria-label="Seek track">
+                <div class="player-progress-container" aria-label="Seek track" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                     <div class="player-progress-bar"></div>
                     <div class="player-progress-knob"></div>
                 </div>
@@ -39,7 +39,7 @@ function initializeCustomAudioPlayers(container) {
                         <svg class="icon-volume" viewBox="0 0 24 24"><path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                         <svg class="icon-muted" viewBox="0 0 24 24" style="display:none;"><path fill="currentColor" d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                     </button>
-                    <div class="player-volume-slider-container" aria-label="Volume slider">
+                    <div class="player-volume-slider-container" aria-label="Volume slider" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
                         <div class="player-volume-slider-bar" style="width: 100%;"></div>
                     </div>
                 </div>
@@ -96,11 +96,13 @@ function initializeCustomAudioPlayers(container) {
         audio.addEventListener('play', () => {
             if (iconPlay) iconPlay.style.display = 'none';
             if (iconPause) iconPause.style.display = 'block';
+            playPauseBtn.setAttribute('aria-label', 'Pause');
         });
 
         audio.addEventListener('pause', () => {
             if (iconPlay) iconPlay.style.display = 'block';
             if (iconPause) iconPause.style.display = 'none';
+            playPauseBtn.setAttribute('aria-label', 'Play');
         });
 
         audio.addEventListener('ended', () => {
@@ -108,8 +110,12 @@ function initializeCustomAudioPlayers(container) {
             if (iconPause) iconPause.style.display = 'none';
             if (progressBar) progressBar.style.width = '0%';
             if (progressBarKnob) progressBarKnob.style.left = '0%';
-            if (progressBarContainer) progressBarContainer.style.setProperty('--progress-percent', '0%');
+            if (progressBarContainer) {
+                progressBarContainer.style.setProperty('--progress-percent', '0%');
+                progressBarContainer.setAttribute('aria-valuenow', '0');
+            }
             if (timeCurrent) timeCurrent.textContent = '0:00';
+            playPauseBtn.setAttribute('aria-label', 'Play');
         });
 
         audio.addEventListener('timeupdate', () => {
@@ -119,7 +125,10 @@ function initializeCustomAudioPlayers(container) {
                 const percent = (current / duration) * 100;
                 if (progressBar) progressBar.style.width = `${percent}%`;
                 if (progressBarKnob) progressBarKnob.style.left = `${percent}%`;
-                if (progressBarContainer) progressBarContainer.style.setProperty('--progress-percent', `${percent}%`);
+                if (progressBarContainer) {
+                    progressBarContainer.style.setProperty('--progress-percent', `${percent}%`);
+                    progressBarContainer.setAttribute('aria-valuenow', Math.round(percent).toString());
+                }
                 if (timeDuration) timeDuration.textContent = formatTime(duration);
             }
             if (timeCurrent) timeCurrent.textContent = formatTime(current);
@@ -151,6 +160,27 @@ function initializeCustomAudioPlayers(container) {
                     if (progressBarKnob) progressBarKnob.style.left = `${percent * 100}%`;
                 }
             });
+
+            // Keyboard accessibility for Seek Slider
+            progressBarContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                        audio.currentTime = Math.min(audio.currentTime + 5, audio.duration);
+                    }
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    audio.currentTime = Math.max(audio.currentTime - 5, 0);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    audio.currentTime = 0;
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                        audio.currentTime = audio.duration;
+                    }
+                }
+            });
         }
 
         if (muteBtn) {
@@ -160,32 +190,59 @@ function initializeCustomAudioPlayers(container) {
                     if (iconVolume) iconVolume.style.display = 'none';
                     if (iconMuted) iconMuted.style.display = 'block';
                     if (volumeSliderBar) volumeSliderBar.style.width = '0%';
+                    volumeSliderContainer.setAttribute('aria-valuenow', '0');
+                    muteBtn.setAttribute('aria-label', 'Unmute');
                 } else {
                     if (iconVolume) iconVolume.style.display = 'block';
                     if (iconMuted) iconMuted.style.display = 'none';
                     if (volumeSliderBar) volumeSliderBar.style.width = `${audio.volume * 100}%`;
+                    volumeSliderContainer.setAttribute('aria-valuenow', Math.round(audio.volume * 100).toString());
+                    muteBtn.setAttribute('aria-label', 'Mute');
                 }
             });
         }
 
         if (volumeSliderContainer) {
-            volumeSliderContainer.addEventListener('click', (e) => {
-                const rect = volumeSliderContainer.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const width = rect.width;
-                const percent = Math.min(Math.max(clickX / width, 0), 1);
-
+            const updateVolumeUI = (percent) => {
                 audio.volume = percent;
                 if (volumeSliderBar) volumeSliderBar.style.width = `${percent * 100}%`;
+                volumeSliderContainer.setAttribute('aria-valuenow', Math.round(percent * 100).toString());
 
                 if (percent === 0) {
                     audio.muted = true;
                     if (iconVolume) iconVolume.style.display = 'none';
                     if (iconMuted) iconMuted.style.display = 'block';
+                    muteBtn.setAttribute('aria-label', 'Unmute');
                 } else {
                     audio.muted = false;
                     if (iconVolume) iconVolume.style.display = 'block';
                     if (iconMuted) iconMuted.style.display = 'none';
+                    muteBtn.setAttribute('aria-label', 'Mute');
+                }
+            };
+
+            volumeSliderContainer.addEventListener('click', (e) => {
+                const rect = volumeSliderContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+                const percent = Math.min(Math.max(clickX / width, 0), 1);
+                updateVolumeUI(percent);
+            });
+
+            // Keyboard accessibility for Volume Slider
+            volumeSliderContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    updateVolumeUI(Math.min(audio.volume + 0.05, 1));
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    updateVolumeUI(Math.max(audio.volume - 0.05, 0));
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    updateVolumeUI(0);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    updateVolumeUI(1);
                 }
             });
         }
@@ -203,6 +260,10 @@ document.addEventListener('DOMContentLoaded', () => {
         lightbox.id = 'lightbox-overlay';
         lightbox.className = 'lightbox-overlay';
         lightbox.setAttribute('aria-hidden', 'true');
+        lightbox.setAttribute('tabindex', '-1');
+        lightbox.setAttribute('role', 'dialog');
+        lightbox.setAttribute('aria-modal', 'true');
+        lightbox.setAttribute('aria-label', 'Image gallery lightbox');
         lightbox.innerHTML = `
             <button class="lightbox-close" aria-label="Close lightbox">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -214,6 +275,27 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         document.body.appendChild(lightbox);
     }
+
+    // Focus trapping event listener for keyboard accessibility in lightbox dialog
+    lightbox.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            const focusableElements = lightbox.querySelectorAll('button, [tabindex="0"], iframe');
+            if (focusableElements.length === 0) return;
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
+        }
+    });
     const lightboxImg = document.getElementById('lightbox-image');
     const lightboxCaption = document.getElementById('lightbox-caption');
     const lightboxClose = lightbox.querySelector('.lightbox-close');
@@ -265,14 +347,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pill = document.createElement('button');
                 pill.className = `filter-pill${cat.id === 'all' ? ' active' : ''}`;
                 pill.setAttribute('data-category', cat.id);
+                pill.setAttribute('aria-pressed', cat.id === 'all' ? 'true' : 'false');
                 pill.innerHTML = `${cat.label}`;
 
                 pill.addEventListener('click', () => {
-                    if (pill.classList.contains('active')) return;
+                    if (pill.classList.contains('active')) {
+                        if (cat.id === 'all') return; // Clicking 'All' when already active does nothing
+                        
+                        pill.classList.remove('active');
+                        pill.setAttribute('aria-pressed', 'false');
+
+                        const allPill = filterPillsContainer.querySelector('.filter-pill[data-category="all"]');
+                        if (allPill) {
+                            allPill.classList.add('active');
+                            allPill.setAttribute('aria-pressed', 'true');
+                        }
+                        filterProjects('all');
+                        return;
+                    }
 
                     // Toggle active class on pills
-                    filterPillsContainer.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+                    filterPillsContainer.querySelectorAll('.filter-pill').forEach(p => {
+                        p.classList.remove('active');
+                        p.setAttribute('aria-pressed', 'false');
+                    });
                     pill.classList.add('active');
+                    pill.setAttribute('aria-pressed', 'true');
 
                     // Filter the projects
                     filterProjects(cat.id);
@@ -502,9 +602,12 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCustomAudioPlayers(projectDetailArea);
     }
 
-    // 3. Lightbox open/close functions
+    // 3. Lightbox open/close functions with focus restoration
+    let lastActiveElement = null;
+
     function openLightbox(src, alt, captionText) {
         if (!lightboxImg || !lightbox) return;
+        lastActiveElement = document.activeElement;
         lightboxImg.src = src;
         lightboxImg.alt = alt || 'Enlarged project image';
         lightboxCaption.textContent = captionText || '';
@@ -516,6 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openDiagramLightbox(src, captionText) {
         if (!lightbox) return;
+        lastActiveElement = document.activeElement;
         if (lightboxImg) lightboxImg.style.display = 'none';
         if (lightboxCaption) {
             lightboxCaption.textContent = captionText || '';
@@ -552,6 +656,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (lightboxIframe) {
                 lightboxIframe.src = '';
                 lightboxIframe.style.display = 'none';
+            }
+            if (lastActiveElement && typeof lastActiveElement.focus === 'function') {
+                lastActiveElement.focus();
             }
         }, 400);
     }
