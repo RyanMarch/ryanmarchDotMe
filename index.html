@@ -21,13 +21,12 @@
 
     </script>
     <base href="/">
+    <link rel="canonical" href="https://ryanmarch.me/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Ryan March | Product & Technology</title>
     <meta name="description"
         content="Personal landing page for Ryan March, a Product Manager and creative technologist.">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="preload" href="/assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin>
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="/style.css">
     <link rel="me" href="https://mastodon.social/@ryanmarch">
@@ -137,7 +136,7 @@
         <div id="projects-grid" class="destinations-grid"></div>
 
         <!-- SPA Project Container (Hidden by default) -->
-        <div class="modal-content" id="modal-content-area" style="display: none;">
+        <div class="project-detail-content" id="project-detail-area" style="display: none;">
             <!-- Content gets injected here via SPA router -->
         </div>
 
@@ -160,8 +159,7 @@
 
 
     <!-- Data and Rendering Script -->
-    <script src="/assets/js/project-data.js"></script>
-    <script src="/assets/js/projects.js"></script>
+    <script type="module" src="/assets/js/projects.js"></script>
     <script src="/assets/js/theme.js"></script>
 
     <script>
