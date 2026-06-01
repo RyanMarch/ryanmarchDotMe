@@ -43,6 +43,7 @@
     ],
     "liveServer.settings.wait": 1000,
     "liveServer.settings.port": 5588,
+    "liveServer.settings.donotVerifyTags": true,
     // --- Auto-Compilation Configuration ---
     // Using your already-installed "Trigger Task on Save" extension (gardne.trigger-task-on-save)
     // configured to run silently in the background without popups or alerts.

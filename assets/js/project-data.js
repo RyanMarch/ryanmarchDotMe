@@ -1,4 +1,4 @@
-const myProjects = [
+export const myProjects = [
     {
         id: "motion-poster",
         title: "Motion Poster",
