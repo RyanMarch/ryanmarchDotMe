@@ -428,16 +428,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>${project.actionText}</span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
                     </a>
-                    <a href="/project/${project.id}/" class="project-btn btn-secondary read-more-btn" data-project-id="${project.id}" aria-label="Read more about ${project.title}">
-                        <span>Read More</span>
+                    <a href="/project/${project.id}/" class="project-btn btn-secondary read-more-btn" data-project-id="${project.id}">
+                        <span>Read More <span class="sr-only">about ${project.title}</span></span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     </a>
                 `;
             } else if (project.hasExtendedContent) {
                 // ONE button: Read More (Primary)
                 actionsHtml = `
-                    <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}" aria-label="Read more about ${project.title}">
-                        <span>Read More</span>
+                    <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}">
+                        <span>Read More <span class="sr-only">about ${project.title}</span></span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     </a>
                 `;
