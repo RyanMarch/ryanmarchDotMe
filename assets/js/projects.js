@@ -1,3 +1,5 @@
+import { myProjects } from './project-data.js';
+
 function initializeCustomAudioPlayers(container) {
     const players = container.querySelectorAll('.custom-audio-player');
 
@@ -192,7 +194,7 @@ function initializeCustomAudioPlayers(container) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('projects-grid');
-    const modalContentArea = document.getElementById('modal-content-area');
+    const projectDetailArea = document.getElementById('project-detail-area');
 
     // 1. Dynamic Lightbox Setup (programmatically creates the lightbox if it is missing)
     let lightbox = document.getElementById('lightbox-overlay');
@@ -496,8 +498,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Automatically initialize custom audio players for the current page content
-    if (modalContentArea) {
-        initializeCustomAudioPlayers(modalContentArea);
+    if (projectDetailArea) {
+        initializeCustomAudioPlayers(projectDetailArea);
     }
 
     // 3. Lightbox open/close functions
@@ -602,8 +604,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (modalContentArea) {
-        setupContentClicks(modalContentArea, null);
+    if (projectDetailArea) {
+        setupContentClicks(projectDetailArea, null);
     }
 
     // Escape key handling
@@ -620,6 +622,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadProject(projectId) {
         const project = myProjects.find(p => p.id === projectId);
         if (!project) return;
+
+        // Fade out home view before switching
+        const topRow = document.querySelector('.top-row');
+        const filterContainer = document.querySelector('.filter-container');
+        const projectsGrid = document.getElementById('projects-grid');
+        const homeEls = [topRow, filterContainer, projectsGrid].filter(Boolean);
+        homeEls.forEach(el => { el.style.transition = 'opacity 0.1s ease'; el.style.opacity = '0'; });
         
         try {
             // 1. Fetch content
@@ -638,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (headings.length > 0) {
                 const links = Array.from(headings).map(h => `<a href="#${h.id}">${h.querySelector('span') ? h.querySelector('span').innerHTML : h.innerHTML}</a>`);
                 if (project.actionUrl || project.sourceUrl) {
-                    links.push('<a href="#modal-footer-actions">Links</a>');
+                    links.push('<a href="#project-detail-footer-actions">Links</a>');
                 }
                 navHtml = `<nav class="project-nav"><div class="nav-links">${links.join('')}</div></nav>`;
             }
@@ -656,68 +665,126 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // 5. Build Tags
-            const tagsHtml = `<div class="tag-list modal-tags">${buildTagsHtml(project.tags)}</div>`;
+            const tagsHtml = `<div class="tag-list project-detail-tags">${buildTagsHtml(project.tags)}</div>`;
             
             // 6. Build Footer
             let footerHtml = '';
             if (project.actionUrl || project.sourceUrl) {
-                footerHtml += '<hr class="modal-footer-divider">\n<div class="modal-footer-actions" id="modal-footer-actions">\n';
+                footerHtml += '<hr class="project-detail-footer-divider">\n<div class="project-detail-footer-actions" id="project-detail-footer-actions">\n';
                 if (project.sourceUrl) {
-                    footerHtml += `    <a href="${project.sourceUrl}" class="project-btn modal-full-btn btn-secondary" target="_blank" rel="noopener noreferrer">
+                    footerHtml += `    <a href="${project.sourceUrl}" class="project-btn project-detail-btn btn-secondary" target="_blank" rel="noopener noreferrer">
         <span>View More</span>
         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
     </a>\n`;
                 }
                 if (project.actionUrl) {
-                    footerHtml += `    <a href="${project.actionUrl}" class="project-btn modal-full-btn" target="_blank" rel="noopener noreferrer">
+                    footerHtml += `    <a href="${project.actionUrl}" class="project-btn project-detail-btn" target="_blank" rel="noopener noreferrer">
         <span>${project.actionText || 'Visit'}</span>
         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
     </a>\n`;
                 }
-                footerHtml += '    <a href="/" class="modal-back-to-top-btn data-spa-link">Back to Home</a>\n</div>';
+                footerHtml += '    <a href="/" class="project-detail-back-btn data-spa-link">Back to Home</a>\n</div>';
             } else {
-                footerHtml = '<div class="modal-footer-actions"><a href="/" class="modal-back-to-top-btn data-spa-link">Back to Home</a></div>';
+                footerHtml = '<div class="project-detail-footer-actions"><a href="/" class="project-detail-back-btn data-spa-link">Back to Home</a></div>';
             }
             
             // 7. Inject everything
-            modalContentArea.innerHTML = tagsHtml + htmlContent + footerHtml;
+            projectDetailArea.innerHTML = tagsHtml + htmlContent + footerHtml;
             
             // 8. Wire up handlers
-            initializeCustomAudioPlayers(modalContentArea);
+            initializeCustomAudioPlayers(projectDetailArea);
             
             // Re-bind back button inside footer
-            const backBtns = modalContentArea.querySelectorAll('.data-spa-link');
+            const backBtns = projectDetailArea.querySelectorAll('.data-spa-link');
             backBtns.forEach(b => b.addEventListener('click', (e) => {
                 e.preventDefault();
                 navigateHome();
             }));
             
-            // 9. Show Modal, Hide Home
-            document.querySelector('.top-row').style.display = 'none';
-            document.querySelector('.filter-container').style.display = 'none';
-            document.getElementById('projects-grid').style.display = 'none';
+            // 9. Show Project View, Hide Home (after fade out completes)
+            homeEls.forEach(el => { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; });
             document.body.classList.add('standalone-page');
-            modalContentArea.style.display = 'block';
-            window.scrollTo(0,0);
+
+            // Fade in project detail
+            projectDetailArea.style.opacity = '0';
+            projectDetailArea.style.display = 'block';
+            window.scrollTo(0, 0);
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    projectDetailArea.style.transition = 'opacity 0.15s ease';
+                    projectDetailArea.style.opacity = '1';
+                    setTimeout(() => { projectDetailArea.style.transition = ''; }, 180);
+                });
+            });
+
             document.title = `${project.title} | Ryan March`;
+
+            // Update canonical URL
+            let canonicalLink = document.querySelector('link[rel="canonical"]');
+            if (canonicalLink) {
+                canonicalLink.setAttribute('href', `https://ryanmarch.me/project/${projectId}/`);
+            }
             
         } catch (e) {
             console.error("Failed to load project", e);
+            // Restore home visibility on error
+            homeEls.forEach(el => { el.style.opacity = ''; el.style.transition = ''; });
         }
     }
     
     function navigateHome(pushState = true) {
-        document.querySelector('.top-row').style.display = 'flex';
-        document.querySelector('.filter-container').style.display = 'block';
-        document.getElementById('projects-grid').style.display = 'grid';
-        document.body.classList.remove('standalone-page');
-        modalContentArea.style.display = 'none';
-        modalContentArea.innerHTML = '';
         if (pushState && window.location.pathname !== '/') {
             history.pushState(null, '', '/');
         }
         document.title = 'Ryan March | Product & Technology';
-        window.scrollTo(0,0);
+
+        // Update canonical URL
+        let canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+            canonicalLink.setAttribute('href', 'https://ryanmarch.me/');
+        }
+
+        // Fade out project detail, then swap views
+        projectDetailArea.style.transition = 'opacity 0.1s ease';
+        projectDetailArea.style.opacity = '0';
+
+        setTimeout(() => {
+            projectDetailArea.style.display = 'none';
+            projectDetailArea.style.opacity = '';
+            projectDetailArea.style.transition = '';
+            projectDetailArea.innerHTML = '';
+            document.body.classList.remove('standalone-page');
+
+            const topRow = document.querySelector('.top-row');
+            const filterContainer = document.querySelector('.filter-container');
+            const projectsGrid = document.getElementById('projects-grid');
+
+            // Reveal home elements with a fade-in
+            [topRow, filterContainer, projectsGrid].forEach(el => {
+                if (!el) return;
+                el.style.opacity = '0';
+                el.style.display = el === topRow ? 'flex' : el === filterContainer ? 'block' : 'grid';
+            });
+
+            window.scrollTo(0, 0);
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    [topRow, filterContainer, projectsGrid].forEach(el => {
+                        if (!el) return;
+                        el.style.transition = 'opacity 0.15s ease';
+                        el.style.opacity = '1';
+                    });
+                    setTimeout(() => {
+                        [topRow, filterContainer, projectsGrid].forEach(el => {
+                            if (!el) return;
+                            el.style.transition = '';
+                            el.style.opacity = '';
+                        });
+                    }, 180);
+                });
+            });
+        }, 120);
     }
 
     // Listen for History popstate (Back/Forward buttons)
@@ -734,8 +801,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (modalContentArea) {
-        setupContentClicks(modalContentArea, modalContentArea);
+    if (projectDetailArea) {
+        setupContentClicks(projectDetailArea, projectDetailArea);
     }
 
     // Card clicks — SPA interception
@@ -763,5 +830,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial Route Check
     handleUrlRoute();
+
+    // Intercept slim-header brand link to use SPA navigation
+    const headerBrand = document.querySelector('.slim-header-brand');
+    if (headerBrand) {
+        headerBrand.addEventListener('click', (e) => {
+            // Only intercept when we're on a project page; let normal navigation handle the home page
+            if (document.body.classList.contains('standalone-page')) {
+                e.preventDefault();
+                navigateHome();
+            }
+        });
+    }
 });
 
