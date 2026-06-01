@@ -1,0 +1,41 @@
+# ============================================================
+# Cloudflare Pages — Response Headers
+# ============================================================
+
+# ── Fonts: immutable, long-lived cache + CORS for cross-origin @font-face
+/assets/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+# ── Images: long-lived cache (bump filenames to bust)
+/assets/img/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── JS / CSS: long-lived cache (bump filenames or version query strings to bust)
+/assets/js/*
+  Cache-Control: public, max-age=31536000, immutable
+/*.css
+  Cache-Control: public, max-age=31536000, immutable
+
+# ── Favicons: reasonably long cache
+/assets/favicon/*
+  Cache-Control: public, max-age=604800
+
+# ── Content HTML fragments (loaded dynamically by the SPA router)
+/content/*
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# ── Root HTML + sitemap: short cache so changes propagate quickly
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
+# ── Security headers (applied globally)
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
