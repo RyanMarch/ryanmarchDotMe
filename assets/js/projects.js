@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <div class="lightbox-container">
-                <img id="lightbox-image" src="" alt="Enlarged view">
+                <img id="lightbox-image" src="" alt="Enlarged view" width="800" height="450">
                 <p id="lightbox-caption" class="lightbox-caption"></p>
             </div>
         `;
@@ -457,13 +457,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (project.image) {
                 const widthAttr = project.imageWidth ? ` width="${project.imageWidth}"` : '';
                 const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
-                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" loading="lazy"${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+                const loadingAttr = project.featured ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
             } else {
                 let iconSvg = '';
                 if (project.symbol === 'data') {
                     iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0v3.75" /></svg>`;
                 } else if (project.symbol === 'hub') {
-                    iconSvg = `<img src="assets/img/rentpress-logo.svg" alt="RentPress">`;
+                    iconSvg = `<img src="assets/img/rentpress-logo.svg" alt="RentPress" width="376" height="69">`;
                 } else if (project.symbol === 'email') {
                     iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>`;
                 } else {
