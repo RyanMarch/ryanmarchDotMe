@@ -468,7 +468,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const smImage = `${base}-sm${ext}`;
                     const smWidth = Math.round(project.imageWidth / 2);
                     srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${project.imageWidth}w"`;
-                    sizesAttr = ` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${project.imageWidth}px"`;
+                    
+                    const desktopSize = project.size === 'large' ? '500px' : '300px';
+                    sizesAttr = ` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${desktopSize}"`;
                 }
                 
                 visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr}${sizesAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
