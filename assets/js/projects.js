@@ -470,8 +470,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     let lgWidth = project.imageWidth;
                     let smWidth = Math.round(project.imageWidth / 2);
                     if (project.id === 'motion-poster') {
-                        lgWidth = 800;
-                        smWidth = 500;
+                        lgWidth = 1000;
+                        smWidth = 600;
                     } else if (project.id === 'bowserstack') {
                         lgWidth = 480;
                         smWidth = 300;
