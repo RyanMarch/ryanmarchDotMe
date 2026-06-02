@@ -39,11 +39,11 @@
     --font-main: 'Outfit', sans-serif;
 
     /* Tag Palette - Sophisticated Muted Tones */
-    --tag-blue: #38bdf8;
+    --tag-blue: #7dd3fc;
     --tag-blue-bg: rgba(56, 189, 248, 0.1);
     --tag-blue-border: rgba(56, 189, 248, 0.2);
 
-    --tag-green: #4ade80;
+    --tag-green: #86efac;
     --tag-green-bg: rgba(74, 222, 128, 0.1);
     --tag-green-border: rgba(74, 222, 128, 0.2);
 
@@ -51,19 +51,19 @@
     --tag-purple-bg: rgba(216, 180, 254, 0.1);
     --tag-purple-border: rgba(216, 180, 254, 0.2);
 
-    --tag-orange: #fb923c;
+    --tag-orange: #fdba74;
     --tag-orange-bg: rgba(251, 146, 60, 0.1);
     --tag-orange-border: rgba(251, 146, 60, 0.2);
 
-    --tag-rose: #fb7185;
+    --tag-rose: #fda4af;
     --tag-rose-bg: rgba(251, 113, 133, 0.1);
     --tag-rose-border: rgba(251, 113, 133, 0.2);
 
-    --tag-pink: #f472b6;
+    --tag-pink: #f9a8d4;
     --tag-pink-bg: rgba(244, 114, 182, 0.1);
     --tag-pink-border: rgba(244, 114, 182, 0.2);
 
-    --tag-cyan: #22d3ee;
+    --tag-cyan: #67e8f9;
     --tag-cyan-bg: rgba(34, 211, 238, 0.1);
     --tag-cyan-border: rgba(34, 211, 238, 0.2);
 
@@ -71,11 +71,11 @@
     --tag-indigo-bg: rgba(165, 180, 252, 0.1);
     --tag-indigo-border: rgba(165, 180, 252, 0.2);
 
-    --tag-gold: #fbbf24;
+    --tag-gold: #fde047;
     --tag-gold-bg: rgba(251, 191, 36, 0.1);
     --tag-gold-border: rgba(251, 191, 36, 0.2);
 
-    --tag-teal: #2dd4bf;
+    --tag-teal: #5eead4;
     --tag-teal-bg: rgba(45, 212, 191, 0.1);
     --tag-teal-border: rgba(45, 212, 191, 0.2);
 
