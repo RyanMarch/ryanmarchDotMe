@@ -726,15 +726,19 @@ margin-top: 3rem;
     perspective: 1200px;
 }
 
+.destination-visual:has(img),
+.destination-standalone-visual:has(img) {
+    filter: var(--img-shadow);
+}
 
 .destination-image-standalone,
 .destination-icon {
     max-width: 100%;
     max-height: 320px;
     width: auto;
+    height: auto;
     object-fit: contain;
     border-radius: 12px;
-    filter: var(--img-shadow);
 }
 
 .bowser-preview-img {
@@ -1870,6 +1874,7 @@ body.standalone-page {
     .destination-icon {
         max-height: 200px; /* Slightly shorter for mobile bento tiles */
         width: auto;
+        height: auto;
         object-fit: contain;
     }
 
