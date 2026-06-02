@@ -21,18 +21,12 @@ async function build() {
     
     try {
       const originalContent = fs.readFileSync(absolutePath, 'utf8');
-      const originalSize = Buffer.byteLength(originalContent, 'utf8');
-      
       const minified = await esbuild.transform(originalContent, {
         minify: true,
         loader: file.loader,
       });
-      
       fs.writeFileSync(absolutePath, minified.code, 'utf8');
-      const minifiedSize = Buffer.byteLength(minified.code, 'utf8');
-      const savings = ((originalSize - minifiedSize) / originalSize * 100).toFixed(1);
-      
-      console.log(`✅ Minified ${file.path}: ${(originalSize / 1024).toFixed(1)} KiB -> ${(minifiedSize / 1024).toFixed(1)} KiB (${savings}% savings)`);
+      console.log(`✅ Minified ${file.path}`);
     } catch (error) {
       console.error(`❌ Failed to minify ${file.path}:`, error);
       process.exit(1);
