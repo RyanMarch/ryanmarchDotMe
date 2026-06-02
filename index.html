@@ -144,7 +144,8 @@
 
 
     <!-- Lightbox Overlay -->
-    <div id="lightbox-overlay" class="lightbox-overlay" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true" aria-label="Image gallery lightbox">
+    <div id="lightbox-overlay" class="lightbox-overlay" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true"
+        aria-label="Image gallery lightbox">
         <button class="lightbox-close" aria-label="Close lightbox">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
@@ -160,7 +161,7 @@
 
     <!-- Data and Rendering Script -->
     <script type="module" src="/assets/js/projects.js"></script>
-    <script src="/assets/js/theme.js"></script>
+    <script src="/assets/js/theme.js" defer></script>
 
     <script>
         // Slim header scroll trigger
@@ -205,6 +206,9 @@
             document.addEventListener('scroll', updateGlimmers, { capture: true, passive: true });
         }
     </script>
+    <!-- Cloudflare Web Analytics (Self-Hosted for Cache Optimization) -->
+    <script defer src="/assets/js/beacon.min.js"
+        data-cf-beacon='{"token": "5a96c1f54a7f4d3d9e689f7983e95bbc"}'></script>
 </body>
 
 </html>

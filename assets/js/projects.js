@@ -386,18 +386,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const scrollLeft = filterPillsContainer.scrollLeft;
                 const maxScrollLeft = filterPillsContainer.scrollWidth - filterPillsContainer.clientWidth;
 
-                // Use a small 2px threshold to avoid subpixel rounding issues on some screens
-                if (scrollLeft > 2) {
-                    filterPillsContainer.classList.add('scrolled-left');
-                } else {
-                    filterPillsContainer.classList.remove('scrolled-left');
-                }
+                // Defer DOM writes to requestAnimationFrame to prevent forced reflows
+                requestAnimationFrame(() => {
+                    if (scrollLeft > 2) {
+                        filterPillsContainer.classList.add('scrolled-left');
+                    } else {
+                        filterPillsContainer.classList.remove('scrolled-left');
+                    }
 
-                if (scrollLeft < maxScrollLeft - 2) {
-                    filterPillsContainer.classList.add('scrolled-right');
-                } else {
-                    filterPillsContainer.classList.remove('scrolled-right');
-                }
+                    if (scrollLeft < maxScrollLeft - 2) {
+                        filterPillsContainer.classList.add('scrolled-right');
+                    } else {
+                        filterPillsContainer.classList.remove('scrolled-right');
+                    }
+                });
             };
 
             filterPillsContainer.addEventListener('scroll', updateScrollFade);
