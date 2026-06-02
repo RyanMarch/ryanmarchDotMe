@@ -466,8 +466,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     const base = project.image.substring(0, extIndex);
                     const ext = project.image.substring(extIndex);
                     const smImage = `${base}-sm${ext}`;
-                    const smWidth = Math.round(project.imageWidth / 2);
-                    srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${project.imageWidth}w"`;
+                    
+                    let lgWidth = project.imageWidth;
+                    let smWidth = Math.round(project.imageWidth / 2);
+                    if (project.id === 'motion-poster') {
+                        lgWidth = 800;
+                        smWidth = 500;
+                    } else if (project.id === 'bowserstack') {
+                        lgWidth = 480;
+                        smWidth = 300;
+                    } else if (project.id === 'rentpress') {
+                        lgWidth = 800;
+                        smWidth = 485;
+                    }
+                    
+                    srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${lgWidth}w"`;
                     
                     const desktopSize = project.size === 'large' ? '500px' : '300px';
                     sizesAttr = ` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${desktopSize}"`;
