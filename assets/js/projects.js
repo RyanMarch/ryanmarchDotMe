@@ -458,7 +458,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const widthAttr = project.imageWidth ? ` width="${project.imageWidth}"` : '';
                 const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
                 const loadingAttr = project.featured ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
-                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+                
+                let srcsetAttr = '';
+                let sizesAttr = '';
+                const extIndex = project.image.lastIndexOf('.');
+                if (extIndex !== -1 && (project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress')) {
+                    const base = project.image.substring(0, extIndex);
+                    const ext = project.image.substring(extIndex);
+                    const smImage = `${base}-sm${ext}`;
+                    const smWidth = Math.round(project.imageWidth / 2);
+                    srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${project.imageWidth}w"`;
+                    sizesAttr = ` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${project.imageWidth}px"`;
+                }
+                
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr}${sizesAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
             } else {
                 let iconSvg = '';
                 if (project.symbol === 'data') {
