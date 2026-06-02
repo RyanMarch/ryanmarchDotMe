@@ -12,6 +12,7 @@ dev/*
 !dev/generate.py
 !dev/project-template.html
 !dev/r2_cleanup.py
+!dev/build.js
 projectsFromOldWebsite/
 
 # Code workspace files
@@ -30,3 +31,5 @@ projectsFromOldWebsite/
 # Build/upload cache files
 dev/.r2_cache.json
 
+# Node modules
+node_modules/
