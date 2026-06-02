@@ -613,7 +613,6 @@ margin-top: 3rem;
         grid-column: span 1;
         grid-row: span 1;
         padding: 1.2rem;
-        row-gap: 0.75rem;
     }
     
     .destination-card.size-medium {
@@ -635,7 +634,6 @@ margin-top: 3rem;
         grid-column: span 1;
         grid-row: span 2;
         padding: 1.2rem;
-        row-gap: 0.75rem;
     }
 }
 
@@ -643,7 +641,7 @@ margin-top: 3rem;
     padding: 1.5rem 1.5rem;
     display: grid;
     container-type: inline-size;
-    row-gap: 1rem;
+    row-gap: 0.75rem;
     column-gap: 1.5rem;
     position: relative;
     overflow: hidden;
@@ -663,23 +661,20 @@ margin-top: 3rem;
     /* Only modules that are strictly wider than they are tall (2x1, 3x1) should be side-by-side */
     .destination-card.size-medium,
     .destination-card.size-wide {
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 2fr minmax(0, 1fr);
         grid-template-rows: auto 1fr;
         grid-template-areas: 
             "tags tags"
             "content visual";
     }
+
+    .destination-card.size-medium .destination-icon,
+    .destination-card.size-wide .destination-icon {
+        max-height: 180px;
+    }
 }
 
 /* Requirement: Large (2x2) remains stacked, but with wider text and smaller image */
-.destination-card.size-large {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
-    grid-template-areas: 
-        "tags"
-        "content"
-        "visual";
-}
 
 .destination-card.size-large .destination-content p,
 .destination-card.size-medium .destination-content p,
@@ -708,9 +703,16 @@ margin-top: 3rem;
     grid-area: content;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 0.75rem;
     z-index: 2;
     position: relative;
+}
+
+/* Size-small cards have no visual row, so content fills 1fr height.
+   Push the button to the bottom to anchor it consistently. */
+.destination-card.size-small .destination-actions {
+    margin-top: auto;
 }
 
 .destination-visual,
@@ -723,12 +725,6 @@ margin-top: 3rem;
     z-index: 1;
     perspective: 1200px;
 }
-.poster-preview-img {
-    transform: rotateY(-25deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-style: preserve-3d;
-    will-change: transform;
-}
 
 
 .destination-image-standalone,
@@ -738,7 +734,6 @@ margin-top: 3rem;
     width: auto;
     object-fit: contain;
     border-radius: 12px;
-    transition: transform 0.8s cubic-bezier(0.68, 0.68, 0.3, 1);
     filter: var(--img-shadow);
 }
 
@@ -750,25 +745,14 @@ margin-top: 3rem;
     scale: 0.75;
 }
 
-@media (min-width: 1025px) {
-    .destination-card:hover .destination-image-standalone,
-    .destination-card:hover .destination-icon {
-        transform: scale(1.05);
-    }
-
-    /* Specific override for the poster preview to handle the 3D swing */
-    .destination-card:hover .poster-preview-img {
-        transform: rotateY(0deg) rotateX(0deg) rotateZ(0deg) scale(1.4) translateY(-5px);
-    }
-}
 
 /* Project description typography */
 .destination-content p {
     color: var(--text-secondary);
     font-size: clamp(1rem, 2vw, 1.05rem);
-    line-height: 1.45;
-    max-width: 420px; /* Increased from 380px */
-    margin: 0.6rem 0 1rem 0;
+    line-height: 1.3;
+    max-width: 420px;
+    margin: 0;
     text-wrap: balance;
 }
 
@@ -804,17 +788,9 @@ margin-top: 3rem;
     }
 }
 
-.size-small .destination-header h2 {
-    font-size: clamp(1.8rem, 5vw, 2.2rem); /* Restored to be closer to main titles */
-    line-height: 1.1;
-    margin-bottom: 0.5rem;
-}
 
-.size-small .destination-content p {
-    font-size: 1.1rem;
-    line-height: 1.4;
-    margin-bottom: 1.5rem;
-}
+
+
 
 /* --- Standalone Project Pages --- */
 body.standalone-page {
@@ -1419,7 +1395,6 @@ body.standalone-page {
     flex-wrap: wrap;
     width: fit-content;
     position: relative;
-    margin-top: auto;
 }
 
 /* Note: .project-link removed as View Source buttons are deprecated */
@@ -1563,6 +1538,7 @@ body.standalone-page {
 .destination-content h2 {
     font-size: 2.5rem;
     font-weight: 700;
+    line-height: 1.1;
     letter-spacing: -0.01em;
 }
 
@@ -1846,29 +1822,15 @@ body.standalone-page {
     }
 
     /* Adjust typography for narrow mobile modules (1-column only) */
-    .destination-card.size-medium .destination-content h2,
-    .destination-card.size-small .destination-content h2 {
-        font-size: 1.35rem; /* Down from 2.2rem */
-        line-height: 1.2;
-    }
-
     .destination-card.size-medium .destination-content p,
     .destination-card.size-small .destination-content p {
-        font-size: 0.85rem;
         line-height: 1.4;
         display: block; /* Remove line-clamp */
         overflow: visible;
         margin: 0.5rem 0;
     }
 
-    /* Horizontal card specific typography */
-    .destination-card.size-tall .destination-content h2 {
-        font-size: 1.6rem;
-        margin-bottom: 0.25rem;
-    }
-
     .destination-card.size-tall .destination-content p {
-        font-size: 0.95rem;
         max-width: 100%;
         margin-bottom: 1rem;
     }
@@ -1894,11 +1856,6 @@ body.standalone-page {
     .destination-content {
         padding: 0;
         align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .destination-card.size-tall .destination-content {
-        align-items: flex-start;
     }
 
     .destination-visual,
@@ -1922,11 +1879,6 @@ body.standalone-page {
         max-height: 140px;
     }
 
-    /* Disable tilt effect on mobile */
-    .poster-preview-img {
-        transform: scale(1.4);
-        transition: none;
-    }
 
     .destination-actions {
         width: 100%;
@@ -2886,12 +2838,7 @@ body.standalone-page {
 
 /* Container query adjustments for narrow cards/modules to prevent button cropping */
 @container (max-width: 550px) {
-    .destination-content h2 {
-        font-size: 2rem;
-    }
-    
     .destination-content p {
-        font-size: 0.95rem;
         line-height: 1.4;
         margin: 0.4rem 0 0.8rem 0;
     }
@@ -2905,12 +2852,10 @@ body.standalone-page {
 /* Container query adjustments for extremely narrow cards/modules (e.g. 1x1 size-small or 1x2 size-tall) */
 @container (max-width: 300px) {
     .destination-content h2 {
-        font-size: 1.35rem;
         line-height: 1.25;
     }
     
     .destination-content p {
-        font-size: 0.85rem;
         line-height: 1.35;
         margin: 0.3rem 0 0.6rem 0;
     }
