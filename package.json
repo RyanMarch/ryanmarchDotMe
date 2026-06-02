@@ -1,0 +1,11 @@
+{
+  "name": "ryanmarchdotme",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node dev/build.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0"
+  }
+}
