@@ -455,7 +455,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let visualHtml = '';
             if (project.image) {
-                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" loading="lazy" class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+                const widthAttr = project.imageWidth ? ` width="${project.imageWidth}"` : '';
+                const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" loading="lazy"${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
             } else {
                 let iconSvg = '';
                 if (project.symbol === 'data') {
