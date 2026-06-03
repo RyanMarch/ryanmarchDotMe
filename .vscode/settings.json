@@ -3,14 +3,30 @@
         "**/node_modules": true,
         "**/bower_components": true,
         "**/*.code-search": true,
-        "project/": true
+        "project/": true,
+        "**/*.webp": true,
+        "**/*.png": true,
+        "**/*.jpg": true,
+        "**/*.jpeg": true,
+        "**/*.gif": true,
+        "**/*.ico": true,
+        "**/*.mp3": true,
+        "dev/og-image.pxd": true,
+        "dev/.r2_cache.json": true,
+        "**/.wrangler": true,
+        "**/dev/downloadReports": true
     },
     "files.exclude": {
         "project/": true,
         "wrangler.jsonc": true,
         "package.json": true,
         "sitemap.xml": true,
-        "robots.txt": true
+        "robots.txt": true,
+        "worker.js": true,
+        "GEMINI.md": true,
+        "_headers": true,
+        ".assetsignore": true,
+        "build.js": true,
     },
     "liveServer.settings.ignoreFiles": [
         "**/.git/**",
@@ -44,6 +60,11 @@
     "liveServer.settings.wait": 1000,
     "liveServer.settings.port": 5588,
     "liveServer.settings.donotVerifyTags": true,
+    "liveServer.settings.proxy": {
+        "enable": true,
+        "baseUri": "/",
+        "proxyUri": "http://127.0.0.1:8000"
+    },
     // --- Auto-Compilation Configuration ---
     // Using your already-installed "Trigger Task on Save" extension (gardne.trigger-task-on-save)
     // configured to run silently in the background without popups or alerts.
