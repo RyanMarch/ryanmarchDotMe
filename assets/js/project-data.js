@@ -328,7 +328,7 @@ export const myProjects = [
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
-        size: "medium",
+        size: "tall",
         image: "content/sbut-feel-right/images/feelright.webp",
         imageWidth: 350,
         imageHeight: 350,
@@ -385,7 +385,7 @@ export const myProjects = [
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
-        size: "medium",
+        size: "tall",
         image: "content/chris-jamison-covers/images/chris-jamison-covers.webp",
         imageWidth: 350,
         imageHeight: 350,
@@ -429,6 +429,26 @@ export const myProjects = [
         imageHeight: 336,
         imageClass: "destination-icon",
         actionText: "View Promo",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "the-meadows",
+        title: "The Meadows",
+        subtitle: "Website and brand relaunch for an event venue.",
+        tags: [
+            { label: "Web Development", color: "green" },
+            { label: "Branding", color: "purple" },
+            { label: "Marketing", color: "orange" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "tall",
+        image: "content/the-meadows/images/hero.jpg",
+        imageWidth: 600,
+        imageHeight: 400,
+        imageClass: "destination-icon",
+        actionText: "View Case Study",
         actionUrl: "",
         hasExtendedContent: true
     }
