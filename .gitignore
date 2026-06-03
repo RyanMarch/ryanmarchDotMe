@@ -7,13 +7,8 @@
 ehthumbs.db
 Thumbs.db
 
-# Dev-only notes (keep local, don't deploy)
-dev/*
-!dev/generate.py
-!dev/project-template.html
-!dev/r2_cleanup.py
-!dev/build.js
-projectsFromOldWebsite/
+# Dev folder (local tools/scripts, not committed to git)
+dev/
 
 # Code workspace files
 *.code-workspace
@@ -33,3 +28,6 @@ dev/.r2_cache.json
 
 # Node modules
 node_modules/
+
+# Local-only AI instruction file
+GEMINI.md
