@@ -572,7 +572,7 @@ margin-top: 3rem;
 }
 
 .bio-info .subtitle {
-    color: var(--accent-color);
+    color: var(--tag-blue);
     font-size: clamp(0.9rem, 2vw, 1rem);
     font-weight: 600;
     text-transform: uppercase;
@@ -1929,6 +1929,12 @@ body.standalone-page {
         overflow: hidden;
     }
 
+    /* Ensure profile buttons and filter bar match the translucent mobile style */
+    .top-row .profile-btn,
+    .filter-container .filter-bar {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
     .project-detail-content {
         padding: 1rem 1.4rem;
         display: block;
@@ -2040,17 +2046,65 @@ body.standalone-page {
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 520px) {
     .profile-links {
         flex-direction: column;
+    }
+    
+    .destinations-grid {
+        grid-template-columns: 1fr;
+        gap: 0.8rem;
+    }
+
+    /* Make all card types span full width on small mobile screens */
+    .destination-card.size-medium,
+    .destination-card.size-small,
+    .destination-card.size-large,
+    .destination-card.size-tall {
+        grid-column: span 1 !important;
+        grid-row: span 1 !important;
+    }
+
+    /* Stack the tall cards vertically on mobile to give text and elements space */
+    .destination-card.size-tall {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        grid-template-areas: 
+            "tags"
+            "content"
+            "visual"
+            "source";
+        align-items: stretch;
+    }
+
+    .destination-card.size-tall .destination-icon {
+        max-height: 140px; /* Adjust height when stacked */
+        margin: 0 auto;
+    }
+
+    /* Restore button styles for wider mobile view */
+    .destination-card.size-medium .project-btn,
+    .destination-card.size-small .project-btn {
+        width: fit-content;
+        padding: 0.7rem 1.5rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Restore tag size on mobile when the grid collapses to 1 column */
+    .destination-card.size-medium .tag,
+    .destination-card.size-small .tag {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.8rem;
+        letter-spacing: 0.1em;
     }
     
     .destination-card {
         padding: 1.5rem;
     }
+    
     .bowser-preview-img {
-    scale: 1;
-}
+        scale: 1;
+    }
 }
 
 
@@ -2857,6 +2911,7 @@ body.standalone-page {
 /* Container query adjustments for extremely narrow cards/modules (e.g. 1x1 size-small or 1x2 size-tall) */
 @container (max-width: 300px) {
     .destination-content h2 {
+        font-size: 1.6rem; /* Prevent heading overflow and clipping in narrow cards */
         line-height: 1.25;
     }
     

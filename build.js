@@ -10,10 +10,19 @@ const filesToMinify = [
 ];
 
 async function build() {
+  const isCloudflare = process.env.CF_PAGES === '1' || process.env.CI === 'true';
+  const hasForceFlag = process.argv.includes('--force') || process.argv.includes('-f');
+
+  if (!isCloudflare && !hasForceFlag) {
+    console.error('⚠️  Warning: Running "npm run build" locally will overwrite your source files with minified code in-place.');
+    console.error('If you want to run this locally, use: npm run build -- --force');
+    process.exit(1);
+  }
+
   console.log('🏁 Starting in-place assets minification...');
   
   for (const file of filesToMinify) {
-    const absolutePath = path.resolve(__dirname, '..', file.path);
+    const absolutePath = path.resolve(__dirname, file.path);
     if (!fs.existsSync(absolutePath)) {
       console.warn(`⚠️ File not found: ${file.path}`);
       continue;
