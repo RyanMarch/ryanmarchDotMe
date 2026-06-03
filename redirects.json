@@ -1,0 +1,7 @@
+[
+  {
+    "source": "/resume/",
+    "destination": "/",
+    "permanent": true
+  }
+]
