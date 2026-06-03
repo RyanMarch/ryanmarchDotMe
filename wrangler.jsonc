@@ -19,15 +19,5 @@
       "pattern": "ryanmarch.me",
       "custom_domain": true
     }
-  ],
-  "env": {
-    "staging": {
-      "routes": [
-        {
-          "pattern": "staging.ryanmarch.me",
-          "custom_domain": true
-        }
-      ]
-    }
-  }
+  ]
 }
