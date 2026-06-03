@@ -40,10 +40,6 @@
         "**/.Trashes/**",
         "**/node_modules/**",
         "node_modules/**",
-        "**/content/**",
-        "content/**",
-        "**/assets/js/project-data.js",
-        "assets/js/project-data.js",
         "**/dev/**",
         "dev/**",
         "**/.wrangler/**",
@@ -64,16 +60,5 @@
         "enable": true,
         "baseUri": "/",
         "proxyUri": "http://127.0.0.1:8000"
-    },
-    // --- Auto-Compilation Configuration ---
-    // Using your already-installed "Trigger Task on Save" extension (gardne.trigger-task-on-save)
-    // configured to run silently in the background without popups or alerts.
-    "triggerTaskOnSave.on": true,
-    "triggerTaskOnSave.showNotifications": false,
-    "triggerTaskOnSave.tasks": {
-        "Build Project Pages": [
-            "**/content/*.html",
-            "**/assets/js/project-data.js"
-        ]
     }
 }
