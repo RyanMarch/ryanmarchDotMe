@@ -104,6 +104,8 @@ export const myProjects = [
         id: "icon-studio",
         title: "Icon Studio",
         subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
+        seoTitle: "Icon Studio - App Icon Generator & Maker",
+        seoDescription: "Design and generate custom app icons online. Create high-fidelity icons for iOS, macOS, Android, and PWAs with gradients, skeuomorphic frames, and badges.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },
