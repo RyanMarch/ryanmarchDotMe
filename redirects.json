@@ -3,5 +3,10 @@
     "source": "/resume/",
     "destination": "/",
     "permanent": true
+  },
+  {
+    "source": "/index.php",
+    "destination": "/",
+    "permanent": true
   }
 ]
