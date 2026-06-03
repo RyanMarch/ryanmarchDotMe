@@ -875,6 +875,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function navigateHome(pushState = true) {
         if (pushState && window.location.pathname !== '/') {
             history.pushState(null, '', '/');
+        } else if (!pushState && window.location.pathname !== '/') {
+            history.replaceState(null, '', '/');
         }
         document.title = 'Ryan March | Product & Technology';
 
