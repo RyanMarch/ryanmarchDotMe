@@ -43,6 +43,12 @@ export default {
     async fetch(request, env) {
         try {
             const url = new URL(request.url);
+
+            // Redirect www to non-www
+            if (url.hostname === 'www.ryanmarch.me') {
+                return Response.redirect(`https://ryanmarch.me${url.pathname}${url.search}`, 301);
+            }
+
             const path = url.pathname;
 
             const normalizePath = (p) => {
