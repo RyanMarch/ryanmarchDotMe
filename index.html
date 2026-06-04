@@ -16,9 +16,17 @@
             } else {
                 document.documentElement.setAttribute('data-theme', theme);
             }
-            // document.documentElement.className = theme; // Redundant since we use [data-theme]
         })();
 
+        // iOS PWA standalone mode detection — runs before paint to avoid layout flash
+        (function () {
+            const isStandalone =
+                window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+            if (isStandalone) {
+                document.documentElement.classList.add('pwa-standalone');
+            }
+        })();
     </script>
     <base href="/">
     <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg">
@@ -27,16 +35,20 @@
     <link rel="manifest" href="/assets/favicon/site.webmanifest">
     <link rel="canonical" href="https://ryanmarch.me/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- iOS PWA: enable fullscreen homescreen app mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ryan March">
     <title>Ryan March | Product Manager & Creative Technologist</title>
     <meta name="description"
         content="Personal website and portfolio of Ryan March, a Product Manager and Creative Technologist. Explore interactive case studies, design tools, and web applications.">
     <link rel="preload" href="/style.css" as="style" fetchpriority="high">
     <link rel="preload" href="/assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-    <link rel="preload" href="/assets/img/motion-poster-framed.webp" as="image"
-        imagesrcset="/assets/img/motion-poster-framed-sm.webp 600w, /assets/img/motion-poster-framed.webp 1000w"
+    <link rel="preload" href="/content/icon-studio/images/icon-studio-framed.webp" as="image"
+        imagesrcset="/content/icon-studio/images/icon-studio-framed-sm.webp 400w, /content/icon-studio/images/icon-studio-framed.webp 800w"
         imagesizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, 500px" fetchpriority="high">
-    <link rel="modulepreload" href="/assets/js/projects.js">
-    <link rel="modulepreload" href="/assets/js/project-data.js">
+    <link rel="modulepreload" href="/assets/js/projects.js?v=1">
+    <link rel="modulepreload" href="/assets/js/project-data.js?v=1">
     <meta name="color-scheme" content="light dark">
     <link rel="stylesheet" href="/style.css">
     <link rel="me" href="https://mastodon.social/@ryanmarch">
@@ -162,7 +174,7 @@
             </svg>
         </button>
         <div class="lightbox-container">
-            <img id="lightbox-image" src="" alt="Enlarged view" width="800" height="450">
+            <img id="lightbox-image" src="" alt="Enlarged view">
             <p id="lightbox-caption" class="lightbox-caption"></p>
         </div>
     </div>
@@ -170,7 +182,7 @@
 
 
     <!-- Data and Rendering Script -->
-    <script type="module" src="/assets/js/projects.js"></script>
+    <script type="module" src="/assets/js/projects.js?v=1"></script>
     <script src="/assets/js/theme.js" defer></script>
 
     <script>
