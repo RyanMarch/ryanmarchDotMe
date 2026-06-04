@@ -12,7 +12,7 @@ export const myProjects = [
         ],
         featured: false,
         size: "large",
-        image: "assets/img/icon-studio-hero.png",
+        image: "assets/img/icon-studio-framed.png",
         imageWidth: 834,
         imageHeight: 560,
         imageClass: "destination-icon",
@@ -82,6 +82,27 @@ export const myProjects = [
         actionText: "Visit RentPress.io",
         actionUrl: "https://rentpress.io",
         sourceUrl: "https://wordpress.org/plugins/rentpress-for-websites/",
+        hasExtendedContent: true
+    },
+    {
+        id: "aasc-analytics",
+        title: "AASC Analytics and SEO Strategy",
+        subtitle: "Web analytics and SEO strategy for a national professional association.",
+        seoTitle: "AASC Analytics and SEO Strategy - Case Study",
+        seoDescription: "An in-depth case study on establishing Google Analytics 4 tracking, custom event tagging, and technical SEO remediation for servicecoordinator.org.",
+        tags: [
+            { label: "Analytics", color: "purple" },
+            { label: "Marketing", color: "orange" },
+            { label: "Professional", color: "blue" }
+        ],
+        featured: false,
+        size: "large",
+        image: "content/aasc-analytics/images/aasc-device-composite.png",
+        imageWidth: 1920,
+        imageHeight: 1088,
+        imageClass: "destination-icon",
+        actionText: "Visit Website",
+        actionUrl: "https://www.servicecoordinator.org",
         hasExtendedContent: true
     },
     {

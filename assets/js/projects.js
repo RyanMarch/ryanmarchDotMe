@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'web-apps',
             label: 'Web & Apps',
-            match: (project) => project.tags.some(t => ['web development', 'design tool', 'app', 'platform', 'digital signage', 'backend', 'experimentation'].includes(t.label.toLowerCase()))
+            match: (project) => project.tags.some(t => ['web development', 'design tool', 'app', 'platform', 'digital signage', 'backend', 'experimentation', 'analytics'].includes(t.label.toLowerCase()))
         },
         {
             id: 'audio-music',
@@ -462,10 +462,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 let srcsetAttr = '';
                 let sizesAttr = '';
                 const extIndex = project.image.lastIndexOf('.');
-                if (extIndex !== -1 && (project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress')) {
+                if (extIndex !== -1 && (project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress' || project.id === 'aasc-analytics')) {
                     const base = project.image.substring(0, extIndex);
                     const ext = project.image.substring(extIndex);
-                    const smImage = `${base}-sm${ext}`;
+                    const suffix = project.id === 'aasc-analytics' ? '-small' : '-sm';
+                    const smImage = `${base}${suffix}${ext}`;
                     
                     let lgWidth = project.imageWidth;
                     let smWidth = Math.round(project.imageWidth / 2);
@@ -478,6 +479,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else if (project.id === 'rentpress') {
                         lgWidth = 800;
                         smWidth = 485;
+                    } else if (project.id === 'aasc-analytics') {
+                        lgWidth = 1920;
+                        smWidth = 800;
                     }
                     
                     srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${lgWidth}w"`;
