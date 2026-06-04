@@ -16,9 +16,17 @@
             } else {
                 document.documentElement.setAttribute('data-theme', theme);
             }
-            // document.documentElement.className = theme; // Redundant since we use [data-theme]
         })();
 
+        // iOS PWA standalone mode detection — runs before paint to avoid layout flash
+        (function () {
+            const isStandalone =
+                window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+            if (isStandalone) {
+                document.documentElement.classList.add('pwa-standalone');
+            }
+        })();
     </script>
     <base href="/">
     <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg">
@@ -27,6 +35,10 @@
     <link rel="manifest" href="/assets/favicon/site.webmanifest">
     <link rel="canonical" href="https://ryanmarch.me/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <!-- iOS PWA: enable fullscreen homescreen app mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ryan March">
     <title>Ryan March | Product Manager & Creative Technologist</title>
     <meta name="description"
         content="Personal website and portfolio of Ryan March, a Product Manager and Creative Technologist. Explore interactive case studies, design tools, and web applications.">
