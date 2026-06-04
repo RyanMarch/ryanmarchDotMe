@@ -19,7 +19,7 @@
     "files.exclude": {
         "project/": true,
         "wrangler.jsonc": true,
-        "sitemap.xml": true,
+        // "sitemap.xml": true,
         "robots.txt": true,
         "worker.js": true,
         "GEMINI.md": true,
