@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
             <div class="lightbox-container">
-                <img id="lightbox-image" src="" alt="Enlarged view" width="800" height="450">
+                <img id="lightbox-image" src="" alt="Enlarged view">
                 <p id="lightbox-caption" class="lightbox-caption"></p>
             </div>
         `;
@@ -462,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 let srcsetAttr = '';
                 let sizesAttr = '';
                 const extIndex = project.image.lastIndexOf('.');
-                if (extIndex !== -1 && (project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress' || project.id === 'aasc-analytics')) {
+                if (extIndex !== -1 && (project.id === 'icon-studio' || project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress' || project.id === 'aasc-analytics')) {
                     const base = project.image.substring(0, extIndex);
                     const ext = project.image.substring(extIndex);
                     const suffix = project.id === 'aasc-analytics' ? '-small' : '-sm';
@@ -470,7 +470,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     let lgWidth = project.imageWidth;
                     let smWidth = Math.round(project.imageWidth / 2);
-                    if (project.id === 'motion-poster') {
+                    if (project.id === 'icon-studio') {
+                        lgWidth = 800;
+                        smWidth = 400;
+                    } else if (project.id === 'motion-poster') {
                         lgWidth = 1000;
                         smWidth = 600;
                     } else if (project.id === 'bowserstack') {
