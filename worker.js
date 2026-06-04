@@ -27,6 +27,13 @@ class MetaRewriter {
                 element.setAttribute('content', this.fullTitle);
             } else if (property === 'og:description') {
                 element.setAttribute('content', this.project.seoDescription || this.project.subtitle);
+            } else if (property === 'og:image') {
+                if (this.project.image) {
+                    const imageUrl = this.project.image.startsWith('http') 
+                        ? this.project.image 
+                        : `https://ryanmarch.me/${this.project.image.replace(/^\/+/, '')}`;
+                    element.setAttribute('content', imageUrl);
+                }
             } else if (name === 'description') {
                 element.setAttribute('content', this.project.seoDescription || this.project.subtitle);
             }
@@ -61,7 +68,7 @@ export default {
             // 1. Check redirects first
             const redirectMatch = redirects.find(r => normalizePath(r.source).toLowerCase() === cleanPath.toLowerCase());
             if (redirectMatch) {
-                const targetUrl = new URL(redirectMatch.destination, url.origin);
+                const targetUrl = new URL(redirectMatch.destination, 'https://ryanmarch.me');
                 for (const [key, value] of url.searchParams) {
                     targetUrl.searchParams.set(key, value);
                 }
@@ -72,10 +79,10 @@ export default {
             if (cleanPath.startsWith('/portfolio/')) {
                 const projectSlug = cleanPath.substring('/portfolio/'.length);
                 if (projectSlug) {
-                    return Response.redirect(`${url.origin}/project/${projectSlug}/${url.search}`, 301);
+                    return Response.redirect(`https://ryanmarch.me/project/${projectSlug}/${url.search}`, 301);
                 }
             } else if (cleanPath === '/portfolio') {
-                return Response.redirect(`${url.origin}/${url.search}`, 301);
+                return Response.redirect(`https://ryanmarch.me/${url.search}`, 301);
             }
 
             // 1.7. Normalize trailing slash for project details (redirect /project/abc to /project/abc/)
@@ -85,7 +92,7 @@ export default {
                     const projectId = projectMatch[1];
                     const project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
                     if (project) {
-                        return Response.redirect(`${url.origin}/project/${project.id}/${url.search}`, 301);
+                        return Response.redirect(`https://ryanmarch.me/project/${project.id}/${url.search}`, 301);
                     }
                 }
             }
@@ -148,6 +155,7 @@ export default {
                     .on('title', new MetaRewriter(project))
                     .on('meta[property="og:title"]', new MetaRewriter(project))
                     .on('meta[property="og:description"]', new MetaRewriter(project))
+                    .on('meta[property="og:image"]', new MetaRewriter(project))
                     .on('meta[name="description"]', new MetaRewriter(project))
                     .on('link[rel="canonical"]', new MetaRewriter(project))
                     .transform(response);
