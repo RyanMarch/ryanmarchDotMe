@@ -1,4 +1,4 @@
-import { myProjects } from './project-data.js';
+import { myProjects } from './project-data.js?v=1';
 
 function initializeCustomAudioPlayers(container) {
     const players = container.querySelectorAll('.custom-audio-player');
@@ -757,6 +757,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    function performScrollRestorationOrScrollToTop() {
+        const scrollX = sessionStorage.getItem('live_reload_scroll_x');
+        const scrollY = sessionStorage.getItem('live_reload_scroll_y');
+        if (scrollX !== null && scrollY !== null) {
+            sessionStorage.removeItem('live_reload_scroll_x');
+            sessionStorage.removeItem('live_reload_scroll_y');
+            window.scrollTo(parseInt(scrollX, 10), parseInt(scrollY, 10));
+        } else {
+            window.scrollTo(0, 0);
+        }
+    }
+
     // === SPA ROUTER ===
     
     async function loadProject(projectId) {
@@ -772,7 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         try {
             // 1. Fetch content
-            const response = await fetch(`/content/${projectId}/index.html`);
+            const response = await fetch(`/content/${projectId}/`);
             if (!response.ok) throw new Error("Content missing");
             let htmlContent = await response.text();
             
@@ -848,7 +860,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Fade in project detail
             projectDetailArea.style.opacity = '0';
             projectDetailArea.style.display = 'block';
-            window.scrollTo(0, 0);
+            performScrollRestorationOrScrollToTop();
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     projectDetailArea.style.transition = 'opacity 0.15s ease';
@@ -908,7 +920,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.display = el === topRow ? 'flex' : el === filterContainer ? 'block' : 'grid';
             });
 
-            window.scrollTo(0, 0);
+            performScrollRestorationOrScrollToTop();
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -984,5 +996,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    // Save scroll position on any page unload (e.g., manual browser reload)
+    window.addEventListener('beforeunload', () => {
+        try {
+            sessionStorage.setItem('live_reload_scroll_x', window.scrollX);
+            sessionStorage.setItem('live_reload_scroll_y', window.scrollY);
+        } catch (e) {}
+    });
 });
 
