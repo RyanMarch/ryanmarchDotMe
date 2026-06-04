@@ -146,8 +146,12 @@ export default {
                 });
             }
 
-            // Fetch the original asset from Cloudflare Pages / Static handling
-            const response = await env.ASSETS.fetch(request);
+            // Fetch the asset — for valid project routes, explicitly serve index.html
+            // (we can't rely on SPA fallback since we removed not_found_handling)
+            const assetRequest = isValidProject
+                ? new Request(url.origin + '/index.html', request)
+                : request;
+            const response = await env.ASSETS.fetch(assetRequest);
 
             // If it's a valid project route and the response is HTML, rewrite the meta tags
             if (isValidProject && project && response.headers.get('content-type')?.includes('text/html')) {
