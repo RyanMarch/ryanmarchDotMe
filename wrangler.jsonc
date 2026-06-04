@@ -16,7 +16,11 @@
   ],
   "routes": [
     {
-      "pattern": "ryanmarch.me",
+      "pattern": "ryanmarch.me/*",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.ryanmarch.me/*",
       "custom_domain": true
     }
   ]

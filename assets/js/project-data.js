@@ -1,22 +1,24 @@
 export const myProjects = [
     {
-        id: "motion-poster",
-        title: "Motion Poster",
-        subtitle: "Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.",
+        id: "icon-studio",
+        title: "Icon Studio",
+        subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
+        seoTitle: "Icon Studio - App Icon Generator & Maker",
+        seoDescription: "Design and generate custom app icons online. Create high-fidelity icons for iOS, macOS, Android, and PWAs with gradients, skeuomorphic frames, and badges.",
         tags: [
             { label: "Recently Updated", color: "gold" },
-            { label: "Digital Signage", color: "purple" },
+            { label: "Design Tool", color: "purple" },
             { label: "Project", color: "gray" }
         ],
-        featured: true,
+        featured: false,
         size: "large",
-        image: "assets/img/motion-poster-framed.webp",
-        imageWidth: 1000,
-        imageHeight: 750,
-        imageClass: "poster-preview-img",
-        actionText: "Launch Motion Poster",
-        actionUrl: "https://motionposter.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/motionEventPoster",
+        image: "assets/img/icon-studio-hero.png",
+        imageWidth: 834,
+        imageHeight: 560,
+        imageClass: "destination-icon",
+        actionText: "Launch Icon Studio",
+        actionUrl: "https://iconstudio.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/iconStudio",
         hasExtendedContent: true,
         showLaunchButton: true
     },
@@ -39,6 +41,27 @@ export const myProjects = [
         actionUrl: "https://bowserstack.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/bowserstack",
         hasExtendedContent: false,
+        showLaunchButton: true
+    },
+    {
+        id: "motion-poster",
+        title: "Motion Poster",
+        subtitle: "Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Digital Signage", color: "purple" },
+            { label: "Project", color: "gray" }
+        ],
+        featured: true,
+        size: "large",
+        image: "assets/img/motion-poster-framed.webp",
+        imageWidth: 1000,
+        imageHeight: 750,
+        imageClass: "poster-preview-img",
+        actionText: "Launch Motion Poster",
+        actionUrl: "https://motionposter.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/motionEventPoster",
+        hasExtendedContent: true,
         showLaunchButton: true
     },
     {
@@ -99,29 +122,6 @@ export const myProjects = [
         actionUrl: "https://wordpress.org/plugins/rentpress-gravity-forms-add-on/",
         sourceUrl: "https://support.30lines.com/documentation/rentpress-gravity-forms-add-on/",
         hasExtendedContent: true
-    },
-    {
-        id: "icon-studio",
-        title: "Icon Studio",
-        subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
-        seoTitle: "Icon Studio - App Icon Generator & Maker",
-        seoDescription: "Design and generate custom app icons online. Create high-fidelity icons for iOS, macOS, Android, and PWAs with gradients, skeuomorphic frames, and badges.",
-        tags: [
-            { label: "Recently Updated", color: "gold" },
-            { label: "Design Tool", color: "purple" },
-            { label: "Project", color: "gray" }
-        ],
-        featured: false,
-        size: "large",
-        image: "assets/img/icon-studio-multi-theme-framed.webp",
-        imageWidth: 834,
-        imageHeight: 560,
-        imageClass: "destination-icon",
-        actionText: "Launch Icon Studio",
-        actionUrl: "https://iconstudio.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/iconStudio",
-        hasExtendedContent: true,
-        showLaunchButton: true
     },
     {
         id: "rentpress-data-hub",
