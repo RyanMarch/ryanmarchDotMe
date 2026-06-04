@@ -1,22 +1,24 @@
 export const myProjects = [
     {
-        id: "motion-poster",
-        title: "Motion Poster",
-        subtitle: "Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.",
+        id: "icon-studio",
+        title: "Icon Studio",
+        subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
+        seoTitle: "Icon Studio - App Icon Generator & Maker",
+        seoDescription: "Design and generate custom app icons online. Create high-fidelity icons for iOS, macOS, Android, and PWAs with gradients, skeuomorphic frames, and badges.",
         tags: [
             { label: "Recently Updated", color: "gold" },
-            { label: "Digital Signage", color: "purple" },
+            { label: "Design Tool", color: "purple" },
             { label: "Project", color: "gray" }
         ],
         featured: true,
         size: "large",
-        image: "assets/img/motion-poster-framed.webp",
-        imageWidth: 1000,
-        imageHeight: 750,
-        imageClass: "poster-preview-img",
-        actionText: "Launch Motion Poster",
-        actionUrl: "https://motionposter.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/motionEventPoster",
+        image: "content/icon-studio/images/icon-studio-framed.webp",
+        imageWidth: 800,
+        imageHeight: 514,
+        imageClass: "destination-icon",
+        actionText: "Launch Icon Studio",
+        actionUrl: "https://iconstudio.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/iconStudio",
         hasExtendedContent: true,
         showLaunchButton: true
     },
@@ -42,6 +44,27 @@ export const myProjects = [
         showLaunchButton: true
     },
     {
+        id: "motion-poster",
+        title: "Motion Poster",
+        subtitle: "Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Digital Signage", color: "purple" },
+            { label: "Project", color: "gray" }
+        ],
+        featured: true,
+        size: "large",
+        image: "content/motion-poster/images/motion-poster-framed.webp",
+        imageWidth: 1000,
+        imageHeight: 750,
+        imageClass: "poster-preview-img",
+        actionText: "Launch Motion Poster",
+        actionUrl: "https://motionposter.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/motionEventPoster",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "rentpress",
         title: "RentPress for Apartments",
         subtitle: "A comprehensive property management and marketing solution to build the ultimate online leasing office.",
@@ -59,6 +82,48 @@ export const myProjects = [
         actionText: "Visit RentPress.io",
         actionUrl: "https://rentpress.io",
         sourceUrl: "https://wordpress.org/plugins/rentpress-for-websites/",
+        hasExtendedContent: true
+    },
+    {
+        id: "aasc-analytics",
+        title: "AASC Analytics and SEO Audit",
+        subtitle: "Web analytics and SEO strategy for a national professional association.",
+        seoTitle: "AASC Analytics and SEO Strategy - Case Study",
+        seoDescription: "An in-depth case study on establishing Google Analytics 4 tracking, custom event tagging, and technical SEO remediation for servicecoordinator.org.",
+        tags: [
+            { label: "Analytics", color: "purple" },
+            { label: "Marketing", color: "orange" },
+            { label: "Professional", color: "blue" }
+        ],
+        featured: false,
+        size: "large",
+        image: "content/aasc-analytics/images/aasc-device-composite.png",
+        imageWidth: 1920,
+        imageHeight: 1088,
+        imageClass: "destination-icon",
+        actionText: "Visit Website",
+        actionUrl: "https://www.servicecoordinator.org",
+        hasExtendedContent: true
+    },
+    {
+        id: "delhi-historical-society",
+        title: "Delhi Historical Society",
+        subtitle: "Analytics, website audit, and digital workspace setup for a local nonprofit.",
+        seoTitle: "Delhi Historical Society - Analytics & Google Workspace - Case Study",
+        seoDescription: "A case study on website auditing, Google Analytics 4 setup, Google Search Console configuration, and Google Workspace migration for a local nonprofit historical society.",
+        tags: [
+            { label: "Analytics", color: "purple" },
+            { label: "Non-Profit", color: "teal" },
+            { label: "Marketing", color: "orange" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/delhi-historical-society/images/dhs-logo.webp",
+        imageWidth: 1249,
+        imageHeight: 1249,
+        imageClass: "destination-icon",
+        actionText: "Visit Website",
+        actionUrl: "https://www.delhihistoricalsociety.org",
         hasExtendedContent: true
     },
     {
@@ -99,29 +164,6 @@ export const myProjects = [
         actionUrl: "https://wordpress.org/plugins/rentpress-gravity-forms-add-on/",
         sourceUrl: "https://support.30lines.com/documentation/rentpress-gravity-forms-add-on/",
         hasExtendedContent: true
-    },
-    {
-        id: "icon-studio",
-        title: "Icon Studio",
-        subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
-        seoTitle: "Icon Studio - App Icon Generator & Maker",
-        seoDescription: "Design and generate custom app icons online. Create high-fidelity icons for iOS, macOS, Android, and PWAs with gradients, skeuomorphic frames, and badges.",
-        tags: [
-            { label: "Recently Updated", color: "gold" },
-            { label: "Design Tool", color: "purple" },
-            { label: "Project", color: "gray" }
-        ],
-        featured: false,
-        size: "large",
-        image: "assets/img/icon-studio-multi-theme-framed.webp",
-        imageWidth: 834,
-        imageHeight: 560,
-        imageClass: "destination-icon",
-        actionText: "Launch Icon Studio",
-        actionUrl: "https://iconstudio.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/iconStudio",
-        hasExtendedContent: true,
-        showLaunchButton: true
     },
     {
         id: "rentpress-data-hub",
@@ -433,6 +475,26 @@ export const myProjects = [
         hasExtendedContent: true
     },
     {
+        id: "the-meadows",
+        title: "The Meadows",
+        subtitle: "Website and brand relaunch for an event venue.",
+        tags: [
+            { label: "Web Development", color: "green" },
+            { label: "Branding", color: "purple" },
+            { label: "Marketing", color: "orange" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "tall",
+        image: "content/the-meadows/images/hero.webp",
+        imageWidth: 740,
+        imageHeight: 820,
+        imageClass: "destination-icon",
+        actionText: "View Case Study",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
         id: "clear-tech",
         title: "CLEAR Tech",
         subtitle: "A comprehensive business plan and branding design for a mobile recording service.",
@@ -446,26 +508,6 @@ export const myProjects = [
         image: "content/clear-tech/images/brochure-mockup.webp",
         imageWidth: 800,
         imageHeight: 680,
-        imageClass: "destination-icon",
-        actionText: "View Case Study",
-        actionUrl: "",
-        hasExtendedContent: true
-    },
-    {
-        id: "the-meadows",
-        title: "The Meadows",
-        subtitle: "Website and brand relaunch for an event venue.",
-        tags: [
-            { label: "Web Development", color: "green" },
-            { label: "Branding", color: "purple" },
-            { label: "Marketing", color: "orange" },
-            { label: "Archive", color: "gray", priority: "low" }
-        ],
-        featured: false,
-        size: "tall",
-        image: "content/the-meadows/images/hero.jpg",
-        imageWidth: 600,
-        imageHeight: 400,
         imageClass: "destination-icon",
         actionText: "View Case Study",
         actionUrl: "",
