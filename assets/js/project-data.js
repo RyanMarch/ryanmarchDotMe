@@ -86,7 +86,7 @@ export const myProjects = [
     },
     {
         id: "aasc-analytics",
-        title: "AASC Analytics and SEO Strategy",
+        title: "AASC Analytics and SEO Audit",
         subtitle: "Web analytics and SEO strategy for a national professional association.",
         seoTitle: "AASC Analytics and SEO Strategy - Case Study",
         seoDescription: "An in-depth case study on establishing Google Analytics 4 tracking, custom event tagging, and technical SEO remediation for servicecoordinator.org.",
@@ -103,6 +103,27 @@ export const myProjects = [
         imageClass: "destination-icon",
         actionText: "Visit Website",
         actionUrl: "https://www.servicecoordinator.org",
+        hasExtendedContent: true
+    },
+    {
+        id: "delhi-historical-society",
+        title: "Delhi Historical Society",
+        subtitle: "Analytics, website audit, and digital workspace setup for a local nonprofit.",
+        seoTitle: "Delhi Historical Society - Analytics & Google Workspace - Case Study",
+        seoDescription: "A case study on website auditing, Google Analytics 4 setup, Google Search Console configuration, and Google Workspace migration for a local nonprofit historical society.",
+        tags: [
+            { label: "Analytics", color: "purple" },
+            { label: "Non-Profit", color: "teal" },
+            { label: "Marketing", color: "orange" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/delhi-historical-society/images/dhs-logo.jpg",
+        imageWidth: 1080,
+        imageHeight: 1080,
+        imageClass: "destination-icon",
+        actionText: "Visit Website",
+        actionUrl: "https://www.delhihistoricalsociety.org",
         hasExtendedContent: true
     },
     {
