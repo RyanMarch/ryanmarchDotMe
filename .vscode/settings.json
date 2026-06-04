@@ -60,5 +60,12 @@
         "enable": true,
         "baseUri": "/",
         "proxyUri": "http://127.0.0.1:8000"
-    }
+    },
+    "VsCodeTaskButtons.tasks": [
+        {
+            "label": "Start Server",
+            "task": "Open Browser",
+            "tooltip": "Start the local development server with SPA routing"
+        }
+    ]
 }

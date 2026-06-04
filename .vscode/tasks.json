@@ -14,6 +14,17 @@
                 "panel": "shared",
                 "echo": false
             }
+        },
+        {
+            "label": "Open Browser",
+            "type": "shell",
+            "command": "python3 dev/serve.py",
+            "isBackground": false,
+            "presentation": {
+                "reveal": "never",
+                "panel": "shared",
+                "echo": false
+            }
         }
     ]
 }
