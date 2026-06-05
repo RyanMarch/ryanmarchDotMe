@@ -264,6 +264,14 @@ export default {
             }
 
             if (cleanPath === '/admin.html') {
+                // Gate: require Cloudflare Access JWT (set automatically by CF Access) or a valid Bearer token (local dev)
+                const cfJwt = request.headers.get('CF-Access-JWT-Assertion');
+                const authHeader = request.headers.get('Authorization');
+                const validPassword = env.ADMIN_PASSWORD && authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
+                if (!cfJwt && !validPassword) {
+                    // Not authenticated — redirect to CF Access login
+                    return Response.redirect(`https://marchryan.cloudflareaccess.com/cdn-cgi/access/login/${url.hostname}?redirect_url=${encodeURIComponent(url.href)}`, 302);
+                }
                 const newHeaders = new Headers(response.headers);
                 newHeaders.set('X-Robots-Tag', 'noindex, nofollow');
                 return new Response(response.body, {
