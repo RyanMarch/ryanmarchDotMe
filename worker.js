@@ -67,7 +67,13 @@ export default {
 
             // Redirect /admin or /admin/ to /admin.html
             if (cleanPath === '/admin') {
-                return Response.redirect(`https://ryanmarch.me/admin.html${url.search}`, 301);
+                return new Response(null, {
+                    status: 301,
+                    headers: {
+                        'Location': `https://ryanmarch.me/admin.html${url.search}`,
+                        'X-Robots-Tag': 'noindex, nofollow'
+                    }
+                });
             }
 
             // Handle API proxy for mobile admin
@@ -249,6 +255,16 @@ export default {
                     .on('meta[name="description"]', new MetaRewriter(project))
                     .on('link[rel="canonical"]', new MetaRewriter(project))
                     .transform(response);
+            }
+
+            if (cleanPath === '/admin.html') {
+                const newHeaders = new Headers(response.headers);
+                newHeaders.set('X-Robots-Tag', 'noindex, nofollow');
+                return new Response(response.body, {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: newHeaders
+                });
             }
 
             return response;
