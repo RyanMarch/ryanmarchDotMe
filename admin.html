@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mobile Editor | Ryan March</title>
     <meta name="description" content="Quick mobile editor for managing ryanmarch.me content.">
+    <meta name="robots" content="noindex, nofollow">
     <script>
         // Theme initialization (critical to run before paint to prevent flash)
         (function () {
@@ -478,20 +479,20 @@
                     <span id="active-file-label"
                         style="font-size: 0.85rem; font-weight: 600; color: var(--tag-blue);"></span>
                     <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;"
-                        onclick="toggleNewCaseStudyForm()">+ New Case Study</button>
+                        onclick="toggleNewProjectForm()">Add New Project</button>
                 </div>
 
-                <!-- Hidden form to create a new case study -->
-                <div id="new-case-study-form" class="hidden"
+                <!-- Hidden form to create a new project -->
+                <div id="new-project-form" class="hidden"
                     style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
-                    <h3 style="font-size: 1rem; color: var(--text-primary);">Create New Case Study</h3>
+                    <h3 style="font-size: 1rem; color: var(--text-primary);">Create New Project</h3>
                     <div class="form-group">
                         <label for="new-project-id">New Project ID (slug-format)</label>
                         <input type="text" id="new-project-id" placeholder="e.g. rentpress-v2" autocomplete="off"
                             autocapitalize="none">
                         <div class="hint">Creates a folder and template file at content/&lt;id&gt;/index.html</div>
                     </div>
-                    <button class="btn" id="create-study-btn" onclick="createNewCaseStudy()">Create & Edit
+                    <button class="btn" id="create-project-btn" onclick="createNewProject()">Create & Edit
                         Template</button>
                 </div>
             </section>
@@ -593,7 +594,7 @@
 
             // Populate selector lists
             myProjects.forEach(project => {
-                // Add case studies (only those defined as having extended HTML content)
+                // Add projects (only those defined as having extended HTML content)
                 if (project.hasExtendedContent) {
                     window.searchFiles.push({
                         path: `content/${project.id}/index.html`,
@@ -687,7 +688,7 @@
             const uploadSelect = document.getElementById('upload-project');
             if (!uploadSelect) return;
 
-            // If it is a project case study, e.g. "content/rentpress/index.html"
+            // If it is a project page, e.g. "content/rentpress/index.html"
             if (filePath.startsWith('content/') && filePath.endsWith('/index.html')) {
                 const parts = filePath.split('/');
                 if (parts.length >= 3) {
@@ -1193,17 +1194,17 @@
             }
         }
 
-        // Toggle New Case Study Expansion
-        function toggleNewCaseStudyForm() {
-            const form = document.getElementById('new-case-study-form');
+        // Toggle New Project Expansion
+        function toggleNewProjectForm() {
+            const form = document.getElementById('new-project-form');
             form.classList.toggle('hidden');
         }
 
-        // Create New Case Study from Template
-        async function createNewCaseStudy() {
+        // Create New Project from Template
+        async function createNewProject() {
             const idInput = document.getElementById('new-project-id');
             const id = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
-            const createBtn = document.getElementById('create-study-btn');
+            const createBtn = document.getElementById('create-project-btn');
 
             if (!id) {
                 alert('Please enter a valid lowercase project ID/slug.');
@@ -1215,7 +1216,7 @@
 
             const templateContent = `<!-- Header Details -->
 <h2 class="project-title">${id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</h2>
-<p class="project-subtitle">Case Study Subtitle</p>
+<p class="project-subtitle">Project Subtitle</p>
 <p class="project-description">Role • Date • Client</p>
 
 <!-- Table of Contents is generated AUTOMATICALLY based on <h4> tags below! -->
@@ -1254,7 +1255,7 @@
                     body: JSON.stringify({
                         path: targetPath,
                         content: b64Content,
-                        message: `admin: create case study for ${id}`
+                        message: `admin: create project for ${id}`
                     })
                 });
 
@@ -1279,12 +1280,12 @@
                 syncImageUploader(targetPath);
 
                 idInput.value = '';
-                toggleNewCaseStudyForm();
+                toggleNewProjectForm();
 
                 await loadFile(targetPath);
-                showAlert(document.getElementById('editor-alert'), 'Created case study template! Edit details below.', 'info');
+                showAlert(document.getElementById('editor-alert'), 'Created project template! Edit details below.', 'info');
             } catch (err) {
-                alert(`Error creating case study: ${err.message}`);
+                alert(`Error creating project: ${err.message}`);
             } finally {
                 createBtn.disabled = false;
                 createBtn.textContent = 'Create & Edit Template';
