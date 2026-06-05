@@ -279,7 +279,7 @@ export default {
 
             return response;
         } catch (err) {
-            return new Response('Internal Server Error', {
+            return new Response(`Worker Error: ${err.message}\nStack: ${err.stack}`, {
                 status: 500,
                 headers: { 'Content-Type': 'text/plain' }
             });
