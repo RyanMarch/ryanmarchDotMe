@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Editor | Ryan March</title>
+    <meta name="description" content="Quick mobile editor for managing ryanmarch.me content.">
+    <script>
+        // Theme initialization (critical to run before paint to prevent flash)
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'system';
+            if (theme === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+        })();
+    </script>
+    <!-- Load global fonts and styles for theme variable parity -->
+    <link rel="stylesheet" href="/style.css">
+
+    <!-- CodeJar & Prism Editor dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+    <script type="module">
+        import { CodeJar } from 'https://cdn.jsdelivr.net/npm/codejar/+esm';
+        window.CodeJar = CodeJar;
+    </script>
+    <style>
+        /* Custom enhancements for the Admin Interface */
+        :root {
+            --admin-success: #10b981;
+            --admin-error: #ef4444;
+            --admin-warning: #f59e0b;
+        }
+
+        body.admin-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 1.5rem 1rem;
+            min-height: 100vh;
+            background: var(--bg-radial);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            overflow-y: auto;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        header.admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--title-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logout-btn {
+            background: var(--btn-secondary-bg);
+            border: 1px solid var(--btn-secondary-border);
+            color: var(--btn-secondary-text);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-text);
+            border-color: var(--btn-hover-border);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--tag-blue);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input,
+        select,
+        textarea {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 0.75rem;
+            font-size: 1rem;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+
+        option,
+        optgroup {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            height: auto;
+            padding: 0;
+            margin: 0;
+            background: none;
+            border: none;
+            border-radius: 0;
+        }
+
+        input[type="checkbox"]:focus {
+            outline: none;
+            border-color: transparent;
+        }
+
+        .btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+            border: 1px solid var(--btn-secondary-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-text);
+            border-color: var(--btn-hover-border);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Monospace editor styling */
+        .editor-textarea {
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 16px;
+            line-height: 1.5;
+            min-height: 350px;
+            max-height: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 0.75rem;
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-y: auto;
+            tab-size: 4;
+            -moz-tab-size: 4;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* Reset global .tag badge styles for Prism tokens in the editor */
+        .editor-textarea .tag {
+            display: inline !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            font-size: inherit !important;
+            font-weight: inherit !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            line-height: inherit !important;
+            cursor: text !important;
+            user-select: text !important;
+        }
+
+        /* Syntax highlighting colors using theme variables */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .token.punctuation {
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: var(--accent-color);
+        }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: var(--tag-green);
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url {
+            color: var(--tag-purple);
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: var(--tag-orange);
+        }
+
+        .token.function,
+        .token.class-name {
+            color: var(--tag-blue);
+        }
+
+        /* Custom alert message styles */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--admin-success);
+            color: #34d399;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--admin-error);
+            color: #f87171;
+        }
+
+        .alert-info {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--accent-color);
+            color: #7dd3fc;
+        }
+
+        /* Loading spinner styling */
+        .spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .flex-row>* {
+            flex: 1;
+        }
+
+        .hint {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 0.2rem;
+        }
+
+        /* Custom Search Dropdown Styles */
+        .search-result-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover,
+        .search-result-item.selected {
+            background-color: var(--btn-secondary-bg);
+            color: var(--text-primary);
+        }
+
+        .search-result-group-title {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--tag-blue);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive adaptations */
+        @media (max-width: 480px) {
+            body.admin-body {
+                padding: 1rem 0;
+            }
+
+            header.admin-header {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            .flex-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+    <!-- Floating background decorative elements matching main site -->
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>Mobile Site Editor</h1>
+            <button id="logout-btn" class="logout-btn hidden" onclick="logout()">Logout</button>
+        </header>
+
+        <!-- Passcode Login View -->
+        <main id="auth-view" class="card">
+            <h2>Enter Admin Passcode</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                Authenticate to edit content and upload files on ryanmarch.me.
+            </p>
+            <div class="form-group">
+                <label for="passcode-input">Passcode</label>
+                <input type="password" id="passcode-input" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button id="login-btn" class="btn" onclick="checkAuth()">Authenticate</button>
+            <div id="auth-alert" class="alert alert-error hidden"></div>
+
+            <div
+                style="font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 0.5rem;">
+                <strong>Setup Cloudflare Secrets:</strong><br>
+                Ensure <code>ADMIN_PASSWORD</code> and <code>GITHUB_PAT</code> are defined as environment secrets in
+                your Cloudflare Pages project.
+            </div>
+        </main>
+
+        <!-- Admin Workspace View (Hidden by default) -->
+        <main id="admin-view" class="hidden" style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- File Selector Card -->
+            <section class="card" style="z-index: 10;">
+                <h2>Select File to Edit</h2>
+                <div class="form-group" style="position: relative;">
+                    <input type="text" id="file-search" placeholder="Type to search/filter files..." autocomplete="off"
+                        autocapitalize="none" autocorrect="off" spellcheck="false" onfocus="showSearchResults()"
+                        oninput="filterSearchResults()">
+                    <div id="file-search-results" class="hidden"
+                        style="position: absolute; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                    <span id="active-file-label"
+                        style="font-size: 0.85rem; font-weight: 600; color: var(--tag-blue);"></span>
+                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;"
+                        onclick="toggleNewCaseStudyForm()">+ New Case Study</button>
+                </div>
+
+                <!-- Hidden form to create a new case study -->
+                <div id="new-case-study-form" class="hidden"
+                    style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h3 style="font-size: 1rem; color: var(--text-primary);">Create New Case Study</h3>
+                    <div class="form-group">
+                        <label for="new-project-id">New Project ID (slug-format)</label>
+                        <input type="text" id="new-project-id" placeholder="e.g. rentpress-v2" autocomplete="off"
+                            autocapitalize="none">
+                        <div class="hint">Creates a folder and template file at content/&lt;id&gt;/index.html</div>
+                    </div>
+                    <button class="btn" id="create-study-btn" onclick="createNewCaseStudy()">Create & Edit
+                        Template</button>
+                </div>
+            </section>
+
+            <!-- Text Editor Card -->
+            <section id="editor-card" class="card hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 id="editor-title">File Editor</h2>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <label
+                            style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem; cursor: pointer; user-select: none; margin: 0;">
+                            <input type="checkbox" id="wrap-lines-checkbox" onchange="toggleWrapLines()">
+                            <span>Wrap Lines</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Find in File Bar -->
+                <div id="find-bar"
+                    style="display: flex; gap: 0.5rem; align-items: center; border-top: 1px solid var(--card-border); padding-top: 0.75rem; margin-top: -0.25rem;">
+                    <input type="text" id="find-input" placeholder="Find in file..." autocomplete="off"
+                        autocapitalize="none" autocorrect="off" spellcheck="false"
+                        style="font-size: 16px; padding: 0.4rem 0.75rem; border-radius: 6px; flex: 1; min-width: 0;"
+                        oninput="window.updateSearch()" onkeydown="window.handleFindKeyDown(event)">
+                    <span id="find-status"
+                        style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">0 of 0</span>
+                    <button class="btn btn-secondary" onclick="window.findNext()"
+                        style="font-size: 0.85rem; padding: 0.4rem 0.6rem; border-radius: 6px; height: 34px; margin: 0; line-height: 1;">Next</button>
+                    <button class="btn btn-secondary" onclick="window.findPrev()"
+                        style="font-size: 0.85rem; padding: 0.4rem 0.6rem; border-radius: 6px; height: 34px; margin: 0; line-height: 1;">Prev</button>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <div id="editor-textarea" class="editor-textarea" spellcheck="false" autocapitalize="none"
+                        autocorrect="off"></div>
+                </div>
+                <div style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; margin-top: -0.25rem; margin-bottom: 0.25rem;">
+                    <span style="color: var(--text-secondary);">Status:</span>
+                    <span id="draft-status" style="color: var(--tag-green); font-weight: 600;"></span>
+                </div>
+                <div class="flex-row">
+                    <button id="save-btn" class="btn" onclick="saveFile()">
+                        <span id="save-btn-text">Save Changes</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadFile()">Discard Changes</button>
+                </div>
+                <div id="editor-alert" class="alert hidden"></div>
+            </section>
+
+            <!-- Image Uploader Card -->
+            <section id="uploader-card" class="card">
+                <h2 onclick="toggleUploader()"
+                    style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                    <span>Upload Image to Project</span>
+                    <span id="uploader-chevron"
+                        style="transition: transform 0.2s ease; transform: rotate(-90deg);">▼</span>
+                </h2>
+                <div id="uploader-body" class="hidden"
+                    style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Upload an asset directly to a project's images directory.
+                    </p>
+                    <div class="form-group">
+                        <label for="upload-project">Target Folder / Project</label>
+                        <select id="upload-project">
+                            <option value="assets/img">assets/img/ (Global Site Images)</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-file">Select Image</label>
+                        <input type="file" id="upload-file" accept="image/*" onchange="suggestImageName()">
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-name">Target Filename (e.g. hero.webp)</label>
+                        <input type="text" id="upload-name" placeholder="filename.png" autocapitalize="none"
+                            autocorrect="off">
+                    </div>
+                    <button id="upload-btn" class="btn" onclick="uploadImage()">Upload Image</button>
+                    <div id="upload-alert" class="alert hidden"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Script Block utilizing ES Modules to read site config dynamically -->
+    <script type="module">
+        import { myProjects } from './assets/js/project-data.js';
+
+        // Load project lists into UI dropdowns on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            const uploadProjectSelect = document.getElementById('upload-project');
+
+            // Build the global list of files for the search UI
+            window.searchFiles = [
+                { path: 'index.html', title: 'Homepage Wrapper', category: 'Global Files' },
+                { path: 'assets/js/project-data.js', title: 'Projects Database', category: 'Global Files' }
+            ];
+
+            // Populate selector lists
+            myProjects.forEach(project => {
+                // Add case studies (only those defined as having extended HTML content)
+                if (project.hasExtendedContent) {
+                    window.searchFiles.push({
+                        path: `content/${project.id}/index.html`,
+                        title: project.title,
+                        category: 'Projects'
+                    });
+                }
+
+                // Upload targets - all project folders plus assets
+                const optUpload = document.createElement('option');
+                optUpload.value = `content/${project.id}/images`;
+                optUpload.textContent = `content/${project.id}/images/ (${project.title})`;
+                uploadProjectSelect.appendChild(optUpload);
+            });
+
+            // Initialize search results list
+            renderSearchResults(window.searchFiles);
+
+            // Check if user is already authenticated
+            const savedPasscode = localStorage.getItem('admin_passcode');
+            if (savedPasscode) {
+                document.getElementById('passcode-input').value = savedPasscode;
+                checkAuth();
+            }
+        });
+
+        // Attach search functions globally
+        window.showSearchResults = function () {
+            const resultsDiv = document.getElementById('file-search-results');
+            resultsDiv.classList.remove('hidden');
+        };
+
+        window.filterSearchResults = function () {
+            const query = document.getElementById('file-search').value.toLowerCase();
+            const filtered = window.searchFiles.filter(file =>
+                file.title.toLowerCase().includes(query) ||
+                file.path.toLowerCase().includes(query)
+            );
+            renderSearchResults(filtered);
+        };
+
+        window.renderSearchResults = function (files) {
+            const resultsDiv = document.getElementById('file-search-results');
+            resultsDiv.innerHTML = '';
+
+            if (files.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.padding = '0.75rem';
+                emptyDiv.style.color = 'var(--text-secondary)';
+                emptyDiv.style.fontSize = '0.9rem';
+                emptyDiv.textContent = 'No matching files found.';
+                resultsDiv.appendChild(emptyDiv);
+                return;
+            }
+
+            // Group by category
+            const groups = {};
+            files.forEach(file => {
+                if (!groups[file.category]) {
+                    groups[file.category] = [];
+                }
+                groups[file.category].push(file);
+            });
+
+            for (const category in groups) {
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'search-result-group-title';
+                titleDiv.textContent = category;
+                resultsDiv.appendChild(titleDiv);
+
+                groups[category].forEach(file => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'search-result-item';
+                    itemDiv.textContent = file.title;
+                    itemDiv.onclick = () => {
+                        document.getElementById('file-search').value = file.title;
+                        resultsDiv.classList.add('hidden');
+
+                        // Sync with image uploader project dropdown
+                        syncImageUploader(file.path);
+
+                        // Trigger file load
+                        loadFile(file.path);
+                    };
+                    resultsDiv.appendChild(itemDiv);
+                });
+            }
+        };
+
+        window.syncImageUploader = function (filePath) {
+            const uploadSelect = document.getElementById('upload-project');
+            if (!uploadSelect) return;
+
+            // If it is a project case study, e.g. "content/rentpress/index.html"
+            if (filePath.startsWith('content/') && filePath.endsWith('/index.html')) {
+                const parts = filePath.split('/');
+                if (parts.length >= 3) {
+                    const projectId = parts[1];
+                    const targetValue = `content/${projectId}/images`;
+
+                    // Check if this option exists in the selector
+                    let optionExists = false;
+                    for (let i = 0; i < uploadSelect.options.length; i++) {
+                        if (uploadSelect.options[i].value === targetValue) {
+                            optionExists = true;
+                            break;
+                        }
+                    }
+
+                    if (optionExists) {
+                        uploadSelect.value = targetValue;
+                        // Expand the image uploader panel automatically so they see it is synced
+                        const uploaderBody = document.getElementById('uploader-body');
+                        if (uploaderBody && uploaderBody.classList.contains('hidden')) {
+                            toggleUploader();
+                        }
+                    }
+                }
+            } else {
+                // Global file, default upload target is assets/img
+                uploadSelect.value = 'assets/img';
+            }
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const searchInput = document.getElementById('file-search');
+            const resultsDiv = document.getElementById('file-search-results');
+            if (searchInput && resultsDiv && !searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <script>
+        // Store current active file state
+        let currentFile = {
+            path: '',
+            sha: '',
+            originalContent: ''
+        };
+        let jar;
+
+        // Update Draft Status Helper (Green for Synced, Amber for Warnings/Unsaved)
+        function updateDraftStatus(text, isWarning = false, isRawHTML = false) {
+            const draftStatus = document.getElementById('draft-status');
+            if (!draftStatus) return;
+            
+            if (isWarning) {
+                draftStatus.style.color = 'var(--admin-warning)';
+            } else if (text === 'Loading...') {
+                draftStatus.style.color = 'var(--text-secondary)';
+            } else {
+                draftStatus.style.color = 'var(--tag-green)';
+            }
+            
+            if (isRawHTML) {
+                draftStatus.innerHTML = text;
+            } else {
+                draftStatus.textContent = text;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const editorEl = document.getElementById('editor-textarea');
+            if (window.CodeJar && window.Prism) {
+                const highlight = editor => {
+                    let lang = 'html';
+                    const path = currentFile.path || '';
+                    if (path.endsWith('.js')) lang = 'javascript';
+                    if (path.endsWith('.json')) lang = 'json';
+
+                    editor.className = `editor-textarea language-${lang}`;
+                    Prism.highlightElement(editor);
+                };
+                jar = CodeJar(editorEl, highlight);
+                jar.onUpdate(code => {
+                    saveDraft();
+                    const findInput = document.getElementById('find-input');
+                    if (findInput && findInput.value) {
+                        searchState.query = '';
+                        window.updateSearch();
+                    }
+                });
+            }
+        });
+
+        // Utility: UTF-8 safe base64 decoding
+        function b64DecodeUnicode(str) {
+            return new TextDecoder().decode(Uint8Array.from(atob(str), c => c.charCodeAt(0)));
+        }
+
+        // Utility: UTF-8 safe base64 encoding
+        function b64EncodeUnicode(str) {
+            return btoa(Array.from(new TextEncoder().encode(str), b => String.fromCharCode(b)).join(''));
+        }
+
+        // Retrieve passcode
+        function getPasscode() {
+            return localStorage.getItem('admin_passcode') || '';
+        }
+
+        // Authentication Handler
+        async function checkAuth() {
+            const passcode = document.getElementById('passcode-input').value.trim();
+            const alertEl = document.getElementById('auth-alert');
+            const loginBtn = document.getElementById('login-btn');
+
+            if (!passcode) {
+                showAlert(alertEl, 'Please enter a passcode.', 'error');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="spinner"></span> Validating...';
+            alertEl.classList.add('hidden');
+
+            try {
+                // Test authentication by attempting to read a lightweight metadata file (e.g. robots.txt)
+                const res = await fetch('/api/admin/file?path=robots.txt', {
+                    headers: {
+                        'Authorization': `Bearer ${passcode}`
+                    }
+                });
+
+                if (res.ok) {
+                    // Save validated passcode
+                    localStorage.setItem('admin_passcode', passcode);
+
+                    // Toggle views
+                    document.getElementById('auth-view').classList.add('hidden');
+                    document.getElementById('admin-view').classList.remove('hidden');
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                } else {
+                    const text = await res.text();
+                    showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid passcode' : text}`, 'error');
+                    localStorage.removeItem('admin_passcode');
+                }
+            } catch (err) {
+                showAlert(alertEl, `Error connecting to API: ${err.message}`, 'error');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Authenticate';
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('admin_passcode');
+            document.getElementById('passcode-input').value = '';
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('editor-card').classList.add('hidden');
+            document.getElementById('file-search').value = '';
+            document.getElementById('active-file-label').textContent = '';
+        }
+
+        // File Loader
+        async function loadFile(filePath) {
+            // Fallback to active file if not specified
+            if (!filePath) {
+                filePath = currentFile.path;
+            }
+
+            const editorCard = document.getElementById('editor-card');
+            const activeFileLabel = document.getElementById('active-file-label');
+            const alertEl = document.getElementById('editor-alert');
+            const textarea = document.getElementById('editor-textarea');
+            const draftStatus = document.getElementById('draft-status');
+
+            if (!filePath) {
+                editorCard.classList.add('hidden');
+                activeFileLabel.textContent = '';
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+            updateDraftStatus('Loading...');
+            editorCard.classList.remove('hidden');
+            textarea.setAttribute('contenteditable', 'false');
+
+            // Reset find in file state on load
+            const findInput = document.getElementById('find-input');
+            if (findInput) {
+                findInput.value = '';
+            }
+            searchState = { query: '', matches: [], currentIndex: -1 };
+            const findStatus = document.getElementById('find-status');
+            if (findStatus) {
+                findStatus.textContent = '0 of 0';
+            }
+
+            try {
+                // Fetch file payload through proxy API
+                const res = await fetch(`/api/admin/file?path=${filePath}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getPasscode()}`
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
+
+                const data = await res.json();
+                const fileText = b64DecodeUnicode(data.content.replace(/\s/g, ''));
+
+                // Set state
+                currentFile.path = filePath;
+                currentFile.sha = data.sha;
+                currentFile.originalContent = fileText;
+
+                // Set UI (CodeJar or fallback)
+                if (jar) {
+                    jar.updateCode(fileText);
+                } else {
+                    textarea.textContent = fileText;
+                }
+                activeFileLabel.textContent = `Editing: ${filePath}`;
+
+                // Check if local draft exists
+                const savedDraft = localStorage.getItem(`draft_${filePath}`);
+                if (savedDraft && savedDraft !== fileText) {
+                    updateDraftStatus('⚠️ Local draft loaded. <a href="#" onclick="restoreOriginal(event)" style="color: var(--accent-color); text-decoration: underline;">Discard Draft</a>', true, true);
+                    if (jar) {
+                        jar.updateCode(savedDraft);
+                    } else {
+                        textarea.textContent = savedDraft;
+                    }
+                } else {
+                    updateDraftStatus('Synced with remote');
+                }
+            } catch (err) {
+                showAlert(alertEl, `Error loading file: ${err.message}`, 'error');
+                editorCard.classList.add('hidden');
+                activeFileLabel.textContent = '';
+            } finally {
+                textarea.setAttribute('contenteditable', 'true');
+                toggleWrapLines();
+            }
+        }
+
+        // Restore original content bypassing draft
+        function restoreOriginal(e) {
+            if (e) e.preventDefault();
+            const textarea = document.getElementById('editor-textarea');
+            if (jar) {
+                jar.updateCode(currentFile.originalContent);
+            } else {
+                textarea.textContent = currentFile.originalContent;
+            }
+            localStorage.removeItem(`draft_${currentFile.path}`);
+            updateDraftStatus('Synced with remote');
+        }
+
+        // Toggle line wrapping
+        function toggleWrapLines() {
+            const checkbox = document.getElementById('wrap-lines-checkbox');
+            const textarea = document.getElementById('editor-textarea');
+            if (!checkbox || !textarea) return;
+            if (checkbox.checked) {
+                textarea.style.whiteSpace = 'pre-wrap';
+                textarea.style.wordWrap = 'break-word';
+            } else {
+                textarea.style.whiteSpace = 'pre';
+                textarea.style.wordWrap = 'normal';
+            }
+        }
+
+        // Find in File State
+        let searchState = {
+            query: '',
+            matches: [],
+            currentIndex: -1
+        };
+
+        // Create range helper to map plain text character offset to DOM nodes
+        function createRangeAtCharacterOffsets(container, start, end) {
+            const range = document.createRange();
+
+            let currentOffset = 0;
+            let startNode = null;
+            let startNodeOffset = 0;
+            let endNode = null;
+            let endNodeOffset = 0;
+
+            function traverse(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const len = node.length;
+                    if (!startNode && currentOffset + len >= start) {
+                        startNode = node;
+                        startNodeOffset = start - currentOffset;
+                    }
+                    if (!endNode && currentOffset + len >= end) {
+                        endNode = node;
+                        endNodeOffset = end - currentOffset;
+                    }
+                    currentOffset += len;
+                } else {
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        traverse(node.childNodes[i]);
+                        if (startNode && endNode) break;
+                    }
+                }
+            }
+
+            traverse(container);
+
+            if (startNode && endNode) {
+                range.setStart(startNode, startNodeOffset);
+                range.setEnd(endNode, endNodeOffset);
+                return range;
+            }
+            return null;
+        }
+
+        // Handle Keydown in Find Input
+        window.handleFindKeyDown = function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    window.findPrev();
+                } else {
+                    window.findNext();
+                }
+            }
+        }
+
+        // Update Search Matches based on current text
+        window.updateSearch = function () {
+            const findInput = document.getElementById('find-input');
+            const query = findInput ? findInput.value : '';
+            const textarea = document.getElementById('editor-textarea');
+            const text = textarea ? textarea.textContent : '';
+
+            if (!query) {
+                searchState = { query: '', matches: [], currentIndex: -1 };
+                const findStatus = document.getElementById('find-status');
+                if (findStatus) {
+                    findStatus.textContent = '0 of 0';
+                }
+
+                // Only clear selection range if user is actively searching/focused on search input
+                // to prevent clearing the editor cursor while editing
+                if (document.activeElement === findInput) {
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                }
+                return;
+            }
+
+            // Rebuild matches if the query changed
+            if (searchState.query !== query) {
+                searchState.query = query;
+                searchState.matches = [];
+                searchState.currentIndex = -1;
+
+                let index = 0;
+                const lowerText = text.toLowerCase();
+                const lowerQuery = query.toLowerCase();
+                while ((index = lowerText.indexOf(lowerQuery, index)) !== -1) {
+                    searchState.matches.push(index);
+                    index += query.length;
+                }
+            }
+
+            const count = searchState.matches.length;
+            const findStatus = document.getElementById('find-status');
+            if (count > 0) {
+                if (searchState.currentIndex === -1) {
+                    searchState.currentIndex = 0;
+                }
+                if (findStatus) {
+                    findStatus.textContent = `${searchState.currentIndex + 1} of ${count}`;
+                }
+            } else {
+                searchState.currentIndex = -1;
+                if (findStatus) {
+                    findStatus.textContent = '0 of 0';
+                }
+            }
+        }
+
+        // Highlight and scroll the selected match
+        window.highlightCurrentMatch = function () {
+            const textarea = document.getElementById('editor-textarea');
+            const findInput = document.getElementById('find-input');
+            if (!textarea || searchState.currentIndex === -1 || searchState.matches.length === 0) return;
+
+            const start = searchState.matches[searchState.currentIndex];
+            const end = start + searchState.query.length;
+
+            const range = createRangeAtCharacterOffsets(textarea, start, end);
+            if (range) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Scroll into view
+                const parent = range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer;
+                parent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Refocus search box to keep keyboard open and focus
+                if (findInput) {
+                    findInput.focus();
+                }
+            }
+        }
+
+        // Find Next Match
+        window.findNext = function () {
+            window.updateSearch();
+            if (searchState.matches.length === 0) return;
+
+            searchState.currentIndex = (searchState.currentIndex + 1) % searchState.matches.length;
+            const findStatus = document.getElementById('find-status');
+            if (findStatus) {
+                findStatus.textContent = `${searchState.currentIndex + 1} of ${searchState.matches.length}`;
+            }
+            window.highlightCurrentMatch();
+        }
+
+        // Find Prev Match
+        window.findPrev = function () {
+            window.updateSearch();
+            if (searchState.matches.length === 0) return;
+
+            searchState.currentIndex = (searchState.currentIndex - 1 + searchState.matches.length) % searchState.matches.length;
+            const findStatus = document.getElementById('find-status');
+            if (findStatus) {
+                findStatus.textContent = `${searchState.currentIndex + 1} of ${searchState.matches.length}`;
+            }
+            window.highlightCurrentMatch();
+        }
+
+        // Save local draft in browser storage
+        function saveDraft() {
+            const textarea = document.getElementById('editor-textarea');
+            const editorVal = jar ? jar.toString() : textarea.textContent;
+
+            if (editorVal !== currentFile.originalContent) {
+                localStorage.setItem(`draft_${currentFile.path}`, editorVal);
+                updateDraftStatus('Unsaved changes (Draft saved locally)', true);
+            } else {
+                localStorage.removeItem(`draft_${currentFile.path}`);
+                updateDraftStatus('Synced');
+            }
+        }
+
+        // Save file back to GitHub
+        async function saveFile() {
+            const textarea = document.getElementById('editor-textarea');
+            const alertEl = document.getElementById('editor-alert');
+            const saveBtn = document.getElementById('save-btn');
+            const saveBtnText = document.getElementById('save-btn-text');
+            const newContent = jar ? jar.toString() : textarea.textContent;
+
+            alertEl.classList.add('hidden');
+            saveBtn.disabled = true;
+            saveBtnText.innerHTML = '<span class="spinner"></span> Saving...';
+
+            try {
+                const b64Content = b64EncodeUnicode(newContent);
+                const res = await fetch('/api/admin/file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getPasscode()}`
+                    },
+                    body: JSON.stringify({
+                        path: currentFile.path,
+                        content: b64Content,
+                        sha: currentFile.sha,
+                        message: `admin: update ${currentFile.path}`
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
+
+                const data = await res.json();
+
+                // Update file status
+                currentFile.sha = data.sha;
+                currentFile.originalContent = newContent;
+                localStorage.removeItem(`draft_${currentFile.path}`);
+
+                updateDraftStatus('Synced');
+                showAlert(alertEl, 'Changes saved successfully! Deploying to live site (takes ~1 min)...', 'success');
+            } catch (err) {
+                showAlert(alertEl, `Error saving changes: ${err.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtnText.textContent = 'Save Changes';
+            }
+        }
+
+        // Toggle New Case Study Expansion
+        function toggleNewCaseStudyForm() {
+            const form = document.getElementById('new-case-study-form');
+            form.classList.toggle('hidden');
+        }
+
+        // Create New Case Study from Template
+        async function createNewCaseStudy() {
+            const idInput = document.getElementById('new-project-id');
+            const id = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            const createBtn = document.getElementById('create-study-btn');
+
+            if (!id) {
+                alert('Please enter a valid lowercase project ID/slug.');
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtn.innerHTML = '<span class="spinner"></span> Creating...';
+
+            const templateContent = `<!-- Header Details -->
+<h2 class="project-title">${id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</h2>
+<p class="project-subtitle">Case Study Subtitle</p>
+<p class="project-description">Role • Date • Client</p>
+
+<!-- Table of Contents is generated AUTOMATICALLY based on <h4> tags below! -->
+
+<h4 id="introduction" class="section-divider"><span>Introduction</span></h4>
+<p>
+    Write a brief introduction about what this project is.
+</p>
+
+<h4 id="the-challenge" class="section-divider"><span>The Challenge</span></h4>
+<p>
+    Describe the core problem solved.
+</p>
+
+<h4 id="the-solution" class="section-divider"><span>The Solution</span></h4>
+<p>
+    Detail your technical execution and implementation steps.
+</p>
+
+<h4 id="outcomes" class="section-divider"><span>Outcomes & Impact</span></h4>
+<p>
+    Highlight key metrics, achievements, or project takeaways.
+</p>
+`;
+
+            const targetPath = `content/${id}/index.html`;
+
+            try {
+                const b64Content = b64EncodeUnicode(templateContent);
+                const res = await fetch('/api/admin/file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getPasscode()}`
+                    },
+                    body: JSON.stringify({
+                        path: targetPath,
+                        content: b64Content,
+                        message: `admin: create case study for ${id}`
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
+
+                // Add option to search files and trigger load
+                const projectTitle = id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                window.searchFiles.push({
+                    path: targetPath,
+                    title: projectTitle,
+                    category: 'Projects'
+                });
+
+                // Re-render dropdown list
+                renderSearchResults(window.searchFiles);
+
+                document.getElementById('file-search').value = projectTitle;
+
+                // Sync with image uploader dropdown
+                syncImageUploader(targetPath);
+
+                idInput.value = '';
+                toggleNewCaseStudyForm();
+
+                await loadFile(targetPath);
+                showAlert(document.getElementById('editor-alert'), 'Created case study template! Edit details below.', 'info');
+            } catch (err) {
+                alert(`Error creating case study: ${err.message}`);
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create & Edit Template';
+            }
+        }
+
+        // Image Selection Auto-Naming
+        function suggestImageName() {
+            const fileInput = document.getElementById('upload-file');
+            const nameInput = document.getElementById('upload-name');
+            if (fileInput.files && fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                nameInput.value = fileName;
+            }
+        }
+
+        // Upload Image
+        async function uploadImage() {
+            const folderSelect = document.getElementById('upload-project');
+            const fileInput = document.getElementById('upload-file');
+            const nameInput = document.getElementById('upload-name');
+            const alertEl = document.getElementById('upload-alert');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showAlert(alertEl, 'Please select an image file to upload.', 'error');
+                return;
+            }
+
+            const targetName = nameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+            if (!targetName) {
+                showAlert(alertEl, 'Please enter a valid filename.', 'error');
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function () {
+                const result = reader.result;
+                // FileReader base64 format is "data:*/*;base64,CONTENT"
+                const b64Content = result.split(',')[1];
+                const targetPath = `${folderSelect.value}/${targetName}`;
+
+                try {
+                    // Check if file already exists on GitHub to obtain its SHA (for overwrites)
+                    let existingSha = null;
+                    try {
+                        const checkRes = await fetch(`/api/admin/file?path=${targetPath}`, {
+                            headers: {
+                                'Authorization': `Bearer ${getPasscode()}`
+                            }
+                        });
+                        if (checkRes.ok) {
+                            const checkData = await checkRes.json();
+                            existingSha = checkData.sha;
+                        }
+                    } catch (e) {
+                        // File likely does not exist yet, proceed with existingSha = null
+                    }
+
+                    // Push image content
+                    const res = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getPasscode()}`
+                        },
+                        body: JSON.stringify({
+                            path: targetPath,
+                            content: b64Content,
+                            sha: existingSha,
+                            message: `admin: upload ${targetPath}`
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(await res.text());
+                    }
+
+                    showAlert(alertEl, `Success! Image uploaded to ${targetPath}. Copy this path to embed in your HTML: <strong>${targetPath}</strong>`, 'success');
+                    fileInput.value = '';
+                    nameInput.value = '';
+                } catch (err) {
+                    showAlert(alertEl, `Error uploading image: ${err.message}`, 'error');
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload Image';
+                }
+            };
+
+            reader.onerror = function () {
+                showAlert(alertEl, 'Error reading local file.', 'error');
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Image';
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Shared Alert Display helper
+        function showAlert(element, message, type) {
+            element.className = `alert alert-${type}`;
+            element.innerHTML = message;
+            element.classList.remove('hidden');
+        }
+
+        // Toggle Image Uploader body
+        function toggleUploader() {
+            const body = document.getElementById('uploader-body');
+            const chevron = document.getElementById('uploader-chevron');
+            const isHidden = body.classList.toggle('hidden');
+            chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+    </script>
+</body>
+
+</html>
