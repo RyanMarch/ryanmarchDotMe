@@ -65,6 +65,91 @@ export default {
 
             const cleanPath = normalizePath(path);
 
+            // Redirect /admin or /admin/ to /admin.html
+            if (cleanPath === '/admin') {
+                return Response.redirect(`https://ryanmarch.me/admin.html${url.search}`, 301);
+            }
+
+            // Handle API proxy for mobile admin
+            if (cleanPath === '/api/admin/file') {
+                // Check authorization header
+                const authHeader = request.headers.get('Authorization');
+                const expectedAuth = `Bearer ${env.ADMIN_PASSWORD}`;
+                if (!env.ADMIN_PASSWORD || authHeader !== expectedAuth) {
+                    return new Response('Unauthorized', { status: 401 });
+                }
+
+                const filePath = url.searchParams.get('path');
+                if (!filePath) {
+                    return new Response('Missing path parameter', { status: 400 });
+                }
+
+                // Restrict files to content/ and specific global files to prevent arbitrary reads/writes
+                const isAllowedPath = 
+                    filePath.startsWith('content/') || 
+                    filePath === 'index.html' || 
+                    filePath === 'assets/js/project-data.js';
+
+                if (!isAllowedPath) {
+                    return new Response('Forbidden path', { status: 403 });
+                }
+
+                const githubApiUrl = `https://api.github.com/repos/RyanMarch/ryanmarchDotMe/contents/${filePath}`;
+
+                if (request.method === 'GET') {
+                    // Fetch file from GitHub
+                    const ghRes = await fetch(githubApiUrl, {
+                        headers: {
+                            'Authorization': `token ${env.GITHUB_PAT}`,
+                            'User-Agent': 'ryanmarchDotMe-Cloudflare-Worker'
+                        }
+                    });
+                    if (!ghRes.ok) {
+                        return new Response(await ghRes.text(), { status: ghRes.status });
+                    }
+                    const data = await ghRes.json();
+                    return new Response(JSON.stringify({
+                        content: data.content,
+                        sha: data.sha
+                    }), {
+                        status: 200,
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Cache-Control': 'no-store, no-cache, must-revalidate'
+                        }
+                    });
+                } else if (request.method === 'POST') {
+                    // Commit file to GitHub
+                    const body = await request.json();
+                    const ghRes = await fetch(githubApiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${env.GITHUB_PAT}`,
+                            'User-Agent': 'ryanmarchDotMe-Cloudflare-Worker',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: body.message || `admin: update ${filePath}`,
+                            content: body.content, // base64 encoded content
+                            sha: body.sha // required if updating existing file
+                        })
+                    });
+                    if (!ghRes.ok) {
+                        return new Response(await ghRes.text(), { status: ghRes.status });
+                    }
+                    const data = await ghRes.json();
+                    return new Response(JSON.stringify({
+                        success: true,
+                        sha: data.content.sha
+                    }), {
+                        status: 200,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                } else {
+                    return new Response('Method Not Allowed', { status: 405 });
+                }
+            }
+
             // 1. Check redirects first
             const redirectMatch = redirects.find(r => normalizePath(r.source).toLowerCase() === cleanPath.toLowerCase());
             if (redirectMatch) {
@@ -118,7 +203,8 @@ export default {
                     '/sitemap.xml', 
                     '/favicon.ico', 
                     '/404.html',
-                    '/index.html'
+                    '/index.html',
+                    '/admin.html'
                 ].includes(cleanPath.toLowerCase());
 
             const projectMatch = cleanPath.match(/^\/project\/([^\/]+)$/i);
