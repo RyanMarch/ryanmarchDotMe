@@ -37,6 +37,12 @@
 /sitemap.xml
   Cache-Control: public, max-age=3600
 
+# ── Admin Page (noindex search engines)
+/admin
+  X-Robots-Tag: noindex, nofollow
+/admin.html
+  X-Robots-Tag: noindex, nofollow
+
 # ── Security headers (applied globally)
 /*
   X-Content-Type-Options: nosniff
