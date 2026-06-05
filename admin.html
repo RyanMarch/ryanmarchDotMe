@@ -1540,7 +1540,8 @@
         function logout() {
             if (!isLocal) {
                 // In production, invalidate the Cloudflare Access session
-                window.location.href = 'https://marchryan.cloudflareaccess.com/cdn-cgi/access/logout';
+                const redirectUrl = encodeURIComponent(window.location.origin + '/');
+                window.location.href = `https://marchryan.cloudflareaccess.com/cdn-cgi/access/logout?redirect_url=${redirectUrl}`;
                 return;
             }
             adminPasscode = '';
