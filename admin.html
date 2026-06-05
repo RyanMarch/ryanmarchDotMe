@@ -138,7 +138,7 @@
             border: 1px solid var(--card-border);
             border-radius: 8px;
             color: var(--text-primary);
-            padding: 0.75rem;
+            padding: 0.5rem;
             font-size: 1rem;
             width: 100%;
             transition: border-color 0.2s ease;
@@ -368,10 +368,15 @@
             flex: 1;
         }
 
-        .hint {
+        .hint,
+        .subtitle-counter {
             font-size: 0.75rem;
             color: var(--text-secondary);
-            margin-top: 0.2rem;
+            opacity: 0.75;
+        }
+
+        .hint {
+            margin: 0 0 0.3rem 0.5rem;
         }
 
         /* Custom Search Dropdown Styles */
@@ -421,6 +426,132 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+        }
+
+        /* Custom styles for the tags checkboxes in the new project form */
+        .tag-selector {
+            position: relative;
+            margin: 0.3rem 0 0 0;
+        }
+
+        .tags-checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .tag-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            border: 1px solid var(--card-border);
+            background: var(--btn-secondary-bg);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .tag-checkbox-label:hover {
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+        }
+
+        .tag-checkbox-input {
+            position: absolute;
+            clip-path: inset(50%);
+            overflow: hidden;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            border: 0;
+            white-space: nowrap;
+        }
+
+        .tag-checkbox-input:focus-visible+.tag-checkbox-label {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Active tag pill states matching the site colors */
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-green {
+            color: var(--tag-green);
+            background: var(--tag-green-bg);
+            border-color: var(--tag-green-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-purple {
+            color: var(--tag-purple);
+            background: var(--tag-purple-bg);
+            border-color: var(--tag-purple-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-orange {
+            color: var(--tag-orange);
+            background: var(--tag-orange-bg);
+            border-color: var(--tag-orange-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-rose {
+            color: var(--tag-rose);
+            background: var(--tag-rose-bg);
+            border-color: var(--tag-rose-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-cyan {
+            color: var(--tag-cyan);
+            background: var(--tag-cyan-bg);
+            border-color: var(--tag-cyan-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-white {
+            color: var(--tag-white);
+            background: var(--tag-white-bg);
+            border-color: var(--tag-white-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-gray {
+            color: var(--tag-gray);
+            background: var(--tag-gray-bg);
+            border-color: var(--tag-gray-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-indigo {
+            color: var(--tag-indigo);
+            background: var(--tag-indigo-bg);
+            border-color: var(--tag-indigo-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-gold {
+            color: var(--tag-gold);
+            background: var(--tag-gold-bg);
+            border-color: var(--tag-gold-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-teal {
+            color: var(--tag-teal);
+            background: var(--tag-teal-bg);
+            border-color: var(--tag-teal-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-pink {
+            color: var(--tag-pink);
+            background: var(--tag-pink-bg);
+            border-color: var(--tag-pink-border);
+        }
+
+        .link-checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem;
         }
     </style>
 </head>
@@ -486,12 +617,97 @@
                 <div id="new-project-form" class="hidden"
                     style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
                     <h3 style="font-size: 1rem; color: var(--text-primary);">Create New Project</h3>
+
                     <div class="form-group">
-                        <label for="new-project-id">New Project ID (slug-format)</label>
-                        <input type="text" id="new-project-id" placeholder="e.g. rentpress-v2" autocomplete="off"
-                            autocapitalize="none">
-                        <div class="hint">Creates a folder and template file at content/&lt;id&gt;/index.html</div>
+                        <label for="new-project-title">Project Name</label>
+                        <input type="text" id="new-project-title" placeholder="e.g. My Awesome Project"
+                            autocomplete="off" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="new-project-id">Project Slug</label>
+                        <input type="text" id="new-project-id" placeholder="e.g. my-awesome-project" autocomplete="off"
+                            required>
+                        <div class="hint">Set the URL (/project/my-awesome-project/) and folder name.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-subtitle">Subtitle</label>
+                        <input type="text" id="new-project-subtitle" placeholder="e.g. A bento builder tool"
+                            autocomplete="off" maxlength="100">
+                        <div class="subtitle-counter" id="new-project-subtitle-counter"
+                            style="text-align: right; font-size: 0.75rem; margin-top: -0.2rem;">0 / 100 characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-size">Size</label>
+                        <select id="new-project-size">
+                            <option value="small">small</option>
+                            <option value="medium" selected>medium (Default)</option>
+                            <option value="tall">tall</option>
+                            <option value="large">large</option>
+                            <option value="wide">wide</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group tag-selector">
+                        <label>Tags</label>
+                        <!-- Selected tags row -->
+                        <div id="new-project-selected-tags"
+                            style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.25rem;">
+                            <!-- Populated dynamically as pills -->
+                        </div>
+                        <input type="text" id="new-project-tag-search" placeholder="Type to search and add tags..."
+                            autocomplete="off" onfocus="showTagSearchResults()" oninput="filterTagSearchResults()">
+                        <div id="new-project-tag-results" class="hidden"
+                            style="position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-action-url">Primary URL</label>
+                        <input type="url" id="new-project-action-url" placeholder="https://example.com"
+                            autocomplete="off">
+                        <div class="hint">Destination link out to the web site or application.</div>
+                    </div>
+
+                    <div class="form-group link-checkbox">
+                        <input type="checkbox" id="new-project-only-link" style="width: auto;">
+                        <label for="new-project-only-link"
+                            style="margin: 0; cursor: pointer; user-select: none;">Project is Only
+                            Link</label>
+                    </div>
+
+                    <div id="new-project-source-url-group" class="form-group hidden">
+                        <label for="new-project-source-url">Secondary URL (Source Code / GitHub)</label>
+                        <input type="url" id="new-project-source-url" placeholder="https://github.com/..."
+                            autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-image-file">Preview Image</label>
+                        <input type="file" id="new-project-image-file" accept="image/*">
+                        <div id="new-project-image-preview-container" class="hidden"
+                            style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <img id="new-project-image-preview" src="" alt="Preview"
+                                style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--card-border); object-fit: contain;">
+                            <div class="form-group">
+                                <label for="new-project-image-name">Filename to save as</label>
+                                <input type="text" id="new-project-image-name" placeholder="e.g. hero.webp"
+                                    style="padding: 0.4rem; font-size: 0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-placement">Placement</label>
+                        <select id="new-project-placement">
+                            <option value="first" selected>First (Top of homepage grid)</option>
+                            <option value="last">Last (Bottom of homepage grid)</option>
+                        </select>
+                    </div>
+
                     <button class="btn" id="create-project-btn" onclick="createNewProject()">Create & Edit
                         Template</button>
                 </div>
@@ -528,7 +744,8 @@
                     <div id="editor-textarea" class="editor-textarea" spellcheck="false" autocapitalize="none"
                         autocorrect="off"></div>
                 </div>
-                <div style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; margin-top: -0.25rem; margin-bottom: 0.25rem;">
+                <div
+                    style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; margin-top: -0.25rem; margin-bottom: 0.25rem;">
                     <span style="color: var(--text-secondary);">Status:</span>
                     <span id="draft-status" style="color: var(--tag-green); font-weight: 600;"></span>
                 </div>
@@ -581,6 +798,7 @@
     <!-- Script Block utilizing ES Modules to read site config dynamically -->
     <script type="module">
         import { myProjects } from './assets/js/project-data.js';
+        window.myProjects = myProjects;
 
         // Load project lists into UI dropdowns on startup
         window.addEventListener('DOMContentLoaded', () => {
@@ -613,6 +831,80 @@
             // Initialize search results list
             renderSearchResults(window.searchFiles);
 
+            // Populate dynamic tags in form
+            populateFormTags();
+
+            // Set up slug generation listeners
+            const titleInput = document.getElementById('new-project-title');
+            const idInput = document.getElementById('new-project-id');
+            window.slugEditedByUser = false;
+
+            idInput.addEventListener('input', () => {
+                window.slugEditedByUser = true;
+                idInput.value = idInput.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            });
+
+            titleInput.addEventListener('input', () => {
+                if (!window.slugEditedByUser) {
+                    idInput.value = titleInput.value
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, '');
+                }
+            });
+
+            // Subtitle length and counter check
+            const subtitleInput = document.getElementById('new-project-subtitle');
+            const subtitleCounter = document.getElementById('new-project-subtitle-counter');
+            subtitleInput.addEventListener('input', () => {
+                const len = subtitleInput.value.length;
+                subtitleCounter.textContent = `${len} / 100 characters`;
+            });
+
+            // URL input event listeners
+            const actionUrlInput = document.getElementById('new-project-action-url');
+            const sourceUrlGroup = document.getElementById('new-project-source-url-group');
+            const sourceUrlInput = document.getElementById('new-project-source-url');
+
+            actionUrlInput.addEventListener('input', () => {
+                if (actionUrlInput.value.trim() !== '') {
+                    sourceUrlGroup.classList.remove('hidden');
+                } else {
+                    sourceUrlGroup.classList.add('hidden');
+                    sourceUrlInput.value = '';
+                }
+            });
+
+            // Image uploader & preview handlers
+            const imageFileInput = document.getElementById('new-project-image-file');
+            const previewContainer = document.getElementById('new-project-image-preview-container');
+            const previewImg = document.getElementById('new-project-image-preview');
+            const imageNameInput = document.getElementById('new-project-image-name');
+
+            imageFileInput.addEventListener('change', () => {
+                if (imageFileInput.files && imageFileInput.files.length > 0) {
+                    const file = imageFileInput.files[0];
+                    const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                    imageNameInput.value = sanitizedName;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.classList.add('hidden');
+                    previewImg.src = '';
+                    imageNameInput.value = '';
+                }
+            });
+
+            imageNameInput.addEventListener('input', () => {
+                imageNameInput.value = imageNameInput.value.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+            });
+
             // Check if user is already authenticated
             const savedPasscode = localStorage.getItem('admin_passcode');
             if (savedPasscode) {
@@ -620,6 +912,117 @@
                 checkAuth();
             }
         });
+
+        window.newProjectSelectedTags = [];
+        window.allAvailableTags = [];
+
+        // Helper to populate form tags
+        function populateFormTags() {
+            const tagsMap = new Map();
+            myProjects.forEach(project => {
+                if (project.tags && Array.isArray(project.tags)) {
+                    project.tags.forEach(tag => {
+                        if (tag.label) {
+                            tagsMap.set(tag.label, tag.color || 'gray');
+                        }
+                    });
+                }
+            });
+            window.allAvailableTags = Array.from(tagsMap.entries()).map(([label, color]) => ({ label, color }));
+            window.newProjectSelectedTags = [];
+            renderSelectedTags();
+        }
+        window.populateFormTags = populateFormTags;
+
+        // Render selected tags as badges/pills
+        function renderSelectedTags() {
+            const container = document.getElementById('new-project-selected-tags');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (window.newProjectSelectedTags.length === 0) {
+                const hint = document.createElement('span');
+                hint.style.fontSize = '0.8rem';
+                hint.style.color = 'var(--text-secondary)';
+                hint.textContent = 'No tags selected';
+                container.appendChild(hint);
+                return;
+            }
+
+            window.newProjectSelectedTags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = `tag tag-${tag.color}`;
+                badge.style.display = 'inline-flex';
+                badge.style.alignItems = 'center';
+                badge.style.gap = '0.35rem';
+                badge.style.cursor = 'pointer';
+                badge.innerHTML = `${tag.label} <span style="font-weight: bold; opacity: 0.7;">✕</span>`;
+                badge.onclick = () => {
+                    removeSelectedTag(tag.label);
+                };
+                container.appendChild(badge);
+            });
+        }
+        window.renderSelectedTags = renderSelectedTags;
+
+        // Remove a selected tag
+        function removeSelectedTag(label) {
+            window.newProjectSelectedTags = window.newProjectSelectedTags.filter(t => t.label !== label);
+            renderSelectedTags();
+            filterTagSearchResults();
+        }
+        window.removeSelectedTag = removeSelectedTag;
+
+        // Show dropdown search results
+        function showTagSearchResults() {
+            const resultsDiv = document.getElementById('new-project-tag-results');
+            if (resultsDiv) {
+                resultsDiv.classList.remove('hidden');
+                filterTagSearchResults();
+            }
+        }
+        window.showTagSearchResults = showTagSearchResults;
+
+        // Filter available tags in dropdown list
+        function filterTagSearchResults() {
+            const queryInput = document.getElementById('new-project-tag-search');
+            const resultsDiv = document.getElementById('new-project-tag-results');
+            if (!queryInput || !resultsDiv) return;
+
+            const query = queryInput.value.toLowerCase();
+            resultsDiv.innerHTML = '';
+
+            // Exclude tags already selected
+            const filtered = window.allAvailableTags.filter(tag => {
+                const isSelected = window.newProjectSelectedTags.some(t => t.label === tag.label);
+                const matchesQuery = tag.label.toLowerCase().includes(query);
+                return !isSelected && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                const item = document.createElement('div');
+                item.style.padding = '0.75rem';
+                item.style.color = 'var(--text-secondary)';
+                item.style.fontSize = '0.9rem';
+                item.textContent = 'No matching tags available';
+                resultsDiv.appendChild(item);
+                return;
+            }
+
+            filtered.forEach(tag => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = tag.label;
+                item.onclick = () => {
+                    window.newProjectSelectedTags.push(tag);
+                    queryInput.value = '';
+                    resultsDiv.classList.add('hidden');
+                    renderSelectedTags();
+                };
+                resultsDiv.appendChild(item);
+            });
+        }
+        window.filterTagSearchResults = filterTagSearchResults;
 
         // Attach search functions globally
         window.showSearchResults = function () {
@@ -726,6 +1129,12 @@
             if (searchInput && resultsDiv && !searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
                 resultsDiv.classList.add('hidden');
             }
+
+            const tagInput = document.getElementById('new-project-tag-search');
+            const tagResults = document.getElementById('new-project-tag-results');
+            if (tagInput && tagResults && !tagInput.contains(e.target) && !tagResults.contains(e.target)) {
+                tagResults.classList.add('hidden');
+            }
         });
     </script>
 
@@ -742,7 +1151,7 @@
         function updateDraftStatus(text, isWarning = false, isRawHTML = false) {
             const draftStatus = document.getElementById('draft-status');
             if (!draftStatus) return;
-            
+
             if (isWarning) {
                 draftStatus.style.color = 'var(--admin-warning)';
             } else if (text === 'Loading...') {
@@ -750,7 +1159,7 @@
             } else {
                 draftStatus.style.color = 'var(--tag-green)';
             }
-            
+
             if (isRawHTML) {
                 draftStatus.innerHTML = text;
             } else {
@@ -1194,29 +1603,152 @@
             }
         }
 
-        // Toggle New Project Expansion
+        // Toggle New Project Expansion and reset form inputs
         function toggleNewProjectForm() {
             const form = document.getElementById('new-project-form');
-            form.classList.toggle('hidden');
+            const isHidden = form.classList.toggle('hidden');
+            if (!isHidden) {
+                // Form is opening: clear/reset all fields
+                document.getElementById('new-project-title').value = '';
+                document.getElementById('new-project-id').value = '';
+                document.getElementById('new-project-subtitle').value = '';
+                document.getElementById('new-project-subtitle-counter').textContent = '0 / 100 characters';
+                document.getElementById('new-project-size').value = 'medium';
+                document.getElementById('new-project-action-url').value = '';
+                document.getElementById('new-project-only-link').checked = false;
+                document.getElementById('new-project-source-url').value = '';
+                document.getElementById('new-project-source-url-group').classList.add('hidden');
+
+                // Reset searchable tags selector
+                window.newProjectSelectedTags = [];
+                if (window.renderSelectedTags) {
+                    window.renderSelectedTags();
+                }
+                const tagSearchInput = document.getElementById('new-project-tag-search');
+                if (tagSearchInput) tagSearchInput.value = '';
+                const tagResults = document.getElementById('new-project-tag-results');
+                if (tagResults) tagResults.classList.add('hidden');
+
+                // Clear image uploader states
+                document.getElementById('new-project-image-file').value = '';
+                document.getElementById('new-project-image-preview-container').classList.add('hidden');
+                document.getElementById('new-project-image-preview').src = '';
+                document.getElementById('new-project-image-name').value = '';
+
+                // Reset placement select
+                document.getElementById('new-project-placement').value = 'first';
+
+                // Reset user dirty flag for slug auto-generation
+                window.slugEditedByUser = false;
+            }
         }
 
-        // Create New Project from Template
+        // Helper to read local image files as base64
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const b64 = reader.result.split(',')[1];
+                    resolve(b64);
+                };
+                reader.onerror = () => reject(new Error("Error reading local image file."));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Create New Project from Template with custom inputs
         async function createNewProject() {
+            const titleInput = document.getElementById('new-project-title');
             const idInput = document.getElementById('new-project-id');
-            const id = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            const subtitleInput = document.getElementById('new-project-subtitle');
+            const sizeSelect = document.getElementById('new-project-size');
+            const actionUrlInput = document.getElementById('new-project-action-url');
+            const onlyLinkCheckbox = document.getElementById('new-project-only-link');
+            const sourceUrlInput = document.getElementById('new-project-source-url');
+            const imageFileInput = document.getElementById('new-project-image-file');
+            const imageNameInput = document.getElementById('new-project-image-name');
+            const placementSelect = document.getElementById('new-project-placement');
             const createBtn = document.getElementById('create-project-btn');
+
+            const title = titleInput.value.trim();
+            const id = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            const subtitle = subtitleInput.value.trim();
+            const size = sizeSelect.value;
+            const actionUrl = actionUrlInput.value.trim();
+            const hasExtendedContent = !onlyLinkCheckbox.checked;
+            const sourceUrl = hasExtendedContent && actionUrl ? sourceUrlInput.value.trim() : '';
+            const placement = placementSelect.value;
+
+            if (!title) {
+                alert('Please enter a project title/name.');
+                return;
+            }
 
             if (!id) {
                 alert('Please enter a valid lowercase project ID/slug.');
                 return;
             }
 
+            if (subtitle.length > 100) {
+                alert('Subtitle must be 100 characters or less.');
+                return;
+            }
+
+            // Check if project already exists locally
+            if (window.myProjects && window.myProjects.some(p => p.id === id)) {
+                alert('Project ID already exists in the database.');
+                return;
+            }
+
+            // Read tags
+            const selectedTags = window.newProjectSelectedTags || [];
+
+            // Handle preview image validation
+            let imageFile = null;
+            let imageName = '';
+            if (imageFileInput.files && imageFileInput.files.length > 0) {
+                imageFile = imageFileInput.files[0];
+                imageName = imageNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                if (!imageName) {
+                    alert('Please enter a valid target filename for the preview image.');
+                    return;
+                }
+            }
+
             createBtn.disabled = true;
             createBtn.innerHTML = '<span class="spinner"></span> Creating...';
 
-            const templateContent = `<!-- Header Details -->
-<h2 class="project-title">${id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</h2>
-<p class="project-subtitle">Project Subtitle</p>
+            try {
+                let imagePath = '';
+                // 1. Upload preview image if selected
+                if (imageFile) {
+                    const b64Image = await readFileAsBase64(imageFile);
+                    imagePath = `content/${id}/images/${imageName}`;
+
+                    const imgRes = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getPasscode()}`
+                        },
+                        body: JSON.stringify({
+                            path: imagePath,
+                            content: b64Image,
+                            message: `admin: upload preview image for ${id}`
+                        })
+                    });
+                    if (!imgRes.ok) {
+                        throw new Error(`Failed to upload preview image: ${await imgRes.text()}`);
+                    }
+                }
+
+                const targetPath = `content/${id}/index.html`;
+
+                // 2. Create content template file (if hasExtendedContent is true)
+                if (hasExtendedContent) {
+                    const templateContent = `<!-- Header Details -->
+<h2 class="project-title">${title}</h2>
+<p class="project-subtitle">${subtitle || 'Project Subtitle'}</p>
 <p class="project-description">Role • Date • Client</p>
 
 <!-- Table of Contents is generated AUTOMATICALLY based on <h4> tags below! -->
@@ -1241,49 +1773,162 @@
     Highlight key metrics, achievements, or project takeaways.
 </p>
 `;
+                    const b64Content = b64EncodeUnicode(templateContent);
+                    const res = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${getPasscode()}`
+                        },
+                        body: JSON.stringify({
+                            path: targetPath,
+                            content: b64Content,
+                            message: `admin: create project for ${id}`
+                        })
+                    });
 
-            const targetPath = `content/${id}/index.html`;
+                    if (!res.ok) {
+                        throw new Error(await res.text());
+                    }
+                }
 
-            try {
-                const b64Content = b64EncodeUnicode(templateContent);
-                const res = await fetch('/api/admin/file', {
+                // 3. Fetch assets/js/project-data.js to append the metadata
+                const dbRes = await fetch('/api/admin/file?path=assets/js/project-data.js', {
+                    headers: {
+                        'Authorization': `Bearer ${getPasscode()}`
+                    }
+                });
+                if (!dbRes.ok) {
+                    throw new Error(`Failed to load project database: ${await dbRes.text()}`);
+                }
+                const dbData = await dbRes.json();
+                const dbContent = b64DecodeUnicode(dbData.content.replace(/\s/g, ''));
+
+                // Construct tag list formatting matching project-data.js
+                const tagsFormatted = selectedTags.length > 0
+                    ? `[\n${selectedTags.map(t => `            { label: "${t.label}", color: "${t.color}" }`).join(',\n')}\n        ]`
+                    : `[]`;
+
+                const newProjectObject = `
+    {
+        id: "${id}",
+        title: "${title}",
+        subtitle: "${subtitle}",
+        tags: ${tagsFormatted},
+        featured: false,
+        size: "${size}",
+        image: "${imagePath}",
+        actionText: "View Project",
+        actionUrl: "${actionUrl}",
+        sourceUrl: "${sourceUrl}",
+        hasExtendedContent: ${hasExtendedContent}
+    }`;
+
+                let updatedDbContent = '';
+
+                if (placement === 'first') {
+                    // Prepend to array
+                    const insertionPoint = 'export const myProjects = [';
+                    const insertIndex = dbContent.indexOf(insertionPoint);
+                    if (insertIndex === -1) {
+                        throw new Error("Could not find 'export const myProjects = [' in project-data.js");
+                    }
+
+                    const before = dbContent.substring(0, insertIndex + insertionPoint.length);
+                    const after = dbContent.substring(insertIndex + insertionPoint.length);
+
+                    updatedDbContent = before + newProjectObject + ',' + after;
+                } else {
+                    // Append to array
+                    const lastIndex = dbContent.lastIndexOf('];');
+                    if (lastIndex === -1) {
+                        throw new Error("Could not find closing '];' in project-data.js");
+                    }
+                    let before = dbContent.substring(0, lastIndex);
+                    const after = dbContent.substring(lastIndex);
+
+                    // Add comma to previous last element if it doesn't have one
+                    const trimmedBefore = before.trim();
+                    if (trimmedBefore.endsWith('}')) {
+                        const lastBraceIndex = before.lastIndexOf('}');
+                        before = before.substring(0, lastBraceIndex + 1) + ',' + before.substring(lastBraceIndex + 1);
+                    }
+                    updatedDbContent = before + newProjectObject + '\n' + after;
+                }
+
+                const b64UpdatedDb = b64EncodeUnicode(updatedDbContent);
+
+                const dbUpdateRes = await fetch('/api/admin/file', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${getPasscode()}`
                     },
                     body: JSON.stringify({
-                        path: targetPath,
-                        content: b64Content,
-                        message: `admin: create project for ${id}`
+                        path: 'assets/js/project-data.js',
+                        content: b64UpdatedDb,
+                        sha: dbData.sha,
+                        message: `admin: add project metadata for ${id}`
                     })
                 });
 
-                if (!res.ok) {
-                    throw new Error(await res.text());
+                if (!dbUpdateRes.ok) {
+                    throw new Error(`Failed to save project database: ${await dbUpdateRes.text()}`);
                 }
 
-                // Add option to search files and trigger load
-                const projectTitle = id.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                window.searchFiles.push({
-                    path: targetPath,
-                    title: projectTitle,
-                    category: 'Projects'
-                });
+                // 4. Mutate local array state to sync frontend
+                const localProjectObj = {
+                    id: id,
+                    title: title,
+                    subtitle: subtitle,
+                    tags: selectedTags,
+                    featured: false,
+                    size: size,
+                    image: imagePath,
+                    actionText: "View Project",
+                    actionUrl: actionUrl,
+                    sourceUrl: sourceUrl,
+                    hasExtendedContent: hasExtendedContent
+                };
 
-                // Re-render dropdown list
-                renderSearchResults(window.searchFiles);
+                if (window.myProjects) {
+                    if (placement === 'first') {
+                        window.myProjects.unshift(localProjectObj);
+                    } else {
+                        window.myProjects.push(localProjectObj);
+                    }
+                }
 
-                document.getElementById('file-search').value = projectTitle;
+                // Update dropdown list and load editor
+                if (hasExtendedContent) {
+                    window.searchFiles.push({
+                        path: targetPath,
+                        title: title,
+                        category: 'Projects'
+                    });
 
-                // Sync with image uploader dropdown
-                syncImageUploader(targetPath);
+                    // Re-render dropdown list
+                    renderSearchResults(window.searchFiles);
 
-                idInput.value = '';
-                toggleNewProjectForm();
+                    document.getElementById('file-search').value = title;
 
-                await loadFile(targetPath);
-                showAlert(document.getElementById('editor-alert'), 'Created project template! Edit details below.', 'info');
+                    // Sync with image uploader dropdown
+                    syncImageUploader(targetPath);
+
+                    toggleNewProjectForm();
+                    await loadFile(targetPath);
+                    showAlert(document.getElementById('editor-alert'), 'Created project template and updated database! Edit details below.', 'info');
+                } else {
+                    // Update search files (since it doesn't have content, don't list in search files)
+                    toggleNewProjectForm();
+
+                    // Hide editor card if active
+                    document.getElementById('editor-card').classList.add('hidden');
+                    document.getElementById('active-file-label').textContent = '';
+
+                    alert(`Successfully created link-only project database entry: ${title}!`);
+                }
+
             } catch (err) {
                 alert(`Error creating project: ${err.message}`);
             } finally {
