@@ -3,10 +3,17 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mobile Editor | Ryan March</title>
     <meta name="description" content="Quick mobile editor for managing ryanmarch.me content.">
     <meta name="robots" content="noindex, nofollow">
+
+    <!-- iOS PWA: enable fullscreen homescreen app mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mobile Editor">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+
     <script>
         // Theme initialization (critical to run before paint to prevent flash)
         (function () {
@@ -16,6 +23,16 @@
                 document.documentElement.removeAttribute('data-theme');
             } else {
                 document.documentElement.setAttribute('data-theme', theme);
+            }
+        })();
+
+        // iOS PWA standalone mode detection — runs before paint to avoid layout flash
+        (function () {
+            const isStandalone =
+                window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+            if (isStandalone) {
+                document.documentElement.classList.add('pwa-standalone');
             }
         })();
     </script>
@@ -44,7 +61,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            padding: 1.5rem 1rem;
+            padding: calc(1.5rem + env(safe-area-inset-top, 0px)) calc(1rem + env(safe-area-inset-right, 0px)) calc(1.5rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px));
             min-height: 100vh;
             background: var(--bg-radial);
             color: var(--text-primary);
@@ -54,7 +71,7 @@
 
         .admin-container {
             width: 100%;
-            max-width: 700px;
+            max-width: 1200px;
             display: flex;
             flex-direction: column;
             gap: 1.5rem;
@@ -405,6 +422,12 @@
         }
 
         /* Responsive adaptations */
+        @media (min-width: 768px) {
+            #admin-view {
+                padding: 0 !important;
+            }
+        }
+
         @media (max-width: 480px) {
             body.admin-body {
                 padding: 1rem 0;
@@ -553,6 +576,42 @@
             gap: 0.5rem;
             margin: 0.5rem;
         }
+
+        .admin-footer {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+            width: 100%;
+        }
+
+        .back-home-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .back-home-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-home-link span {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .back-home-link:hover span {
+            transform: translateX(-3px);
+        }
     </style>
 </head>
 
@@ -565,29 +624,22 @@
 
     <div class="admin-container">
         <header class="admin-header">
-            <h1>Mobile Site Editor</h1>
-            <button id="logout-btn" class="logout-btn hidden" onclick="logout()">Logout</button>
+            <h1>RyanMarch.me Site Editor</h1>
+
         </header>
 
-        <!-- Passcode Login View -->
+        <!-- Password Login View -->
         <main id="auth-view" class="card">
-            <h2>Enter Admin Passcode</h2>
+            <h2>Enter Admin Password</h2>
             <p style="font-size: 0.9rem; color: var(--text-secondary);">
                 Authenticate to edit content and upload files on ryanmarch.me.
             </p>
             <div class="form-group">
-                <label for="passcode-input">Passcode</label>
+                <label for="passcode-input">Password</label>
                 <input type="password" id="passcode-input" placeholder="••••••••" autocomplete="current-password">
             </div>
-            <button id="login-btn" class="btn" onclick="checkAuth()">Authenticate</button>
+            <button id="login-btn" class="btn" onclick="checkAuth()" disabled>Authenticate</button>
             <div id="auth-alert" class="alert alert-error hidden"></div>
-
-            <div
-                style="font-size: 0.8rem; color: var(--text-secondary); border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 0.5rem;">
-                <strong>Setup Cloudflare Secrets:</strong><br>
-                Ensure <code>ADMIN_PASSWORD</code> and <code>GITHUB_PAT</code> are defined as environment secrets in
-                your Cloudflare Pages project.
-            </div>
         </main>
 
         <!-- Admin Workspace View (Hidden by default) -->
@@ -606,9 +658,7 @@
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                    <span id="active-file-label"
-                        style="font-size: 0.85rem; font-weight: 600; color: var(--tag-blue);"></span>
+                <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 0.5rem;">
                     <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;"
                         onclick="toggleNewProjectForm()">Add New Project</button>
                 </div>
@@ -634,9 +684,9 @@
                     <div class="form-group">
                         <label for="new-project-subtitle">Subtitle</label>
                         <input type="text" id="new-project-subtitle" placeholder="e.g. A bento builder tool"
-                            autocomplete="off" maxlength="100">
+                            autocomplete="off">
                         <div class="subtitle-counter" id="new-project-subtitle-counter"
-                            style="text-align: right; font-size: 0.75rem; margin-top: -0.2rem;">0 / 100 characters</div>
+                            style="text-align: right; font-size: 0.75rem; margin-top: -0.2rem;">0 characters</div>
                     </div>
 
                     <div class="form-group">
@@ -726,6 +776,10 @@
                     </div>
                 </div>
 
+                <div id="active-file-label"
+                    style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-top: -0.5rem; margin-bottom: 0.25rem;">
+                </div>
+
                 <!-- Find in File Bar -->
                 <div id="find-bar"
                     style="display: flex; gap: 0.5rem; align-items: center; border-top: 1px solid var(--card-border); padding-top: 0.75rem; margin-top: -0.25rem;">
@@ -792,13 +846,134 @@
                 </div>
             </section>
 
+            <!-- Project Data Card (Collapsible) -->
+            <section id="project-data-card" class="card hidden">
+                <h2 onclick="toggleProjectDataCard()"
+                    style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                    <span>Project Data</span>
+                    <span id="project-data-chevron"
+                        style="transition: transform 0.2s ease; transform: rotate(-90deg);">▼</span>
+                </h2>
+                <div id="project-data-body" class="hidden"
+                    style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; position: relative;">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Edit the metadata and settings for this project.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="edit-project-title">Project Name</label>
+                        <input type="text" id="edit-project-title" placeholder="e.g. My Awesome Project"
+                            autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-id">Project Slug</label>
+                        <input type="text" id="edit-project-id" placeholder="e.g. my-awesome-project" autocomplete="off"
+                            required>
+                        <div class="hint">Modifying the slug will move the case study content to /project/new-slug/ and
+                            change the database ID.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-subtitle">Subtitle</label>
+                        <input type="text" id="edit-project-subtitle" placeholder="e.g. A bento builder tool"
+                            autocomplete="off">
+                        <div class="subtitle-counter" id="edit-project-subtitle-counter"
+                            style="text-align: right; font-size: 0.75rem; margin-top: -0.2rem;">0 characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-size">Size</label>
+                        <select id="edit-project-size">
+                            <option value="small">small</option>
+                            <option value="medium">medium</option>
+                            <option value="tall">tall</option>
+                            <option value="large">large</option>
+                            <option value="wide">wide</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group tag-selector">
+                        <label>Tags</label>
+                        <!-- Selected tags row -->
+                        <div id="edit-project-selected-tags"
+                            style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.25rem;">
+                            <!-- Populated dynamically as pills -->
+                        </div>
+                        <input type="text" id="edit-project-tag-search" placeholder="Type to search and add tags..."
+                            autocomplete="off" onfocus="showEditTagSearchResults()"
+                            oninput="filterEditTagSearchResults()">
+                        <div id="edit-project-tag-results" class="hidden"
+                            style="position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-action-url">Primary URL</label>
+                        <input type="url" id="edit-project-action-url" placeholder="https://example.com"
+                            autocomplete="off">
+                        <div class="hint">Destination link out to the website or application.</div>
+                    </div>
+
+                    <div class="form-group link-checkbox">
+                        <input type="checkbox" id="edit-project-only-link" style="width: auto;">
+                        <label for="edit-project-only-link"
+                            style="margin: 0; cursor: pointer; user-select: none;">Project is Only
+                            Link</label>
+                    </div>
+
+                    <div id="edit-project-source-url-group" class="form-group hidden">
+                        <label for="edit-project-source-url">Secondary URL (Source Code / GitHub)</label>
+                        <input type="url" id="edit-project-source-url" placeholder="https://github.com/..."
+                            autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-image-path">Image Path</label>
+                        <input type="text" id="edit-project-image-path"
+                            placeholder="content/my-awesome-project/images/hero.webp" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-image-file">Upload New Preview Image (Optional)</label>
+                        <input type="file" id="edit-project-image-file" accept="image/*">
+                        <div id="edit-project-image-preview-container" class="hidden"
+                            style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <img id="edit-project-image-preview" src="" alt="Preview"
+                                style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--card-border); object-fit: contain;">
+                            <div class="form-group">
+                                <label for="edit-project-image-name">Filename to save as</label>
+                                <input type="text" id="edit-project-image-name" placeholder="e.g. hero.webp"
+                                    style="padding: 0.4rem; font-size: 0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="save-project-data-btn" class="btn" onclick="saveProjectData()">Save Project
+                        Data</button>
+                    <div id="project-data-alert" class="alert hidden"></div>
+                </div>
+            </section>
+
         </main>
+
+        <footer class="admin-footer">
+            <a href="/" class="back-home-link">
+                <span>←</span> Back to Main Site
+            </a>
+            <button id="logout-btn" class="logout-btn hidden" onclick="logout()" style="margin: 0;">Logout</button>
+        </footer>
+
     </div>
 
     <!-- Script Block utilizing ES Modules to read site config dynamically -->
     <script type="module">
         import { myProjects } from './assets/js/project-data.js';
         window.myProjects = myProjects;
+
+        // Detect local dev vs production (Cloudflare Access is not active on localhost)
+        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
         // Load project lists into UI dropdowns on startup
         window.addEventListener('DOMContentLoaded', () => {
@@ -820,13 +995,10 @@
                         category: 'Projects'
                     });
                 }
-
-                // Upload targets - all project folders plus assets
-                const optUpload = document.createElement('option');
-                optUpload.value = `content/${project.id}/images`;
-                optUpload.textContent = `content/${project.id}/images/ (${project.title})`;
-                uploadProjectSelect.appendChild(optUpload);
             });
+
+            // Populate upload project dropdown
+            populateUploadProjectDropdown();
 
             // Initialize search results list
             renderSearchResults(window.searchFiles);
@@ -859,7 +1031,7 @@
             const subtitleCounter = document.getElementById('new-project-subtitle-counter');
             subtitleInput.addEventListener('input', () => {
                 const len = subtitleInput.value.length;
-                subtitleCounter.textContent = `${len} / 100 characters`;
+                subtitleCounter.textContent = `${len} characters`;
             });
 
             // URL input event listeners
@@ -905,11 +1077,108 @@
                 imageNameInput.value = imageNameInput.value.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
             });
 
-            // Check if user is already authenticated
-            const savedPasscode = localStorage.getItem('admin_passcode');
-            if (savedPasscode) {
-                document.getElementById('passcode-input').value = savedPasscode;
-                checkAuth();
+            // Set up edit project slug listener
+            const editIdInput = document.getElementById('edit-project-id');
+            if (editIdInput) {
+                editIdInput.addEventListener('input', () => {
+                    editIdInput.value = editIdInput.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                });
+            }
+
+            // Edit project subtitle length and counter check
+            const editSubtitleInput = document.getElementById('edit-project-subtitle');
+            const editSubtitleCounter = document.getElementById('edit-project-subtitle-counter');
+            if (editSubtitleInput && editSubtitleCounter) {
+                editSubtitleInput.addEventListener('input', () => {
+                    const len = editSubtitleInput.value.length;
+                    editSubtitleCounter.textContent = `${len} characters`;
+                });
+            }
+
+            // Edit project URL input event listeners
+            const editActionUrlInput = document.getElementById('edit-project-action-url');
+            const editSourceUrlGroup = document.getElementById('edit-project-source-url-group');
+            const editSourceUrlInput = document.getElementById('edit-project-source-url');
+
+            if (editActionUrlInput && editSourceUrlGroup && editSourceUrlInput) {
+                editActionUrlInput.addEventListener('input', () => {
+                    if (editActionUrlInput.value.trim() !== '') {
+                        editSourceUrlGroup.classList.remove('hidden');
+                    } else {
+                        editSourceUrlGroup.classList.add('hidden');
+                        editSourceUrlInput.value = '';
+                    }
+                });
+            }
+
+            // Edit project image file & preview handlers
+            const editImageFileInput = document.getElementById('edit-project-image-file');
+            const editPreviewContainer = document.getElementById('edit-project-image-preview-container');
+            const editPreviewImg = document.getElementById('edit-project-image-preview');
+            const editImageNameInput = document.getElementById('edit-project-image-name');
+            const editImagePathInput = document.getElementById('edit-project-image-path');
+
+            if (editImageFileInput && editPreviewContainer && editPreviewImg && editImageNameInput && editImagePathInput) {
+                editImageFileInput.addEventListener('change', () => {
+                    if (editImageFileInput.files && editImageFileInput.files.length > 0) {
+                        const file = editImageFileInput.files[0];
+                        const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                        editImageNameInput.value = sanitizedName;
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            editPreviewImg.src = e.target.result;
+                            editPreviewContainer.classList.remove('hidden');
+
+                            const slug = editIdInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '') || window.editingProjectId;
+                            editImagePathInput.value = `content/${slug}/images/${sanitizedName}`;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        editPreviewContainer.classList.add('hidden');
+                        editPreviewImg.src = '';
+                        editImageNameInput.value = '';
+                    }
+                });
+
+                editImageNameInput.addEventListener('input', () => {
+                    const sanitizedName = editImageNameInput.value.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                    editImageNameInput.value = sanitizedName;
+                    if (sanitizedName) {
+                        const slug = editIdInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '') || window.editingProjectId;
+                        editImagePathInput.value = `content/${slug}/images/${sanitizedName}`;
+                    }
+                });
+            }
+
+            // Password input listeners for login view
+            const passcodeInput = document.getElementById('passcode-input');
+            const loginBtn = document.getElementById('login-btn');
+
+            if (passcodeInput && loginBtn) {
+                const updateButtonState = () => {
+                    loginBtn.disabled = passcodeInput.value.trim() === '';
+                };
+
+                passcodeInput.addEventListener('input', updateButtonState);
+                passcodeInput.addEventListener('change', updateButtonState);
+
+                passcodeInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !loginBtn.disabled) {
+                        checkAuth();
+                    }
+                });
+
+                // Check initial state (e.g. autofill)
+                updateButtonState();
+                setTimeout(updateButtonState, 100);
+            }
+
+            // Production: Cloudflare Access already authenticated — skip the password screen
+            if (!isLocal) {
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
             }
         });
 
@@ -1135,6 +1404,12 @@
             if (tagInput && tagResults && !tagInput.contains(e.target) && !tagResults.contains(e.target)) {
                 tagResults.classList.add('hidden');
             }
+
+            const editTagInput = document.getElementById('edit-project-tag-search');
+            const editTagResults = document.getElementById('edit-project-tag-results');
+            if (editTagInput && editTagResults && !editTagInput.contains(e.target) && !editTagResults.contains(e.target)) {
+                editTagResults.classList.add('hidden');
+            }
         });
     </script>
 
@@ -1146,6 +1421,17 @@
             originalContent: ''
         };
         let jar;
+        let adminPasscode = '';
+        // True when running via local dev server (serve.py), not Cloudflare edge
+        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+        // Returns an Authorization header object for local dev Bearer auth.
+        // In production, the CF_Authorization cookie is sent automatically by the browser
+        // and Cloudflare Access validates it at the edge — no explicit header needed.
+        function getAuthHeaders() {
+            const passcode = getPasscode();
+            return passcode ? { 'Authorization': `Bearer ${passcode}` } : {};
+        }
 
         // Update Draft Status Helper (Green for Synced, Amber for Warnings/Unsaved)
         function updateDraftStatus(text, isWarning = false, isRawHTML = false) {
@@ -1203,7 +1489,7 @@
 
         // Retrieve passcode
         function getPasscode() {
-            return localStorage.getItem('admin_passcode') || '';
+            return adminPasscode;
         }
 
         // Authentication Handler
@@ -1213,7 +1499,7 @@
             const loginBtn = document.getElementById('login-btn');
 
             if (!passcode) {
-                showAlert(alertEl, 'Please enter a passcode.', 'error');
+                showAlert(alertEl, 'Please enter a password.', 'error');
                 return;
             }
 
@@ -1230,8 +1516,8 @@
                 });
 
                 if (res.ok) {
-                    // Save validated passcode
-                    localStorage.setItem('admin_passcode', passcode);
+                    // Save validated passcode in memory
+                    adminPasscode = passcode;
 
                     // Toggle views
                     document.getElementById('auth-view').classList.add('hidden');
@@ -1239,20 +1525,26 @@
                     document.getElementById('logout-btn').classList.remove('hidden');
                 } else {
                     const text = await res.text();
-                    showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid passcode' : text}`, 'error');
-                    localStorage.removeItem('admin_passcode');
+                    showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid password' : text}`, 'error');
+                    adminPasscode = '';
                 }
             } catch (err) {
                 showAlert(alertEl, `Error connecting to API: ${err.message}`, 'error');
             } finally {
-                loginBtn.disabled = false;
+                loginBtn.disabled = document.getElementById('passcode-input').value.trim() === '';
                 loginBtn.textContent = 'Authenticate';
             }
         }
 
         // Logout
         function logout() {
-            localStorage.removeItem('admin_passcode');
+            if (!isLocal) {
+                // In production, invalidate the Cloudflare Access session
+                const redirectUrl = encodeURIComponent(window.location.origin + '/');
+                window.location.href = `https://marchryan.cloudflareaccess.com/cdn-cgi/access/logout?redirect_url=${redirectUrl}`;
+                return;
+            }
+            adminPasscode = '';
             document.getElementById('passcode-input').value = '';
             document.getElementById('auth-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
@@ -1301,7 +1593,7 @@
                 // Fetch file payload through proxy API
                 const res = await fetch(`/api/admin/file?path=${filePath}`, {
                     headers: {
-                        'Authorization': `Bearer ${getPasscode()}`
+                        ...getAuthHeaders()
                     }
                 });
 
@@ -1337,10 +1629,28 @@
                 } else {
                     updateDraftStatus('Synced with remote');
                 }
+
+                // Check if this is a project index.html file to show and populate Project Data
+                const projectDataCard = document.getElementById('project-data-card');
+                if (filePath.startsWith('content/') && filePath.endsWith('/index.html')) {
+                    const parts = filePath.split('/');
+                    const projectId = parts[1];
+                    const project = window.myProjects.find(p => p.id === projectId);
+                    if (project && projectDataCard) {
+                        projectDataCard.classList.remove('hidden');
+                        populateEditProjectForm(project);
+                    } else if (projectDataCard) {
+                        projectDataCard.classList.add('hidden');
+                    }
+                } else if (projectDataCard) {
+                    projectDataCard.classList.add('hidden');
+                }
             } catch (err) {
                 showAlert(alertEl, `Error loading file: ${err.message}`, 'error');
                 editorCard.classList.add('hidden');
                 activeFileLabel.textContent = '';
+                const projectDataCard = document.getElementById('project-data-card');
+                if (projectDataCard) projectDataCard.classList.add('hidden');
             } finally {
                 textarea.setAttribute('contenteditable', 'true');
                 toggleWrapLines();
@@ -1572,7 +1882,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getPasscode()}`
+                        ...getAuthHeaders()
                     },
                     body: JSON.stringify({
                         path: currentFile.path,
@@ -1612,7 +1922,7 @@
                 document.getElementById('new-project-title').value = '';
                 document.getElementById('new-project-id').value = '';
                 document.getElementById('new-project-subtitle').value = '';
-                document.getElementById('new-project-subtitle-counter').textContent = '0 / 100 characters';
+                document.getElementById('new-project-subtitle-counter').textContent = '0 characters';
                 document.getElementById('new-project-size').value = 'medium';
                 document.getElementById('new-project-action-url').value = '';
                 document.getElementById('new-project-only-link').checked = false;
@@ -1689,10 +1999,7 @@
                 return;
             }
 
-            if (subtitle.length > 100) {
-                alert('Subtitle must be 100 characters or less.');
-                return;
-            }
+
 
             // Check if project already exists locally
             if (window.myProjects && window.myProjects.some(p => p.id === id)) {
@@ -1729,7 +2036,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${getPasscode()}`
+                            ...getAuthHeaders()
                         },
                         body: JSON.stringify({
                             path: imagePath,
@@ -1778,7 +2085,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${getPasscode()}`
+                            ...getAuthHeaders()
                         },
                         body: JSON.stringify({
                             path: targetPath,
@@ -1795,7 +2102,7 @@
                 // 3. Fetch assets/js/project-data.js to append the metadata
                 const dbRes = await fetch('/api/admin/file?path=assets/js/project-data.js', {
                     headers: {
-                        'Authorization': `Bearer ${getPasscode()}`
+                        ...getAuthHeaders()
                     }
                 });
                 if (!dbRes.ok) {
@@ -1862,7 +2169,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${getPasscode()}`
+                        ...getAuthHeaders()
                     },
                     body: JSON.stringify({
                         path: 'assets/js/project-data.js',
@@ -1874,6 +2181,40 @@
 
                 if (!dbUpdateRes.ok) {
                     throw new Error(`Failed to save project database: ${await dbUpdateRes.text()}`);
+                }
+
+                // Auto-update sitemap.xml
+                if (hasExtendedContent) {
+                    try {
+                        const sitemapRes = await fetch('/api/admin/file?path=sitemap.xml', {
+                            headers: {
+                                ...getAuthHeaders()
+                            }
+                        });
+                        if (sitemapRes.ok) {
+                            const sitemapData = await sitemapRes.json();
+                            const sitemapXml = b64DecodeUnicode(sitemapData.content.replace(/\s/g, ''));
+
+                            const updatedSitemap = updateSitemapContent(sitemapXml, id, hasExtendedContent);
+                            const b64Sitemap = b64EncodeUnicode(updatedSitemap);
+
+                            await fetch('/api/admin/file', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    ...getAuthHeaders()
+                                },
+                                body: JSON.stringify({
+                                    path: 'sitemap.xml',
+                                    content: b64Sitemap,
+                                    sha: sitemapData.sha,
+                                    message: `admin: update sitemap for new project ${id}`
+                                })
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to auto-update sitemap:', e);
+                    }
                 }
 
                 // 4. Mutate local array state to sync frontend
@@ -1985,7 +2326,7 @@
                     try {
                         const checkRes = await fetch(`/api/admin/file?path=${targetPath}`, {
                             headers: {
-                                'Authorization': `Bearer ${getPasscode()}`
+                                ...getAuthHeaders()
                             }
                         });
                         if (checkRes.ok) {
@@ -2001,7 +2342,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${getPasscode()}`
+                            ...getAuthHeaders()
                         },
                         body: JSON.stringify({
                             path: targetPath,
@@ -2049,6 +2390,590 @@
             const isHidden = body.classList.toggle('hidden');
             chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
         }
+
+        // --- NEW PROJECT DATA EDITOR SCRIPTS ---
+
+        // Toggle Project Data Card body
+        function toggleProjectDataCard() {
+            const body = document.getElementById('project-data-body');
+            const chevron = document.getElementById('project-data-chevron');
+            const isHidden = body.classList.toggle('hidden');
+            chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+        window.toggleProjectDataCard = toggleProjectDataCard;
+
+        // Populate the Project Data edit form fields
+        window.editingProjectId = '';
+        function populateEditProjectForm(project) {
+            window.editingProjectId = project.id;
+
+            document.getElementById('edit-project-title').value = project.title || '';
+            document.getElementById('edit-project-id').value = project.id || '';
+            document.getElementById('edit-project-subtitle').value = project.subtitle || '';
+
+            const subtitleLen = (project.subtitle || '').length;
+            document.getElementById('edit-project-subtitle-counter').textContent = `${subtitleLen} characters`;
+
+            document.getElementById('edit-project-size').value = project.size || 'medium';
+
+            window.editProjectSelectedTags = JSON.parse(JSON.stringify(project.tags || []));
+            renderEditSelectedTags();
+
+            document.getElementById('edit-project-tag-search').value = '';
+            document.getElementById('edit-project-tag-results').classList.add('hidden');
+
+            document.getElementById('edit-project-action-url').value = project.actionUrl || '';
+
+            const onlyLinkCheckbox = document.getElementById('edit-project-only-link');
+            onlyLinkCheckbox.checked = !project.hasExtendedContent;
+
+            const sourceUrlGroup = document.getElementById('edit-project-source-url-group');
+            const sourceUrlInput = document.getElementById('edit-project-source-url');
+            sourceUrlInput.value = project.sourceUrl || '';
+            if (project.actionUrl && project.actionUrl.trim() !== '') {
+                sourceUrlGroup.classList.remove('hidden');
+            } else {
+                sourceUrlGroup.classList.add('hidden');
+            }
+
+            document.getElementById('edit-project-image-path').value = project.image || '';
+
+            // Clear image uploader states for editing
+            document.getElementById('edit-project-image-file').value = '';
+            document.getElementById('edit-project-image-preview-container').classList.add('hidden');
+            document.getElementById('edit-project-image-preview').src = '';
+            document.getElementById('edit-project-image-name').value = '';
+
+            // Reset alert container
+            const alertEl = document.getElementById('project-data-alert');
+            if (alertEl) alertEl.classList.add('hidden');
+        }
+        window.populateEditProjectForm = populateEditProjectForm;
+
+        // Render selected tags for edit form
+        window.editProjectSelectedTags = [];
+        function renderEditSelectedTags() {
+            const container = document.getElementById('edit-project-selected-tags');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (window.editProjectSelectedTags.length === 0) {
+                const hint = document.createElement('span');
+                hint.style.fontSize = '0.8rem';
+                hint.style.color = 'var(--text-secondary)';
+                hint.textContent = 'No tags selected';
+                container.appendChild(hint);
+                return;
+            }
+
+            window.editProjectSelectedTags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = `tag tag-${tag.color}`;
+                badge.style.display = 'inline-flex';
+                badge.style.alignItems = 'center';
+                badge.style.gap = '0.35rem';
+                badge.style.cursor = 'pointer';
+                badge.innerHTML = `${tag.label} <span style="font-weight: bold; opacity: 0.7;">✕</span>`;
+                badge.onclick = () => {
+                    removeEditSelectedTag(tag.label);
+                };
+                container.appendChild(badge);
+            });
+        }
+        window.renderEditSelectedTags = renderEditSelectedTags;
+
+        // Remove tag from edit form selection
+        function removeEditSelectedTag(label) {
+            window.editProjectSelectedTags = window.editProjectSelectedTags.filter(t => t.label !== label);
+            renderEditSelectedTags();
+            filterEditTagSearchResults();
+        }
+        window.removeEditSelectedTag = removeEditSelectedTag;
+
+        // Show edit form tag results dropdown
+        function showEditTagSearchResults() {
+            const resultsDiv = document.getElementById('edit-project-tag-results');
+            if (resultsDiv) {
+                resultsDiv.classList.remove('hidden');
+                filterEditTagSearchResults();
+            }
+        }
+        window.showEditTagSearchResults = showEditTagSearchResults;
+
+        // Filter edit form tag results dropdown
+        function filterEditTagSearchResults() {
+            const queryInput = document.getElementById('edit-project-tag-search');
+            const resultsDiv = document.getElementById('edit-project-tag-results');
+            if (!queryInput || !resultsDiv) return;
+
+            const query = queryInput.value.toLowerCase();
+            resultsDiv.innerHTML = '';
+
+            const filtered = window.allAvailableTags.filter(tag => {
+                const isSelected = window.editProjectSelectedTags.some(t => t.label === tag.label);
+                const matchesQuery = tag.label.toLowerCase().includes(query);
+                return !isSelected && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                const item = document.createElement('div');
+                item.style.padding = '0.75rem';
+                item.style.color = 'var(--text-secondary)';
+                item.style.fontSize = '0.9rem';
+                item.textContent = 'No matching tags available';
+                resultsDiv.appendChild(item);
+                return;
+            }
+
+            filtered.forEach(tag => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = tag.label;
+                item.onclick = () => {
+                    window.editProjectSelectedTags.push(tag);
+                    queryInput.value = '';
+                    resultsDiv.classList.add('hidden');
+                    renderEditSelectedTags();
+                };
+                resultsDiv.appendChild(item);
+            });
+        }
+        window.filterEditTagSearchResults = filterEditTagSearchResults;
+
+        // Populate upload targets dropdown dynamically
+        function populateUploadProjectDropdown() {
+            const uploadProjectSelect = document.getElementById('upload-project');
+            if (!uploadProjectSelect) return;
+            uploadProjectSelect.innerHTML = '<option value="assets/img">assets/img/ (Global Site Images)</option>';
+            window.myProjects.forEach(project => {
+                const optUpload = document.createElement('option');
+                optUpload.value = `content/${project.id}/images`;
+                optUpload.textContent = `content/${project.id}/images/ (${project.title})`;
+                uploadProjectSelect.appendChild(optUpload);
+            });
+        }
+        window.populateUploadProjectDropdown = populateUploadProjectDropdown;
+
+        // Pretty serialize project object literal for project-data.js
+        function serializeProjectObject(project) {
+            const lines = [];
+            lines.push('    {');
+            const keys = Object.keys(project);
+            keys.forEach((key, index) => {
+                const val = project[key];
+                let valStr = '';
+                if (key === 'tags') {
+                    if (Array.isArray(val) && val.length > 0) {
+                        valStr = `[\n${val.map(t => `            { label: "${t.label}", color: "${t.color}"${t.priority ? `, priority: "${t.priority}"` : ''} }`).join(',\n')}\n        ]`;
+                    } else {
+                        valStr = '[]';
+                    }
+                } else if (typeof val === 'string') {
+                    valStr = `"${val.replace(/"/g, '\\"')}"`;
+                } else if (typeof val === 'boolean' || typeof val === 'number') {
+                    valStr = val.toString();
+                } else {
+                    valStr = JSON.stringify(val);
+                }
+                const comma = (index === keys.length - 1) ? '' : ',';
+                lines.push(`        ${key}: ${valStr}${comma}`);
+            });
+            lines.push('    }');
+            return lines.join('\n');
+        }
+
+        // Find character boundaries of a project object literal by project slug
+        function findProjectObjectBounds(dbContent, projectId) {
+            const doubleQuotePattern = `id:\\s*"${projectId}"`;
+            const singleQuotePattern = `id:\\s*'${projectId}'`;
+            let match = dbContent.match(new RegExp(doubleQuotePattern));
+            if (!match) {
+                match = dbContent.match(new RegExp(singleQuotePattern));
+            }
+            if (!match) return null;
+            const matchIndex = match.index;
+            let braceCount = 0;
+            let startIndex = -1;
+            for (let i = matchIndex; i >= 0; i--) {
+                if (dbContent[i] === '}') {
+                    braceCount--;
+                } else if (dbContent[i] === '{') {
+                    braceCount++;
+                    if (braceCount === 1) {
+                        startIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (startIndex === -1) return null;
+            braceCount = 0;
+            let endIndex = -1;
+            for (let i = startIndex; i < dbContent.length; i++) {
+                if (dbContent[i] === '{') {
+                    braceCount++;
+                } else if (dbContent[i] === '}') {
+                    braceCount--;
+                    if (braceCount === 0) {
+                        endIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (endIndex === -1) return null;
+            return { start: startIndex, end: endIndex };
+        }
+
+        // Save project metadata edits to database and optionally rename slug path
+        async function saveProjectData() {
+            const titleInput = document.getElementById('edit-project-title');
+            const idInput = document.getElementById('edit-project-id');
+            const subtitleInput = document.getElementById('edit-project-subtitle');
+            const sizeSelect = document.getElementById('edit-project-size');
+            const actionUrlInput = document.getElementById('edit-project-action-url');
+            const onlyLinkCheckbox = document.getElementById('edit-project-only-link');
+            const sourceUrlInput = document.getElementById('edit-project-source-url');
+            const imagePathInput = document.getElementById('edit-project-image-path');
+            const imageFileInput = document.getElementById('edit-project-image-file');
+            const imageNameInput = document.getElementById('edit-project-image-name');
+            const saveBtn = document.getElementById('save-project-data-btn');
+            const alertEl = document.getElementById('project-data-alert');
+
+            const title = titleInput.value.trim();
+            const newId = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            const subtitle = subtitleInput.value.trim();
+            const size = sizeSelect.value;
+            const actionUrl = actionUrlInput.value.trim();
+            const hasExtendedContent = !onlyLinkCheckbox.checked;
+            const sourceUrl = hasExtendedContent && actionUrl ? sourceUrlInput.value.trim() : '';
+            let imagePath = imagePathInput.value.trim();
+
+            if (!title) {
+                alert('Please enter a project title/name.');
+                return;
+            }
+
+            if (!newId) {
+                alert('Please enter a valid lowercase project ID/slug.');
+                return;
+            }
+
+
+
+            // Check if slug already exists (excluding the current editing project)
+            if (newId !== window.editingProjectId) {
+                if (window.myProjects && window.myProjects.some(p => p.id === newId)) {
+                    alert('Project ID already exists in the database.');
+                    return;
+                }
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+            alertEl.classList.add('hidden');
+
+            try {
+                // 1. Upload preview image if selected
+                if (imageFileInput.files && imageFileInput.files.length > 0) {
+                    const file = imageFileInput.files[0];
+                    const imageName = imageNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                    if (!imageName) {
+                        throw new Error('Please enter a valid target filename for the preview image.');
+                    }
+
+                    const b64Image = await readFileAsBase64(file);
+                    imagePath = `content/${newId}/images/${imageName}`;
+
+                    const imgRes = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: imagePath,
+                            content: b64Image,
+                            message: `admin: upload preview image for ${newId}`
+                        })
+                    });
+                    if (!imgRes.ok) {
+                        throw new Error(`Failed to upload preview image: ${await imgRes.text()}`);
+                    }
+                    imagePathInput.value = imagePath;
+                }
+
+                // 2. If the project ID changed, copy the current template file to the new path
+                let oldPath = `content/${window.editingProjectId}/index.html`;
+                let newPath = `content/${newId}/index.html`;
+
+                if (newId !== window.editingProjectId && hasExtendedContent) {
+                    const editorTextarea = document.getElementById('editor-textarea');
+                    const editorContent = jar ? jar.toString() : editorTextarea.textContent;
+                    const b64Content = b64EncodeUnicode(editorContent);
+
+                    const res = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: newPath,
+                            content: b64Content,
+                            message: `admin: move project template from ${window.editingProjectId} to ${newId}`
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(`Failed to copy project template to new slug path: ${await res.text()}`);
+                    }
+                    const resData = await res.json();
+                    currentFile.sha = resData.sha;
+                }
+
+                // 3. Fetch assets/js/project-data.js to update the metadata
+                const dbRes = await fetch('/api/admin/file?path=assets/js/project-data.js', {
+                    headers: {
+                        ...getAuthHeaders()
+                    }
+                });
+                if (!dbRes.ok) {
+                    throw new Error(`Failed to load project database: ${await dbRes.text()}`);
+                }
+                const dbData = await dbRes.json();
+                const dbContent = b64DecodeUnicode(dbData.content.replace(/\s/g, ''));
+
+                // Find the bounds of the project in the file
+                const bounds = findProjectObjectBounds(dbContent, window.editingProjectId);
+                if (!bounds) {
+                    throw new Error(`Could not locate project object for '${window.editingProjectId}' in project-data.js`);
+                }
+
+                // Retrieve original project object from local myProjects to preserve all non-form fields
+                const localProj = window.myProjects.find(p => p.id === window.editingProjectId);
+                if (!localProj) {
+                    throw new Error(`Local project data not found for '${window.editingProjectId}'`);
+                }
+
+                // Merge updated properties
+                const updatedProj = {
+                    ...localProj,
+                    id: newId,
+                    title: title,
+                    subtitle: subtitle,
+                    tags: window.editProjectSelectedTags || [],
+                    size: size,
+                    image: imagePath,
+                    actionUrl: actionUrl,
+                    sourceUrl: sourceUrl,
+                    hasExtendedContent: hasExtendedContent
+                };
+
+                const serialized = serializeProjectObject(updatedProj);
+
+                const before = dbContent.substring(0, bounds.start);
+                const after = dbContent.substring(bounds.end + 1);
+                const updatedDbContent = before + serialized + after;
+                const b64UpdatedDb = b64EncodeUnicode(updatedDbContent);
+
+                const dbUpdateRes = await fetch('/api/admin/file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({
+                        path: 'assets/js/project-data.js',
+                        content: b64UpdatedDb,
+                        sha: dbData.sha,
+                        message: `admin: update project metadata for ${newId}`
+                    })
+                });
+
+                if (!dbUpdateRes.ok) {
+                    throw new Error(`Failed to save project database: ${await dbUpdateRes.text()}`);
+                }
+
+                // 4. Update local state
+                const oldId = window.editingProjectId;
+
+                // Auto-update sitemap.xml
+                try {
+                    const sitemapRes = await fetch('/api/admin/file?path=sitemap.xml', {
+                        headers: {
+                            ...getAuthHeaders()
+                        }
+                    });
+                    if (sitemapRes.ok) {
+                        const sitemapData = await sitemapRes.json();
+                        const sitemapXml = b64DecodeUnicode(sitemapData.content.replace(/\s/g, ''));
+
+                        const updatedSitemap = updateSitemapContent(sitemapXml, newId, hasExtendedContent, oldId);
+                        const b64Sitemap = b64EncodeUnicode(updatedSitemap);
+
+                        await fetch('/api/admin/file', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...getAuthHeaders()
+                            },
+                            body: JSON.stringify({
+                                path: 'sitemap.xml',
+                                content: b64Sitemap,
+                                sha: sitemapData.sha,
+                                message: `admin: update sitemap for project ${newId}`
+                            })
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to auto-update sitemap:', e);
+                }
+
+                // Auto-update redirects.json if slug changed
+                if (newId !== oldId) {
+                    try {
+                        const redirectsRes = await fetch('/api/admin/file?path=redirects.json', {
+                            headers: {
+                                ...getAuthHeaders()
+                            }
+                        });
+                        if (redirectsRes.ok) {
+                            const redirectsData = await redirectsRes.json();
+                            const redirectsJsonStr = b64DecodeUnicode(redirectsData.content.replace(/\s/g, ''));
+
+                            const updatedRedirects = updateRedirectsContent(redirectsJsonStr, oldId, newId);
+                            const b64Redirects = b64EncodeUnicode(updatedRedirects);
+
+                            await fetch('/api/admin/file', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    ...getAuthHeaders()
+                                },
+                                body: JSON.stringify({
+                                    path: 'redirects.json',
+                                    content: b64Redirects,
+                                    sha: redirectsData.sha,
+                                    message: `admin: add redirect from ${oldId} to ${newId}`
+                                })
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to auto-update redirects:', e);
+                    }
+                }
+
+                // Update local window.myProjects array
+                const index = window.myProjects.findIndex(p => p.id === oldId);
+                if (index !== -1) {
+                    window.myProjects[index] = updatedProj;
+                }
+
+                // Update searchFiles list and dropdown selection
+                if (hasExtendedContent) {
+                    const searchIndex = window.searchFiles.findIndex(f => f.path === oldPath);
+                    if (searchIndex !== -1) {
+                        window.searchFiles[searchIndex].path = newPath;
+                        window.searchFiles[searchIndex].title = title;
+                    } else {
+                        window.searchFiles.push({
+                            path: newPath,
+                            title: title,
+                            category: 'Projects'
+                        });
+                    }
+                    renderSearchResults(window.searchFiles);
+                    document.getElementById('file-search').value = title;
+                    document.getElementById('active-file-label').textContent = `Editing: ${newPath}`;
+                    currentFile.path = newPath;
+                }
+
+                // Update global state
+                window.editingProjectId = newId;
+
+                // Sync image uploader options
+                populateUploadProjectDropdown();
+                syncImageUploader(newPath);
+
+                // Show success alert
+                showAlert(alertEl, 'Project data saved successfully! Deploying to live site (takes ~1 min)...', 'success');
+            } catch (err) {
+                showAlert(alertEl, `Error saving project data: ${err.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Project Data';
+            }
+        }
+        window.saveProjectData = saveProjectData;
+        // Update sitemap content
+        function updateSitemapContent(sitemapXml, slug, hasExtendedContent, oldSlug = null) {
+            const today = new Date().toISOString().split('T')[0];
+
+            // 1. Update homepage lastmod
+            sitemapXml = sitemapXml.replace(
+                /<loc>https:\/\/ryanmarch\.me\/<\/loc><lastmod>[^<]+<\/lastmod>/,
+                `<loc>https://ryanmarch.me/</loc><lastmod>${today}</lastmod>`
+            );
+
+            const oldUrlPattern = new RegExp(`\\s*<url><loc>https:\\/\\/ryanmarch\\.me\\/project\\/${oldSlug || slug}\\/<\\/loc>.*?<\\/url>`);
+            const newUrlBlock = `\n  <url><loc>https://ryanmarch.me/project/${slug}/</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>`;
+
+            if (oldSlug && oldSlug !== slug) {
+                // Changing slug
+                if (hasExtendedContent) {
+                    if (sitemapXml.match(oldUrlPattern)) {
+                        sitemapXml = sitemapXml.replace(oldUrlPattern, newUrlBlock);
+                    } else {
+                        sitemapXml = sitemapXml.replace('</urlset>', `  ${newUrlBlock.trim()}\n</urlset>`);
+                    }
+                } else {
+                    sitemapXml = sitemapXml.replace(oldUrlPattern, '');
+                }
+            } else {
+                // Same slug or new project
+                if (hasExtendedContent) {
+                    const currentUrlPattern = new RegExp(`\\s*<url><loc>https:\\/\\/ryanmarch\\.me\\/project\\/${slug}\\/<\\/loc>.*?<\\/url>`);
+                    if (sitemapXml.match(currentUrlPattern)) {
+                        sitemapXml = sitemapXml.replace(currentUrlPattern, newUrlBlock);
+                    } else {
+                        sitemapXml = sitemapXml.replace('</urlset>', `  ${newUrlBlock.trim()}\n</urlset>`);
+                    }
+                } else {
+                    sitemapXml = sitemapXml.replace(oldUrlPattern, '');
+                }
+            }
+
+            sitemapXml = sitemapXml.replace(/\n\s*\n/g, '\n');
+            return sitemapXml;
+        }
+        window.updateSitemapContent = updateSitemapContent;
+
+        // Update redirects content
+        function updateRedirectsContent(redirectsJsonStr, oldSlug, newSlug) {
+            let redirects = [];
+            try {
+                redirects = JSON.parse(redirectsJsonStr);
+            } catch (e) {
+                redirects = [];
+            }
+
+            const oldSource = `/project/${oldSlug}/`;
+            const newDestination = `/project/${newSlug}/`;
+
+            const exists = redirects.some(r =>
+                r.source.toLowerCase().replace(/\/+$/, '') === oldSource.toLowerCase().replace(/\/+$/, '')
+            );
+
+            if (!exists) {
+                redirects.push({
+                    source: oldSource,
+                    destination: newDestination,
+                    permanent: true
+                });
+            }
+
+            return JSON.stringify(redirects, null, 2);
+        }
+        window.updateRedirectsContent = updateRedirectsContent;
     </script>
 </body>
 
