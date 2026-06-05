@@ -270,7 +270,7 @@ export default {
                 const validPassword = env.ADMIN_PASSWORD && authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
                 if (!cfJwt && !validPassword) {
                     // Not authenticated — redirect to CF Access login
-                    return Response.redirect(`https://marchryan.cloudflareaccess.com/cdn-cgi/access/login/${url.hostname}?redirect_url=${encodeURIComponent(url.href)}`, 302);
+                    return Response.redirect(`https://marchryan.cloudflareaccess.com/cdn-cgi/access/login/${url.hostname}?redirect_url=${encodeURIComponent(url.pathname + url.search)}`, 302);
                 }
                 const newHeaders = new Headers(response.headers);
                 newHeaders.set('X-Robots-Tag', 'noindex, nofollow');

@@ -1541,8 +1541,8 @@
         function logout() {
             if (!isLocal) {
                 // Invalidate the Cloudflare Access session, then return to homepage
-                const redirectUrl = encodeURIComponent(window.location.origin + '/');
-                window.location.href = `https://marchryan.cloudflareaccess.com/cdn-cgi/access/logout?redirect_url=${redirectUrl}`;
+                const returnUrl = encodeURIComponent(window.location.origin + '/');
+                window.location.href = `/cdn-cgi/access/logout?returnTo=${returnUrl}`;
                 return;
             }
             adminPasscode = '';
