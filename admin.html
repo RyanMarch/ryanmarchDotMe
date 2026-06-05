@@ -1174,7 +1174,13 @@
                 setTimeout(updateButtonState, 100);
             }
 
-            // Always show the password screen — auth is validated by the API (Bearer token)
+            // Production: Cloudflare Access already authenticated — skip the password screen
+            // (CF Access gates /admin.html at the edge; if this page loads, the user passed auth)
+            if (!isLocal) {
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+            }
         });
 
         window.newProjectSelectedTags = [];
@@ -1533,6 +1539,12 @@
 
         // Logout
         function logout() {
+            if (!isLocal) {
+                // Invalidate the Cloudflare Access session, then return to homepage
+                const redirectUrl = encodeURIComponent(window.location.origin + '/');
+                window.location.href = `https://marchryan.cloudflareaccess.com/cdn-cgi/access/logout?redirect_url=${redirectUrl}`;
+                return;
+            }
             adminPasscode = '';
             document.getElementById('passcode-input').value = '';
             document.getElementById('auth-view').classList.remove('hidden');
