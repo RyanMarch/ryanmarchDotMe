@@ -87,7 +87,16 @@ export default {
                     return new Response('Unauthorized', { status: 401 });
                 }
 
-                const filePath = url.searchParams.get('path');
+                let filePath = url.searchParams.get('path');
+                if (request.method === 'POST') {
+                    try {
+                        const body = await request.clone().json();
+                        if (body && body.path) {
+                            filePath = body.path;
+                        }
+                    } catch (e) {}
+                }
+
                 if (!filePath) {
                     return new Response('Missing path parameter', { status: 400 });
                 }
