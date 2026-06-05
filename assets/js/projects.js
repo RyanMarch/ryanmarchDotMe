@@ -780,7 +780,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     async function loadProject(projectId) {
         const project = myProjects.find(p => p.id === projectId);
-        if (!project) return;
+        if (!project) { navigateHome(false); return; }
 
         // Fade out home view before switching
         const topRow = document.querySelector('.top-row');
