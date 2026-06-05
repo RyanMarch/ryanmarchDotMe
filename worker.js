@@ -265,11 +265,14 @@ export default {
             }
 
             if (cleanPath === '/admin.html') {
-                const newHeaders = new Headers(response.headers);
+                // Fetch the asset using '/admin' internally to bypass Workers Assets' clean URL redirect (.html -> extensionless)
+                const rewrittenRequest = new Request(url.origin + '/admin', request);
+                const assetResponse = await env.ASSETS.fetch(rewrittenRequest);
+                const newHeaders = new Headers(assetResponse.headers);
                 newHeaders.set('X-Robots-Tag', 'noindex, nofollow');
-                return new Response(response.body, {
-                    status: response.status,
-                    statusText: response.statusText,
+                return new Response(assetResponse.body, {
+                    status: assetResponse.status,
+                    statusText: assetResponse.statusText,
                     headers: newHeaders
                 });
             }
