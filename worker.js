@@ -29,8 +29,8 @@ class MetaRewriter {
                 element.setAttribute('content', this.project.seoDescription || this.project.subtitle);
             } else if (property === 'og:image') {
                 if (this.project.image) {
-                    const imageUrl = this.project.image.startsWith('http') 
-                        ? this.project.image 
+                    const imageUrl = this.project.image.startsWith('http')
+                        ? this.project.image
                         : `https://ryanmarch.me/${this.project.image.replace(/^\/+/, '')}`;
                     element.setAttribute('content', imageUrl);
                 }
@@ -78,10 +78,11 @@ export default {
 
             // Handle API proxy for mobile admin
             if (cleanPath === '/api/admin/file') {
-                // Check authorization header
+                // Check authorization: CF Access JWT (production) or Bearer password (local dev fallback)
+                const cfJwt = request.headers.get('CF-Access-JWT-Assertion');
                 const authHeader = request.headers.get('Authorization');
-                const expectedAuth = `Bearer ${env.ADMIN_PASSWORD}`;
-                if (!env.ADMIN_PASSWORD || authHeader !== expectedAuth) {
+                const validPassword = env.ADMIN_PASSWORD && authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
+                if (!cfJwt && !validPassword) {
                     return new Response('Unauthorized', { status: 401 });
                 }
 
@@ -91,23 +92,28 @@ export default {
                 }
 
                 // Restrict files to content/ and specific global files to prevent arbitrary reads/writes
-                const isAllowedPath = 
-                    filePath.startsWith('content/') || 
-                    filePath === 'index.html' || 
-                    filePath === 'assets/js/project-data.js';
+                const isAllowedPath =
+                    filePath.startsWith('content/') ||
+                    filePath === 'index.html' ||
+                    filePath === 'assets/js/project-data.js' ||
+                    filePath === 'sitemap.xml' ||
+                    filePath === 'redirects.json' ||
+                    filePath === 'robots.txt';
 
                 if (!isAllowedPath) {
                     return new Response('Forbidden path', { status: 403 });
                 }
 
-                const githubApiUrl = `https://api.github.com/repos/RyanMarch/ryanmarchDotMe/contents/${filePath}`;
+                const githubRepo = env.GITHUB_REPO;
+                const githubUserAgent = `${githubRepo.split('/').pop()}-Cloudflare-Worker`;
+                const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${filePath}`;
 
                 if (request.method === 'GET') {
                     // Fetch file from GitHub
                     const ghRes = await fetch(githubApiUrl, {
                         headers: {
                             'Authorization': `token ${env.GITHUB_PAT}`,
-                            'User-Agent': 'ryanmarchDotMe-Cloudflare-Worker'
+                            'User-Agent': githubUserAgent
                         }
                     });
                     if (!ghRes.ok) {
@@ -119,7 +125,7 @@ export default {
                         sha: data.sha
                     }), {
                         status: 200,
-                        headers: { 
+                        headers: {
                             'Content-Type': 'application/json',
                             'Cache-Control': 'no-store, no-cache, must-revalidate'
                         }
@@ -131,7 +137,7 @@ export default {
                         method: 'PUT',
                         headers: {
                             'Authorization': `token ${env.GITHUB_PAT}`,
-                            'User-Agent': 'ryanmarchDotMe-Cloudflare-Worker',
+                            'User-Agent': githubUserAgent,
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
@@ -200,14 +206,14 @@ export default {
             }
 
             // 2. Validate route to determine if it should 404
-            const isStaticAsset = 
-                cleanPath.startsWith('/assets/') || 
+            const isStaticAsset =
+                cleanPath.startsWith('/assets/') ||
                 cleanPath.startsWith('/content/') ||
                 [
-                    '/style.css', 
-                    '/robots.txt', 
-                    '/sitemap.xml', 
-                    '/favicon.ico', 
+                    '/style.css',
+                    '/robots.txt',
+                    '/sitemap.xml',
+                    '/favicon.ico',
                     '/404.html',
                     '/index.html',
                     '/admin.html'
@@ -269,7 +275,7 @@ export default {
 
             return response;
         } catch (err) {
-            return new Response(`Worker Error: ${err.message}\nStack: ${err.stack}`, {
+            return new Response('Internal Server Error', {
                 status: 500,
                 headers: { 'Content-Type': 'text/plain' }
             });
