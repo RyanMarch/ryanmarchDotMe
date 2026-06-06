@@ -647,7 +647,16 @@
 
             <!-- File Selector Card -->
             <section class="card" style="z-index: 10;">
-                <h2>Select File to Edit</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                    <h2 style="margin: 0;">Select File to Edit</h2>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label for="branch-select" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-weight: 500;">Target Branch:</label>
+                        <select id="branch-select" onchange="changeBranch()" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; width: auto; height: auto; margin: 0;">
+                            <option value="main">main</option>
+                            <option value="develop">develop</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="form-group" style="position: relative;">
                     <input type="text" id="file-search" placeholder="Type to search/filter files..." autocomplete="off"
                         autocapitalize="none" autocorrect="off" spellcheck="false" onfocus="showSearchResults()"
@@ -977,6 +986,13 @@
 
         // Load project lists into UI dropdowns on startup
         window.addEventListener('DOMContentLoaded', () => {
+            // Initialize target branch from localStorage
+            const savedBranch = localStorage.getItem('admin_selected_branch') || 'main';
+            const branchSelect = document.getElementById('branch-select');
+            if (branchSelect) {
+                branchSelect.value = savedBranch;
+            }
+
             const uploadProjectSelect = document.getElementById('upload-project');
 
             // Build the global list of files for the search UI
@@ -1555,6 +1571,27 @@
             document.getElementById('active-file-label').textContent = '';
         }
 
+        // Target Branch Helpers
+        window.getSelectedBranch = function() {
+            const select = document.getElementById('branch-select');
+            return select ? select.value : (localStorage.getItem('admin_selected_branch') || 'main');
+        };
+
+        window.changeBranch = function() {
+            const select = document.getElementById('branch-select');
+            if (!select) return;
+            const branch = select.value;
+            localStorage.setItem('admin_selected_branch', branch);
+            
+            // If there's an active file being edited, reload it from the new branch
+            if (currentFile && currentFile.path) {
+                if (confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
+                    localStorage.removeItem(`draft_${currentFile.path}`);
+                    loadFile(currentFile.path);
+                }
+            }
+        };
+
         // File Loader
         async function loadFile(filePath) {
             // Fallback to active file if not specified
@@ -1592,7 +1629,7 @@
 
             try {
                 // Fetch file payload through proxy API
-                const res = await fetch(`/api/admin/file?path=${filePath}`, {
+                 const res = await fetch(`/api/admin/file?path=${filePath}&branch=${window.getSelectedBranch()}`, {
                     headers: {
                         ...getAuthHeaders()
                     }
@@ -1889,7 +1926,8 @@
                         path: currentFile.path,
                         content: b64Content,
                         sha: currentFile.sha,
-                        message: `admin: update ${currentFile.path}`
+                        message: `admin: update ${currentFile.path}`,
+                        branch: window.getSelectedBranch()
                     })
                 });
 
@@ -2042,7 +2080,8 @@
                         body: JSON.stringify({
                             path: imagePath,
                             content: b64Image,
-                            message: `admin: upload preview image for ${id}`
+                            message: `admin: upload preview image for ${id}`,
+                            branch: window.getSelectedBranch()
                         })
                     });
                     if (!imgRes.ok) {
@@ -2091,7 +2130,8 @@
                         body: JSON.stringify({
                             path: targetPath,
                             content: b64Content,
-                            message: `admin: create project for ${id}`
+                            message: `admin: create project for ${id}`,
+                            branch: window.getSelectedBranch()
                         })
                     });
 
@@ -2101,7 +2141,7 @@
                 }
 
                 // 3. Fetch assets/js/project-data.js to append the metadata
-                const dbRes = await fetch('/api/admin/file?path=assets/js/project-data.js', {
+                const dbRes = await fetch(`/api/admin/file?path=assets/js/project-data.js&branch=${window.getSelectedBranch()}`, {
                     headers: {
                         ...getAuthHeaders()
                     }
@@ -2176,7 +2216,8 @@
                         path: 'assets/js/project-data.js',
                         content: b64UpdatedDb,
                         sha: dbData.sha,
-                        message: `admin: add project metadata for ${id}`
+                        message: `admin: add project metadata for ${id}`,
+                        branch: window.getSelectedBranch()
                     })
                 });
 
@@ -2187,7 +2228,7 @@
                 // Auto-update sitemap.xml
                 if (hasExtendedContent) {
                     try {
-                        const sitemapRes = await fetch('/api/admin/file?path=sitemap.xml', {
+                        const sitemapRes = await fetch(`/api/admin/file?path=sitemap.xml&branch=${window.getSelectedBranch()}`, {
                             headers: {
                                 ...getAuthHeaders()
                             }
@@ -2209,7 +2250,8 @@
                                     path: 'sitemap.xml',
                                     content: b64Sitemap,
                                     sha: sitemapData.sha,
-                                    message: `admin: update sitemap for new project ${id}`
+                                    message: `admin: update sitemap for new project ${id}`,
+                                    branch: window.getSelectedBranch()
                                 })
                             });
                         }
@@ -2325,7 +2367,7 @@
                     // Check if file already exists on GitHub to obtain its SHA (for overwrites)
                     let existingSha = null;
                     try {
-                        const checkRes = await fetch(`/api/admin/file?path=${targetPath}`, {
+                        const checkRes = await fetch(`/api/admin/file?path=${targetPath}&branch=${window.getSelectedBranch()}`, {
                             headers: {
                                 ...getAuthHeaders()
                             }
@@ -2349,7 +2391,8 @@
                             path: targetPath,
                             content: b64Content,
                             sha: existingSha,
-                            message: `admin: upload ${targetPath}`
+                            message: `admin: upload ${targetPath}`,
+                            branch: window.getSelectedBranch()
                         })
                     });
 
@@ -2693,7 +2736,8 @@
                         body: JSON.stringify({
                             path: imagePath,
                             content: b64Image,
-                            message: `admin: upload preview image for ${newId}`
+                            message: `admin: upload preview image for ${newId}`,
+                            branch: window.getSelectedBranch()
                         })
                     });
                     if (!imgRes.ok) {
@@ -2720,7 +2764,8 @@
                         body: JSON.stringify({
                             path: newPath,
                             content: b64Content,
-                            message: `admin: move project template from ${window.editingProjectId} to ${newId}`
+                            message: `admin: move project template from ${window.editingProjectId} to ${newId}`,
+                            branch: window.getSelectedBranch()
                         })
                     });
 
@@ -2732,7 +2777,7 @@
                 }
 
                 // 3. Fetch assets/js/project-data.js to update the metadata
-                const dbRes = await fetch('/api/admin/file?path=assets/js/project-data.js', {
+                const dbRes = await fetch(`/api/admin/file?path=assets/js/project-data.js&branch=${window.getSelectedBranch()}`, {
                     headers: {
                         ...getAuthHeaders()
                     }
@@ -2786,7 +2831,8 @@
                         path: 'assets/js/project-data.js',
                         content: b64UpdatedDb,
                         sha: dbData.sha,
-                        message: `admin: update project metadata for ${newId}`
+                        message: `admin: update project metadata for ${newId}`,
+                        branch: window.getSelectedBranch()
                     })
                 });
 
@@ -2799,7 +2845,7 @@
 
                 // Auto-update sitemap.xml
                 try {
-                    const sitemapRes = await fetch('/api/admin/file?path=sitemap.xml', {
+                    const sitemapRes = await fetch(`/api/admin/file?path=sitemap.xml&branch=${window.getSelectedBranch()}`, {
                         headers: {
                             ...getAuthHeaders()
                         }
@@ -2821,7 +2867,8 @@
                                 path: 'sitemap.xml',
                                 content: b64Sitemap,
                                 sha: sitemapData.sha,
-                                message: `admin: update sitemap for project ${newId}`
+                                message: `admin: update sitemap for project ${newId}`,
+                                branch: window.getSelectedBranch()
                             })
                         });
                     }
@@ -2832,7 +2879,7 @@
                 // Auto-update redirects.json if slug changed
                 if (newId !== oldId) {
                     try {
-                        const redirectsRes = await fetch('/api/admin/file?path=redirects.json', {
+                        const redirectsRes = await fetch(`/api/admin/file?path=redirects.json&branch=${window.getSelectedBranch()}`, {
                             headers: {
                                 ...getAuthHeaders()
                             }
@@ -2854,7 +2901,8 @@
                                     path: 'redirects.json',
                                     content: b64Redirects,
                                     sha: redirectsData.sha,
-                                    message: `admin: add redirect from ${oldId} to ${newId}`
+                                    message: `admin: add redirect from ${oldId} to ${newId}`,
+                                    branch: window.getSelectedBranch()
                                 })
                             });
                         }
