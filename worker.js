@@ -88,11 +88,15 @@ export default {
                 }
 
                 let filePath = url.searchParams.get('path');
+                let branch = url.searchParams.get('branch') || 'main';
                 if (request.method === 'POST') {
                     try {
                         const body = await request.clone().json();
                         if (body && body.path) {
                             filePath = body.path;
+                        }
+                        if (body && body.branch) {
+                            branch = body.branch;
                         }
                     } catch (e) {}
                 }
@@ -116,10 +120,10 @@ export default {
 
                 const githubRepo = env.GITHUB_REPO;
                 const githubUserAgent = `${githubRepo.split('/').pop()}-Cloudflare-Worker`;
-                const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${filePath}`;
 
                 if (request.method === 'GET') {
-                    // Fetch file from GitHub
+                    // Fetch file from GitHub with ref branch parameter
+                    const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${filePath}?ref=${branch}`;
                     const ghRes = await fetch(githubApiUrl, {
                         headers: {
                             'Authorization': `token ${env.GITHUB_PAT}`,
@@ -143,6 +147,7 @@ export default {
                 } else if (request.method === 'POST') {
                     // Commit file to GitHub
                     const body = await request.json();
+                    const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${filePath}`;
                     const ghRes = await fetch(githubApiUrl, {
                         method: 'PUT',
                         headers: {
@@ -153,7 +158,8 @@ export default {
                         body: JSON.stringify({
                             message: body.message || `admin: update ${filePath}`,
                             content: body.content, // base64 encoded content
-                            sha: body.sha // required if updating existing file
+                            sha: body.sha, // required if updating existing file
+                            branch: branch
                         })
                     });
                     if (!ghRes.ok) {
