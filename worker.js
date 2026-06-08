@@ -106,6 +106,73 @@ class SchemaRewriter {
     }
 }
 
+class PreloadRewriter {
+    constructor(project) {
+        this.project = project;
+    }
+
+    element(element) {
+        if (!this.project.image) {
+            // Remove the preload link if there is no hero image
+            element.remove();
+            return;
+        }
+
+        // Resolve absolute path (with leading slash)
+        const imagePath = this.project.image.startsWith('/') 
+            ? this.project.image 
+            : `/${this.project.image}`;
+
+        element.setAttribute('href', imagePath);
+
+        // Build srcset and sizes in the same way as projects.js
+        const dotIndex = imagePath.lastIndexOf(".");
+        if (dotIndex !== -1 && (
+            this.project.id === "icon-studio" || 
+            this.project.id === "motion-poster" || 
+            this.project.id === "bowserstack" || 
+            this.project.id === "rentpress" || 
+            this.project.id === "aasc-analytics"
+        )) {
+            const base = imagePath.substring(0, dotIndex);
+            const ext = imagePath.substring(dotIndex);
+            const suffix = this.project.id === "aasc-analytics" ? "-small" : "-sm";
+            const smImage = `${base}${suffix}${ext}`;
+
+            let H = this.project.imageWidth;
+            let T = Math.round(this.project.imageWidth / 2);
+
+            if (this.project.id === "icon-studio") {
+                H = 800;
+                T = 400;
+            } else if (this.project.id === "motion-poster") {
+                H = 1000;
+                T = 600;
+            } else if (this.project.id === "bowserstack") {
+                H = 480;
+                T = 300;
+            } else if (this.project.id === "rentpress") {
+                H = 800;
+                T = 485;
+            } else if (this.project.id === "aasc-analytics") {
+                H = 1920;
+                T = 800;
+            }
+
+            const srcset = `${smImage} ${T}w, ${imagePath} ${H}w`;
+            const sizes = `(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${this.project.size === "large" ? "500px" : "300px"}`;
+
+            element.setAttribute('imagesrcset', srcset);
+            element.setAttribute('imagesizes', sizes);
+        } else {
+            // Remove srcset and sizes if not a multi-size image
+            element.removeAttribute('imagesrcset');
+            element.removeAttribute('imagesizes');
+        }
+    }
+}
+
+
 export default {
     async fetch(request, env) {
         try {
@@ -343,6 +410,7 @@ export default {
                     .on('meta[name="description"]', new MetaRewriter(project))
                     .on('link[rel="canonical"]', new MetaRewriter(project))
                     .on('script#schema-data', new SchemaRewriter(project))
+                    .on('link#lcp-preload', new PreloadRewriter(project))
                     .transform(response);
             }
 
