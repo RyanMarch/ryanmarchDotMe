@@ -46,10 +46,141 @@ class MetaRewriter {
     }
 }
 
+class SchemaRewriter {
+    constructor(project) {
+        this.project = project;
+    }
+
+    element(element) {
+        const tags = this.project.tags || [];
+        const isSoftware = tags.some(t => {
+            const label = (t.label || '').toLowerCase();
+            return ['app', 'design tool', 'platform', 'backend', 'experimentation'].includes(label);
+        });
+
+        const schema = {
+            "@context": "https://schema.org",
+            "@type": isSoftware ? "SoftwareApplication" : "CreativeWork",
+            "name": this.project.title,
+            "description": this.project.seoDescription || this.project.subtitle,
+            "url": `https://ryanmarch.me/project/${this.project.id}/`,
+            "creator": {
+                "@type": "Person",
+                "name": "Ryan March",
+                "url": "https://ryanmarch.me"
+            }
+        };
+
+        if (tags.length > 0) {
+            schema.keywords = tags.map(t => t.label).join(', ');
+        }
+
+        if (this.project.image) {
+            schema.image = this.project.image.startsWith('http')
+                ? this.project.image
+                : `https://ryanmarch.me/${this.project.image.replace(/^\/+/, '')}`;
+        }
+
+        if (isSoftware) {
+            let category = "DeveloperApplication";
+            const tagLabels = tags.map(t => t.label.toLowerCase());
+            if (tagLabels.includes("design tool")) {
+                category = "DesignApplication";
+            } else if (tagLabels.includes("app") && this.project.id.includes("weather")) {
+                category = "WeatherApplication";
+            } else if (tagLabels.includes("platform") || tagLabels.includes("backend")) {
+                category = "BusinessApplication";
+            }
+            schema.applicationCategory = category;
+            schema.operatingSystem = "Any";
+            
+            schema.offers = {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD"
+            };
+        }
+
+        element.setAttribute('id', isSoftware ? 'schema-software' : 'schema-work');
+        element.setInnerContent(JSON.stringify(schema, null, 2));
+    }
+}
+
+class PreloadRewriter {
+    constructor(project) {
+        this.project = project;
+    }
+
+    element(element) {
+        if (!this.project.image) {
+            // Remove the preload link if there is no hero image
+            element.remove();
+            return;
+        }
+
+        // Resolve absolute path (with leading slash)
+        const imagePath = this.project.image.startsWith('/') 
+            ? this.project.image 
+            : `/${this.project.image}`;
+
+        element.setAttribute('href', imagePath);
+
+        // Build srcset and sizes in the same way as projects.js
+        const dotIndex = imagePath.lastIndexOf(".");
+        if (dotIndex !== -1 && (
+            this.project.id === "icon-studio" || 
+            this.project.id === "motion-poster" || 
+            this.project.id === "bowserstack" || 
+            this.project.id === "rentpress" || 
+            this.project.id === "aasc-analytics"
+        )) {
+            const base = imagePath.substring(0, dotIndex);
+            const ext = imagePath.substring(dotIndex);
+            const suffix = this.project.id === "aasc-analytics" ? "-small" : "-sm";
+            const smImage = `${base}${suffix}${ext}`;
+
+            let H = this.project.imageWidth;
+            let T = Math.round(this.project.imageWidth / 2);
+
+            if (this.project.id === "icon-studio") {
+                H = 800;
+                T = 400;
+            } else if (this.project.id === "motion-poster") {
+                H = 1000;
+                T = 600;
+            } else if (this.project.id === "bowserstack") {
+                H = 480;
+                T = 300;
+            } else if (this.project.id === "rentpress") {
+                H = 800;
+                T = 485;
+            } else if (this.project.id === "aasc-analytics") {
+                H = 1920;
+                T = 800;
+            }
+
+            const srcset = `${smImage} ${T}w, ${imagePath} ${H}w`;
+            const sizes = `(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${this.project.size === "large" ? "500px" : "300px"}`;
+
+            element.setAttribute('imagesrcset', srcset);
+            element.setAttribute('imagesizes', sizes);
+        } else {
+            // Remove srcset and sizes if not a multi-size image
+            element.removeAttribute('imagesrcset');
+            element.removeAttribute('imagesizes');
+        }
+    }
+}
+
+
 export default {
     async fetch(request, env) {
         try {
             const url = new URL(request.url);
+
+            // Determine if running locally to bypass recursive routing loopback in wrangler dev
+            const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+            const assetHost = isLocal ? 'http://assets.local' : url.origin;
 
             // Redirect www to non-www
             if (url.hostname === 'www.ryanmarch.me') {
@@ -212,13 +343,13 @@ export default {
 
             // 1b. Internal rewrites for root-level favicon/manifest files
             if (cleanPath === '/favicon.ico') {
-                return env.ASSETS.fetch(new Request(url.origin + '/assets/favicon/favicon.ico', request));
+                return env.ASSETS.fetch(new Request(`${assetHost}/assets/favicon/favicon.ico`, request));
             }
             if (cleanPath === '/apple-touch-icon.png') {
-                return env.ASSETS.fetch(new Request(url.origin + '/assets/favicon/apple-touch-icon.png', request));
+                return env.ASSETS.fetch(new Request(`${assetHost}/assets/favicon/apple-touch-icon.png`, request));
             }
             if (cleanPath === '/site.webmanifest') {
-                return env.ASSETS.fetch(new Request(url.origin + '/assets/favicon/site.webmanifest', request));
+                return env.ASSETS.fetch(new Request(`${assetHost}/assets/favicon/site.webmanifest`, request));
             }
 
             // 2. Validate route to determine if it should 404
@@ -262,9 +393,11 @@ export default {
 
             // Fetch the asset — for valid project routes, explicitly serve index.html
             // (we can't rely on SPA fallback since we removed not_found_handling)
+            // We use the hostname inside assetHost ('http://assets.local' locally) to prevent recursive loops
+            const assetUrl = new URL(url.pathname + url.search, assetHost);
             const assetRequest = isValidProject
-                ? new Request(url.origin + '/index.html', request)
-                : request;
+                ? new Request(`${assetHost}/`, request)
+                : new Request(assetUrl.toString(), request);
             const response = await env.ASSETS.fetch(assetRequest);
 
             // If it's a valid project route and the response is HTML, rewrite the meta tags
@@ -276,12 +409,15 @@ export default {
                     .on('meta[property="og:image"]', new MetaRewriter(project))
                     .on('meta[name="description"]', new MetaRewriter(project))
                     .on('link[rel="canonical"]', new MetaRewriter(project))
+                    .on('script#schema-data', new SchemaRewriter(project))
+                    .on('link#lcp-preload', new PreloadRewriter(project))
                     .transform(response);
             }
 
             if (cleanPath === '/admin.html') {
                 // Fetch the asset using '/admin' internally to bypass Workers Assets' clean URL redirect (.html -> extensionless)
-                const rewrittenRequest = new Request(url.origin + '/admin', request);
+                // We use the hostname inside assetHost to prevent recursion loops
+                const rewrittenRequest = new Request(`${assetHost}/admin`, request);
                 const assetResponse = await env.ASSETS.fetch(rewrittenRequest);
                 const newHeaders = new Headers(assetResponse.headers);
                 newHeaders.set('X-Robots-Tag', 'noindex, nofollow');
