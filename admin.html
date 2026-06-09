@@ -1,0 +1,3356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mobile Editor | Ryan March</title>
+    <meta name="description" content="Quick mobile editor for managing ryanmarch.me content.">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- iOS PWA: enable fullscreen homescreen app mode -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mobile Editor">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png">
+
+    <script>
+        // Theme initialization (critical to run before paint to prevent flash)
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const theme = savedTheme || 'system';
+            if (theme === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+        })();
+
+        // iOS PWA standalone mode detection — runs before paint to avoid layout flash
+        (function () {
+            const isStandalone =
+                window.navigator.standalone === true ||
+                window.matchMedia('(display-mode: standalone)').matches;
+            if (isStandalone) {
+                document.documentElement.classList.add('pwa-standalone');
+            }
+        })();
+    </script>
+    <!-- Load global fonts and styles for theme variable parity -->
+    <link rel="stylesheet" href="/style.css">
+
+    <!-- CodeJar & Prism Editor dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-markup.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js" defer></script>
+    <script type="module">
+        import { CodeJar } from 'https://cdn.jsdelivr.net/npm/codejar/+esm';
+        window.CodeJar = CodeJar;
+    </script>
+    <style>
+        /* Custom enhancements for the Admin Interface */
+        :root {
+            --admin-success: #10b981;
+            --admin-error: #ef4444;
+            --admin-warning: #f59e0b;
+        }
+
+        body.admin-body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: calc(1.5rem + env(safe-area-inset-top, 0px)) calc(1rem + env(safe-area-inset-right, 0px)) calc(1.5rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px));
+            min-height: 100vh;
+            background: var(--bg-radial);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            overflow-y: auto;
+        }
+
+        .admin-container {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        header.admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--title-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logout-btn {
+            background: var(--btn-secondary-bg);
+            border: 1px solid var(--btn-secondary-border);
+            color: var(--btn-secondary-text);
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-text);
+            border-color: var(--btn-hover-border);
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--tag-blue);
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input,
+        select,
+        textarea {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 0.5rem;
+            font-size: 1rem;
+            width: 100%;
+            transition: border-color 0.2s ease;
+        }
+
+        option,
+        optgroup {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        input[type="checkbox"] {
+            width: auto;
+            height: auto;
+            padding: 0;
+            margin: 0;
+            background: none;
+            border: none;
+            border-radius: 0;
+        }
+
+        input[type="checkbox"]:focus {
+            outline: none;
+            border-color: transparent;
+        }
+
+        .btn {
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            font-weight: 600;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--btn-secondary-bg);
+            color: var(--btn-secondary-text);
+            border: 1px solid var(--btn-secondary-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--btn-hover-bg);
+            color: var(--btn-hover-text);
+            border-color: var(--btn-hover-border);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Monospace editor styling */
+        .editor-textarea {
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 16px;
+            line-height: 1.5;
+            min-height: 350px;
+            max-height: 600px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 0.75rem;
+            outline: none;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-y: auto;
+            tab-size: 4;
+            -moz-tab-size: 4;
+        }
+
+        .editor-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        /* Reset global .tag badge styles for Prism tokens in the editor */
+        .editor-textarea .tag {
+            display: inline !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            background: none !important;
+            border: none !important;
+            border-radius: 0 !important;
+            font-size: inherit !important;
+            font-weight: inherit !important;
+            text-transform: none !important;
+            letter-spacing: normal !important;
+            line-height: inherit !important;
+            cursor: text !important;
+            user-select: text !important;
+        }
+
+        /* Syntax highlighting colors using theme variables */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: var(--text-secondary);
+            opacity: 0.6;
+        }
+
+        .token.punctuation {
+            color: var(--text-primary);
+            opacity: 0.8;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol,
+        .token.deleted {
+            color: var(--accent-color);
+        }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin,
+        .token.inserted {
+            color: var(--tag-green);
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url {
+            color: var(--tag-purple);
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: var(--tag-orange);
+        }
+
+        .token.function,
+        .token.class-name {
+            color: var(--tag-blue);
+        }
+
+        /* Custom alert message styles */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--admin-success);
+            color: #34d399;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--admin-error);
+            color: #f87171;
+        }
+
+        .alert-info {
+            background: rgba(56, 189, 248, 0.15);
+            border: 1px solid var(--accent-color);
+            color: #7dd3fc;
+        }
+
+        /* Loading spinner styling */
+        .spinner {
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.75s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .flex-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .flex-row>* {
+            flex: 1;
+        }
+
+        .hint,
+        .subtitle-counter {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            opacity: 0.75;
+        }
+
+        .hint {
+            margin: 0 0 0.3rem 0.5rem;
+        }
+
+        /* Custom Search Dropdown Styles */
+        .search-result-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--card-border);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover,
+        .search-result-item.selected {
+            background-color: var(--btn-secondary-bg);
+            color: var(--text-primary);
+        }
+
+        .search-result-group-title {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--tag-blue);
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        /* Responsive adaptations */
+        @media (min-width: 768px) {
+            #admin-view {
+                padding: 0 !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body.admin-body {
+                padding: 1rem 0;
+            }
+
+            header.admin-header {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            .flex-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        /* Custom styles for the tags checkboxes in the new project form */
+        .tag-selector {
+            position: relative;
+            margin: 0.3rem 0 0 0;
+        }
+
+        .tags-checkbox-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.25rem;
+        }
+
+        .tag-checkbox-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.75rem;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            border: 1px solid var(--card-border);
+            background: var(--btn-secondary-bg);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .tag-checkbox-label:hover {
+            border-color: var(--accent-color);
+            color: var(--text-primary);
+        }
+
+        .tag-checkbox-input {
+            position: absolute;
+            clip-path: inset(50%);
+            overflow: hidden;
+            width: 1px;
+            height: 1px;
+            margin: -1px;
+            padding: 0;
+            border: 0;
+            white-space: nowrap;
+        }
+
+        .tag-checkbox-input:focus-visible+.tag-checkbox-label {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Active tag pill states matching the site colors */
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-green {
+            color: var(--tag-green);
+            background: var(--tag-green-bg);
+            border-color: var(--tag-green-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-purple {
+            color: var(--tag-purple);
+            background: var(--tag-purple-bg);
+            border-color: var(--tag-purple-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-orange {
+            color: var(--tag-orange);
+            background: var(--tag-orange-bg);
+            border-color: var(--tag-orange-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-rose {
+            color: var(--tag-rose);
+            background: var(--tag-rose-bg);
+            border-color: var(--tag-rose-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-cyan {
+            color: var(--tag-cyan);
+            background: var(--tag-cyan-bg);
+            border-color: var(--tag-cyan-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-white {
+            color: var(--tag-white);
+            background: var(--tag-white-bg);
+            border-color: var(--tag-white-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-gray {
+            color: var(--tag-gray);
+            background: var(--tag-gray-bg);
+            border-color: var(--tag-gray-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-indigo {
+            color: var(--tag-indigo);
+            background: var(--tag-indigo-bg);
+            border-color: var(--tag-indigo-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-gold {
+            color: var(--tag-gold);
+            background: var(--tag-gold-bg);
+            border-color: var(--tag-gold-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-teal {
+            color: var(--tag-teal);
+            background: var(--tag-teal-bg);
+            border-color: var(--tag-teal-border);
+        }
+
+        .tag-checkbox-input:checked+.tag-checkbox-label.tag-pink {
+            color: var(--tag-pink);
+            background: var(--tag-pink-bg);
+            border-color: var(--tag-pink-border);
+        }
+
+        .link-checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem;
+        }
+
+        .admin-footer {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4rem;
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--card-border);
+            width: 100%;
+        }
+
+        .back-home-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .back-home-link:hover {
+            color: var(--text-primary);
+        }
+
+        .back-home-link span {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .back-home-link:hover span {
+            transform: translateX(-3px);
+        }
+
+        /* Responsive HTML templates bar for case study editing */
+        .editor-templates-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 0.5rem 0.25rem 0.75rem 0.25rem;
+            margin-top: 0.25rem;
+            border-bottom: 1px solid var(--card-border);
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+        }
+        .editor-templates-bar::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Safari and Chrome */
+        }
+        .editor-templates-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-right: 0.25rem;
+            flex-shrink: 0;
+        }
+        .template-btn {
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.75rem !important;
+            border-radius: 6px !important;
+            height: auto !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+    </style>
+</head>
+
+<body class="admin-body">
+    <!-- Floating background decorative elements matching main site -->
+    <div class="background-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1>RyanMarch.me Site Editor</h1>
+
+        </header>
+
+        <!-- Password Login View -->
+        <main id="auth-view" class="card">
+            <h2>Enter Admin Password</h2>
+            <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                Authenticate to edit content and upload files on ryanmarch.me.
+            </p>
+            <div class="form-group">
+                <label for="passcode-input">Password</label>
+                <input type="password" id="passcode-input" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button id="login-btn" class="btn" onclick="checkAuth()" disabled>Authenticate</button>
+            <div id="auth-alert" class="alert alert-error hidden"></div>
+        </main>
+
+        <!-- Admin Workspace View (Hidden by default) -->
+        <main id="admin-view" class="hidden" style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+            <!-- File Selector Card -->
+            <section class="card" style="z-index: 10;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                    <h2 style="margin: 0;">Select File to Edit</h2>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label for="branch-select" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-weight: 500;">Target Branch:</label>
+                        <select id="branch-select" onchange="changeBranch()" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; width: auto; height: auto; margin: 0;">
+                            <option value="main">main</option>
+                            <option value="develop">develop</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <input type="text" id="file-search" placeholder="Type to search/filter files..." autocomplete="off"
+                        autocapitalize="none" autocorrect="off" spellcheck="false" onfocus="showSearchResults()"
+                        oninput="filterSearchResults()">
+                    <div id="file-search-results" class="hidden"
+                        style="position: absolute; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                        <!-- Filled dynamically -->
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; align-items: center; margin-top: 0.5rem;">
+                    <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;"
+                        onclick="toggleNewProjectForm()">Add New Project</button>
+                </div>
+
+                <!-- Hidden form to create a new project -->
+                <div id="new-project-form" class="hidden"
+                    style="border-top: 1px solid var(--card-border); padding-top: 1rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+                    <h3 style="font-size: 1rem; color: var(--text-primary);">Create New Project</h3>
+
+                    <div class="form-group">
+                        <label for="new-project-title">Project Name</label>
+                        <input type="text" id="new-project-title" placeholder="e.g. My Awesome Project"
+                            autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-id">Project Slug</label>
+                        <input type="text" id="new-project-id" placeholder="e.g. my-awesome-project" autocomplete="off"
+                            required>
+                        <div class="hint">Set the URL (/project/my-awesome-project/) and folder name.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-subtitle">Subtitle</label>
+                        <input type="text" id="new-project-subtitle" placeholder="e.g. A bento builder tool"
+                            autocomplete="off">
+                        <div class="subtitle-counter" id="new-project-subtitle-counter"
+                            style="text-align: right; font-size: 0.75rem; margin-top: -0.2rem;">0 characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-size">Size</label>
+                        <select id="new-project-size">
+                            <option value="small">small</option>
+                            <option value="medium" selected>medium (Default)</option>
+                            <option value="tall">tall</option>
+                            <option value="large">large</option>
+                            <option value="wide">wide</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group tag-selector">
+                        <label>Tags</label>
+                        <!-- Selected tags row -->
+                        <div id="new-project-selected-tags"
+                            style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.25rem;">
+                            <!-- Populated dynamically as pills -->
+                        </div>
+                        <input type="text" id="new-project-tag-search" placeholder="Type to search and add tags..."
+                            autocomplete="off" onfocus="showTagSearchResults()" oninput="filterTagSearchResults()">
+                        <div id="new-project-tag-results" class="hidden"
+                            style="position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-action-url">Primary URL</label>
+                        <input type="url" id="new-project-action-url" placeholder="https://example.com"
+                            autocomplete="off">
+                        <div class="hint">Destination link out to the web site or application.</div>
+                    </div>
+
+                    <div class="form-group link-checkbox">
+                        <input type="checkbox" id="new-project-only-link" style="width: auto;">
+                        <label for="new-project-only-link"
+                            style="margin: 0; cursor: pointer; user-select: none;">Project is Only
+                            Link</label>
+                    </div>
+
+                    <div id="new-project-source-url-group" class="form-group hidden">
+                        <label for="new-project-source-url">Secondary URL (Source Code / GitHub)</label>
+                        <input type="url" id="new-project-source-url" placeholder="https://github.com/..."
+                            autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-image-file">Preview Image</label>
+                        <input type="file" id="new-project-image-file" accept="image/*">
+                        <div id="new-project-image-preview-container" class="hidden"
+                            style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <img id="new-project-image-preview" src="" alt="Preview"
+                                style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--card-border); object-fit: contain;">
+                            <div class="form-group">
+                                <label for="new-project-image-name">Filename to save as</label>
+                                <input type="text" id="new-project-image-name" placeholder="e.g. hero.webp"
+                                    style="padding: 0.4rem; font-size: 0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="new-project-placement">Placement</label>
+                        <select id="new-project-placement">
+                            <option value="first" selected>First (Top of homepage grid)</option>
+                            <option value="last">Last (Bottom of homepage grid)</option>
+                        </select>
+                    </div>
+
+                    <button class="btn" id="create-project-btn" onclick="createNewProject()">Create & Edit
+                        Template</button>
+                </div>
+            </section>
+
+            <!-- Text Editor Card -->
+            <section id="editor-card" class="card hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 id="editor-title">File Editor</h2>
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <label
+                            style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem; cursor: pointer; user-select: none; margin: 0;">
+                            <input type="checkbox" id="wrap-lines-checkbox" onchange="toggleWrapLines()">
+                            <span>Wrap Lines</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="active-file-label"
+                    style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-top: -0.5rem; margin-bottom: 0.25rem;">
+                </div>
+
+                <!-- HTML Layout Block Templates -->
+                <div id="editor-templates-container" class="hidden editor-templates-bar">
+                    <span class="editor-templates-label">Insert:</span>
+                    <button class="btn btn-secondary template-btn" onclick="insertSectionDivider()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        <span>Divider</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertGalleryBlock()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Gallery</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertAudioPlayerBlock()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                        <span>Audio</span>
+                    </button>
+                    
+                    <!-- Vertical separator -->
+                    <div style="width: 1px; height: 16px; background: var(--card-border); flex-shrink: 0; align-self: center; margin: 0 0.25rem;"></div>
+                    
+                    <!-- HTML Quick Tags -->
+                    <button class="btn btn-secondary template-btn" onclick="insertParagraphTag()">
+                        <span>p</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertDivTag()">
+                        <span>div</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertLinkTag()">
+                        <span>link</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertListTag()">
+                        <span>list</span>
+                    </button>
+                </div>
+
+                <!-- Find in File Bar -->
+                <div id="find-bar"
+                    style="display: flex; gap: 0.5rem; align-items: center; border-top: 1px solid var(--card-border); padding-top: 0.75rem; margin-top: -0.25rem;">
+                    <input type="text" id="find-input" placeholder="Find in file..." autocomplete="off"
+                        autocapitalize="none" autocorrect="off" spellcheck="false"
+                        style="font-size: 16px; padding: 0.4rem 0.75rem; border-radius: 6px; flex: 1; min-width: 0;"
+                        oninput="window.updateSearch()" onkeydown="window.handleFindKeyDown(event)">
+                    <span id="find-status"
+                        style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap;">0 of 0</span>
+                    <button class="btn btn-secondary" onclick="window.findNext()"
+                        style="font-size: 0.85rem; padding: 0.4rem 0.6rem; border-radius: 6px; height: 34px; margin: 0; line-height: 1;">Next</button>
+                    <button class="btn btn-secondary" onclick="window.findPrev()"
+                        style="font-size: 0.85rem; padding: 0.4rem 0.6rem; border-radius: 6px; height: 34px; margin: 0; line-height: 1;">Prev</button>
+                </div>
+                <div class="form-group" style="position: relative;">
+                    <div id="editor-textarea" class="editor-textarea" spellcheck="false" autocapitalize="none"
+                        autocorrect="off"></div>
+                </div>
+                <div
+                    style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; margin-top: -0.25rem; margin-bottom: 0.25rem;">
+                    <span style="color: var(--text-secondary);">Status:</span>
+                    <span id="draft-status" style="color: var(--tag-green); font-weight: 600;"></span>
+                </div>
+                <div class="flex-row">
+                    <button id="save-btn" class="btn" onclick="saveFile()">
+                        <span id="save-btn-text">Save Changes</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="loadFile()">Discard Changes</button>
+                </div>
+                <div id="editor-alert" class="alert hidden"></div>
+            </section>
+
+            <!-- Image Uploader Card -->
+            <section id="uploader-card" class="card">
+                <h2 onclick="toggleUploader()"
+                    style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                    <span>Upload Image to Project</span>
+                    <span id="uploader-chevron"
+                        style="transition: transform 0.2s ease; transform: rotate(-90deg);">▼</span>
+                </h2>
+                <div id="uploader-body" class="hidden"
+                    style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem;">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Upload an asset directly to a project's images directory.
+                    </p>
+                    <div class="form-group">
+                        <label for="upload-project">Target Folder / Project</label>
+                        <select id="upload-project">
+                            <option value="assets/img">assets/img/ (Global Site Images)</option>
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-file">Select Image</label>
+                        <input type="file" id="upload-file" accept="image/*" onchange="suggestImageName()">
+                    </div>
+                    <div class="form-group">
+                        <label for="upload-name">Target Filename (e.g. hero.webp)</label>
+                        <input type="text" id="upload-name" placeholder="filename.png" autocapitalize="none"
+                            autocorrect="off">
+                    </div>
+                    <button id="upload-btn" class="btn" onclick="uploadImage()">Upload Image</button>
+                    <div id="upload-alert" class="alert hidden"></div>
+                </div>
+            </section>
+
+            <!-- Project Data Card (Collapsible) -->
+            <section id="project-data-card" class="card hidden">
+                <h2 onclick="toggleProjectDataCard()"
+                    style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none;">
+                    <span>Project Data</span>
+                    <span id="project-data-chevron"
+                        style="transition: transform 0.2s ease; transform: rotate(-90deg);">▼</span>
+                </h2>
+                <div id="project-data-body" class="hidden"
+                    style="display: flex; flex-direction: column; gap: 1rem; margin-top: 0.5rem; position: relative;">
+                    <p style="font-size: 0.85rem; color: var(--text-secondary);">
+                        Edit the metadata and settings for this project.
+                    </p>
+
+                    <div class="form-group">
+                        <label for="edit-project-title">Project Name</label>
+                        <input type="text" id="edit-project-title" placeholder="e.g. My Awesome Project"
+                            autocomplete="off" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-id">Project Slug</label>
+                        <input type="text" id="edit-project-id" placeholder="e.g. my-awesome-project" autocomplete="off"
+                            required>
+                        <div class="hint">Modifying the slug will move the case study content to /project/new-slug/ and
+                            change the database ID.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-subtitle">Subtitle</label>
+                        <input type="text" id="edit-project-subtitle" placeholder="e.g. A bento builder tool"
+                            autocomplete="off">
+                        <div class="subtitle-counter" id="edit-project-subtitle-counter"
+                            style="text-align: right; font-size: 0.75rem; margin-top: -0.2rem;">0 characters</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-size">Size</label>
+                        <select id="edit-project-size">
+                            <option value="small">small</option>
+                            <option value="medium">medium</option>
+                            <option value="tall">tall</option>
+                            <option value="large">large</option>
+                            <option value="wide">wide</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group tag-selector">
+                        <label>Tags</label>
+                        <!-- Selected tags row -->
+                        <div id="edit-project-selected-tags"
+                            style="display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.25rem;">
+                            <!-- Populated dynamically as pills -->
+                        </div>
+                        <input type="text" id="edit-project-tag-search" placeholder="Type to search and add tags..."
+                            autocomplete="off" onfocus="showEditTagSearchResults()"
+                            oninput="filterEditTagSearchResults()">
+                        <div id="edit-project-tag-results" class="hidden"
+                            style="position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-action-url">Primary URL</label>
+                        <input type="url" id="edit-project-action-url" placeholder="https://example.com"
+                            autocomplete="off">
+                        <div class="hint">Destination link out to the website or application.</div>
+                    </div>
+
+                    <div class="form-group link-checkbox">
+                        <input type="checkbox" id="edit-project-only-link" style="width: auto;">
+                        <label for="edit-project-only-link"
+                            style="margin: 0; cursor: pointer; user-select: none;">Project is Only
+                            Link</label>
+                    </div>
+
+                    <div id="edit-project-source-url-group" class="form-group hidden">
+                        <label for="edit-project-source-url">Secondary URL (Source Code / GitHub)</label>
+                        <input type="url" id="edit-project-source-url" placeholder="https://github.com/..."
+                            autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-image-path">Image Path</label>
+                        <input type="text" id="edit-project-image-path"
+                            placeholder="content/my-awesome-project/images/hero.webp" autocomplete="off">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-project-image-file">Upload New Preview Image (Optional)</label>
+                        <input type="file" id="edit-project-image-file" accept="image/*">
+                        <div id="edit-project-image-preview-container" class="hidden"
+                            style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                            <img id="edit-project-image-preview" src="" alt="Preview"
+                                style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--card-border); object-fit: contain;">
+                            <div class="form-group">
+                                <label for="edit-project-image-name">Filename to save as</label>
+                                <input type="text" id="edit-project-image-name" placeholder="e.g. hero.webp"
+                                    style="padding: 0.4rem; font-size: 0.9rem;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button id="save-project-data-btn" class="btn" onclick="saveProjectData()">Save Project
+                        Data</button>
+                    <div id="project-data-alert" class="alert hidden"></div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="admin-footer">
+            <a href="/" class="back-home-link">
+                <span>←</span> Back to Main Site
+            </a>
+            <button id="logout-btn" class="logout-btn hidden" onclick="logout()" style="margin: 0;">Logout</button>
+        </footer>
+
+    </div>
+
+    <!-- Script Block utilizing ES Modules to read site config dynamically -->
+    <script type="module">
+        import { myProjects } from './assets/js/project-data.js';
+        window.myProjects = myProjects;
+
+        // Detect local dev vs production (Cloudflare Access is not active on localhost)
+        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+        // Load project lists into UI dropdowns on startup
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize target branch from localStorage
+            const savedBranch = localStorage.getItem('admin_selected_branch') || 'main';
+            const branchSelect = document.getElementById('branch-select');
+            if (branchSelect) {
+                branchSelect.value = savedBranch;
+            }
+
+            const uploadProjectSelect = document.getElementById('upload-project');
+
+            // Build the global list of files for the search UI
+            window.searchFiles = [
+                { path: 'index.html', title: 'Homepage Wrapper', category: 'Global Files' },
+                { path: 'assets/js/project-data.js', title: 'Projects Database', category: 'Global Files' }
+            ];
+
+            // Populate selector lists
+            myProjects.forEach(project => {
+                // Add projects (only those defined as having extended HTML content)
+                if (project.hasExtendedContent) {
+                    window.searchFiles.push({
+                        path: `content/${project.id}/index.html`,
+                        title: project.title,
+                        category: 'Projects'
+                    });
+                }
+            });
+
+            // Populate upload project dropdown
+            populateUploadProjectDropdown();
+
+            // Initialize search results list
+            renderSearchResults(window.searchFiles);
+
+            // Populate dynamic tags in form
+            populateFormTags();
+
+            // Set up slug generation listeners
+            const titleInput = document.getElementById('new-project-title');
+            const idInput = document.getElementById('new-project-id');
+            window.slugEditedByUser = false;
+
+            idInput.addEventListener('input', () => {
+                window.slugEditedByUser = true;
+                idInput.value = idInput.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            });
+
+            titleInput.addEventListener('input', () => {
+                if (!window.slugEditedByUser) {
+                    idInput.value = titleInput.value
+                        .toLowerCase()
+                        .trim()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, '');
+                }
+            });
+
+            // Subtitle length and counter check
+            const subtitleInput = document.getElementById('new-project-subtitle');
+            const subtitleCounter = document.getElementById('new-project-subtitle-counter');
+            subtitleInput.addEventListener('input', () => {
+                const len = subtitleInput.value.length;
+                subtitleCounter.textContent = `${len} characters`;
+            });
+
+            // URL input event listeners
+            const actionUrlInput = document.getElementById('new-project-action-url');
+            const sourceUrlGroup = document.getElementById('new-project-source-url-group');
+            const sourceUrlInput = document.getElementById('new-project-source-url');
+
+            actionUrlInput.addEventListener('input', () => {
+                if (actionUrlInput.value.trim() !== '') {
+                    sourceUrlGroup.classList.remove('hidden');
+                } else {
+                    sourceUrlGroup.classList.add('hidden');
+                    sourceUrlInput.value = '';
+                }
+            });
+
+            // Image uploader & preview handlers
+            const imageFileInput = document.getElementById('new-project-image-file');
+            const previewContainer = document.getElementById('new-project-image-preview-container');
+            const previewImg = document.getElementById('new-project-image-preview');
+            const imageNameInput = document.getElementById('new-project-image-name');
+
+            imageFileInput.addEventListener('change', () => {
+                if (imageFileInput.files && imageFileInput.files.length > 0) {
+                    const file = imageFileInput.files[0];
+                    const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                    imageNameInput.value = sanitizedName;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.remove('hidden');
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    previewContainer.classList.add('hidden');
+                    previewImg.src = '';
+                    imageNameInput.value = '';
+                }
+            });
+
+            imageNameInput.addEventListener('input', () => {
+                imageNameInput.value = imageNameInput.value.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+            });
+
+            // Set up edit project slug listener
+            const editIdInput = document.getElementById('edit-project-id');
+            if (editIdInput) {
+                editIdInput.addEventListener('input', () => {
+                    editIdInput.value = editIdInput.value.toLowerCase().replace(/[^a-z0-9_-]/g, '');
+                });
+            }
+
+            // Edit project subtitle length and counter check
+            const editSubtitleInput = document.getElementById('edit-project-subtitle');
+            const editSubtitleCounter = document.getElementById('edit-project-subtitle-counter');
+            if (editSubtitleInput && editSubtitleCounter) {
+                editSubtitleInput.addEventListener('input', () => {
+                    const len = editSubtitleInput.value.length;
+                    editSubtitleCounter.textContent = `${len} characters`;
+                });
+            }
+
+            // Edit project URL input event listeners
+            const editActionUrlInput = document.getElementById('edit-project-action-url');
+            const editSourceUrlGroup = document.getElementById('edit-project-source-url-group');
+            const editSourceUrlInput = document.getElementById('edit-project-source-url');
+
+            if (editActionUrlInput && editSourceUrlGroup && editSourceUrlInput) {
+                editActionUrlInput.addEventListener('input', () => {
+                    if (editActionUrlInput.value.trim() !== '') {
+                        editSourceUrlGroup.classList.remove('hidden');
+                    } else {
+                        editSourceUrlGroup.classList.add('hidden');
+                        editSourceUrlInput.value = '';
+                    }
+                });
+            }
+
+            // Edit project image file & preview handlers
+            const editImageFileInput = document.getElementById('edit-project-image-file');
+            const editPreviewContainer = document.getElementById('edit-project-image-preview-container');
+            const editPreviewImg = document.getElementById('edit-project-image-preview');
+            const editImageNameInput = document.getElementById('edit-project-image-name');
+            const editImagePathInput = document.getElementById('edit-project-image-path');
+
+            if (editImageFileInput && editPreviewContainer && editPreviewImg && editImageNameInput && editImagePathInput) {
+                editImageFileInput.addEventListener('change', () => {
+                    if (editImageFileInput.files && editImageFileInput.files.length > 0) {
+                        const file = editImageFileInput.files[0];
+                        const sanitizedName = file.name.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                        editImageNameInput.value = sanitizedName;
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            editPreviewImg.src = e.target.result;
+                            editPreviewContainer.classList.remove('hidden');
+
+                            const slug = editIdInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '') || window.editingProjectId;
+                            editImagePathInput.value = `content/${slug}/images/${sanitizedName}`;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        editPreviewContainer.classList.add('hidden');
+                        editPreviewImg.src = '';
+                        editImageNameInput.value = '';
+                    }
+                });
+
+                editImageNameInput.addEventListener('input', () => {
+                    const sanitizedName = editImageNameInput.value.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                    editImageNameInput.value = sanitizedName;
+                    if (sanitizedName) {
+                        const slug = editIdInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '') || window.editingProjectId;
+                        editImagePathInput.value = `content/${slug}/images/${sanitizedName}`;
+                    }
+                });
+            }
+
+            // Password input listeners for login view
+            const passcodeInput = document.getElementById('passcode-input');
+            const loginBtn = document.getElementById('login-btn');
+
+            if (passcodeInput && loginBtn) {
+                const updateButtonState = () => {
+                    loginBtn.disabled = passcodeInput.value.trim() === '';
+                };
+
+                passcodeInput.addEventListener('input', updateButtonState);
+                passcodeInput.addEventListener('change', updateButtonState);
+
+                passcodeInput.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && !loginBtn.disabled) {
+                        checkAuth();
+                    }
+                });
+
+                // Check initial state (e.g. autofill)
+                updateButtonState();
+                setTimeout(updateButtonState, 100);
+            }
+
+            // Production: Cloudflare Access already authenticated — skip the password screen
+            // (CF Access gates /admin.html at the edge; if this page loads, the user passed auth)
+            if (!isLocal) {
+                document.getElementById('auth-view').classList.add('hidden');
+                document.getElementById('admin-view').classList.remove('hidden');
+                document.getElementById('logout-btn').classList.remove('hidden');
+            }
+        });
+
+        window.newProjectSelectedTags = [];
+        window.allAvailableTags = [];
+
+        // Helper to populate form tags
+        function populateFormTags() {
+            const tagsMap = new Map();
+            myProjects.forEach(project => {
+                if (project.tags && Array.isArray(project.tags)) {
+                    project.tags.forEach(tag => {
+                        if (tag.label) {
+                            tagsMap.set(tag.label, tag.color || 'gray');
+                        }
+                    });
+                }
+            });
+            window.allAvailableTags = Array.from(tagsMap.entries()).map(([label, color]) => ({ label, color }));
+            window.newProjectSelectedTags = [];
+            renderSelectedTags();
+        }
+        window.populateFormTags = populateFormTags;
+
+        // Render selected tags as badges/pills
+        function renderSelectedTags() {
+            const container = document.getElementById('new-project-selected-tags');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (window.newProjectSelectedTags.length === 0) {
+                const hint = document.createElement('span');
+                hint.style.fontSize = '0.8rem';
+                hint.style.color = 'var(--text-secondary)';
+                hint.textContent = 'No tags selected';
+                container.appendChild(hint);
+                return;
+            }
+
+            window.newProjectSelectedTags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = `tag tag-${tag.color}`;
+                badge.style.display = 'inline-flex';
+                badge.style.alignItems = 'center';
+                badge.style.gap = '0.35rem';
+                badge.style.cursor = 'pointer';
+                badge.innerHTML = `${tag.label} <span style="font-weight: bold; opacity: 0.7;">✕</span>`;
+                badge.onclick = () => {
+                    removeSelectedTag(tag.label);
+                };
+                container.appendChild(badge);
+            });
+        }
+        window.renderSelectedTags = renderSelectedTags;
+
+        // Remove a selected tag
+        function removeSelectedTag(label) {
+            window.newProjectSelectedTags = window.newProjectSelectedTags.filter(t => t.label !== label);
+            renderSelectedTags();
+            filterTagSearchResults();
+        }
+        window.removeSelectedTag = removeSelectedTag;
+
+        // Show dropdown search results
+        function showTagSearchResults() {
+            const resultsDiv = document.getElementById('new-project-tag-results');
+            if (resultsDiv) {
+                resultsDiv.classList.remove('hidden');
+                filterTagSearchResults();
+            }
+        }
+        window.showTagSearchResults = showTagSearchResults;
+
+        // Filter available tags in dropdown list
+        function filterTagSearchResults() {
+            const queryInput = document.getElementById('new-project-tag-search');
+            const resultsDiv = document.getElementById('new-project-tag-results');
+            if (!queryInput || !resultsDiv) return;
+
+            const query = queryInput.value.toLowerCase();
+            resultsDiv.innerHTML = '';
+
+            // Exclude tags already selected
+            const filtered = window.allAvailableTags.filter(tag => {
+                const isSelected = window.newProjectSelectedTags.some(t => t.label === tag.label);
+                const matchesQuery = tag.label.toLowerCase().includes(query);
+                return !isSelected && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                const item = document.createElement('div');
+                item.style.padding = '0.75rem';
+                item.style.color = 'var(--text-secondary)';
+                item.style.fontSize = '0.9rem';
+                item.textContent = 'No matching tags available';
+                resultsDiv.appendChild(item);
+                return;
+            }
+
+            filtered.forEach(tag => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = tag.label;
+                item.onclick = () => {
+                    window.newProjectSelectedTags.push(tag);
+                    queryInput.value = '';
+                    resultsDiv.classList.add('hidden');
+                    renderSelectedTags();
+                };
+                resultsDiv.appendChild(item);
+            });
+        }
+        window.filterTagSearchResults = filterTagSearchResults;
+
+        // Attach search functions globally
+        window.showSearchResults = function () {
+            const resultsDiv = document.getElementById('file-search-results');
+            resultsDiv.classList.remove('hidden');
+        };
+
+        window.filterSearchResults = function () {
+            const query = document.getElementById('file-search').value.toLowerCase();
+            const filtered = window.searchFiles.filter(file =>
+                file.title.toLowerCase().includes(query) ||
+                file.path.toLowerCase().includes(query)
+            );
+            renderSearchResults(filtered);
+        };
+
+        window.renderSearchResults = function (files) {
+            const resultsDiv = document.getElementById('file-search-results');
+            resultsDiv.innerHTML = '';
+
+            if (files.length === 0) {
+                const emptyDiv = document.createElement('div');
+                emptyDiv.style.padding = '0.75rem';
+                emptyDiv.style.color = 'var(--text-secondary)';
+                emptyDiv.style.fontSize = '0.9rem';
+                emptyDiv.textContent = 'No matching files found.';
+                resultsDiv.appendChild(emptyDiv);
+                return;
+            }
+
+            // Group by category
+            const groups = {};
+            files.forEach(file => {
+                if (!groups[file.category]) {
+                    groups[file.category] = [];
+                }
+                groups[file.category].push(file);
+            });
+
+            for (const category in groups) {
+                const titleDiv = document.createElement('div');
+                titleDiv.className = 'search-result-group-title';
+                titleDiv.textContent = category;
+                resultsDiv.appendChild(titleDiv);
+
+                groups[category].forEach(file => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'search-result-item';
+                    itemDiv.textContent = file.title;
+                    itemDiv.onclick = () => {
+                        document.getElementById('file-search').value = file.title;
+                        resultsDiv.classList.add('hidden');
+
+                        // Sync with image uploader project dropdown
+                        syncImageUploader(file.path);
+
+                        // Trigger file load
+                        loadFile(file.path);
+                    };
+                    resultsDiv.appendChild(itemDiv);
+                });
+            }
+        };
+
+        window.syncImageUploader = function (filePath) {
+            const uploadSelect = document.getElementById('upload-project');
+            if (!uploadSelect) return;
+
+            // If it is a project page, e.g. "content/rentpress/index.html"
+            if (filePath.startsWith('content/') && filePath.endsWith('/index.html')) {
+                const parts = filePath.split('/');
+                if (parts.length >= 3) {
+                    const projectId = parts[1];
+                    const targetValue = `content/${projectId}/images`;
+
+                    // Check if this option exists in the selector
+                    let optionExists = false;
+                    for (let i = 0; i < uploadSelect.options.length; i++) {
+                        if (uploadSelect.options[i].value === targetValue) {
+                            optionExists = true;
+                            break;
+                        }
+                    }
+
+                    if (optionExists) {
+                        uploadSelect.value = targetValue;
+                        // Expand the image uploader panel automatically so they see it is synced
+                        const uploaderBody = document.getElementById('uploader-body');
+                        if (uploaderBody && uploaderBody.classList.contains('hidden')) {
+                            toggleUploader();
+                        }
+                    }
+                }
+            } else {
+                // Global file, default upload target is assets/img
+                uploadSelect.value = 'assets/img';
+            }
+        };
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            const searchInput = document.getElementById('file-search');
+            const resultsDiv = document.getElementById('file-search-results');
+            if (searchInput && resultsDiv && !searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                resultsDiv.classList.add('hidden');
+            }
+
+            const tagInput = document.getElementById('new-project-tag-search');
+            const tagResults = document.getElementById('new-project-tag-results');
+            if (tagInput && tagResults && !tagInput.contains(e.target) && !tagResults.contains(e.target)) {
+                tagResults.classList.add('hidden');
+            }
+
+            const editTagInput = document.getElementById('edit-project-tag-search');
+            const editTagResults = document.getElementById('edit-project-tag-results');
+            if (editTagInput && editTagResults && !editTagInput.contains(e.target) && !editTagResults.contains(e.target)) {
+                editTagResults.classList.add('hidden');
+            }
+        });
+    </script>
+
+    <script>
+        // Store current active file state
+        let currentFile = {
+            path: '',
+            sha: '',
+            originalContent: ''
+        };
+        let jar;
+        let adminPasscode = '';
+        // True when running via local dev server (serve.py), not Cloudflare edge
+        const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+        // Returns an Authorization header object for local dev Bearer auth.
+        // In production, the CF_Authorization cookie is sent automatically by the browser
+        // and Cloudflare Access validates it at the edge — no explicit header needed.
+        function getAuthHeaders() {
+            const passcode = getPasscode();
+            return passcode ? { 'Authorization': `Bearer ${passcode}` } : {};
+        }
+
+        // Update Draft Status Helper (Green for Synced, Amber for Warnings/Unsaved)
+        function updateDraftStatus(text, isWarning = false, isRawHTML = false) {
+            const draftStatus = document.getElementById('draft-status');
+            if (!draftStatus) return;
+
+            if (isWarning) {
+                draftStatus.style.color = 'var(--admin-warning)';
+            } else if (text === 'Loading...') {
+                draftStatus.style.color = 'var(--text-secondary)';
+            } else {
+                draftStatus.style.color = 'var(--tag-green)';
+            }
+
+            if (isRawHTML) {
+                draftStatus.innerHTML = text;
+            } else {
+                draftStatus.textContent = text;
+            }
+        }
+
+        window.addEventListener('load', () => {
+            const editorEl = document.getElementById('editor-textarea');
+            if (window.CodeJar && window.Prism) {
+                const highlight = editor => {
+                    let lang = 'html';
+                    const path = currentFile.path || '';
+                    if (path.endsWith('.js')) lang = 'javascript';
+                    if (path.endsWith('.json')) lang = 'json';
+
+                    editor.className = `editor-textarea language-${lang}`;
+                    Prism.highlightElement(editor);
+                };
+                jar = CodeJar(editorEl, highlight);
+                jar.onUpdate(code => {
+                    saveDraft();
+                    const findInput = document.getElementById('find-input');
+                    if (findInput && findInput.value) {
+                        searchState.query = '';
+                        window.updateSearch();
+                    }
+                });
+            }
+        });
+
+        // Utility: UTF-8 safe base64 decoding
+        function b64DecodeUnicode(str) {
+            return new TextDecoder().decode(Uint8Array.from(atob(str), c => c.charCodeAt(0)));
+        }
+
+        // Utility: UTF-8 safe base64 encoding
+        function b64EncodeUnicode(str) {
+            return btoa(Array.from(new TextEncoder().encode(str), b => String.fromCharCode(b)).join(''));
+        }
+
+        // Retrieve passcode
+        function getPasscode() {
+            return adminPasscode;
+        }
+
+        // Authentication Handler
+        async function checkAuth() {
+            const passcode = document.getElementById('passcode-input').value.trim();
+            const alertEl = document.getElementById('auth-alert');
+            const loginBtn = document.getElementById('login-btn');
+
+            if (!passcode) {
+                showAlert(alertEl, 'Please enter a password.', 'error');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="spinner"></span> Validating...';
+            alertEl.classList.add('hidden');
+
+            try {
+                // Test authentication by attempting to read a lightweight metadata file (e.g. robots.txt)
+                const res = await fetch('/api/admin/file?path=robots.txt', {
+                    headers: {
+                        'Authorization': `Bearer ${passcode}`
+                    }
+                });
+
+                if (res.ok) {
+                    // Save validated passcode in memory
+                    adminPasscode = passcode;
+
+                    // Toggle views
+                    document.getElementById('auth-view').classList.add('hidden');
+                    document.getElementById('admin-view').classList.remove('hidden');
+                    document.getElementById('logout-btn').classList.remove('hidden');
+                } else {
+                    const text = await res.text();
+                    showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid password' : text}`, 'error');
+                    adminPasscode = '';
+                }
+            } catch (err) {
+                showAlert(alertEl, `Error connecting to API: ${err.message}`, 'error');
+            } finally {
+                loginBtn.disabled = document.getElementById('passcode-input').value.trim() === '';
+                loginBtn.textContent = 'Authenticate';
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (!isLocal) {
+                // Invalidate the Cloudflare Access session, then return to homepage
+                const returnUrl = encodeURIComponent(window.location.origin + '/');
+                window.location.href = `/cdn-cgi/access/logout?returnTo=${returnUrl}`;
+                return;
+            }
+            adminPasscode = '';
+            document.getElementById('passcode-input').value = '';
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('editor-card').classList.add('hidden');
+            document.getElementById('file-search').value = '';
+            document.getElementById('active-file-label').textContent = '';
+        }
+
+        // Target Branch Helpers
+        window.getSelectedBranch = function() {
+            const select = document.getElementById('branch-select');
+            return select ? select.value : (localStorage.getItem('admin_selected_branch') || 'main');
+        };
+
+        window.changeBranch = function() {
+            const select = document.getElementById('branch-select');
+            if (!select) return;
+            const branch = select.value;
+            localStorage.setItem('admin_selected_branch', branch);
+            
+            // If there's an active file being edited, reload it from the new branch
+            if (currentFile && currentFile.path) {
+                if (confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
+                    localStorage.removeItem(`draft_${currentFile.path}`);
+                    loadFile(currentFile.path);
+                }
+            }
+        };
+
+        // File Loader
+        async function loadFile(filePath) {
+            // Fallback to active file if not specified
+            if (!filePath) {
+                filePath = currentFile.path;
+            }
+
+            const editorCard = document.getElementById('editor-card');
+            const activeFileLabel = document.getElementById('active-file-label');
+            const alertEl = document.getElementById('editor-alert');
+            const textarea = document.getElementById('editor-textarea');
+            const draftStatus = document.getElementById('draft-status');
+
+            if (!filePath) {
+                editorCard.classList.add('hidden');
+                activeFileLabel.textContent = '';
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+            updateDraftStatus('Loading...');
+            editorCard.classList.remove('hidden');
+            textarea.setAttribute('contenteditable', 'false');
+
+            // Reset find in file state on load
+            const findInput = document.getElementById('find-input');
+            if (findInput) {
+                findInput.value = '';
+            }
+            searchState = { query: '', matches: [], currentIndex: -1 };
+            const findStatus = document.getElementById('find-status');
+            if (findStatus) {
+                findStatus.textContent = '0 of 0';
+            }
+
+            try {
+                // Fetch file payload through proxy API
+                 const res = await fetch(`/api/admin/file?path=${filePath}&branch=${window.getSelectedBranch()}`, {
+                    headers: {
+                        ...getAuthHeaders()
+                    }
+                });
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
+
+                const data = await res.json();
+                const fileText = b64DecodeUnicode(data.content.replace(/\s/g, ''));
+
+                // Set state
+                currentFile.path = filePath;
+                currentFile.sha = data.sha;
+                currentFile.originalContent = fileText;
+
+                // Set UI (CodeJar or fallback)
+                if (jar) {
+                    jar.updateCode(fileText);
+                } else {
+                    textarea.textContent = fileText;
+                }
+                activeFileLabel.textContent = `Editing: ${filePath}`;
+
+                // Check if local draft exists
+                const savedDraft = localStorage.getItem(`draft_${filePath}`);
+                if (savedDraft && savedDraft !== fileText) {
+                    updateDraftStatus('⚠️ Local draft loaded. <a href="#" onclick="restoreOriginal(event)" style="color: var(--accent-color); text-decoration: underline;">Discard Draft</a>', true, true);
+                    if (jar) {
+                        jar.updateCode(savedDraft);
+                    } else {
+                        textarea.textContent = savedDraft;
+                    }
+                } else {
+                    updateDraftStatus('Synced with remote');
+                }
+
+                // Check if this is a project index.html file to show and populate Project Data
+                const projectDataCard = document.getElementById('project-data-card');
+                if (filePath.startsWith('content/') && filePath.endsWith('/index.html')) {
+                    const parts = filePath.split('/');
+                    const projectId = parts[1];
+                    const project = window.myProjects.find(p => p.id === projectId);
+                    if (project && projectDataCard) {
+                        projectDataCard.classList.remove('hidden');
+                        populateEditProjectForm(project);
+                    } else if (projectDataCard) {
+                        projectDataCard.classList.add('hidden');
+                    }
+                } else if (projectDataCard) {
+                    projectDataCard.classList.add('hidden');
+                }
+
+                // Toggle templates container visibility
+                const templatesContainer = document.getElementById('editor-templates-container');
+                if (templatesContainer) {
+                    if (filePath && filePath.endsWith('.html')) {
+                        templatesContainer.classList.remove('hidden');
+                    } else {
+                        templatesContainer.classList.add('hidden');
+                    }
+                }
+            } catch (err) {
+                showAlert(alertEl, `Error loading file: ${err.message}`, 'error');
+                editorCard.classList.add('hidden');
+                activeFileLabel.textContent = '';
+                const projectDataCard = document.getElementById('project-data-card');
+                if (projectDataCard) projectDataCard.classList.add('hidden');
+                const templatesContainer = document.getElementById('editor-templates-container');
+                if (templatesContainer) templatesContainer.classList.add('hidden');
+            } finally {
+                textarea.setAttribute('contenteditable', 'true');
+                toggleWrapLines();
+            }
+        }
+
+        // Restore original content bypassing draft
+        function restoreOriginal(e) {
+            if (e) e.preventDefault();
+            const textarea = document.getElementById('editor-textarea');
+            if (jar) {
+                jar.updateCode(currentFile.originalContent);
+            } else {
+                textarea.textContent = currentFile.originalContent;
+            }
+            localStorage.removeItem(`draft_${currentFile.path}`);
+            updateDraftStatus('Synced with remote');
+        }
+
+        // Toggle line wrapping
+        function toggleWrapLines() {
+            const checkbox = document.getElementById('wrap-lines-checkbox');
+            const textarea = document.getElementById('editor-textarea');
+            if (!checkbox || !textarea) return;
+            if (checkbox.checked) {
+                textarea.style.whiteSpace = 'pre-wrap';
+                textarea.style.wordWrap = 'break-word';
+            } else {
+                textarea.style.whiteSpace = 'pre';
+                textarea.style.wordWrap = 'normal';
+            }
+        }
+
+        // Find in File State
+        let searchState = {
+            query: '',
+            matches: [],
+            currentIndex: -1
+        };
+
+        // Create range helper to map plain text character offset to DOM nodes
+        function createRangeAtCharacterOffsets(container, start, end) {
+            const range = document.createRange();
+
+            let currentOffset = 0;
+            let startNode = null;
+            let startNodeOffset = 0;
+            let endNode = null;
+            let endNodeOffset = 0;
+
+            function traverse(node) {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    const len = node.length;
+                    if (!startNode && currentOffset + len >= start) {
+                        startNode = node;
+                        startNodeOffset = start - currentOffset;
+                    }
+                    if (!endNode && currentOffset + len >= end) {
+                        endNode = node;
+                        endNodeOffset = end - currentOffset;
+                    }
+                    currentOffset += len;
+                } else {
+                    for (let i = 0; i < node.childNodes.length; i++) {
+                        traverse(node.childNodes[i]);
+                        if (startNode && endNode) break;
+                    }
+                }
+            }
+
+            traverse(container);
+
+            if (startNode && endNode) {
+                range.setStart(startNode, startNodeOffset);
+                range.setEnd(endNode, endNodeOffset);
+                return range;
+            }
+            return null;
+        }
+
+        // Handle Keydown in Find Input
+        window.handleFindKeyDown = function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (e.shiftKey) {
+                    window.findPrev();
+                } else {
+                    window.findNext();
+                }
+            }
+        }
+
+        // Update Search Matches based on current text
+        window.updateSearch = function () {
+            const findInput = document.getElementById('find-input');
+            const query = findInput ? findInput.value : '';
+            const textarea = document.getElementById('editor-textarea');
+            const text = textarea ? textarea.textContent : '';
+
+            if (!query) {
+                searchState = { query: '', matches: [], currentIndex: -1 };
+                const findStatus = document.getElementById('find-status');
+                if (findStatus) {
+                    findStatus.textContent = '0 of 0';
+                }
+
+                // Only clear selection range if user is actively searching/focused on search input
+                // to prevent clearing the editor cursor while editing
+                if (document.activeElement === findInput) {
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                }
+                return;
+            }
+
+            // Rebuild matches if the query changed
+            if (searchState.query !== query) {
+                searchState.query = query;
+                searchState.matches = [];
+                searchState.currentIndex = -1;
+
+                let index = 0;
+                const lowerText = text.toLowerCase();
+                const lowerQuery = query.toLowerCase();
+                while ((index = lowerText.indexOf(lowerQuery, index)) !== -1) {
+                    searchState.matches.push(index);
+                    index += query.length;
+                }
+            }
+
+            const count = searchState.matches.length;
+            const findStatus = document.getElementById('find-status');
+            if (count > 0) {
+                if (searchState.currentIndex === -1) {
+                    searchState.currentIndex = 0;
+                }
+                if (findStatus) {
+                    findStatus.textContent = `${searchState.currentIndex + 1} of ${count}`;
+                }
+            } else {
+                searchState.currentIndex = -1;
+                if (findStatus) {
+                    findStatus.textContent = '0 of 0';
+                }
+            }
+        }
+
+        // Highlight and scroll the selected match
+        window.highlightCurrentMatch = function () {
+            const textarea = document.getElementById('editor-textarea');
+            const findInput = document.getElementById('find-input');
+            if (!textarea || searchState.currentIndex === -1 || searchState.matches.length === 0) return;
+
+            const start = searchState.matches[searchState.currentIndex];
+            const end = start + searchState.query.length;
+
+            const range = createRangeAtCharacterOffsets(textarea, start, end);
+            if (range) {
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                // Scroll into view
+                const parent = range.startContainer.nodeType === Node.TEXT_NODE ? range.startContainer.parentElement : range.startContainer;
+                parent.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Refocus search box to keep keyboard open and focus
+                if (findInput) {
+                    findInput.focus();
+                }
+            }
+        }
+
+        // Find Next Match
+        window.findNext = function () {
+            window.updateSearch();
+            if (searchState.matches.length === 0) return;
+
+            searchState.currentIndex = (searchState.currentIndex + 1) % searchState.matches.length;
+            const findStatus = document.getElementById('find-status');
+            if (findStatus) {
+                findStatus.textContent = `${searchState.currentIndex + 1} of ${searchState.matches.length}`;
+            }
+            window.highlightCurrentMatch();
+        }
+
+        // Find Prev Match
+        window.findPrev = function () {
+            window.updateSearch();
+            if (searchState.matches.length === 0) return;
+
+            searchState.currentIndex = (searchState.currentIndex - 1 + searchState.matches.length) % searchState.matches.length;
+            const findStatus = document.getElementById('find-status');
+            if (findStatus) {
+                findStatus.textContent = `${searchState.currentIndex + 1} of ${searchState.matches.length}`;
+            }
+            window.highlightCurrentMatch();
+        }
+
+        // Save local draft in browser storage
+        function saveDraft() {
+            const textarea = document.getElementById('editor-textarea');
+            const editorVal = jar ? jar.toString() : textarea.textContent;
+
+            if (editorVal !== currentFile.originalContent) {
+                localStorage.setItem(`draft_${currentFile.path}`, editorVal);
+                updateDraftStatus('Unsaved changes (Draft saved locally)', true);
+            } else {
+                localStorage.removeItem(`draft_${currentFile.path}`);
+                updateDraftStatus('Synced');
+            }
+        }
+
+        // Insert custom layout templates into CodeJar editor
+        function getProjectSlug() {
+            let slug = 'PROJECT_ID';
+            const path = currentFile ? (currentFile.path || '') : '';
+            const match = path.match(/^content\/([^\/]+)\//);
+            if (match) {
+                slug = match[1];
+            }
+            return slug;
+        }
+
+        function insertTemplate(templateText) {
+            const editorEl = document.getElementById('editor-textarea');
+            if (!editorEl) return;
+
+            editorEl.focus();
+
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                if (editorEl.contains(range.commonAncestorContainer)) {
+                    range.deleteContents();
+                    const textNode = document.createTextNode(templateText);
+                    range.insertNode(textNode);
+                    
+                    // Move cursor after the inserted content
+                    range.setStartAfter(textNode);
+                    range.setEndAfter(textNode);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+
+                    if (jar) {
+                        jar.updateCode(editorEl.textContent);
+                        saveDraft();
+                    }
+                    return;
+                }
+            }
+
+            // Fallback: append to the end of editor
+            if (jar) {
+                const currentCode = jar.toString();
+                const separator = currentCode.endsWith('\n') || currentCode === '' ? '' : '\n';
+                jar.updateCode(currentCode + separator + templateText);
+                saveDraft();
+            }
+        }
+
+        function insertSectionDivider() {
+            const template = `<h4 id="section-id" class="section-divider"><span>Section Title</span></h4>\n<p>\n    Write section content here...\n</p>\n`;
+            insertTemplate(template);
+        }
+
+        function insertGalleryBlock() {
+            const slug = getProjectSlug();
+            const template = `<div class="project-gallery">\n    <div class="gallery-item">\n        <img alt="Image Alt Text" src="content/${slug}/images/hero.webp" loading="lazy" />\n        <div class="gallery-caption">Caption text goes here.</div>\n    </div>\n</div>\n`;
+            insertTemplate(template);
+        }
+
+        function insertAudioPlayerBlock() {
+            const slug = getProjectSlug();
+            const template = `<div class="custom-audio-player" data-title="Audio Title" data-subtitle="Audio Subtitle">\n    <audio src="content/${slug}/audio/track.mp3" preload="metadata"></audio>\n</div>\n`;
+            insertTemplate(template);
+        }
+
+        // Context-aware HTML Tag Insertion
+        function insertHTMLTag(openTag, closeTag) {
+            const editorEl = document.getElementById('editor-textarea');
+            if (!editorEl) return;
+
+            editorEl.focus();
+
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                if (editorEl.contains(range.commonAncestorContainer)) {
+                    const selectedText = range.toString();
+                    
+                    range.deleteContents();
+                    
+                    const openNode = document.createTextNode(openTag);
+                    const textNode = document.createTextNode(selectedText);
+                    const closeNode = document.createTextNode(closeTag);
+                    
+                    // Insert nodes in reverse order to place them correctly in DOM
+                    range.insertNode(closeNode);
+                    range.insertNode(textNode);
+                    range.insertNode(openNode);
+                    
+                    // Position cursor between tags (after selected text)
+                    range.setStartAfter(textNode);
+                    range.setEndBefore(closeNode);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+
+                    if (jar) {
+                        jar.updateCode(editorEl.textContent);
+                        saveDraft();
+                    }
+                    return;
+                }
+            }
+
+            // Fallback: append to the end of editor
+            if (jar) {
+                const currentCode = jar.toString();
+                const separator = currentCode.endsWith('\n') || currentCode === '' ? '' : '\n';
+                jar.updateCode(currentCode + separator + openTag + closeTag);
+                saveDraft();
+            }
+        }
+
+        function isInsideUl() {
+            const editorEl = document.getElementById('editor-textarea');
+            if (!editorEl) return false;
+            
+            let textBeforeCursor = '';
+            if (jar) {
+                const pos = jar.save();
+                const currentCode = jar.toString();
+                textBeforeCursor = currentCode.substring(0, pos.start);
+            } else {
+                textBeforeCursor = editorEl.textContent;
+            }
+            
+            const lastUl = textBeforeCursor.lastIndexOf('<ul');
+            const lastCloseUl = textBeforeCursor.lastIndexOf('</ul>');
+            
+            return lastUl > lastCloseUl;
+        }
+
+        function insertParagraphTag() {
+            insertHTMLTag('<p>', '</p>');
+        }
+
+        function insertDivTag() {
+            insertHTMLTag('<div>', '</div>');
+        }
+
+        function insertLinkTag() {
+            insertHTMLTag('<a href="">', '</a>');
+        }
+
+        function insertListTag() {
+            if (isInsideUl()) {
+                insertHTMLTag('<li>', '</li>');
+            } else {
+                insertHTMLTag('<ul>\n    <li>', '</li>\n</ul>');
+            }
+        }
+
+        // Save file back to GitHub
+        async function saveFile() {
+            const textarea = document.getElementById('editor-textarea');
+            const alertEl = document.getElementById('editor-alert');
+            const saveBtn = document.getElementById('save-btn');
+            const saveBtnText = document.getElementById('save-btn-text');
+            const newContent = jar ? jar.toString() : textarea.textContent;
+
+            alertEl.classList.add('hidden');
+            saveBtn.disabled = true;
+            saveBtnText.innerHTML = '<span class="spinner"></span> Saving...';
+
+            try {
+                const b64Content = b64EncodeUnicode(newContent);
+                const res = await fetch('/api/admin/file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({
+                        path: currentFile.path,
+                        content: b64Content,
+                        sha: currentFile.sha,
+                        message: `admin: update ${currentFile.path}`,
+                        branch: window.getSelectedBranch()
+                    })
+                });
+
+                if (!res.ok) {
+                    throw new Error(await res.text());
+                }
+
+                const data = await res.json();
+
+                // Update file status
+                currentFile.sha = data.sha;
+                currentFile.originalContent = newContent;
+                localStorage.removeItem(`draft_${currentFile.path}`);
+
+                updateDraftStatus('Synced');
+                showAlert(alertEl, 'Changes saved successfully! Deploying to live site (takes ~1 min)...', 'success');
+            } catch (err) {
+                showAlert(alertEl, `Error saving changes: ${err.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtnText.textContent = 'Save Changes';
+            }
+        }
+
+        // Toggle New Project Expansion and reset form inputs
+        function toggleNewProjectForm() {
+            const form = document.getElementById('new-project-form');
+            const isHidden = form.classList.toggle('hidden');
+            if (!isHidden) {
+                // Form is opening: clear/reset all fields
+                document.getElementById('new-project-title').value = '';
+                document.getElementById('new-project-id').value = '';
+                document.getElementById('new-project-subtitle').value = '';
+                document.getElementById('new-project-subtitle-counter').textContent = '0 characters';
+                document.getElementById('new-project-size').value = 'medium';
+                document.getElementById('new-project-action-url').value = '';
+                document.getElementById('new-project-only-link').checked = false;
+                document.getElementById('new-project-source-url').value = '';
+                document.getElementById('new-project-source-url-group').classList.add('hidden');
+
+                // Reset searchable tags selector
+                window.newProjectSelectedTags = [];
+                if (window.renderSelectedTags) {
+                    window.renderSelectedTags();
+                }
+                const tagSearchInput = document.getElementById('new-project-tag-search');
+                if (tagSearchInput) tagSearchInput.value = '';
+                const tagResults = document.getElementById('new-project-tag-results');
+                if (tagResults) tagResults.classList.add('hidden');
+
+                // Clear image uploader states
+                document.getElementById('new-project-image-file').value = '';
+                document.getElementById('new-project-image-preview-container').classList.add('hidden');
+                document.getElementById('new-project-image-preview').src = '';
+                document.getElementById('new-project-image-name').value = '';
+
+                // Reset placement select
+                document.getElementById('new-project-placement').value = 'first';
+
+                // Reset user dirty flag for slug auto-generation
+                window.slugEditedByUser = false;
+            }
+        }
+
+        // Helper to read local image files as base64
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const b64 = reader.result.split(',')[1];
+                    resolve(b64);
+                };
+                reader.onerror = () => reject(new Error("Error reading local image file."));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Create New Project from Template with custom inputs
+        async function createNewProject() {
+            const titleInput = document.getElementById('new-project-title');
+            const idInput = document.getElementById('new-project-id');
+            const subtitleInput = document.getElementById('new-project-subtitle');
+            const sizeSelect = document.getElementById('new-project-size');
+            const actionUrlInput = document.getElementById('new-project-action-url');
+            const onlyLinkCheckbox = document.getElementById('new-project-only-link');
+            const sourceUrlInput = document.getElementById('new-project-source-url');
+            const imageFileInput = document.getElementById('new-project-image-file');
+            const imageNameInput = document.getElementById('new-project-image-name');
+            const placementSelect = document.getElementById('new-project-placement');
+            const createBtn = document.getElementById('create-project-btn');
+
+            const title = titleInput.value.trim();
+            const id = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            const subtitle = subtitleInput.value.trim();
+            const size = sizeSelect.value;
+            const actionUrl = actionUrlInput.value.trim();
+            const hasExtendedContent = !onlyLinkCheckbox.checked;
+            const sourceUrl = hasExtendedContent && actionUrl ? sourceUrlInput.value.trim() : '';
+            const placement = placementSelect.value;
+
+            if (!title) {
+                alert('Please enter a project title/name.');
+                return;
+            }
+
+            if (!id) {
+                alert('Please enter a valid lowercase project ID/slug.');
+                return;
+            }
+
+
+
+            // Check if project already exists locally
+            if (window.myProjects && window.myProjects.some(p => p.id === id)) {
+                alert('Project ID already exists in the database.');
+                return;
+            }
+
+            // Read tags
+            const selectedTags = window.newProjectSelectedTags || [];
+
+            // Handle preview image validation
+            let imageFile = null;
+            let imageName = '';
+            if (imageFileInput.files && imageFileInput.files.length > 0) {
+                imageFile = imageFileInput.files[0];
+                imageName = imageNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                if (!imageName) {
+                    alert('Please enter a valid target filename for the preview image.');
+                    return;
+                }
+            }
+
+            createBtn.disabled = true;
+            createBtn.innerHTML = '<span class="spinner"></span> Creating...';
+
+            try {
+                let imagePath = '';
+                // 1. Upload preview image if selected
+                if (imageFile) {
+                    const b64Image = await readFileAsBase64(imageFile);
+                    imagePath = `content/${id}/images/${imageName}`;
+
+                    const imgRes = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: imagePath,
+                            content: b64Image,
+                            message: `admin: upload preview image for ${id}`,
+                            branch: window.getSelectedBranch()
+                        })
+                    });
+                    if (!imgRes.ok) {
+                        throw new Error(`Failed to upload preview image: ${await imgRes.text()}`);
+                    }
+                }
+
+                const targetPath = `content/${id}/index.html`;
+
+                // 2. Create content template file (if hasExtendedContent is true)
+                if (hasExtendedContent) {
+                    const templateContent = `<!-- Header Details -->
+<h2 class="project-title">${title}</h2>
+<p class="project-subtitle">${subtitle || 'Project Subtitle'}</p>
+<p class="project-description">Role • Date • Client</p>
+
+<!-- Table of Contents is generated AUTOMATICALLY based on <h4> tags below! -->
+
+<h4 id="introduction" class="section-divider"><span>Introduction</span></h4>
+<p>
+    Write a brief introduction about what this project is.
+</p>
+
+<h4 id="the-challenge" class="section-divider"><span>The Challenge</span></h4>
+<p>
+    Describe the core problem solved.
+</p>
+
+<h4 id="the-solution" class="section-divider"><span>The Solution</span></h4>
+<p>
+    Detail your technical execution and implementation steps.
+</p>
+
+<h4 id="outcomes" class="section-divider"><span>Outcomes & Impact</span></h4>
+<p>
+    Highlight key metrics, achievements, or project takeaways.
+</p>
+`;
+                    const b64Content = b64EncodeUnicode(templateContent);
+                    const res = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: targetPath,
+                            content: b64Content,
+                            message: `admin: create project for ${id}`,
+                            branch: window.getSelectedBranch()
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(await res.text());
+                    }
+                }
+
+                // 3. Fetch assets/js/project-data.js to append the metadata
+                const dbRes = await fetch(`/api/admin/file?path=assets/js/project-data.js&branch=${window.getSelectedBranch()}`, {
+                    headers: {
+                        ...getAuthHeaders()
+                    }
+                });
+                if (!dbRes.ok) {
+                    throw new Error(`Failed to load project database: ${await dbRes.text()}`);
+                }
+                const dbData = await dbRes.json();
+                const dbContent = b64DecodeUnicode(dbData.content.replace(/\s/g, ''));
+
+                // Construct tag list formatting matching project-data.js
+                const tagsFormatted = selectedTags.length > 0
+                    ? `[\n${selectedTags.map(t => `            { label: "${t.label}", color: "${t.color}" }`).join(',\n')}\n        ]`
+                    : `[]`;
+
+                const newProjectObject = `
+    {
+        id: "${id}",
+        title: "${title}",
+        subtitle: "${subtitle}",
+        tags: ${tagsFormatted},
+        featured: false,
+        size: "${size}",
+        image: "${imagePath}",
+        actionText: "View Project",
+        actionUrl: "${actionUrl}",
+        sourceUrl: "${sourceUrl}",
+        hasExtendedContent: ${hasExtendedContent}
+    }`;
+
+                let updatedDbContent = '';
+
+                if (placement === 'first') {
+                    // Prepend to array
+                    const insertionPoint = 'export const myProjects = [';
+                    const insertIndex = dbContent.indexOf(insertionPoint);
+                    if (insertIndex === -1) {
+                        throw new Error("Could not find 'export const myProjects = [' in project-data.js");
+                    }
+
+                    const before = dbContent.substring(0, insertIndex + insertionPoint.length);
+                    const after = dbContent.substring(insertIndex + insertionPoint.length);
+
+                    updatedDbContent = before + newProjectObject + ',' + after;
+                } else {
+                    // Append to array
+                    const lastIndex = dbContent.lastIndexOf('];');
+                    if (lastIndex === -1) {
+                        throw new Error("Could not find closing '];' in project-data.js");
+                    }
+                    let before = dbContent.substring(0, lastIndex);
+                    const after = dbContent.substring(lastIndex);
+
+                    // Add comma to previous last element if it doesn't have one
+                    const trimmedBefore = before.trim();
+                    if (trimmedBefore.endsWith('}')) {
+                        const lastBraceIndex = before.lastIndexOf('}');
+                        before = before.substring(0, lastBraceIndex + 1) + ',' + before.substring(lastBraceIndex + 1);
+                    }
+                    updatedDbContent = before + newProjectObject + '\n' + after;
+                }
+
+                const b64UpdatedDb = b64EncodeUnicode(updatedDbContent);
+
+                const dbUpdateRes = await fetch('/api/admin/file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({
+                        path: 'assets/js/project-data.js',
+                        content: b64UpdatedDb,
+                        sha: dbData.sha,
+                        message: `admin: add project metadata for ${id}`,
+                        branch: window.getSelectedBranch()
+                    })
+                });
+
+                if (!dbUpdateRes.ok) {
+                    throw new Error(`Failed to save project database: ${await dbUpdateRes.text()}`);
+                }
+
+                // Auto-update sitemap.xml
+                if (hasExtendedContent) {
+                    try {
+                        const sitemapRes = await fetch(`/api/admin/file?path=sitemap.xml&branch=${window.getSelectedBranch()}`, {
+                            headers: {
+                                ...getAuthHeaders()
+                            }
+                        });
+                        if (sitemapRes.ok) {
+                            const sitemapData = await sitemapRes.json();
+                            const sitemapXml = b64DecodeUnicode(sitemapData.content.replace(/\s/g, ''));
+
+                            const updatedSitemap = updateSitemapContent(sitemapXml, id, hasExtendedContent);
+                            const b64Sitemap = b64EncodeUnicode(updatedSitemap);
+
+                            await fetch('/api/admin/file', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    ...getAuthHeaders()
+                                },
+                                body: JSON.stringify({
+                                    path: 'sitemap.xml',
+                                    content: b64Sitemap,
+                                    sha: sitemapData.sha,
+                                    message: `admin: update sitemap for new project ${id}`,
+                                    branch: window.getSelectedBranch()
+                                })
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to auto-update sitemap:', e);
+                    }
+                }
+
+                // 4. Mutate local array state to sync frontend
+                const localProjectObj = {
+                    id: id,
+                    title: title,
+                    subtitle: subtitle,
+                    tags: selectedTags,
+                    featured: false,
+                    size: size,
+                    image: imagePath,
+                    actionText: "View Project",
+                    actionUrl: actionUrl,
+                    sourceUrl: sourceUrl,
+                    hasExtendedContent: hasExtendedContent
+                };
+
+                if (window.myProjects) {
+                    if (placement === 'first') {
+                        window.myProjects.unshift(localProjectObj);
+                    } else {
+                        window.myProjects.push(localProjectObj);
+                    }
+                }
+
+                // Update dropdown list and load editor
+                if (hasExtendedContent) {
+                    window.searchFiles.push({
+                        path: targetPath,
+                        title: title,
+                        category: 'Projects'
+                    });
+
+                    // Re-render dropdown list
+                    renderSearchResults(window.searchFiles);
+
+                    document.getElementById('file-search').value = title;
+
+                    // Sync with image uploader dropdown
+                    syncImageUploader(targetPath);
+
+                    toggleNewProjectForm();
+                    await loadFile(targetPath);
+                    showAlert(document.getElementById('editor-alert'), 'Created project template and updated database! Edit details below.', 'info');
+                } else {
+                    // Update search files (since it doesn't have content, don't list in search files)
+                    toggleNewProjectForm();
+
+                    // Hide editor card if active
+                    document.getElementById('editor-card').classList.add('hidden');
+                    document.getElementById('active-file-label').textContent = '';
+
+                    alert(`Successfully created link-only project database entry: ${title}!`);
+                }
+
+            } catch (err) {
+                alert(`Error creating project: ${err.message}`);
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create & Edit Template';
+            }
+        }
+
+        // Image Selection Auto-Naming
+        function suggestImageName() {
+            const fileInput = document.getElementById('upload-file');
+            const nameInput = document.getElementById('upload-name');
+            if (fileInput.files && fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name.toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                nameInput.value = fileName;
+            }
+        }
+
+        // Client-side image resizing via HTML5 Canvas
+        function resizeImageClientSide(dataUrl, filename, folderPath) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = dataUrl;
+                img.onload = function () {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Set the target width based on project specs, or default to 50% width
+                        // max width 800px is excellent for case studies / mobile screens
+                        let targetWidth = Math.round(img.width / 2);
+                        if (folderPath.includes('icon-studio')) {
+                            targetWidth = 400;
+                        } else if (folderPath.includes('motion-poster')) {
+                            targetWidth = 600;
+                        } else if (folderPath.includes('bowserstack')) {
+                            targetWidth = 300;
+                        } else if (folderPath.includes('rentpress')) {
+                            targetWidth = 485;
+                        } else if (folderPath.includes('aasc-analytics')) {
+                            targetWidth = 800;
+                        } else {
+                            // Default to max 800px or half original width
+                            targetWidth = Math.min(800, targetWidth);
+                        }
+                        
+                        // Don't upscale if the original image is already smaller than target width
+                        if (img.width <= targetWidth) {
+                            resolve(null); // skip resizing
+                            return;
+                        }
+
+                        const scaleFactor = targetWidth / img.width;
+                        const targetHeight = Math.round(img.height * scaleFactor);
+
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                        // Match original image mime type where possible
+                        let mimeType = 'image/jpeg';
+                        let quality = 0.85;
+                        if (filename.endsWith('.webp')) {
+                            mimeType = 'image/webp';
+                            quality = 0.82;
+                        } else if (filename.endsWith('.png')) {
+                            mimeType = 'image/png';
+                        }
+
+                        const resizedDataUrl = canvas.toDataURL(mimeType, quality);
+                        const b64 = resizedDataUrl.split(',')[1];
+                        resolve(b64);
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                img.onerror = function (err) {
+                    reject(err);
+                };
+            });
+        }
+
+        // Upload Image (with automatic resizing variant upload)
+        async function uploadImage() {
+            const folderSelect = document.getElementById('upload-project');
+            const fileInput = document.getElementById('upload-file');
+            const nameInput = document.getElementById('upload-name');
+            const alertEl = document.getElementById('upload-alert');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showAlert(alertEl, 'Please select an image file to upload.', 'error');
+                return;
+            }
+
+            const targetName = nameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+            if (!targetName) {
+                showAlert(alertEl, 'Please enter a valid filename.', 'error');
+                return;
+            }
+
+            alertEl.classList.add('hidden');
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<span class="spinner"></span> Uploading...';
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function () {
+                const dataUrl = reader.result;
+                const b64Content = dataUrl.split(',')[1];
+                const targetPath = `${folderSelect.value}/${targetName}`;
+
+                // Helper to perform file upload via API
+                async function uploadFileApi(path, base64Data) {
+                    let existingSha = null;
+                    try {
+                        const checkRes = await fetch(`/api/admin/file?path=${path}&branch=${window.getSelectedBranch()}`, {
+                            headers: {
+                                ...getAuthHeaders()
+                            }
+                        });
+                        if (checkRes.ok) {
+                            const checkData = await checkRes.json();
+                            existingSha = checkData.sha;
+                        }
+                    } catch (e) {}
+
+                    const res = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: path,
+                            content: base64Data,
+                            sha: existingSha,
+                            message: `admin: upload ${path}`,
+                            branch: window.getSelectedBranch()
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(await res.text());
+                    }
+                    return true;
+                }
+
+                try {
+                    // 1. Upload original file
+                    await uploadFileApi(targetPath, b64Content);
+                    let successHtml = `Success! Original image uploaded to <strong>${targetPath}</strong>.`;
+
+                    // 2. Only resize if file is an image and is uploaded to a content/ project folder
+                    if (file.type.startsWith('image/') && folderSelect.value.startsWith('content/')) {
+                        try {
+                            const resizedB64 = await resizeImageClientSide(dataUrl, targetName, folderSelect.value);
+                            if (resizedB64) {
+                                // Determine resized path
+                                const lastDot = targetName.lastIndexOf('.');
+                                const isAasc = folderSelect.value.includes('aasc-analytics');
+                                const suffix = isAasc ? '-small' : '-sm';
+                                let smallName = '';
+                                if (lastDot !== -1) {
+                                    smallName = targetName.substring(0, lastDot) + suffix + targetName.substring(lastDot);
+                                } else {
+                                    smallName = targetName + suffix;
+                                }
+                                const smallPath = `${folderSelect.value}/${smallName}`;
+                                
+                                // Upload resized file in parallel
+                                await uploadFileApi(smallPath, resizedB64);
+                                successHtml += `<br>Auto-resized variant uploaded to <strong>${smallPath}</strong>.`;
+                            }
+                        } catch (resizeErr) {
+                            console.error('Image auto-resizing failed, skipped resizing:', resizeErr);
+                        }
+                    }
+
+                    showAlert(alertEl, `${successHtml}<br>Copy the original path to embed in your HTML: <strong>${targetPath}</strong>`, 'success');
+                    fileInput.value = '';
+                    nameInput.value = '';
+                } catch (err) {
+                    showAlert(alertEl, `Error uploading image: ${err.message}`, 'error');
+                } finally {
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload Image';
+                }
+            };
+
+            reader.onerror = function () {
+                showAlert(alertEl, 'Error reading local file.', 'error');
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = 'Upload Image';
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Shared Alert Display helper
+        function showAlert(element, message, type) {
+            element.className = `alert alert-${type}`;
+            element.innerHTML = message;
+            element.classList.remove('hidden');
+        }
+
+        // Toggle Image Uploader body
+        function toggleUploader() {
+            const body = document.getElementById('uploader-body');
+            const chevron = document.getElementById('uploader-chevron');
+            const isHidden = body.classList.toggle('hidden');
+            chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+
+        // --- NEW PROJECT DATA EDITOR SCRIPTS ---
+
+        // Toggle Project Data Card body
+        function toggleProjectDataCard() {
+            const body = document.getElementById('project-data-body');
+            const chevron = document.getElementById('project-data-chevron');
+            const isHidden = body.classList.toggle('hidden');
+            chevron.style.transform = isHidden ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+        window.toggleProjectDataCard = toggleProjectDataCard;
+
+        // Populate the Project Data edit form fields
+        window.editingProjectId = '';
+        function populateEditProjectForm(project) {
+            window.editingProjectId = project.id;
+
+            document.getElementById('edit-project-title').value = project.title || '';
+            document.getElementById('edit-project-id').value = project.id || '';
+            document.getElementById('edit-project-subtitle').value = project.subtitle || '';
+
+            const subtitleLen = (project.subtitle || '').length;
+            document.getElementById('edit-project-subtitle-counter').textContent = `${subtitleLen} characters`;
+
+            document.getElementById('edit-project-size').value = project.size || 'medium';
+
+            window.editProjectSelectedTags = JSON.parse(JSON.stringify(project.tags || []));
+            renderEditSelectedTags();
+
+            document.getElementById('edit-project-tag-search').value = '';
+            document.getElementById('edit-project-tag-results').classList.add('hidden');
+
+            document.getElementById('edit-project-action-url').value = project.actionUrl || '';
+
+            const onlyLinkCheckbox = document.getElementById('edit-project-only-link');
+            onlyLinkCheckbox.checked = !project.hasExtendedContent;
+
+            const sourceUrlGroup = document.getElementById('edit-project-source-url-group');
+            const sourceUrlInput = document.getElementById('edit-project-source-url');
+            sourceUrlInput.value = project.sourceUrl || '';
+            if (project.actionUrl && project.actionUrl.trim() !== '') {
+                sourceUrlGroup.classList.remove('hidden');
+            } else {
+                sourceUrlGroup.classList.add('hidden');
+            }
+
+            document.getElementById('edit-project-image-path').value = project.image || '';
+
+            // Clear image uploader states for editing
+            document.getElementById('edit-project-image-file').value = '';
+            document.getElementById('edit-project-image-preview-container').classList.add('hidden');
+            document.getElementById('edit-project-image-preview').src = '';
+            document.getElementById('edit-project-image-name').value = '';
+
+            // Reset alert container
+            const alertEl = document.getElementById('project-data-alert');
+            if (alertEl) alertEl.classList.add('hidden');
+        }
+        window.populateEditProjectForm = populateEditProjectForm;
+
+        // Render selected tags for edit form
+        window.editProjectSelectedTags = [];
+        function renderEditSelectedTags() {
+            const container = document.getElementById('edit-project-selected-tags');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (window.editProjectSelectedTags.length === 0) {
+                const hint = document.createElement('span');
+                hint.style.fontSize = '0.8rem';
+                hint.style.color = 'var(--text-secondary)';
+                hint.textContent = 'No tags selected';
+                container.appendChild(hint);
+                return;
+            }
+
+            window.editProjectSelectedTags.forEach(tag => {
+                const badge = document.createElement('span');
+                badge.className = `tag tag-${tag.color}`;
+                badge.style.display = 'inline-flex';
+                badge.style.alignItems = 'center';
+                badge.style.gap = '0.35rem';
+                badge.style.cursor = 'pointer';
+                badge.innerHTML = `${tag.label} <span style="font-weight: bold; opacity: 0.7;">✕</span>`;
+                badge.onclick = () => {
+                    removeEditSelectedTag(tag.label);
+                };
+                container.appendChild(badge);
+            });
+        }
+        window.renderEditSelectedTags = renderEditSelectedTags;
+
+        // Remove tag from edit form selection
+        function removeEditSelectedTag(label) {
+            window.editProjectSelectedTags = window.editProjectSelectedTags.filter(t => t.label !== label);
+            renderEditSelectedTags();
+            filterEditTagSearchResults();
+        }
+        window.removeEditSelectedTag = removeEditSelectedTag;
+
+        // Show edit form tag results dropdown
+        function showEditTagSearchResults() {
+            const resultsDiv = document.getElementById('edit-project-tag-results');
+            if (resultsDiv) {
+                resultsDiv.classList.remove('hidden');
+                filterEditTagSearchResults();
+            }
+        }
+        window.showEditTagSearchResults = showEditTagSearchResults;
+
+        // Filter edit form tag results dropdown
+        function filterEditTagSearchResults() {
+            const queryInput = document.getElementById('edit-project-tag-search');
+            const resultsDiv = document.getElementById('edit-project-tag-results');
+            if (!queryInput || !resultsDiv) return;
+
+            const query = queryInput.value.toLowerCase();
+            resultsDiv.innerHTML = '';
+
+            const filtered = window.allAvailableTags.filter(tag => {
+                const isSelected = window.editProjectSelectedTags.some(t => t.label === tag.label);
+                const matchesQuery = tag.label.toLowerCase().includes(query);
+                return !isSelected && matchesQuery;
+            });
+
+            if (filtered.length === 0) {
+                const item = document.createElement('div');
+                item.style.padding = '0.75rem';
+                item.style.color = 'var(--text-secondary)';
+                item.style.fontSize = '0.9rem';
+                item.textContent = 'No matching tags available';
+                resultsDiv.appendChild(item);
+                return;
+            }
+
+            filtered.forEach(tag => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                item.textContent = tag.label;
+                item.onclick = () => {
+                    window.editProjectSelectedTags.push(tag);
+                    queryInput.value = '';
+                    resultsDiv.classList.add('hidden');
+                    renderEditSelectedTags();
+                };
+                resultsDiv.appendChild(item);
+            });
+        }
+        window.filterEditTagSearchResults = filterEditTagSearchResults;
+
+        // Populate upload targets dropdown dynamically
+        function populateUploadProjectDropdown() {
+            const uploadProjectSelect = document.getElementById('upload-project');
+            if (!uploadProjectSelect) return;
+            uploadProjectSelect.innerHTML = '<option value="assets/img">assets/img/ (Global Site Images)</option>';
+            window.myProjects.forEach(project => {
+                const optUpload = document.createElement('option');
+                optUpload.value = `content/${project.id}/images`;
+                optUpload.textContent = `content/${project.id}/images/ (${project.title})`;
+                uploadProjectSelect.appendChild(optUpload);
+            });
+        }
+        window.populateUploadProjectDropdown = populateUploadProjectDropdown;
+
+        // Pretty serialize project object literal for project-data.js
+        function serializeProjectObject(project) {
+            const lines = [];
+            lines.push('    {');
+            const keys = Object.keys(project);
+            keys.forEach((key, index) => {
+                const val = project[key];
+                let valStr = '';
+                if (key === 'tags') {
+                    if (Array.isArray(val) && val.length > 0) {
+                        valStr = `[\n${val.map(t => `            { label: "${t.label}", color: "${t.color}"${t.priority ? `, priority: "${t.priority}"` : ''} }`).join(',\n')}\n        ]`;
+                    } else {
+                        valStr = '[]';
+                    }
+                } else if (typeof val === 'string') {
+                    valStr = `"${val.replace(/"/g, '\\"')}"`;
+                } else if (typeof val === 'boolean' || typeof val === 'number') {
+                    valStr = val.toString();
+                } else {
+                    valStr = JSON.stringify(val);
+                }
+                const comma = (index === keys.length - 1) ? '' : ',';
+                lines.push(`        ${key}: ${valStr}${comma}`);
+            });
+            lines.push('    }');
+            return lines.join('\n');
+        }
+
+        // Find character boundaries of a project object literal by project slug
+        function findProjectObjectBounds(dbContent, projectId) {
+            const doubleQuotePattern = `id:\\s*"${projectId}"`;
+            const singleQuotePattern = `id:\\s*'${projectId}'`;
+            let match = dbContent.match(new RegExp(doubleQuotePattern));
+            if (!match) {
+                match = dbContent.match(new RegExp(singleQuotePattern));
+            }
+            if (!match) return null;
+            const matchIndex = match.index;
+            let braceCount = 0;
+            let startIndex = -1;
+            for (let i = matchIndex; i >= 0; i--) {
+                if (dbContent[i] === '}') {
+                    braceCount--;
+                } else if (dbContent[i] === '{') {
+                    braceCount++;
+                    if (braceCount === 1) {
+                        startIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (startIndex === -1) return null;
+            braceCount = 0;
+            let endIndex = -1;
+            for (let i = startIndex; i < dbContent.length; i++) {
+                if (dbContent[i] === '{') {
+                    braceCount++;
+                } else if (dbContent[i] === '}') {
+                    braceCount--;
+                    if (braceCount === 0) {
+                        endIndex = i;
+                        break;
+                    }
+                }
+            }
+            if (endIndex === -1) return null;
+            return { start: startIndex, end: endIndex };
+        }
+
+        // Save project metadata edits to database and optionally rename slug path
+        async function saveProjectData() {
+            const titleInput = document.getElementById('edit-project-title');
+            const idInput = document.getElementById('edit-project-id');
+            const subtitleInput = document.getElementById('edit-project-subtitle');
+            const sizeSelect = document.getElementById('edit-project-size');
+            const actionUrlInput = document.getElementById('edit-project-action-url');
+            const onlyLinkCheckbox = document.getElementById('edit-project-only-link');
+            const sourceUrlInput = document.getElementById('edit-project-source-url');
+            const imagePathInput = document.getElementById('edit-project-image-path');
+            const imageFileInput = document.getElementById('edit-project-image-file');
+            const imageNameInput = document.getElementById('edit-project-image-name');
+            const saveBtn = document.getElementById('save-project-data-btn');
+            const alertEl = document.getElementById('project-data-alert');
+
+            const title = titleInput.value.trim();
+            const newId = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+            const subtitle = subtitleInput.value.trim();
+            const size = sizeSelect.value;
+            const actionUrl = actionUrlInput.value.trim();
+            const hasExtendedContent = !onlyLinkCheckbox.checked;
+            const sourceUrl = hasExtendedContent && actionUrl ? sourceUrlInput.value.trim() : '';
+            let imagePath = imagePathInput.value.trim();
+
+            if (!title) {
+                alert('Please enter a project title/name.');
+                return;
+            }
+
+            if (!newId) {
+                alert('Please enter a valid lowercase project ID/slug.');
+                return;
+            }
+
+
+
+            // Check if slug already exists (excluding the current editing project)
+            if (newId !== window.editingProjectId) {
+                if (window.myProjects && window.myProjects.some(p => p.id === newId)) {
+                    alert('Project ID already exists in the database.');
+                    return;
+                }
+            }
+
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<span class="spinner"></span> Saving...';
+            alertEl.classList.add('hidden');
+
+            try {
+                // 1. Upload preview image if selected
+                if (imageFileInput.files && imageFileInput.files.length > 0) {
+                    const file = imageFileInput.files[0];
+                    const imageName = imageNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
+                    if (!imageName) {
+                        throw new Error('Please enter a valid target filename for the preview image.');
+                    }
+
+                    const b64Image = await readFileAsBase64(file);
+                    imagePath = `content/${newId}/images/${imageName}`;
+
+                    const imgRes = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: imagePath,
+                            content: b64Image,
+                            message: `admin: upload preview image for ${newId}`,
+                            branch: window.getSelectedBranch()
+                        })
+                    });
+                    if (!imgRes.ok) {
+                        throw new Error(`Failed to upload preview image: ${await imgRes.text()}`);
+                    }
+                    imagePathInput.value = imagePath;
+                }
+
+                // 2. If the project ID changed, copy the current template file to the new path
+                let oldPath = `content/${window.editingProjectId}/index.html`;
+                let newPath = `content/${newId}/index.html`;
+
+                if (newId !== window.editingProjectId && hasExtendedContent) {
+                    const editorTextarea = document.getElementById('editor-textarea');
+                    const editorContent = jar ? jar.toString() : editorTextarea.textContent;
+                    const b64Content = b64EncodeUnicode(editorContent);
+
+                    const res = await fetch('/api/admin/file', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...getAuthHeaders()
+                        },
+                        body: JSON.stringify({
+                            path: newPath,
+                            content: b64Content,
+                            message: `admin: move project template from ${window.editingProjectId} to ${newId}`,
+                            branch: window.getSelectedBranch()
+                        })
+                    });
+
+                    if (!res.ok) {
+                        throw new Error(`Failed to copy project template to new slug path: ${await res.text()}`);
+                    }
+                    const resData = await res.json();
+                    currentFile.sha = resData.sha;
+                }
+
+                // 3. Fetch assets/js/project-data.js to update the metadata
+                const dbRes = await fetch(`/api/admin/file?path=assets/js/project-data.js&branch=${window.getSelectedBranch()}`, {
+                    headers: {
+                        ...getAuthHeaders()
+                    }
+                });
+                if (!dbRes.ok) {
+                    throw new Error(`Failed to load project database: ${await dbRes.text()}`);
+                }
+                const dbData = await dbRes.json();
+                const dbContent = b64DecodeUnicode(dbData.content.replace(/\s/g, ''));
+
+                // Find the bounds of the project in the file
+                const bounds = findProjectObjectBounds(dbContent, window.editingProjectId);
+                if (!bounds) {
+                    throw new Error(`Could not locate project object for '${window.editingProjectId}' in project-data.js`);
+                }
+
+                // Retrieve original project object from local myProjects to preserve all non-form fields
+                const localProj = window.myProjects.find(p => p.id === window.editingProjectId);
+                if (!localProj) {
+                    throw new Error(`Local project data not found for '${window.editingProjectId}'`);
+                }
+
+                // Merge updated properties
+                const updatedProj = {
+                    ...localProj,
+                    id: newId,
+                    title: title,
+                    subtitle: subtitle,
+                    tags: window.editProjectSelectedTags || [],
+                    size: size,
+                    image: imagePath,
+                    actionUrl: actionUrl,
+                    sourceUrl: sourceUrl,
+                    hasExtendedContent: hasExtendedContent
+                };
+
+                const serialized = serializeProjectObject(updatedProj);
+
+                const before = dbContent.substring(0, bounds.start);
+                const after = dbContent.substring(bounds.end + 1);
+                const updatedDbContent = before + serialized + after;
+                const b64UpdatedDb = b64EncodeUnicode(updatedDbContent);
+
+                const dbUpdateRes = await fetch('/api/admin/file', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...getAuthHeaders()
+                    },
+                    body: JSON.stringify({
+                        path: 'assets/js/project-data.js',
+                        content: b64UpdatedDb,
+                        sha: dbData.sha,
+                        message: `admin: update project metadata for ${newId}`,
+                        branch: window.getSelectedBranch()
+                    })
+                });
+
+                if (!dbUpdateRes.ok) {
+                    throw new Error(`Failed to save project database: ${await dbUpdateRes.text()}`);
+                }
+
+                // 4. Update local state
+                const oldId = window.editingProjectId;
+
+                // Auto-update sitemap.xml
+                try {
+                    const sitemapRes = await fetch(`/api/admin/file?path=sitemap.xml&branch=${window.getSelectedBranch()}`, {
+                        headers: {
+                            ...getAuthHeaders()
+                        }
+                    });
+                    if (sitemapRes.ok) {
+                        const sitemapData = await sitemapRes.json();
+                        const sitemapXml = b64DecodeUnicode(sitemapData.content.replace(/\s/g, ''));
+
+                        const updatedSitemap = updateSitemapContent(sitemapXml, newId, hasExtendedContent, oldId);
+                        const b64Sitemap = b64EncodeUnicode(updatedSitemap);
+
+                        await fetch('/api/admin/file', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                ...getAuthHeaders()
+                            },
+                            body: JSON.stringify({
+                                path: 'sitemap.xml',
+                                content: b64Sitemap,
+                                sha: sitemapData.sha,
+                                message: `admin: update sitemap for project ${newId}`,
+                                branch: window.getSelectedBranch()
+                            })
+                        });
+                    }
+                } catch (e) {
+                    console.error('Failed to auto-update sitemap:', e);
+                }
+
+                // Auto-update redirects.json if slug changed
+                if (newId !== oldId) {
+                    try {
+                        const redirectsRes = await fetch(`/api/admin/file?path=redirects.json&branch=${window.getSelectedBranch()}`, {
+                            headers: {
+                                ...getAuthHeaders()
+                            }
+                        });
+                        if (redirectsRes.ok) {
+                            const redirectsData = await redirectsRes.json();
+                            const redirectsJsonStr = b64DecodeUnicode(redirectsData.content.replace(/\s/g, ''));
+
+                            const updatedRedirects = updateRedirectsContent(redirectsJsonStr, oldId, newId);
+                            const b64Redirects = b64EncodeUnicode(updatedRedirects);
+
+                            await fetch('/api/admin/file', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    ...getAuthHeaders()
+                                },
+                                body: JSON.stringify({
+                                    path: 'redirects.json',
+                                    content: b64Redirects,
+                                    sha: redirectsData.sha,
+                                    message: `admin: add redirect from ${oldId} to ${newId}`,
+                                    branch: window.getSelectedBranch()
+                                })
+                            });
+                        }
+                    } catch (e) {
+                        console.error('Failed to auto-update redirects:', e);
+                    }
+                }
+
+                // Update local window.myProjects array
+                const index = window.myProjects.findIndex(p => p.id === oldId);
+                if (index !== -1) {
+                    window.myProjects[index] = updatedProj;
+                }
+
+                // Update searchFiles list and dropdown selection
+                if (hasExtendedContent) {
+                    const searchIndex = window.searchFiles.findIndex(f => f.path === oldPath);
+                    if (searchIndex !== -1) {
+                        window.searchFiles[searchIndex].path = newPath;
+                        window.searchFiles[searchIndex].title = title;
+                    } else {
+                        window.searchFiles.push({
+                            path: newPath,
+                            title: title,
+                            category: 'Projects'
+                        });
+                    }
+                    renderSearchResults(window.searchFiles);
+                    document.getElementById('file-search').value = title;
+                    document.getElementById('active-file-label').textContent = `Editing: ${newPath}`;
+                    currentFile.path = newPath;
+                }
+
+                // Update global state
+                window.editingProjectId = newId;
+
+                // Sync image uploader options
+                populateUploadProjectDropdown();
+                syncImageUploader(newPath);
+
+                // Show success alert
+                showAlert(alertEl, 'Project data saved successfully! Deploying to live site (takes ~1 min)...', 'success');
+            } catch (err) {
+                showAlert(alertEl, `Error saving project data: ${err.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Project Data';
+            }
+        }
+        window.saveProjectData = saveProjectData;
+        // Update sitemap content
+        function updateSitemapContent(sitemapXml, slug, hasExtendedContent, oldSlug = null) {
+            const today = new Date().toISOString().split('T')[0];
+
+            // 1. Update homepage lastmod
+            sitemapXml = sitemapXml.replace(
+                /<loc>https:\/\/ryanmarch\.me\/<\/loc><lastmod>[^<]+<\/lastmod>/,
+                `<loc>https://ryanmarch.me/</loc><lastmod>${today}</lastmod>`
+            );
+
+            const oldUrlPattern = new RegExp(`\\s*<url><loc>https:\\/\\/ryanmarch\\.me\\/project\\/${oldSlug || slug}\\/<\\/loc>.*?<\\/url>`);
+            const newUrlBlock = `\n  <url><loc>https://ryanmarch.me/project/${slug}/</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>`;
+
+            if (oldSlug && oldSlug !== slug) {
+                // Changing slug
+                if (hasExtendedContent) {
+                    if (sitemapXml.match(oldUrlPattern)) {
+                        sitemapXml = sitemapXml.replace(oldUrlPattern, newUrlBlock);
+                    } else {
+                        sitemapXml = sitemapXml.replace('</urlset>', `  ${newUrlBlock.trim()}\n</urlset>`);
+                    }
+                } else {
+                    sitemapXml = sitemapXml.replace(oldUrlPattern, '');
+                }
+            } else {
+                // Same slug or new project
+                if (hasExtendedContent) {
+                    const currentUrlPattern = new RegExp(`\\s*<url><loc>https:\\/\\/ryanmarch\\.me\\/project\\/${slug}\\/<\\/loc>.*?<\\/url>`);
+                    if (sitemapXml.match(currentUrlPattern)) {
+                        sitemapXml = sitemapXml.replace(currentUrlPattern, newUrlBlock);
+                    } else {
+                        sitemapXml = sitemapXml.replace('</urlset>', `  ${newUrlBlock.trim()}\n</urlset>`);
+                    }
+                } else {
+                    sitemapXml = sitemapXml.replace(oldUrlPattern, '');
+                }
+            }
+
+            sitemapXml = sitemapXml.replace(/\n\s*\n/g, '\n');
+            return sitemapXml;
+        }
+        window.updateSitemapContent = updateSitemapContent;
+
+        // Update redirects content
+        function updateRedirectsContent(redirectsJsonStr, oldSlug, newSlug) {
+            let redirects = [];
+            try {
+                redirects = JSON.parse(redirectsJsonStr);
+            } catch (e) {
+                redirects = [];
+            }
+
+            const oldSource = `/project/${oldSlug}/`;
+            const newDestination = `/project/${newSlug}/`;
+
+            const exists = redirects.some(r =>
+                r.source.toLowerCase().replace(/\/+$/, '') === oldSource.toLowerCase().replace(/\/+$/, '')
+            );
+
+            if (!exists) {
+                redirects.push({
+                    source: oldSource,
+                    destination: newDestination,
+                    permanent: true
+                });
+            }
+
+            return JSON.stringify(redirects, null, 2);
+        }
+        window.updateRedirectsContent = updateRedirectsContent;
+    </script>
+</body>
+
+</html>

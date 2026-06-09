@@ -8,5 +8,10 @@
     "source": "/index.php",
     "destination": "/",
     "permanent": true
+  },
+  {
+    "source": "/projects/bowserstack",
+    "destination": "https://bowserstack.ryanmarch.me/",
+    "permanent": false
   }
 ]
