@@ -474,25 +474,6 @@ export const myProjects = [
         hasExtendedContent: true
     },
     {
-        id: "clear-tech",
-        title: "CLEAR Tech",
-        subtitle: "A comprehensive business plan and branding design for a mobile recording service.",
-        tags: [
-            { label: "Branding", color: "purple" },
-            { label: "Marketing", color: "orange" },
-            { label: "Archive", color: "gray", priority: "low" }
-        ],
-        featured: false,
-        size: "medium",
-        image: "/content/clear-tech/images/brochure-mockup.webp",
-        imageWidth: 800,
-        imageHeight: 680,
-        imageClass: "destination-icon",
-        actionText: "View Case Study",
-        actionUrl: "",
-        hasExtendedContent: true
-    },
-    {
         id: "the-meadows",
         title: "The Meadows",
         subtitle: "Website and brand relaunch for an event venue.",
@@ -507,6 +488,25 @@ export const myProjects = [
         image: "/content/the-meadows/images/hero.webp",
         imageWidth: 740,
         imageHeight: 820,
+        imageClass: "destination-icon",
+        actionText: "View Case Study",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
+        id: "clear-tech",
+        title: "CLEAR Tech",
+        subtitle: "A comprehensive business plan and branding design for a mobile recording service.",
+        tags: [
+            { label: "Audio Production", color: "indigo" },
+            { label: "Branding", color: "purple" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "/content/clear-tech/images/brochure-mockup.webp",
+        imageWidth: 800,
+        imageHeight: 680,
         imageClass: "destination-icon",
         actionText: "View Case Study",
         actionUrl: "",
