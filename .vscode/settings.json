@@ -20,6 +20,8 @@
         "project/": true,
         "wrangler.jsonc": true,
         // "sitemap.xml": true,
+        ".wrangler": true,
+        "node_modules": true,
         "robots.txt": true,
         "worker.js": true,
         "GEMINI.md": true,
@@ -59,5 +61,12 @@
         "enable": true,
         "baseUri": "/",
         "proxyUri": "http://127.0.0.1:8000"
-    }
+    },
+    "VsCodeTaskButtons.tasks": [
+        {
+            "label": "Start Server",
+            "task": "Open Browser",
+            "tooltip": "Start the local development server with SPA routing"
+        }
+    ]
 }
