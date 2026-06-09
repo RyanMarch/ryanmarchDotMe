@@ -26,6 +26,8 @@ export const myProjects = [
         id: "bowserstack",
         title: "Bowserstack",
         subtitle: "An interactive Bowserstack testing tool to help get to the bottom of web-based issues.",
+        seoTitle: "Bowserstack - Interactive Bowser Debugger",
+        seoDescription: "Bowser issues can be hard to diagnose. Use Bowserstack's interactive testing tool to test your optimization strategy.",
         tags: [
             { label: "Completed", color: "green" },
             { label: "Experimentation", color: "pink" },
@@ -46,7 +48,9 @@ export const myProjects = [
     {
         id: "motion-poster",
         title: "Motion Poster",
-        subtitle: "Atmospheric, living digital centerpieces bring immersive art to high-end events and venues. Now with multiple themes.",
+        subtitle: "Atmospheric, living digital centerpieces bring immersive, customizable art to event venues. Now with multiple themes and remote control.",
+        seoTitle: "Motion Poster - Dynamic Digital Art Signage",
+        seoDescription: "A living digital centerpiece application bringing responsive, atmospheric art and customizable digital signage to event venues.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Digital Signage", color: "purple" },
@@ -68,6 +72,8 @@ export const myProjects = [
         id: "rentpress",
         title: "RentPress for Apartments",
         subtitle: "A comprehensive property management and marketing solution to build the ultimate online leasing office.",
+        seoTitle: "RentPress - Apartment Property Marketing Platform",
+        seoDescription: "A powerful property management and real estate integration tool for WordPress. Sync floor plans, pricing, and availability in real time.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Platform", color: "purple" },
@@ -130,6 +136,8 @@ export const myProjects = [
         id: "rentpress-local",
         title: "RentPress Local",
         subtitle: "Local listings management product for automatic map updates.",
+        seoTitle: "RentPress Local - Map & Listing Management",
+        seoDescription: "Automate local business listing updates, map configurations, and property location directories seamlessly for real estate websites.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -149,6 +157,8 @@ export const myProjects = [
         id: "rentpress-lead-sync",
         title: "RentPress Lead Sync",
         subtitle: "Send and receive leads without writing code.",
+        seoTitle: "RentPress Lead Sync - Real Estate Form Integration",
+        seoDescription: "Integrate with property management APIs to capture, validate, and route leasing leads automatically without writing custom code.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -169,6 +179,8 @@ export const myProjects = [
         id: "rentpress-data-hub",
         title: "RentPress Data Hub",
         subtitle: "The centralized data engine bridging the gap between property management APIs and modern marketing platforms.",
+        seoTitle: "RentPress Data Hub - Real Estate API Engine",
+        seoDescription: "A centralized data engine and API integration hub designed to sync real estate listings and floor plans with marketing platforms.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -187,6 +199,8 @@ export const myProjects = [
         id: "amenities-manager",
         title: "Amenities Manager",
         subtitle: "Powerful control over property amenities and features for multifamily websites.",
+        seoTitle: "RentPress Amenities Manager - WordPress Add-On",
+        seoDescription: "An intuitive dashboard plugin to filter, and cusotmize apartment amenities and community features on multifamily websites.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -207,6 +221,8 @@ export const myProjects = [
         id: "rentpress-email",
         title: "RentPress Email",
         subtitle: "Automated lifecycle marketing that transforms property management data into personalized resident journeys.",
+        seoTitle: "RentPress Email - Automated Real Estate Marketing",
+        seoDescription: "Automate email marketing and CRM workflows for multifamily properties using real estate data and prospect behavior.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
@@ -227,6 +243,8 @@ export const myProjects = [
         id: "night-riots-interview",
         title: "Night Riots Interview",
         subtitle: "An exclusive on-tour artist interview broadcast on WXCU Radio.",
+        seoTitle: "Night Riots Interview - WXCU Radio Broadcast",
+        seoDescription: "An exclusive on-tour interview production and broadcast featuring the indie rock band Night Riots on WXCU Radio.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Interview", color: "cyan" },
@@ -248,6 +266,8 @@ export const myProjects = [
         id: "breaking-winter",
         title: "Breaking Winter",
         subtitle: "Original Composition",
+        seoTitle: "Breaking Winter - Original Music Composition",
+        seoDescription: "Listen to Breaking Winter, an original atmospheric musical composition featuring ambient soundscapes and orchestration.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Composition", color: "purple" },
@@ -267,6 +287,8 @@ export const myProjects = [
         id: "wxcu-radio",
         title: "WXCU Radio",
         subtitle: "Broadcasting, branding, and WordPress web development for Capital University's student radio station.",
+        seoTitle: "WXCU Radio - Web Development & Station Branding",
+        seoDescription: "A comprehensive case study on web design, custom audio streaming player integration, and digital branding for a collegiate radio station.",
         tags: [
             { label: "Web Development", color: "green" },
             { label: "Audio Production", color: "blue" },
@@ -288,6 +310,8 @@ export const myProjects = [
         id: "forecast-weather",
         title: "Forecast Weather",
         subtitle: "Get the seven day forecast for an entered location.",
+        seoTitle: "Forecast Weather - Seven Day Forecast App",
+        seoDescription: "An award-winning Windows weather application that fetches and visualizes clean, real-time seven-day forecasts for any location.",
         tags: [
             { label: "App", color: "green" },
             { label: "Award-Winning", color: "gold" },
@@ -308,6 +332,8 @@ export const myProjects = [
         id: "the-danger-ranger",
         title: "The Danger Ranger",
         subtitle: "A satirical truck review with comedic timing and unexpected turns.",
+        seoTitle: "The Danger Ranger - Comedic Short Film",
+        seoDescription: "A satirical vehicle review short film showcasing comedic pacing, creative video production, and sound design.",
         tags: [
             { label: "Video Production", color: "rose" },
             { label: "Comedy", color: "gold" },
@@ -327,6 +353,8 @@ export const myProjects = [
         id: "jeanie-end-theme",
         title: "Jeanie - 'End Theme'",
         subtitle: "A highly atmospheric, stylized indie music video with custom digital lighting effects.",
+        seoTitle: "Jeanie - 'End Theme' Music Video Production",
+        seoDescription: "A stylized music video project utilizing custom digital lighting effects, moody cinematography, and editing for Jeanie.",
         tags: [
             { label: "Video Production", color: "rose" },
             { label: "Archive", color: "gray", priority: "low" }
@@ -345,6 +373,8 @@ export const myProjects = [
         id: "taylor-swift-analysis-hour",
         title: "Taylor Swift Analysis Hour",
         subtitle: "A dynamic pop music songwriting and marketing analysis podcast segment.",
+        seoTitle: "Taylor Swift Analysis Hour - Podcast Segment",
+        seoDescription: "A podcast segment focusing on pop music songwriting structure, production design, and music marketing strategies.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Podcast", color: "gold" },
@@ -364,6 +394,8 @@ export const myProjects = [
         id: "sbut-feel-right",
         title: "Sbut - 'Feel Right'",
         subtitle: "Recording & producing a cover of Mark Ronson & Mystikal's song.",
+        seoTitle: "Sbut - 'Feel Right' - Music Production",
+        seoDescription: "A recording project covering Mark Ronson & Mystikal's track, highlighting multitrack mixing and production.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Archive", color: "gray", priority: "low" }
@@ -382,6 +414,8 @@ export const myProjects = [
         id: "music-festival-radio-spot",
         title: "Music Festival Radio Spot",
         subtitle: "Radio sweeper for an extremely loud concert.",
+        seoTitle: "Music Festival Radio Spot - Audio Sweeper",
+        seoDescription: "A high-impact promotional radio sweeper and audio spot designed for marketing an extremely loud music festival.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Marketing", color: "orange" },
@@ -401,6 +435,8 @@ export const myProjects = [
         id: "making-of-a-masterpiece",
         title: "Making of A Masterpiece",
         subtitle: "A mockumentary short film produced in 24 hours.",
+        seoTitle: "Making of a Masterpiece - 24-Hour Film",
+        seoDescription: "An award-winning mockumentary short film written, shot, and edited within a 24-hour time constraint.",
         tags: [
             { label: "Video Production", color: "rose" },
             { label: "Award-Winning", color: "gold" },
@@ -420,6 +456,8 @@ export const myProjects = [
         id: "chris-jamison-covers",
         title: "Chris Jamison Covers",
         subtitle: "A series of high-fidelity studio cover recordings and multitrack mixes.",
+        seoTitle: "Chris Jamison Covers - Studio Audio Production",
+        seoDescription: "A collection of studio cover recordings, vocal production sessions, and high-fidelity multitrack music mixes.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Mixing", color: "indigo" },
@@ -439,6 +477,8 @@ export const myProjects = [
         id: "fesss-mess-paris",
         title: "Fess's Mess - 'Paris'",
         subtitle: "Recording and mixing of Grace Potter's hit song.",
+        seoTitle: "Fess's Mess - 'Paris' - Audio Mixing",
+        seoDescription: "Audio recording, track alignment, and production for a studio cover of Grace Potter's popular song.",
         tags: [
             { label: "Audio Production", color: "blue" },
             { label: "Mixing", color: "indigo" },
@@ -458,6 +498,8 @@ export const myProjects = [
         id: "furniture-bank-promo",
         title: "Furniture Bank Promo",
         subtitle: "A documentary-style volunteer recruitment video detailing local community impact.",
+        seoTitle: "Furniture Bank Promo - Documentary Video",
+        seoDescription: "A documentary-style promotional video showcasing community impact to recruit volunteers and drive local donations.",
         tags: [
             { label: "Video Production", color: "rose" },
             { label: "Non-Profit", color: "teal" },
@@ -477,6 +519,8 @@ export const myProjects = [
         id: "the-meadows",
         title: "The Meadows",
         subtitle: "Website and brand relaunch for an event venue.",
+        seoTitle: "The Meadows - Brand & Website Relaunch",
+        seoDescription: "A case study on the custom website design, brand positioning, and digital strategy for a premier banquet and event center.",
         tags: [
             { label: "Web Development", color: "green" },
             { label: "Branding", color: "purple" },
@@ -497,9 +541,12 @@ export const myProjects = [
         id: "clear-tech",
         title: "CLEAR Tech",
         subtitle: "A comprehensive business plan and branding design for a mobile recording service.",
+        seoTitle: "CLEAR Tech - Business Plan & Brand Identity",
+        seoDescription: "A brand identity design, marketing collateral, and detailed business plan project for a mobile audio recording service.",
         tags: [
             { label: "Audio Production", color: "indigo" },
             { label: "Branding", color: "purple" },
+            { label: "Marketing", color: "orange" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -513,3 +560,4 @@ export const myProjects = [
         hasExtendedContent: true
     }
 ];
+
