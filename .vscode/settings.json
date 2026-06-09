@@ -20,6 +20,8 @@
         "project/": true,
         "wrangler.jsonc": true,
         // "sitemap.xml": true,
+        ".wrangler": true,
+        "node_modules": true,
         "robots.txt": true,
         "worker.js": true,
         "GEMINI.md": true,

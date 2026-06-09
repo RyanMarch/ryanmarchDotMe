@@ -31,3 +31,6 @@ node_modules/
 
 # Local-only AI instruction file
 GEMINI.md
+
+# Build artifacts
+sitemap.xml
