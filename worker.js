@@ -93,7 +93,7 @@ class SchemaRewriter {
             }
             schema.applicationCategory = category;
             schema.operatingSystem = "Any";
-            
+
             schema.offers = {
                 "@type": "Offer",
                 "price": "0",
@@ -119,8 +119,8 @@ class PreloadRewriter {
         }
 
         // Resolve absolute path (with leading slash)
-        const imagePath = this.project.image.startsWith('/') 
-            ? this.project.image 
+        const imagePath = this.project.image.startsWith('/')
+            ? this.project.image
             : `/${this.project.image}`;
 
         element.setAttribute('href', imagePath);
@@ -128,10 +128,10 @@ class PreloadRewriter {
         // Build srcset and sizes in the same way as projects.js
         const dotIndex = imagePath.lastIndexOf(".");
         if (dotIndex !== -1 && (
-            this.project.id === "icon-studio" || 
-            this.project.id === "motion-poster" || 
-            this.project.id === "bowserstack" || 
-            this.project.id === "rentpress" || 
+            this.project.id === "icon-studio" ||
+            this.project.id === "motion-poster" ||
+            this.project.id === "bowserstack" ||
+            this.project.id === "rentpress" ||
             this.project.id === "aasc-analytics"
         )) {
             const base = imagePath.substring(0, dotIndex);
@@ -229,7 +229,7 @@ export default {
                         if (body && body.branch) {
                             branch = body.branch;
                         }
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 if (!filePath) {
