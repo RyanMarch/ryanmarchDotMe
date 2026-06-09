@@ -1,1 +1,42 @@
-(function(){const o=document.getElementById("theme-toggle"),t=document.getElementById("theme-status");let l;const n=m=>{t&&(t.textContent=m,t.classList.add("visible"),clearTimeout(l),l=setTimeout(()=>{t.classList.remove("visible")},2e3))};o&&o.addEventListener("click",()=>{const m=localStorage.getItem("theme")||"dark";let e,s;m==="dark"?(e="light",s="Light Theme"):m==="light"?(e="system",s="System Theme"):(e="dark",s="Dark Theme"),e==="system"?document.documentElement.removeAttribute("data-theme"):document.documentElement.setAttribute("data-theme",e),localStorage.setItem("theme",e),n(s)})})();
+(function () {
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeStatus = document.getElementById('theme-status');
+    let themeStatusTimeout;
+
+    const showThemeStatus = (text) => {
+        if (!themeStatus) return;
+        themeStatus.textContent = text;
+        themeStatus.classList.add('visible');
+        clearTimeout(themeStatusTimeout);
+        themeStatusTimeout = setTimeout(() => {
+            themeStatus.classList.remove('visible');
+        }, 2000);
+    };
+
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'dark';
+            let newTheme, statusText;
+
+            if (currentTheme === 'dark') {
+                newTheme = 'light';
+                statusText = 'Light Theme';
+            } else if (currentTheme === 'light') {
+                newTheme = 'system';
+                statusText = 'System Theme';
+            } else {
+                newTheme = 'dark';
+                statusText = 'Dark Theme';
+            }
+
+            if (newTheme === 'system') {
+                document.documentElement.removeAttribute('data-theme');
+            } else {
+                document.documentElement.setAttribute('data-theme', newTheme);
+            }
+
+            localStorage.setItem('theme', newTheme);
+            showThemeStatus(statusText);
+        });
+    }
+})();
