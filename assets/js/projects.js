@@ -1,19 +1,24 @@
-import{myProjects as D}from"./project-data.js?v=1";
+import { myProjects } from './project-data.js?v=1';
 
-function R(k){
-    k.querySelectorAll(".custom-audio-player").forEach(n=>{
-        const p=n.querySelector("audio");
-        if(!p)return;
-        const v=p.getAttribute("src"),
-              z=n.getAttribute("data-title")||"Audio Track",
-              V=n.getAttribute("data-subtitle")||"Local File";
-        n.innerHTML=`
-            <audio src="${v}" preload="metadata"></audio>
+function initializeCustomAudioPlayers(container) {
+    const players = container.querySelectorAll('.custom-audio-player');
+
+    players.forEach(player => {
+        const initialAudio = player.querySelector('audio');
+        if (!initialAudio) return;
+
+        const src = initialAudio.getAttribute('src');
+        const title = player.getAttribute('data-title') || 'Audio Track';
+        const subtitle = player.getAttribute('data-subtitle') || 'Local File';
+
+        // Dynamically build audio player UI inside the container.
+        player.innerHTML = `
+            <audio src="${src}" preload="metadata"></audio>
             
             <!-- Top Row: Title & Info -->
             <div class="player-header">
-                <span class="player-title">${z}</span>
-                <span class="player-subtitle">${V}</span>
+                <span class="player-title">${title}</span>
+                <span class="player-subtitle">${subtitle}</span>
             </div>
             
             <!-- Middle Row: Timeline Scrubber -->
@@ -49,106 +54,236 @@ function R(k){
                 <div class="player-right-spacer"></div>
             </div>
         `;
-        const o=n.querySelector("audio"),
-              E=n.querySelector(".player-play-pause"),
-              m=n.querySelector(".icon-play"),
-              $=n.querySelector(".icon-pause"),
-              y=n.querySelector(".player-progress-container"),
-              L=n.querySelector(".player-progress-bar"),
-              x=n.querySelector(".player-progress-knob"),
-              C=n.querySelector(".player-time-current"),
-              M=n.querySelector(".player-time-duration"),
-              h=n.querySelector(".player-mute"),
-              g=n.querySelector(".icon-volume"),
-              b=n.querySelector(".icon-muted"),
-              i=n.querySelector(".player-volume-slider-container"),
-              e=n.querySelector(".player-volume-slider-bar");
-        if(!o||!E)return;
-        function a(t){
-            if(isNaN(t)||!isFinite(t))return"0:00";
-            const s=Math.floor(t/60),l=Math.floor(t%60);
-            return`${s}:${l<10?"0":""}${l}`
+
+        const audio = player.querySelector('audio');
+        const playPauseBtn = player.querySelector('.player-play-pause');
+        const iconPlay = player.querySelector('.icon-play');
+        const iconPause = player.querySelector('.icon-pause');
+        const progressBarContainer = player.querySelector('.player-progress-container');
+        const progressBar = player.querySelector('.player-progress-bar');
+        const progressBarKnob = player.querySelector('.player-progress-knob');
+        const timeCurrent = player.querySelector('.player-time-current');
+        const timeDuration = player.querySelector('.player-time-duration');
+        const muteBtn = player.querySelector('.player-mute');
+        const iconVolume = player.querySelector('.icon-volume');
+        const iconMuted = player.querySelector('.icon-muted');
+        const volumeSliderContainer = player.querySelector('.player-volume-slider-container');
+        const volumeSliderBar = player.querySelector('.player-volume-slider-bar');
+
+        if (!audio || !playPauseBtn) return;
+
+        function formatTime(seconds) {
+            if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
-        E.addEventListener("click",()=>{
-            document.querySelectorAll("audio").forEach(t=>{t!==o&&!t.paused&&t.pause()}),
-            o.paused?o.play().catch(t=>console.error("Play failed:",t)):o.pause()
-        }),
-        o.addEventListener("play",()=>{
-            m&&(m.style.display="none"),$&&($.style.display="block"),E.setAttribute("aria-label","Pause")
-        }),
-        o.addEventListener("pause",()=>{
-            m&&(m.style.display="block"),$&&($.style.display="none"),E.setAttribute("aria-label","Play")
-        }),
-        o.addEventListener("ended",()=>{
-            m&&(m.style.display="block"),$&&($.style.display="none"),L&&(L.style.width="0%"),x&&(x.style.left="0%"),y&&(y.style.setProperty("--progress-percent","0%"),y.setAttribute("aria-valuenow","0")),C&&(C.textContent="0:00"),E.setAttribute("aria-label","Play")
-        }),
-        o.addEventListener("timeupdate",()=>{
-            const t=o.currentTime,s=o.duration;
-            if(s&&!isNaN(s)&&isFinite(s)){
-                const l=t/s*100;
-                L&&(L.style.width=`${l}%`),x&&(x.style.left=`${l}%`),y&&(y.style.setProperty("--progress-percent",`${l}%`),y.setAttribute("aria-valuenow",Math.round(l).toString())),M&&(M.textContent=a(s))
+
+        playPauseBtn.addEventListener('click', () => {
+            document.querySelectorAll('audio').forEach(otherAudio => {
+                if (otherAudio !== audio && !otherAudio.paused) {
+                    otherAudio.pause();
+                }
+            });
+
+            if (audio.paused) {
+                audio.play().catch(e => console.error("Play failed:", e));
+            } else {
+                audio.pause();
             }
-            C&&(C.textContent=a(t))
         });
-        const r=()=>{
-            M&&o.duration&&!isNaN(o.duration)&&isFinite(o.duration)&&(M.textContent=a(o.duration))
+
+        audio.addEventListener('play', () => {
+            if (iconPlay) iconPlay.style.display = 'none';
+            if (iconPause) iconPause.style.display = 'block';
+            playPauseBtn.setAttribute('aria-label', 'Pause');
+        });
+
+        audio.addEventListener('pause', () => {
+            if (iconPlay) iconPlay.style.display = 'block';
+            if (iconPause) iconPause.style.display = 'none';
+            playPauseBtn.setAttribute('aria-label', 'Play');
+        });
+
+        audio.addEventListener('ended', () => {
+            if (iconPlay) iconPlay.style.display = 'block';
+            if (iconPause) iconPause.style.display = 'none';
+            if (progressBar) progressBar.style.width = '0%';
+            if (progressBarKnob) progressBarKnob.style.left = '0%';
+            if (progressBarContainer) {
+                progressBarContainer.style.setProperty('--progress-percent', '0%');
+                progressBarContainer.setAttribute('aria-valuenow', '0');
+            }
+            if (timeCurrent) timeCurrent.textContent = '0:00';
+            playPauseBtn.setAttribute('aria-label', 'Play');
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            const current = audio.currentTime;
+            const duration = audio.duration;
+            if (duration && !isNaN(duration) && isFinite(duration)) {
+                const percent = (current / duration) * 100;
+                if (progressBar) progressBar.style.width = `${percent}%`;
+                if (progressBarKnob) progressBarKnob.style.left = `${percent}%`;
+                if (progressBarContainer) {
+                    progressBarContainer.style.setProperty('--progress-percent', `${percent}%`);
+                    progressBarContainer.setAttribute('aria-valuenow', Math.round(percent).toString());
+                }
+                if (timeDuration) timeDuration.textContent = formatTime(duration);
+            }
+            if (timeCurrent) timeCurrent.textContent = formatTime(current);
+        });
+
+        const setDuration = () => {
+            if (timeDuration && audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                timeDuration.textContent = formatTime(audio.duration);
+            }
         };
-        if(o.readyState>=1?r():o.addEventListener("loadedmetadata",r),o.addEventListener("durationchange",r),y){
-            y.addEventListener("click",t=>{
-                const s=y.getBoundingClientRect(),l=t.clientX-s.left,u=s.width,c=Math.min(Math.max(l/u,0),1);
-                o.duration&&!isNaN(o.duration)&&isFinite(o.duration)&&(o.currentTime=c*o.duration,L&&(L.style.width=`${c*100}%`),x&&(x.style.left=`${c*100}%`))
-            }),
-            y.addEventListener("keydown",t=>{
-                t.key==="ArrowRight"||t.key==="ArrowUp"?(t.preventDefault(),o.duration&&!isNaN(o.duration)&&isFinite(o.duration)&&(o.currentTime=Math.min(o.currentTime+5,o.duration))):t.key==="ArrowLeft"||t.key==="ArrowDown"?(t.preventDefault(),o.currentTime=Math.max(o.currentTime-5,0)):t.key==="Home"?(t.preventDefault(),o.currentTime=0):t.key==="End"&&(t.preventDefault(),o.duration&&!isNaN(o.duration)&&isFinite(o.duration)&&(o.currentTime=o.duration))
-            })
+
+        if (audio.readyState >= 1) {
+            setDuration();
+        } else {
+            audio.addEventListener('loadedmetadata', setDuration);
         }
-        h&&h.addEventListener("click",()=>{
-            o.muted=!o.muted,
-            o.muted?(g&&(g.style.display="none"),b&&(b.style.display="block"),e&&(e.style.width="0%"),i.setAttribute("aria-valuenow","0"),h.setAttribute("aria-label","Unmute")):(g&&(g.style.display="block"),b&&(b.style.display="none"),e&&(e.style.width=`${o.volume*100}%`),i.setAttribute("aria-valuenow",Math.round(o.volume*100).toString()),h.setAttribute("aria-label","Mute"))
-        }),
-        i&&(t=>{
-            const s=l=>{
-                o.volume=l,
-                e&&(e.style.width=`${l*100}%`),
-                i.setAttribute("aria-valuenow",Math.round(l*100).toString()),
-                l===0?(o.muted=!0,g&&(g.style.display="none"),b&&(b.style.display="block"),h.setAttribute("aria-label","Unmute")):(o.muted=!1,g&&(g.style.display="block"),b&&(b.style.display="none"),h.setAttribute("aria-label","Mute"))
+        audio.addEventListener('durationchange', setDuration);
+
+        if (progressBarContainer) {
+            progressBarContainer.addEventListener('click', (e) => {
+                const rect = progressBarContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+                const percent = Math.min(Math.max(clickX / width, 0), 1);
+
+                if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                    audio.currentTime = percent * audio.duration;
+                    if (progressBar) progressBar.style.width = `${percent * 100}%`;
+                    if (progressBarKnob) progressBarKnob.style.left = `${percent * 100}%`;
+                }
+            });
+
+            // Keyboard accessibility for Seek Slider
+            progressBarContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                        audio.currentTime = Math.min(audio.currentTime + 5, audio.duration);
+                    }
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    audio.currentTime = Math.max(audio.currentTime - 5, 0);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    audio.currentTime = 0;
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
+                        audio.currentTime = audio.duration;
+                    }
+                }
+            });
+        }
+
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => {
+                audio.muted = !audio.muted;
+                if (audio.muted) {
+                    if (iconVolume) iconVolume.style.display = 'none';
+                    if (iconMuted) iconMuted.style.display = 'block';
+                    if (volumeSliderBar) volumeSliderBar.style.width = '0%';
+                    volumeSliderContainer.setAttribute('aria-valuenow', '0');
+                    muteBtn.setAttribute('aria-label', 'Unmute');
+                } else {
+                    if (iconVolume) iconVolume.style.display = 'block';
+                    if (iconMuted) iconMuted.style.display = 'none';
+                    if (volumeSliderBar) volumeSliderBar.style.width = `${audio.volume * 100}%`;
+                    volumeSliderContainer.setAttribute('aria-valuenow', Math.round(audio.volume * 100).toString());
+                    muteBtn.setAttribute('aria-label', 'Mute');
+                }
+            });
+        }
+
+        if (volumeSliderContainer) {
+            const updateVolumeUI = (percent) => {
+                audio.volume = percent;
+                if (volumeSliderBar) volumeSliderBar.style.width = `${percent * 100}%`;
+                volumeSliderContainer.setAttribute('aria-valuenow', Math.round(percent * 100).toString());
+
+                if (percent === 0) {
+                    audio.muted = true;
+                    if (iconVolume) iconVolume.style.display = 'none';
+                    if (iconMuted) iconMuted.style.display = 'block';
+                    muteBtn.setAttribute('aria-label', 'Unmute');
+                } else {
+                    audio.muted = false;
+                    if (iconVolume) iconVolume.style.display = 'block';
+                    if (iconMuted) iconMuted.style.display = 'none';
+                    muteBtn.setAttribute('aria-label', 'Mute');
+                }
             };
-            i.addEventListener("click",l=>{
-                const u=i.getBoundingClientRect(),c=l.clientX-u.left,q=u.width,oVal=Math.min(Math.max(c/q,0),1);
-                s(oVal)
-            }),
-            i.addEventListener("keydown",l=>{
-                l.key==="ArrowRight"||l.key==="ArrowUp"?(l.preventDefault(),s(Math.min(o.volume+.05,1))):l.key==="ArrowLeft"||l.key==="ArrowDown"?(l.preventDefault(),s(Math.max(o.volume-.05,0))):l.key==="Home"?(l.preventDefault(),s(0)):l.key==="End"&&(l.preventDefault(),s(1))
-            })
-        })()
-    })
+
+            volumeSliderContainer.addEventListener('click', (e) => {
+                const rect = volumeSliderContainer.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+                const percent = Math.min(Math.max(clickX / width, 0), 1);
+                updateVolumeUI(percent);
+            });
+
+            // Keyboard accessibility for Volume Slider
+            volumeSliderContainer.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    updateVolumeUI(Math.min(audio.volume + 0.05, 1));
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    updateVolumeUI(Math.max(audio.volume - 0.05, 0));
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    updateVolumeUI(0);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    updateVolumeUI(1);
+                }
+            });
+        }
+    });
 }
 
 function initClearTechBrochure(container) {
-    const tabs = container.querySelectorAll(".brochure-tab-btn");
-    const panels = container.querySelectorAll(".brochure-view-panel");
+    const tabs = container.querySelectorAll('.brochure-tab-btn');
+    const panels = container.querySelectorAll('.brochure-view-panel');
 
     tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-            tabs.forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
 
-            const targetView = tab.getAttribute("data-view");
+            const targetView = tab.getAttribute('data-view');
             panels.forEach(panel => {
-                panel.style.display = (panel.id === `panel-${targetView}`) ? "block" : "none";
+                panel.style.display = (panel.id === `panel-${targetView}`) ? 'block' : 'none';
             });
         });
     });
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
-    const k=document.getElementById("projects-grid"),
-          kArchive=document.getElementById("archive-projects-grid"),
-          archiveDivider=document.getElementById("archive-divider"),
-          d=document.getElementById("project-detail-area");
-          
-    let n=document.getElementById("lightbox-overlay");
-    n||(n=document.createElement("div"),n.id="lightbox-overlay",n.className="lightbox-overlay",n.setAttribute("aria-hidden","true"),n.setAttribute("tabindex","-1"),n.setAttribute("role","dialog"),n.setAttribute("aria-modal","true"),n.setAttribute("aria-label","Image gallery lightbox"),n.innerHTML=`
+document.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('projects-grid');
+    const archiveGrid = document.getElementById('archive-projects-grid');
+    const archiveDivider = document.getElementById('archive-divider');
+    const projectDetailArea = document.getElementById('project-detail-area');
+
+    // 1. Dynamic Lightbox Setup (programmatically creates the lightbox if it is missing)
+    let lightbox = document.getElementById('lightbox-overlay');
+    if (!lightbox) {
+        lightbox = document.createElement('div');
+        lightbox.id = 'lightbox-overlay';
+        lightbox.className = 'lightbox-overlay';
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightbox.setAttribute('tabindex', '-1');
+        lightbox.setAttribute('role', 'dialog');
+        lightbox.setAttribute('aria-modal', 'true');
+        lightbox.setAttribute('aria-label', 'Image gallery lightbox');
+        lightbox.innerHTML = `
             <button class="lightbox-close" aria-label="Close lightbox">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -156,445 +291,806 @@ document.addEventListener("DOMContentLoaded",()=>{
                 <img id="lightbox-image" src="" alt="Enlarged view">
                 <p id="lightbox-caption" class="lightbox-caption"></p>
             </div>
-        `,document.body.appendChild(n)),
-    n.addEventListener("keydown",i=>{
-        if(i.key==="Tab"){
-            const e=n.querySelectorAll('button, [tabindex="0"], iframe');
-            if(e.length===0)return;
-            const a=e[0],r=e[e.length-1];
-            i.shiftKey?document.activeElement===a&&(r.focus(),i.preventDefault()):document.activeElement===r&&(a.focus(),i.preventDefault())
+        `;
+        document.body.appendChild(lightbox);
+    }
+
+    // Focus trapping event listener for keyboard accessibility in lightbox dialog
+    lightbox.addEventListener('keydown', (e) => {
+        if (e.key === 'Tab') {
+            const focusableElements = lightbox.querySelectorAll('button, [tabindex="0"], iframe');
+            if (focusableElements.length === 0) return;
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    lastElement.focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    firstElement.focus();
+                    e.preventDefault();
+                }
+            }
         }
     });
-    
-    const p=document.getElementById("lightbox-image"),
-          v=document.getElementById("lightbox-caption"),
-          z=n.querySelector(".lightbox-close"),
-          V=[
-              {id:"all",label:"All",match:i=>!0},
-              {id:"professional",label:"Professional",match:i=>i.tags.some(e=>["professional","platform","real estate"].includes(e.label.toLowerCase()))},
-              {id:"web-apps",label:"Web & Apps",match:i=>i.tags.some(e=>["web development","design tool","app","platform","digital signage","backend","experimentation","analytics"].includes(e.label.toLowerCase()))},
-              {id:"audio-music",label:"Audio & Music",match:i=>i.tags.some(e=>["audio production","composition","radio","podcast","mixing"].includes(e.label.toLowerCase()))},
-              {id:"video-film",label:"Video & Film",match:i=>i.tags.some(e=>["video production","comedy"].includes(e.label.toLowerCase()))},
-              {id:"archive",label:"Archive",match:i=>i.tags.some(e=>e.label.toLowerCase()==="archive")}
-          ];
-          
-    V.forEach(i=>{i.count=D.filter(e=>i.match(e)).length});
-    
-    if(k){
-        const i=document.getElementById("filter-pills");
-        if(i){
-            V.forEach(a=>{
-                const r=document.createElement("button");
-                r.className=`filter-pill${a.id==="all"?" active":""}`,
-                r.setAttribute("data-category",a.id),
-                r.setAttribute("aria-pressed",a.id==="all"?"true":"false"),
-                r.innerHTML=`${a.label}`,
-                r.addEventListener("click",()=>{
-                    if(r.classList.contains("active")){
-                        if(a.id==="all")return;
-                        r.classList.remove("active"),r.setAttribute("aria-pressed","false");
-                        const t=i.querySelector('.filter-pill[data-category="all"]');
-                        t&&(t.classList.add("active"),t.setAttribute("aria-pressed","true")),
-                        E("all");
-                        return
-                    }
-                    i.querySelectorAll(".filter-pill").forEach(t=>{
-                        t.classList.remove("active"),t.setAttribute("aria-pressed","false")
-                    }),
-                    r.classList.add("active"),
-                    r.setAttribute("aria-pressed","true"),
-                    E(a.id)
-                }),
-                i.appendChild(r)
-            });
-            const e=()=>{
-                const a=i.scrollLeft,r=i.scrollWidth-i.clientWidth;
-                requestAnimationFrame(()=>{
-                    a>2?i.classList.add("scrolled-left"):i.classList.remove("scrolled-left"),
-                    a<r-2?i.classList.add("scrolled-right"):i.classList.remove("scrolled-right")
-                })
-            };
-            i.addEventListener("scroll",e),
-            setTimeout(e,50),
-            window.addEventListener("resize",e)
+    const lightboxImg = document.getElementById('lightbox-image');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const lightboxClose = lightbox.querySelector('.lightbox-close');
+
+    // Define sophisticated category filters
+    const filterCategories = [
+        {
+            id: 'all',
+            label: 'All',
+            match: (project) => true
+        },
+        {
+            id: 'professional',
+            label: 'Professional',
+            match: (project) => project.tags.some(t => ['professional', 'platform', 'real estate'].includes(t.label.toLowerCase()))
+        },
+        {
+            id: 'web-apps',
+            label: 'Web & Apps',
+            match: (project) => project.tags.some(t => ['web development', 'design tool', 'app', 'platform', 'digital signage', 'backend', 'experimentation', 'analytics'].includes(t.label.toLowerCase()))
+        },
+        {
+            id: 'audio-music',
+            label: 'Audio & Music',
+            match: (project) => project.tags.some(t => ['audio production', 'composition', 'radio', 'podcast', 'mixing'].includes(t.label.toLowerCase()))
+        },
+        {
+            id: 'video-film',
+            label: 'Video & Film',
+            match: (project) => project.tags.some(t => ['video production', 'comedy'].includes(t.label.toLowerCase()))
+        },
+        {
+            id: 'archive',
+            label: 'Archive',
+            match: (project) => project.tags.some(t => t.label.toLowerCase() === 'archive')
         }
-        
-        D.forEach(e=>{
-            const a=document.createElement("div"),
-                  r=e.size?`size-${e.size}`:"size-medium";
-            a.className=`glimmer-card destination-card ${r} ${e.featured?"featured":""}`;
-            const t=V.filter(c=>c.match(e)).map(c=>c.id);
-            a.setAttribute("data-categories",t.join(" "));
-            const s=o(e.tags);
-            let l="";
-            e.showLaunchButton&&e.hasExtendedContent?l=`
-                <a href="${e.actionUrl}" class="project-btn" target="_blank" rel="noopener noreferrer">
-                    <span>${e.actionText}</span>
-                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
-                </a>
-                <a href="/project/${e.id}/" class="project-btn btn-secondary read-more-btn" data-project-id="${e.id}">
-                    <span>Read More <span class="sr-only">about ${e.title}</span></span>
-                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                </a>
-            `:e.hasExtendedContent?l=`
-                <a href="/project/${e.id}/" class="project-btn read-more-btn" data-project-id="${e.id}">
-                    <span>Read More <span class="sr-only">about ${e.title}</span></span>
-                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
-                </a>
-            `:e.actionUrl&&(l=`
-                <a href="${e.actionUrl}" class="project-btn" target="_blank" rel="noopener noreferrer">
-                    <span>${e.actionText}</span>
-                    <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
-                </a>
-            `);
-            let u="";
-            if(e.image){
-                const c=e.imageWidth?` width="${e.imageWidth}"`:"",
-                      q=e.imageHeight?` height="${e.imageHeight}"`:"",
-                      H=e.featured?'loading="eager" fetchpriority="high"':'loading="lazy"';
-                let I="",A="";
-                const S=e.image.lastIndexOf(".");
-                if(S!==-1&&(e.id==="icon-studio"||e.id==="motion-poster"||e.id==="bowserstack"||e.id==="rentpress"||e.id==="aasc-analytics")){
-                    const _=e.image.substring(0,S),
-                          P=e.image.substring(S),
-                          f=e.id==="aasc-analytics"?"-small":"-sm",
-                          w=`${_}${f}${P}`;
-                    let B=e.imageWidth,T=Math.round(e.imageWidth/2);
-                    e.id==="icon-studio"?(B=800,T=400):e.id==="motion-poster"?(B=1e3,T=600):e.id==="bowserstack"?(B=480,T=300):e.id==="rentpress"?(B=800,T=485):e.id==="aasc-analytics"&&(B=1920,T=800),
-                    I=` srcset="${w} ${T}w, ${e.image} ${B}w"`,
-                    A=` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${e.size==="large"?"500px":"300px"}"`
-                }
-                u=`<img id="project-image-${e.id}" src="${e.image}"${I}${A} alt="${e.title} Preview" ${H}${c}${q} class="${e.featured?"destination-image-standalone":"destination-icon"} ${e.imageClass}">`
-            }else{
-                let c="";
-                e.symbol==="data"?c='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0v3.75" /></svg>':e.symbol==="hub"?c='<img src="assets/img/rentpress-logo.svg" alt="RentPress" width="376" height="69">':e.symbol==="email"?c='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>':c='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>',
-                u=`<div class="project-placeholder-icon${e.symbol==="hub"?" hub-motif":""}">${c}</div>`
+    ];
+
+    // Compute counts dynamically
+    filterCategories.forEach(cat => {
+        cat.count = myProjects.filter(p => cat.match(p)).length;
+    });
+
+    if (grid) {
+        // Render Filter Pills
+        const filterPillsContainer = document.getElementById('filter-pills');
+        if (filterPillsContainer) {
+            filterCategories.forEach(cat => {
+                const pill = document.createElement('button');
+                pill.className = `filter-pill${cat.id === 'all' ? ' active' : ''}`;
+                pill.setAttribute('data-category', cat.id);
+                pill.setAttribute('aria-pressed', cat.id === 'all' ? 'true' : 'false');
+                pill.innerHTML = `${cat.label}`;
+
+                pill.addEventListener('click', () => {
+                    if (pill.classList.contains('active')) {
+                        if (cat.id === 'all') return; // Clicking 'All' when already active does nothing
+
+                        pill.classList.remove('active');
+                        pill.setAttribute('aria-pressed', 'false');
+
+                        const allPill = filterPillsContainer.querySelector('.filter-pill[data-category="all"]');
+                        if (allPill) {
+                            allPill.classList.add('active');
+                            allPill.setAttribute('aria-pressed', 'true');
+                        }
+                        filterProjects('all');
+                        return;
+                    }
+
+                    // Toggle active class on pills
+                    filterPillsContainer.querySelectorAll('.filter-pill').forEach(p => {
+                        p.classList.remove('active');
+                        p.setAttribute('aria-pressed', 'false');
+                    });
+                    pill.classList.add('active');
+                    pill.setAttribute('aria-pressed', 'true');
+
+                    // Filter the projects
+                    filterProjects(cat.id);
+                });
+
+                filterPillsContainer.appendChild(pill);
+            });
+
+            // Add scroll listeners to update fade masks dynamically on mobile
+            const updateScrollFade = () => {
+                const scrollLeft = filterPillsContainer.scrollLeft;
+                const maxScrollLeft = filterPillsContainer.scrollWidth - filterPillsContainer.clientWidth;
+
+                // Defer DOM writes to requestAnimationFrame to prevent forced reflows
+                requestAnimationFrame(() => {
+                    if (scrollLeft > 2) {
+                        filterPillsContainer.classList.add('scrolled-left');
+                    } else {
+                        filterPillsContainer.classList.remove('scrolled-left');
+                    }
+
+                    if (scrollLeft < maxScrollLeft - 2) {
+                        filterPillsContainer.classList.add('scrolled-right');
+                    } else {
+                        filterPillsContainer.classList.remove('scrolled-right');
+                    }
+                });
+            };
+
+            filterPillsContainer.addEventListener('scroll', updateScrollFade);
+            // Run initial check after rendering (slight delay to let CSS rendering happen)
+            setTimeout(updateScrollFade, 50);
+            window.addEventListener('resize', updateScrollFade);
+        }
+
+        // Render Projects
+        myProjects.forEach(project => {
+            const card = document.createElement('div');
+            const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
+            card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
+
+            // Map matching categories to this card for fast filtering
+            const matchingCats = filterCategories
+                .filter(cat => cat.match(project))
+                .map(cat => cat.id);
+            card.setAttribute('data-categories', matchingCats.join(' '));
+
+            const tagsHtml = buildTagsHtml(project.tags);
+
+            let actionsHtml = '';
+            if (project.showLaunchButton && project.hasExtendedContent) {
+                // TWO buttons: Launch (Primary) & Read More (Secondary)
+                actionsHtml = `
+                    <a href="${project.actionUrl}" class="project-btn" target="_blank" rel="noopener noreferrer">
+                        <span>${project.actionText}</span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+                    </a>
+                    <a href="/project/${project.id}/" class="project-btn btn-secondary read-more-btn" data-project-id="${project.id}">
+                        <span>Read More <span class="sr-only">about ${project.title}</span></span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </a>
+                `;
+            } else if (project.hasExtendedContent) {
+                // ONE button: Read More (Primary)
+                actionsHtml = `
+                    <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}">
+                        <span>Read More <span class="sr-only">about ${project.title}</span></span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                    </a>
+                `;
+            } else if (project.actionUrl) {
+                // ONE button: Launch (Primary)
+                actionsHtml = `
+                    <a href="${project.actionUrl}" class="project-btn" target="_blank" rel="noopener noreferrer">
+                        <span>${project.actionText}</span>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+                    </a>
+                `;
             }
-            a.innerHTML=`
+
+            let visualHtml = '';
+            if (project.image) {
+                const widthAttr = project.imageWidth ? ` width="${project.imageWidth}"` : '';
+                const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
+                const loadingAttr = project.featured ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
+
+                let srcsetAttr = '';
+                let sizesAttr = '';
+                const extIndex = project.image.lastIndexOf('.');
+                if (extIndex !== -1 && (project.id === 'icon-studio' || project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress' || project.id === 'aasc-analytics')) {
+                    const base = project.image.substring(0, extIndex);
+                    const ext = project.image.substring(extIndex);
+                    const suffix = project.id === 'aasc-analytics' ? '-small' : '-sm';
+                    const smImage = `${base}${suffix}${ext}`;
+
+                    let lgWidth = project.imageWidth;
+                    let smWidth = Math.round(project.imageWidth / 2);
+                    if (project.id === 'icon-studio') {
+                        lgWidth = 800;
+                        smWidth = 400;
+                    } else if (project.id === 'motion-poster') {
+                        lgWidth = 1000;
+                        smWidth = 600;
+                    } else if (project.id === 'bowserstack') {
+                        lgWidth = 480;
+                        smWidth = 300;
+                    } else if (project.id === 'rentpress') {
+                        lgWidth = 800;
+                        smWidth = 485;
+                    } else if (project.id === 'aasc-analytics') {
+                        lgWidth = 1920;
+                        smWidth = 800;
+                    }
+
+                    srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${lgWidth}w"`;
+
+                    const desktopSize = project.size === 'large' ? '500px' : '300px';
+                    sizesAttr = ` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${desktopSize}"`;
+                }
+
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr}${sizesAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+            } else {
+                let iconSvg = '';
+                if (project.symbol === 'data') {
+                    iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0v3.75" /></svg>`;
+                } else if (project.symbol === 'hub') {
+                    iconSvg = `<img src="assets/img/rentpress-logo.svg" alt="RentPress" width="376" height="69">`;
+                } else if (project.symbol === 'email') {
+                    iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" /></svg>`;
+                } else {
+                    iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="m21 7.5-9-5.25L3 7.5m18 0-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>`;
+                }
+
+                const hubClass = project.symbol === 'hub' ? ' hub-motif' : '';
+                visualHtml = `<div class="project-placeholder-icon${hubClass}">${iconSvg}</div>`;
+            }
+
+            card.innerHTML = `
                 <div class="tag-list">
-                    ${s}
+                    ${tagsHtml}
                 </div>
                 <div class="destination-content">
                     <div class="destination-header">
-                        <h2>${e.title}</h2>
+                        <h2>${project.title}</h2>
                     </div>
-                    <p>${e.subtitle}</p>
+                    <p>${project.subtitle}</p>
                     <div class="destination-actions">
-                        ${l}
+                        ${actionsHtml}
                     </div>
                 </div>
-                <div class="${e.featured?"destination-standalone-visual":"destination-visual"}">
-                     ${u}
+                <div class="${project.featured ? 'destination-standalone-visual' : 'destination-visual'}">
+                     ${visualHtml}
                 </div>
             `;
-            
-            const isArchived = e.tags.some(tag => tag.label.toLowerCase() === "archive");
-            if (isArchived && kArchive) {
-                kArchive.appendChild(a);
+
+            // Route archived projects to the archive grid
+            const isArchived = project.tags.some(tag => tag.label.toLowerCase() === 'archive');
+            if (isArchived && archiveGrid) {
+                archiveGrid.appendChild(card);
             } else {
-                k.appendChild(a);
+                grid.appendChild(card);
             }
         });
-        
-        // Initial setup for displays
-        const showActive = k && k.querySelectorAll(".destination-card").length > 0;
-        const showArchive = kArchive && kArchive.querySelectorAll(".destination-card").length > 0;
-        if (k) k.style.display = showActive ? "grid" : "none";
-        if (kArchive) kArchive.style.display = showArchive ? "grid" : "none";
-        if (archiveDivider) archiveDivider.style.display = (showActive && showArchive) ? "flex" : "none";
+
+        // Initial setup for grid display states
+        const showActive = grid && grid.querySelectorAll('.destination-card').length > 0;
+        const showArchive = archiveGrid && archiveGrid.querySelectorAll('.destination-card').length > 0;
+        if (grid) grid.style.display = showActive ? 'grid' : 'none';
+        if (archiveGrid) archiveGrid.style.display = showArchive ? 'grid' : 'none';
+        if (archiveDivider) archiveDivider.style.display = (showActive && showArchive) ? 'flex' : 'none';
     }
-    
-    function o(i){
-        return!i||i.length===0?"":i.map(e=>{
-            const a=e.priority?` tag-priority-${e.priority}`:"";
-            return`<span class="tag ${e.color?`tag-${e.color.toLowerCase()}`:"tag-gray"}${a}">${e.label}</span>`
-        }).join("")
+
+    // Helper functions for tags
+    function buildTagsHtml(tags) {
+        if (!tags || tags.length === 0) return '';
+        return tags.map(tag => {
+            const cls = tag.priority ? ` tag-priority-${tag.priority}` : '';
+            const colorClass = tag.color ? `tag-${tag.color.toLowerCase()}` : 'tag-gray';
+            return `<span class="tag ${colorClass}${cls}">${tag.label}</span>`;
+        }).join('');
     }
-    
-    function E(i){
-        const e=document.querySelectorAll(".destination-card"),
-              a=k.getBoundingClientRect().height,
-              aArchive=kArchive ? kArchive.getBoundingClientRect().height : 0;
-              
-        k.style.minHeight=`${a}px`;
-        if(kArchive) kArchive.style.minHeight=`${aArchive}px`;
-        
-        const r=new Map;
-        e.forEach(t=>{
-            if(!t.classList.contains("filtered-out")){
-                const l=t.getBoundingClientRect();
-                r.set(t,{top:l.top,left:l.left,wasVisible:!0})
-            }else r.set(t,{wasVisible:!1})
+
+    function filterProjects(categoryId) {
+        const cards = document.querySelectorAll('.destination-card');
+
+        // Temporarily lock the grid heights to prevent sudden layout collapses during the FLIP transition
+        if (grid) grid.style.minHeight = `${grid.getBoundingClientRect().height}px`;
+        if (archiveGrid) archiveGrid.style.minHeight = `${archiveGrid.getBoundingClientRect().height}px`;
+
+        // 1. Record the "First" state of currently visible cards
+        const firstPositions = new Map();
+        cards.forEach(card => {
+            const isVisible = !card.classList.contains('filtered-out');
+            if (isVisible) {
+                const rect = card.getBoundingClientRect();
+                firstPositions.set(card, {
+                    top: rect.top,
+                    left: rect.left,
+                    wasVisible: true
+                });
+            } else {
+                firstPositions.set(card, {
+                    wasVisible: false
+                });
+            }
         });
-        
-        e.forEach(t=>{
-            t.getAttribute("data-categories").split(" ").includes(i)
-            ? t.classList.contains("filtered-out")&&(t.classList.remove("filtered-out"),t.style.display="")
-            : (t.classList.add("filtered-out"),t.style.display="none")
+
+        // 2. Update classes to trigger reflow instantly so browser knows final positions
+        cards.forEach(card => {
+            const categories = card.getAttribute('data-categories').split(' ');
+            const matches = categories.includes(categoryId);
+
+            if (matches) {
+                if (card.classList.contains('filtered-out')) {
+                    card.classList.remove('filtered-out');
+                    card.style.display = '';
+                }
+            } else {
+                card.classList.add('filtered-out');
+                card.style.display = 'none'; // Instantly hide exiting cards
+            }
         });
-        
-        // Update layouts of grid containers & divider immediately so FLIP measures final layout positions
+
+        // Update grid containers & divider visibility immediately so FLIP measures final layout positions
         let hasActive = false;
         let hasArchive = false;
-        if (k) {
-            hasActive = Array.from(k.querySelectorAll(".destination-card")).some(card => !card.classList.contains("filtered-out"));
-            k.style.display = hasActive ? "grid" : "none";
+        if (grid) {
+            hasActive = Array.from(grid.querySelectorAll('.destination-card')).some(card => !card.classList.contains('filtered-out'));
+            grid.style.display = hasActive ? 'grid' : 'none';
         }
-        if (kArchive) {
-            hasArchive = Array.from(kArchive.querySelectorAll(".destination-card")).some(card => !card.classList.contains("filtered-out"));
-            kArchive.style.display = hasArchive ? "grid" : "none";
+        if (archiveGrid) {
+            hasArchive = Array.from(archiveGrid.querySelectorAll('.destination-card')).some(card => !card.classList.contains('filtered-out'));
+            archiveGrid.style.display = hasArchive ? 'grid' : 'none';
         }
         if (archiveDivider) {
-            archiveDivider.style.display = (hasActive && hasArchive) ? "flex" : "none";
+            archiveDivider.style.display = (hasActive && hasArchive) ? 'flex' : 'none';
         }
-        
-        requestAnimationFrame(()=>{
-            e.forEach(t=>{
-                const s=r.get(t);
-                if(t.classList.contains("filtered-out"))return;
-                const l=t.getBoundingClientRect();
-                if(s.wasVisible){
-                    const u=s.left-l.left,c=s.top-l.top;
-                    (u!==0||c!==0)&&(t.style.transform=`translate(${u}px, ${c}px)`,t.style.transition="none")
-                }else t.style.opacity="0",t.style.transform="scale(0.9) translateY(15px)",t.style.transition="none"
-            }),
-            requestAnimationFrame(()=>{
-                e.forEach(t=>{
-                    t.classList.contains("filtered-out")||(t.style.transition="transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)",t.style.transform="",t.style.opacity="1")
-                }),
-                setTimeout(()=>{
-                    e.forEach(t=>{
-                        t.classList.contains("filtered-out")||(t.style.transition="",t.style.transform="",t.style.opacity="")
-                    }),
-                    k.style.minHeight="",
-                    kArchive&&(kArchive.style.minHeight="")
-                },600)
-            })
-        })
-    }
-    
-    d&&R(d);
-    let m=null;
-    
-    function $(i,e,a){
-        !p||!n||(m=document.activeElement,p.src=i,p.alt=e||"Enlarged project image",v.textContent=a||"",v.style.display=a?"block":"none",n.classList.add("open"),n.setAttribute("aria-hidden","false"),n.focus())
-    }
-    
-    function y(i,e){
-        if(!n)return;
-        m=document.activeElement,p&&(p.style.display="none"),v&&(v.textContent=e||"",v.style.display=e?"block":"none");
-        let a=n.querySelector(".lightbox-iframe");
-        a||(a=document.createElement("iframe"),a.className="lightbox-iframe",n.querySelector(".lightbox-container").insertBefore(a,v)),
-        a.src=i+"?lightbox=true",
-        a.style.display="block",
-        n.classList.add("open"),
-        n.setAttribute("aria-hidden","false"),
-        n.focus()
-    }
-    
-    function L(){
-        n&&(n.classList.remove("open"),n.setAttribute("aria-hidden","true"),setTimeout(()=>{
-            p&&(p.src="",p.style.display="block"),v&&(v.textContent="",v.style.display="none");
-            const i=n.querySelector(".lightbox-iframe");
-            i&&(i.src="",i.style.display="none"),m&&typeof m.focus=="function"&&m.focus()
-        },400))
-    }
-    
-    z&&z.addEventListener("click",L),
-    n&&n.addEventListener("click",L);
-    
-    function x(i,e){
-        i.addEventListener("click",a=>{
-            const r=a.target.closest(".diagram-section");
-            if(r){
-                a.stopPropagation();
-                const s=r.querySelector("iframe");
-                if(s){
-                    const l=r.nextElementSibling,u=l&&l.classList.contains("gallery-caption")?l.textContent:"";
-                    y(s.getAttribute("src"),u)
+
+        // 3. Force layout recalculation and set the "Invert" state
+        requestAnimationFrame(() => {
+            cards.forEach(card => {
+                const first = firstPositions.get(card);
+
+                if (card.classList.contains('filtered-out')) {
+                    return; // Skip hidden cards
                 }
-                return
-            }
-            if(a.target.tagName==="IMG"){
-                a.stopPropagation();
-                const s=a.target.closest(".gallery-item"),l=s?s.querySelector(".gallery-caption"):null;
-                $(a.target.src,a.target.alt,l?l.textContent:"");
-                return
-            }
-            const t=a.target.closest('a[href^="#"]');
-            if(t){
-                const s=t.getAttribute("href").substring(1),l=e&&e.querySelector(`#${s}`)||document.getElementById(s);
-                l&&(a.preventDefault(),l.scrollIntoView({behavior:"smooth",block:"start"}))
-            }
-        })
+
+                const rect = card.getBoundingClientRect();
+
+                if (first.wasVisible) {
+                    // Shifting element: calculate transition from its exact previous position
+                    const deltaX = first.left - rect.left;
+                    const deltaY = first.top - rect.top;
+
+                    if (deltaX !== 0 || deltaY !== 0) {
+                        card.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                        card.style.transition = 'none';
+                    }
+                } else {
+                    // Entering element: fade in and scale up from its correct final position in the grid
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.9) translateY(15px)';
+                    card.style.transition = 'none';
+                }
+            });
+
+            // 4. "Play" phase: trigger the transitions in the next layout frame
+            requestAnimationFrame(() => {
+                cards.forEach(card => {
+                    if (card.classList.contains('filtered-out')) return;
+
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                    card.style.transform = '';
+                    card.style.opacity = '1';
+                });
+
+                // Clean up inline styles after transition completes to restore default CSS hover and transition behaviors
+                setTimeout(() => {
+                    cards.forEach(card => {
+                        if (!card.classList.contains('filtered-out')) {
+                            card.style.transition = '';
+                            card.style.transform = '';
+                            card.style.opacity = '';
+                        }
+                    });
+                    // Restore the CSS-defined default min-height
+                    if (grid) grid.style.minHeight = '';
+                    if (archiveGrid) archiveGrid.style.minHeight = '';
+                }, 600);
+            });
+        });
     }
-    
-    d&&x(d,null),
-    document.addEventListener("keydown",i=>{i.key==="Escape"&&n&&n.classList.contains("open")&&L()});
-    
-    function C(){
-        const i=sessionStorage.getItem("live_reload_scroll_x"),
-              e=sessionStorage.getItem("live_reload_scroll_y");
-        i!==null&&e!==null?(sessionStorage.removeItem("live_reload_scroll_x"),sessionStorage.removeItem("live_reload_scroll_y"),window.scrollTo(parseInt(i,10),parseInt(e,10))):window.scrollTo(0,0)
+
+    // 2. Automatically initialize custom audio players for the current page content
+    if (projectDetailArea) {
+        initializeCustomAudioPlayers(projectDetailArea);
     }
-    
-    async function M(i){
-        const e=D.find(l=>l.id===i);
-        if(!e){h(!1);return}
-        const a=document.querySelector(".top-row"),
-              r=document.querySelector(".filter-container"),
-              t=document.getElementById("projects-grid"),
-              tArchive=document.getElementById("archive-projects-grid"),
-              tDivider=document.getElementById("archive-divider"),
-              s=[a,r,t,tArchive,tDivider].filter(Boolean);
-              
-        s.forEach(l=>{l.style.transition="opacity 0.1s ease",l.style.opacity="0"});
-        try{
-            const l=await fetch(`/content/${i}/`);
-            if(!l.ok)throw new Error("Content missing");
-            let u=await l.text();
-            u=u.replace(/(src|href)="(?:\.\/)?content\/[^\/]+\/audio\/([^\"]+\.mp3)"/g,'$1="https://media.ryanmarch.me/$2"');
-            const c=document.createElement("div");
-            c.innerHTML=u;
-            const q=c.querySelectorAll("h4[id]");
-            let H="";
-            if(q.length>0){
-                const f=Array.from(q).map(w=>`<a href="#${w.id}">${w.querySelector("span")?w.querySelector("span").innerHTML:w.innerHTML}</a>`);
-                (e.actionUrl||e.sourceUrl)&&f.push('<a href="#project-detail-footer-actions">Links</a>'),
-                H=`<nav class="project-nav"><div class="nav-links">${f.join("")}</div></nav>`
+
+    // 3. Lightbox open/close functions with focus restoration
+    let lastActiveElement = null;
+
+    function openLightbox(src, alt, captionText) {
+        if (!lightboxImg || !lightbox) return;
+        lastActiveElement = document.activeElement;
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || 'Enlarged project image';
+        lightboxCaption.textContent = captionText || '';
+        lightboxCaption.style.display = captionText ? 'block' : 'none';
+        lightbox.classList.add('open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        lightbox.focus();
+    }
+
+    function openDiagramLightbox(src, captionText) {
+        if (!lightbox) return;
+        lastActiveElement = document.activeElement;
+        if (lightboxImg) lightboxImg.style.display = 'none';
+        if (lightboxCaption) {
+            lightboxCaption.textContent = captionText || '';
+            lightboxCaption.style.display = captionText ? 'block' : 'none';
+        }
+        let lightboxIframe = lightbox.querySelector('.lightbox-iframe');
+        if (!lightboxIframe) {
+            lightboxIframe = document.createElement('iframe');
+            lightboxIframe.className = 'lightbox-iframe';
+            const container = lightbox.querySelector('.lightbox-container');
+            container.insertBefore(lightboxIframe, lightboxCaption);
+        }
+        lightboxIframe.src = src + '?lightbox=true';
+        lightboxIframe.style.display = 'block';
+        lightbox.classList.add('open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        lightbox.focus();
+    }
+
+    function closeLightbox() {
+        if (!lightbox) return;
+        lightbox.classList.remove('open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        setTimeout(() => {
+            if (lightboxImg) {
+                lightboxImg.src = '';
+                lightboxImg.style.display = 'block';
             }
-            if(H){
-                const f=c.querySelector(".project-description"),w=c.querySelector(".project-subtitle");
-                f?f.insertAdjacentHTML("afterend",H):w&&w.insertAdjacentHTML("afterend",H),
-                u=c.innerHTML
+            if (lightboxCaption) {
+                lightboxCaption.textContent = '';
+                lightboxCaption.style.display = 'none';
             }
-            const I=`<div class="tag-list project-detail-tags">${o(e.tags)}</div>`;
-            let A="";
-            e.actionUrl||e.sourceUrl?(A+=`<hr class="project-detail-footer-divider">
- <div class="project-detail-footer-actions" id="project-detail-footer-actions">
- `,e.sourceUrl&&(A+=`    <a href="${e.sourceUrl}" class="project-btn project-detail-btn btn-secondary" target="_blank" rel="noopener noreferrer">
-         <span>View More</span>
-         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
-     </a>
- `),e.actionUrl&&(A+=`    <a href="${e.actionUrl}" class="project-btn project-detail-btn" target="_blank" rel="noopener noreferrer">
-         <span>${e.actionText||"Visit"}</span>
-         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
-     </a>
- `),A+=`    <a href="/" class="project-detail-back-btn data-spa-link">Back to Home</a>
- </div>`):A='<div class="project-detail-footer-actions"><a href="/" class="project-detail-back-btn data-spa-link">Back to Home</a></div>',
-            d.innerHTML=I+u+A;
-            const S=d.querySelector("img");
-            S&&(S.removeAttribute("loading"),S.setAttribute("loading","eager"),S.setAttribute("fetchpriority","high")),
-            R(d),
-            i==="clear-tech"&&initClearTechBrochure(d),
-            d.querySelectorAll(".data-spa-link").forEach(f=>f.addEventListener("click",w=>{w.preventDefault(),h()})),
-            s.forEach(f=>{f.style.display="none",f.style.opacity="",f.style.transition=""}),
-            document.body.classList.add("standalone-page"),
-            d.style.opacity="0",
-            d.style.display="block",
-            C(),
-            requestAnimationFrame(()=>{
-                requestAnimationFrame(()=>{
-                    d.style.transition="opacity 0.15s ease",
-                    d.style.opacity="1",
-                    setTimeout(()=>{d.style.transition=""},180)
-                })
-            }),
-            document.title=`${e.title} | Ryan March`;
-            let P=document.querySelector('link[rel="canonical"]');
-            P&&P.setAttribute("href",`https://ryanmarch.me/project/${i}/`)
-        }catch(l){
-            console.error("Failed to load project",l),
-            s.forEach(u=>{u.style.opacity="",u.style.transition=""})
+            const lightboxIframe = lightbox.querySelector('.lightbox-iframe');
+            if (lightboxIframe) {
+                lightboxIframe.src = '';
+                lightboxIframe.style.display = 'none';
+            }
+            if (lastActiveElement && typeof lastActiveElement.focus === 'function') {
+                lastActiveElement.focus();
+            }
+        }, 400);
+    }
+
+    if (lightboxClose) {
+        lightboxClose.addEventListener('click', closeLightbox);
+    }
+    if (lightbox) {
+        lightbox.addEventListener('click', closeLightbox);
+    }
+
+    // Shared handler for lightbox image clicks and hash-link smooth scrolling.
+    // searchRoot lets hash links be resolved within a scoped container (e.g. SPA frame).
+    function setupContentClicks(container, searchRoot) {
+        container.addEventListener('click', (e) => {
+            // Handle Diagram click to open lightbox
+            const diagramSection = e.target.closest('.diagram-section');
+            if (diagramSection) {
+                e.stopPropagation();
+                const iframe = diagramSection.querySelector('iframe');
+                if (iframe) {
+                    const caption = diagramSection.nextElementSibling;
+                    const captionText = (caption && caption.classList.contains('gallery-caption')) ? caption.textContent : '';
+                    openDiagramLightbox(iframe.getAttribute('src'), captionText);
+                }
+                return;
+            }
+
+            // 1. Handle Lightbox for images
+            if (e.target.tagName === 'IMG') {
+                e.stopPropagation();
+                const parent = e.target.closest('.gallery-item');
+                const caption = parent ? parent.querySelector('.gallery-caption') : null;
+                openLightbox(e.target.src, e.target.alt, caption ? caption.textContent : '');
+                return;
+            }
+
+            // 2. Handle Table of Contents / Hash Links
+            const hashLink = e.target.closest('a[href^="#"]');
+            if (hashLink) {
+                const targetId = hashLink.getAttribute('href').substring(1);
+                const targetElement =
+                    (searchRoot && searchRoot.querySelector(`#${targetId}`)) ||
+                    document.getElementById(targetId);
+                if (targetElement) {
+                    e.preventDefault();
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    }
+
+    if (projectDetailArea) {
+        setupContentClicks(projectDetailArea, projectDetailArea);
+    }
+
+    // Escape key handling
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            if (lightbox && lightbox.classList.contains('open')) {
+                closeLightbox();
+            }
+        }
+    });
+
+    function performScrollRestorationOrScrollToTop() {
+        const scrollX = sessionStorage.getItem('live_reload_scroll_x');
+        const scrollY = sessionStorage.getItem('live_reload_scroll_y');
+        if (scrollX !== null && scrollY !== null) {
+            sessionStorage.removeItem('live_reload_scroll_x');
+            sessionStorage.removeItem('live_reload_scroll_y');
+            window.scrollTo(parseInt(scrollX, 10), parseInt(scrollY, 10));
+        } else {
+            window.scrollTo(0, 0);
         }
     }
-    
-    function h(i=!0){
-        i&&window.location.pathname!=="/"?history.pushState(null,"","/"):!i&&window.location.pathname!=="/"&&history.replaceState(null,"","/"),
-        document.title="Ryan March | Product & Technology";
-        let e=document.querySelector('link[rel="canonical"]');
-        e&&e.setAttribute("href","https://ryanmarch.me/");
-        
-        d.style.transition="opacity 0.1s ease",
-        d.style.opacity="0",
-        setTimeout(()=>{
-            d.style.display="none",
-            d.style.opacity="",
-            d.style.transition="",
-            d.innerHTML="",
-            document.body.classList.remove("standalone-page");
-            
-            const a=document.querySelector(".top-row"),
-                  r=document.querySelector(".filter-container");
-                  
-            const showActive = k && Array.from(k.querySelectorAll(".destination-card")).some(card => !card.classList.contains("filtered-out"));
-            const showArchive = kArchive && Array.from(kArchive.querySelectorAll(".destination-card")).some(card => !card.classList.contains("filtered-out"));
-            
-            [a,r].forEach(s=>{s&&(s.style.opacity="0",s.style.display=s===a?"flex":"block")});
-            if (k) { k.style.opacity="0"; k.style.display = showActive ? "grid" : "none"; }
-            if (kArchive) { kArchive.style.opacity="0"; kArchive.style.display = showArchive ? "grid" : "none"; }
-            if (archiveDivider) { archiveDivider.style.opacity="0"; archiveDivider.style.display = (showActive && showArchive) ? "flex" : "none"; }
-            
-            C(),
-            requestAnimationFrame(()=>{
-                requestAnimationFrame(()=>{
-                    [a,r,k,kArchive,archiveDivider].forEach(s=>{
-                        s&&(s.style.transition="opacity 0.15s ease",s.style.opacity="1")
-                    }),
-                    setTimeout(()=>{
-                        [a,r,k,kArchive,archiveDivider].forEach(s=>{
-                            s&&(s.style.transition="",s.style.opacity="")
-                        })
-                    },180)
-                })
-            })
-        },120)
-    }
-    
-    window.addEventListener("popstate",g);
-    function g(){
-        const e=window.location.pathname.match(/^\/project\/([^\/]+)\/?/);
-        if(e){
-            const a=e[1];
-            M(a)
-        }else h(!1)
-    }
-    
-    d&&x(d,d),
-    k&&k.addEventListener("click",i=>{
-        const e=i.target.closest(".destination-card");
-        if(!e||i.target.closest(".project-btn:not(.read-more-btn)"))return;
-        const a=e.querySelector(".read-more-btn");
-        if(a&&!i.target.closest("a:not(.read-more-btn)")){
-            i.preventDefault();
-            const r=a.getAttribute("href"),
-                  t=a.getAttribute("data-project-id");
-            history.pushState(null,"",r),
-            M(t)
+
+    // === SPA ROUTER ===
+
+    async function loadProject(projectId) {
+        const project = myProjects.find(p => p.id === projectId);
+        if (!project) { navigateHome(false); return; }
+
+        // Fade out home view before switching
+        const topRow = document.querySelector('.top-row');
+        const filterContainer = document.querySelector('.filter-container');
+        const projectsGrid = document.getElementById('projects-grid');
+        const archiveProjectsGrid = document.getElementById('archive-projects-grid');
+        const homeArchiveDivider = document.getElementById('archive-divider');
+        const homeEls = [topRow, filterContainer, projectsGrid, archiveProjectsGrid, homeArchiveDivider].filter(Boolean);
+        homeEls.forEach(el => { el.style.transition = 'opacity 0.1s ease'; el.style.opacity = '0'; });
+
+        try {
+            // 1. Fetch content
+            const response = await fetch(`/content/${projectId}/`);
+            if (!response.ok) throw new Error("Content missing");
+            let htmlContent = await response.text();
+
+            // 2. Rewrite Audio URLs to R2
+            htmlContent = htmlContent.replace(/(src|href)="(?:\.\/)?content\/[^\/]+\/audio\/([^\"]+\.mp3)"/g, '$1="https://media.ryanmarch.me/$2"');
+
+            // 3. Extract Headings for TOC
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlContent;
+            const headings = tempDiv.querySelectorAll('h4[id]');
+            let navHtml = '';
+            if (headings.length > 0) {
+                const links = Array.from(headings).map(h => `<a href="#${h.id}">${h.querySelector('span') ? h.querySelector('span').innerHTML : h.innerHTML}</a>`);
+                if (project.actionUrl || project.sourceUrl) {
+                    links.push('<a href="#project-detail-footer-actions">Links</a>');
+                }
+                navHtml = `<nav class="project-nav"><div class="nav-links">${links.join('')}</div></nav>`;
+            }
+
+            // 4. Inject TOC
+            if (navHtml) {
+                const desc = tempDiv.querySelector('.project-description');
+                const sub = tempDiv.querySelector('.project-subtitle');
+                if (desc) {
+                    desc.insertAdjacentHTML('afterend', navHtml);
+                } else if (sub) {
+                    sub.insertAdjacentHTML('afterend', navHtml);
+                }
+                htmlContent = tempDiv.innerHTML;
+            }
+
+            // 5. Build Tags
+            const tagsHtml = `<div class="tag-list project-detail-tags">${buildTagsHtml(project.tags)}</div>`;
+
+            // 6. Build Footer
+            let footerHtml = '';
+            if (project.actionUrl || project.sourceUrl) {
+                footerHtml += '<hr class="project-detail-footer-divider">\n<div class="project-detail-footer-actions" id="project-detail-footer-actions">\n';
+                if (project.sourceUrl) {
+                    footerHtml += `    <a href="${project.sourceUrl}" class="project-btn project-detail-btn btn-secondary" target="_blank" rel="noopener noreferrer">
+        <span>View More</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>\n`;
+                }
+                if (project.actionUrl) {
+                    footerHtml += `    <a href="${project.actionUrl}" class="project-btn project-detail-btn" target="_blank" rel="noopener noreferrer">
+        <span>${project.actionText || 'Visit'}</span>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42L17.59 5H14V3zM19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2 2v-7h-2v7z"/></svg>
+    </a>\n`;
+                }
+                footerHtml += '    <a href="/" class="project-detail-back-btn data-spa-link">Back to Home</a>\n</div>';
+            } else {
+                footerHtml = '<div class="project-detail-footer-actions"><a href="/" class="project-detail-back-btn data-spa-link">Back to Home</a></div>';
+            }
+
+            // 7. Inject everything
+            projectDetailArea.innerHTML = tagsHtml + htmlContent + footerHtml;
+
+            // 8. Optimize LCP: load the first image eagerly
+            const firstImg = projectDetailArea.querySelector('img');
+            if (firstImg) {
+                firstImg.removeAttribute('loading');
+                firstImg.setAttribute('loading', 'eager');
+                firstImg.setAttribute('fetchpriority', 'high');
+            }
+
+            // 9. Wire up handlers
+            initializeCustomAudioPlayers(projectDetailArea);
+
+            // Initialize CLEAR Tech brochure tabs if applicable
+            if (projectId === 'clear-tech') {
+                initClearTechBrochure(projectDetailArea);
+            }
+
+            // Re-bind back button inside footer
+            const backBtns = projectDetailArea.querySelectorAll('.data-spa-link');
+            backBtns.forEach(b => b.addEventListener('click', (e) => {
+                e.preventDefault();
+                navigateHome();
+            }));
+
+            // 10. Show Project View, Hide Home (after fade out completes)
+            homeEls.forEach(el => { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; });
+            document.body.classList.add('standalone-page');
+
+            // Fade in project detail
+            projectDetailArea.style.opacity = '0';
+            projectDetailArea.style.display = 'block';
+            performScrollRestorationOrScrollToTop();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    projectDetailArea.style.transition = 'opacity 0.15s ease';
+                    projectDetailArea.style.opacity = '1';
+                    setTimeout(() => { projectDetailArea.style.transition = ''; }, 180);
+                });
+            });
+
+            document.title = `${project.title} | Ryan March`;
+
+            // Update canonical URL
+            let canonicalLink = document.querySelector('link[rel="canonical"]');
+            if (canonicalLink) {
+                canonicalLink.setAttribute('href', `https://ryanmarch.me/project/${projectId}/`);
+            }
+
+        } catch (e) {
+            console.error("Failed to load project", e);
+            // Restore home visibility on error
+            homeEls.forEach(el => { el.style.opacity = ''; el.style.transition = ''; });
         }
-    }),
-    kArchive&&kArchive.addEventListener("click",i=>{
-        const e=i.target.closest(".destination-card");
-        if(!e||i.target.closest(".project-btn:not(.read-more-btn)"))return;
-        const a=e.querySelector(".read-more-btn");
-        if(a&&!i.target.closest("a:not(.read-more-btn)")){
-            i.preventDefault();
-            const r=a.getAttribute("href"),
-                  t=a.getAttribute("data-project-id");
-            history.pushState(null,"",r),
-            M(t)
+    }
+
+    function navigateHome(pushState = true) {
+        if (pushState && window.location.pathname !== '/') {
+            history.pushState(null, '', '/');
+        } else if (!pushState && window.location.pathname !== '/') {
+            history.replaceState(null, '', '/');
         }
-    }),
-    g();
-    
-    const b=document.querySelector(".slim-header-brand");
-    b&&b.addEventListener("click",i=>{
-        document.body.classList.contains("standalone-page")&&(i.preventDefault(),h())
-    }),
-    window.addEventListener("beforeunload",()=>{
-        try{
-            sessionStorage.setItem("live_reload_scroll_x",window.scrollX),
-            sessionStorage.setItem("live_reload_scroll_y",window.scrollY)
-        }catch{}
-    })
+        document.title = 'Ryan March | Product & Technology';
+
+        // Update canonical URL
+        let canonicalLink = document.querySelector('link[rel="canonical"]');
+        if (canonicalLink) {
+            canonicalLink.setAttribute('href', 'https://ryanmarch.me/');
+        }
+
+        // Fade out project detail, then swap views
+        projectDetailArea.style.transition = 'opacity 0.1s ease';
+        projectDetailArea.style.opacity = '0';
+
+        setTimeout(() => {
+            projectDetailArea.style.display = 'none';
+            projectDetailArea.style.opacity = '';
+            projectDetailArea.style.transition = '';
+            projectDetailArea.innerHTML = '';
+            document.body.classList.remove('standalone-page');
+
+            const topRow = document.querySelector('.top-row');
+            const filterContainer = document.querySelector('.filter-container');
+
+            // Determine which grids to show based on current filter state
+            const showActive = grid && Array.from(grid.querySelectorAll('.destination-card')).some(card => !card.classList.contains('filtered-out'));
+            const showArchive = archiveGrid && Array.from(archiveGrid.querySelectorAll('.destination-card')).some(card => !card.classList.contains('filtered-out'));
+
+            // Reveal home elements with a fade-in
+            [topRow, filterContainer].forEach(el => {
+                if (!el) return;
+                el.style.opacity = '0';
+                el.style.display = el === topRow ? 'flex' : 'block';
+            });
+            if (grid) {
+                grid.style.opacity = '0';
+                grid.style.display = showActive ? 'grid' : 'none';
+            }
+            if (archiveGrid) {
+                archiveGrid.style.opacity = '0';
+                archiveGrid.style.display = showArchive ? 'grid' : 'none';
+            }
+            if (archiveDivider) {
+                archiveDivider.style.opacity = '0';
+                archiveDivider.style.display = (showActive && showArchive) ? 'flex' : 'none';
+            }
+
+            performScrollRestorationOrScrollToTop();
+
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    [topRow, filterContainer, grid, archiveGrid, archiveDivider].forEach(el => {
+                        if (!el) return;
+                        el.style.transition = 'opacity 0.15s ease';
+                        el.style.opacity = '1';
+                    });
+                    setTimeout(() => {
+                        [topRow, filterContainer, grid, archiveGrid, archiveDivider].forEach(el => {
+                            if (!el) return;
+                            el.style.transition = '';
+                            el.style.opacity = '';
+                        });
+                    }, 180);
+                });
+            });
+        }, 120);
+    }
+
+    // Listen for History popstate (Back/Forward buttons)
+    window.addEventListener('popstate', handleUrlRoute);
+
+    function handleUrlRoute() {
+        const path = window.location.pathname;
+        const match = path.match(/^\/project\/([^\/]+)\/?/);
+        if (match) {
+            const projectId = match[1];
+            loadProject(projectId);
+        } else {
+            navigateHome(false);
+        }
+    }
+
+    if (projectDetailArea) {
+        setupContentClicks(projectDetailArea, null);
+    }
+
+    // Card clicks — SPA interception for both active and archive grids
+    const setupGridClickInterception = (targetGrid) => {
+        if (!targetGrid) return;
+        targetGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.destination-card');
+            if (!card) return;
+
+            // External links navigate on their own
+            if (e.target.closest('.project-btn:not(.read-more-btn)')) {
+                return;
+            }
+
+            // SPA Interception
+            const readMoreBtn = card.querySelector('.read-more-btn');
+            if (readMoreBtn && !e.target.closest('a:not(.read-more-btn)')) {
+                e.preventDefault();
+                const url = readMoreBtn.getAttribute('href');
+                const projectId = readMoreBtn.getAttribute('data-project-id');
+                history.pushState(null, '', url);
+                loadProject(projectId);
+            }
+        });
+    };
+
+    setupGridClickInterception(grid);
+    setupGridClickInterception(archiveGrid);
+
+    // Initial Route Check
+    handleUrlRoute();
+
+    // Intercept slim-header brand link to use SPA navigation
+    const headerBrand = document.querySelector('.slim-header-brand');
+    if (headerBrand) {
+        headerBrand.addEventListener('click', (e) => {
+            // Only intercept when we're on a project page; let normal navigation handle the home page
+            if (document.body.classList.contains('standalone-page')) {
+                e.preventDefault();
+                navigateHome();
+            }
+        });
+    }
+
+    // Save scroll position on any page unload (e.g., manual browser reload)
+    window.addEventListener('beforeunload', () => {
+        try {
+            sessionStorage.setItem('live_reload_scroll_x', window.scrollX);
+            sessionStorage.setItem('live_reload_scroll_y', window.scrollY);
+        } catch (e) { }
+    });
 });
