@@ -612,6 +612,42 @@
         .back-home-link:hover span {
             transform: translateX(-3px);
         }
+
+        /* Responsive HTML templates bar for case study editing */
+        .editor-templates-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 0.5rem 0.25rem 0.75rem 0.25rem;
+            margin-top: 0.25rem;
+            border-bottom: 1px solid var(--card-border);
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+        }
+        .editor-templates-bar::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Safari and Chrome */
+        }
+        .editor-templates-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-right: 0.25rem;
+            flex-shrink: 0;
+        }
+        .template-btn {
+            font-size: 0.75rem !important;
+            padding: 0.4rem 0.75rem !important;
+            border-radius: 6px !important;
+            height: auto !important;
+            line-height: 1.2 !important;
+            margin: 0 !important;
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
     </style>
 </head>
 
@@ -787,6 +823,40 @@
 
                 <div id="active-file-label"
                     style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary); margin-top: -0.5rem; margin-bottom: 0.25rem;">
+                </div>
+
+                <!-- HTML Layout Block Templates -->
+                <div id="editor-templates-container" class="hidden editor-templates-bar">
+                    <span class="editor-templates-label">Insert:</span>
+                    <button class="btn btn-secondary template-btn" onclick="insertSectionDivider()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        <span>Divider</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertGalleryBlock()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span>Gallery</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertAudioPlayerBlock()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                        <span>Audio</span>
+                    </button>
+                    
+                    <!-- Vertical separator -->
+                    <div style="width: 1px; height: 16px; background: var(--card-border); flex-shrink: 0; align-self: center; margin: 0 0.25rem;"></div>
+                    
+                    <!-- HTML Quick Tags -->
+                    <button class="btn btn-secondary template-btn" onclick="insertParagraphTag()">
+                        <span>p</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertDivTag()">
+                        <span>div</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertLinkTag()">
+                        <span>link</span>
+                    </button>
+                    <button class="btn btn-secondary template-btn" onclick="insertListTag()">
+                        <span>list</span>
+                    </button>
                 </div>
 
                 <!-- Find in File Bar -->
@@ -1683,12 +1753,24 @@
                 } else if (projectDataCard) {
                     projectDataCard.classList.add('hidden');
                 }
+
+                // Toggle templates container visibility
+                const templatesContainer = document.getElementById('editor-templates-container');
+                if (templatesContainer) {
+                    if (filePath && filePath.endsWith('.html')) {
+                        templatesContainer.classList.remove('hidden');
+                    } else {
+                        templatesContainer.classList.add('hidden');
+                    }
+                }
             } catch (err) {
                 showAlert(alertEl, `Error loading file: ${err.message}`, 'error');
                 editorCard.classList.add('hidden');
                 activeFileLabel.textContent = '';
                 const projectDataCard = document.getElementById('project-data-card');
                 if (projectDataCard) projectDataCard.classList.add('hidden');
+                const templatesContainer = document.getElementById('editor-templates-container');
+                if (templatesContainer) templatesContainer.classList.add('hidden');
             } finally {
                 textarea.setAttribute('contenteditable', 'true');
                 toggleWrapLines();
@@ -1899,6 +1981,157 @@
             } else {
                 localStorage.removeItem(`draft_${currentFile.path}`);
                 updateDraftStatus('Synced');
+            }
+        }
+
+        // Insert custom layout templates into CodeJar editor
+        function getProjectSlug() {
+            let slug = 'PROJECT_ID';
+            const path = currentFile ? (currentFile.path || '') : '';
+            const match = path.match(/^content\/([^\/]+)\//);
+            if (match) {
+                slug = match[1];
+            }
+            return slug;
+        }
+
+        function insertTemplate(templateText) {
+            const editorEl = document.getElementById('editor-textarea');
+            if (!editorEl) return;
+
+            editorEl.focus();
+
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                if (editorEl.contains(range.commonAncestorContainer)) {
+                    range.deleteContents();
+                    const textNode = document.createTextNode(templateText);
+                    range.insertNode(textNode);
+                    
+                    // Move cursor after the inserted content
+                    range.setStartAfter(textNode);
+                    range.setEndAfter(textNode);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+
+                    if (jar) {
+                        jar.updateCode(editorEl.textContent);
+                        saveDraft();
+                    }
+                    return;
+                }
+            }
+
+            // Fallback: append to the end of editor
+            if (jar) {
+                const currentCode = jar.toString();
+                const separator = currentCode.endsWith('\n') || currentCode === '' ? '' : '\n';
+                jar.updateCode(currentCode + separator + templateText);
+                saveDraft();
+            }
+        }
+
+        function insertSectionDivider() {
+            const template = `<h4 id="section-id" class="section-divider"><span>Section Title</span></h4>\n<p>\n    Write section content here...\n</p>\n`;
+            insertTemplate(template);
+        }
+
+        function insertGalleryBlock() {
+            const slug = getProjectSlug();
+            const template = `<div class="project-gallery">\n    <div class="gallery-item">\n        <img alt="Image Alt Text" src="content/${slug}/images/hero.webp" loading="lazy" />\n        <div class="gallery-caption">Caption text goes here.</div>\n    </div>\n</div>\n`;
+            insertTemplate(template);
+        }
+
+        function insertAudioPlayerBlock() {
+            const slug = getProjectSlug();
+            const template = `<div class="custom-audio-player" data-title="Audio Title" data-subtitle="Audio Subtitle">\n    <audio src="content/${slug}/audio/track.mp3" preload="metadata"></audio>\n</div>\n`;
+            insertTemplate(template);
+        }
+
+        // Context-aware HTML Tag Insertion
+        function insertHTMLTag(openTag, closeTag) {
+            const editorEl = document.getElementById('editor-textarea');
+            if (!editorEl) return;
+
+            editorEl.focus();
+
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                const range = sel.getRangeAt(0);
+                if (editorEl.contains(range.commonAncestorContainer)) {
+                    const selectedText = range.toString();
+                    
+                    range.deleteContents();
+                    
+                    const openNode = document.createTextNode(openTag);
+                    const textNode = document.createTextNode(selectedText);
+                    const closeNode = document.createTextNode(closeTag);
+                    
+                    // Insert nodes in reverse order to place them correctly in DOM
+                    range.insertNode(closeNode);
+                    range.insertNode(textNode);
+                    range.insertNode(openNode);
+                    
+                    // Position cursor between tags (after selected text)
+                    range.setStartAfter(textNode);
+                    range.setEndBefore(closeNode);
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+
+                    if (jar) {
+                        jar.updateCode(editorEl.textContent);
+                        saveDraft();
+                    }
+                    return;
+                }
+            }
+
+            // Fallback: append to the end of editor
+            if (jar) {
+                const currentCode = jar.toString();
+                const separator = currentCode.endsWith('\n') || currentCode === '' ? '' : '\n';
+                jar.updateCode(currentCode + separator + openTag + closeTag);
+                saveDraft();
+            }
+        }
+
+        function isInsideUl() {
+            const editorEl = document.getElementById('editor-textarea');
+            if (!editorEl) return false;
+            
+            let textBeforeCursor = '';
+            if (jar) {
+                const pos = jar.save();
+                const currentCode = jar.toString();
+                textBeforeCursor = currentCode.substring(0, pos.start);
+            } else {
+                textBeforeCursor = editorEl.textContent;
+            }
+            
+            const lastUl = textBeforeCursor.lastIndexOf('<ul');
+            const lastCloseUl = textBeforeCursor.lastIndexOf('</ul>');
+            
+            return lastUl > lastCloseUl;
+        }
+
+        function insertParagraphTag() {
+            insertHTMLTag('<p>', '</p>');
+        }
+
+        function insertDivTag() {
+            insertHTMLTag('<div>', '</div>');
+        }
+
+        function insertLinkTag() {
+            insertHTMLTag('<a href="">', '</a>');
+        }
+
+        function insertListTag() {
+            if (isInsideUl()) {
+                insertHTMLTag('<li>', '</li>');
+            } else {
+                insertHTMLTag('<ul>\n    <li>', '</li>\n</ul>');
             }
         }
 
@@ -2331,7 +2564,72 @@
             }
         }
 
-        // Upload Image
+        // Client-side image resizing via HTML5 Canvas
+        function resizeImageClientSide(dataUrl, filename, folderPath) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = dataUrl;
+                img.onload = function () {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Set the target width based on project specs, or default to 50% width
+                        // max width 800px is excellent for case studies / mobile screens
+                        let targetWidth = Math.round(img.width / 2);
+                        if (folderPath.includes('icon-studio')) {
+                            targetWidth = 400;
+                        } else if (folderPath.includes('motion-poster')) {
+                            targetWidth = 600;
+                        } else if (folderPath.includes('bowserstack')) {
+                            targetWidth = 300;
+                        } else if (folderPath.includes('rentpress')) {
+                            targetWidth = 485;
+                        } else if (folderPath.includes('aasc-analytics')) {
+                            targetWidth = 800;
+                        } else {
+                            // Default to max 800px or half original width
+                            targetWidth = Math.min(800, targetWidth);
+                        }
+                        
+                        // Don't upscale if the original image is already smaller than target width
+                        if (img.width <= targetWidth) {
+                            resolve(null); // skip resizing
+                            return;
+                        }
+
+                        const scaleFactor = targetWidth / img.width;
+                        const targetHeight = Math.round(img.height * scaleFactor);
+
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
+
+                        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                        // Match original image mime type where possible
+                        let mimeType = 'image/jpeg';
+                        let quality = 0.85;
+                        if (filename.endsWith('.webp')) {
+                            mimeType = 'image/webp';
+                            quality = 0.82;
+                        } else if (filename.endsWith('.png')) {
+                            mimeType = 'image/png';
+                        }
+
+                        const resizedDataUrl = canvas.toDataURL(mimeType, quality);
+                        const b64 = resizedDataUrl.split(',')[1];
+                        resolve(b64);
+                    } catch (e) {
+                        reject(e);
+                    }
+                };
+                img.onerror = function (err) {
+                    reject(err);
+                };
+            });
+        }
+
+        // Upload Image (with automatic resizing variant upload)
         async function uploadImage() {
             const folderSelect = document.getElementById('upload-project');
             const fileInput = document.getElementById('upload-file');
@@ -2358,16 +2656,15 @@
             const reader = new FileReader();
 
             reader.onload = async function () {
-                const result = reader.result;
-                // FileReader base64 format is "data:*/*;base64,CONTENT"
-                const b64Content = result.split(',')[1];
+                const dataUrl = reader.result;
+                const b64Content = dataUrl.split(',')[1];
                 const targetPath = `${folderSelect.value}/${targetName}`;
 
-                try {
-                    // Check if file already exists on GitHub to obtain its SHA (for overwrites)
+                // Helper to perform file upload via API
+                async function uploadFileApi(path, base64Data) {
                     let existingSha = null;
                     try {
-                        const checkRes = await fetch(`/api/admin/file?path=${targetPath}&branch=${window.getSelectedBranch()}`, {
+                        const checkRes = await fetch(`/api/admin/file?path=${path}&branch=${window.getSelectedBranch()}`, {
                             headers: {
                                 ...getAuthHeaders()
                             }
@@ -2376,11 +2673,8 @@
                             const checkData = await checkRes.json();
                             existingSha = checkData.sha;
                         }
-                    } catch (e) {
-                        // File likely does not exist yet, proceed with existingSha = null
-                    }
+                    } catch (e) {}
 
-                    // Push image content
                     const res = await fetch('/api/admin/file', {
                         method: 'POST',
                         headers: {
@@ -2388,10 +2682,10 @@
                             ...getAuthHeaders()
                         },
                         body: JSON.stringify({
-                            path: targetPath,
-                            content: b64Content,
+                            path: path,
+                            content: base64Data,
                             sha: existingSha,
-                            message: `admin: upload ${targetPath}`,
+                            message: `admin: upload ${path}`,
                             branch: window.getSelectedBranch()
                         })
                     });
@@ -2399,8 +2693,41 @@
                     if (!res.ok) {
                         throw new Error(await res.text());
                     }
+                    return true;
+                }
 
-                    showAlert(alertEl, `Success! Image uploaded to ${targetPath}. Copy this path to embed in your HTML: <strong>${targetPath}</strong>`, 'success');
+                try {
+                    // 1. Upload original file
+                    await uploadFileApi(targetPath, b64Content);
+                    let successHtml = `Success! Original image uploaded to <strong>${targetPath}</strong>.`;
+
+                    // 2. Only resize if file is an image and is uploaded to a content/ project folder
+                    if (file.type.startsWith('image/') && folderSelect.value.startsWith('content/')) {
+                        try {
+                            const resizedB64 = await resizeImageClientSide(dataUrl, targetName, folderSelect.value);
+                            if (resizedB64) {
+                                // Determine resized path
+                                const lastDot = targetName.lastIndexOf('.');
+                                const isAasc = folderSelect.value.includes('aasc-analytics');
+                                const suffix = isAasc ? '-small' : '-sm';
+                                let smallName = '';
+                                if (lastDot !== -1) {
+                                    smallName = targetName.substring(0, lastDot) + suffix + targetName.substring(lastDot);
+                                } else {
+                                    smallName = targetName + suffix;
+                                }
+                                const smallPath = `${folderSelect.value}/${smallName}`;
+                                
+                                // Upload resized file in parallel
+                                await uploadFileApi(smallPath, resizedB64);
+                                successHtml += `<br>Auto-resized variant uploaded to <strong>${smallPath}</strong>.`;
+                            }
+                        } catch (resizeErr) {
+                            console.error('Image auto-resizing failed, skipped resizing:', resizeErr);
+                        }
+                    }
+
+                    showAlert(alertEl, `${successHtml}<br>Copy the original path to embed in your HTML: <strong>${targetPath}</strong>`, 'success');
                     fileInput.value = '';
                     nameInput.value = '';
                 } catch (err) {
