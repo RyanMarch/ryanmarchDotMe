@@ -5,9 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "python3 dev/serve.py",
-    "build": "node build.js"
+    "build": "npm run test && node build.js",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "esbuild": "^0.20.0"
+    "@eslint/js": "^10.0.1",
+    "@vitest/coverage-v8": "^4.1.8",
+    "esbuild": "^0.20.0",
+    "eslint": "^10.5.0",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.8"
   }
 }
