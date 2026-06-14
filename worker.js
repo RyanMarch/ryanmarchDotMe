@@ -229,7 +229,9 @@ export default {
                         if (body && body.branch) {
                             branch = body.branch;
                         }
-                    } catch (e) { }
+                    } catch {
+                        // Ignore body parsing failures
+                    }
                 }
 
                 if (!filePath) {
@@ -331,7 +333,7 @@ export default {
 
             // 1.7. Normalize trailing slash for project details (redirect /project/abc to /project/abc/)
             if (path.startsWith('/project/') && !path.endsWith('/')) {
-                const projectMatch = cleanPath.match(/^\/project\/([^\/]+)$/i);
+                const projectMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
                 if (projectMatch) {
                     const projectId = projectMatch[1];
                     const project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
@@ -366,7 +368,7 @@ export default {
                     '/admin.html'
                 ].includes(cleanPath.toLowerCase());
 
-            const projectMatch = cleanPath.match(/^\/project\/([^\/]+)$/i);
+            const projectMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
             let isValidProject = false;
             let project = null;
             if (projectMatch) {
