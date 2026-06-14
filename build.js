@@ -12,7 +12,10 @@ const filesToMinify = [
   { path: 'style.css', loader: 'css' },
   { path: 'assets/js/projects.js', loader: 'js' },
   { path: 'assets/js/theme.js', loader: 'js' },
-  { path: 'assets/js/project-data.js', loader: 'js' }
+  { path: 'assets/js/project-data.js', loader: 'js' },
+  { path: 'assets/js/audio-player.js', loader: 'js' },
+  { path: 'assets/js/lightbox.js', loader: 'js' },
+  { path: 'assets/js/brochure.js', loader: 'js' }
 ];
 
 function getGitLastMod(filePath, fallbackDate) {
@@ -22,7 +25,7 @@ function getGitLastMod(filePath, fallbackDate) {
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;
     }
-  } catch (e) {
+  } catch {
     // Fail silently, fallback to build date
   }
   return fallbackDate;
