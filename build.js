@@ -2,8 +2,8 @@ import esbuild from 'esbuild';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
 import { myProjects } from './assets/js/project-data.js';
+import { buildSitemapXml } from './sitemap-generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,39 +18,11 @@ const filesToMinify = [
   { path: 'assets/js/brochure.js', loader: 'js' }
 ];
 
-function getGitLastMod(filePath, fallbackDate) {
-  try {
-    const stdout = execSync(`git log -1 --format=%cs -- "${filePath}"`, { stdio: ['ignore', 'pipe', 'ignore'] });
-    const dateStr = stdout.toString().trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      return dateStr;
-    }
-  } catch {
-    // Fail silently, fallback to build date
-  }
-  return fallbackDate;
-}
-
 async function generateSitemap() {
   console.log('🗺️ Generating sitemap.xml...');
   const sitemapPath = path.resolve(__dirname, 'sitemap.xml');
   const today = new Date().toISOString().split('T')[0];
-
-  const homeLastMod = getGitLastMod('index.html', today);
-
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-  xml += `  <url><loc>https://ryanmarch.me/</loc><lastmod>${homeLastMod}</lastmod><priority>1.0</priority></url>\n`;
-
-  for (const project of myProjects) {
-    if (project.hasExtendedContent) {
-      const projectFile = `content/${project.id}/index.html`;
-      const lastMod = getGitLastMod(projectFile, today);
-      xml += `  <url><loc>https://ryanmarch.me/project/${project.id}/</loc><lastmod>${lastMod}</lastmod><priority>0.8</priority></url>\n`;
-    }
-  }
-
-  xml += '</urlset>\n';
+  const xml = buildSitemapXml(myProjects, today);
   fs.writeFileSync(sitemapPath, xml, 'utf8');
   console.log('✅ Generated sitemap.xml successfully!');
 }
