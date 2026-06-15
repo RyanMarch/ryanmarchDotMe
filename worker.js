@@ -393,9 +393,10 @@ export default {
             }
 
             // Fetch the asset — for valid project routes, explicitly serve index.html
-            // Force a clean GET request to the root index asset for SPA routes to bypass local Wrangler asset matching loops
+            // (we can't rely on SPA fallback since we removed not_found_handling)
+            const assetUrl = new URL(url.pathname + url.search, assetHost);
             const assetRequest = isValidProject
-                ? new Request(`${assetHost}/`, { method: 'GET', headers: request.headers })
+                ? new Request(`${assetHost}/`, request)
                 : new Request(assetUrl.toString(), request);
             const response = await env.ASSETS.fetch(assetRequest);
 
