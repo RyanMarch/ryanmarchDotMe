@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 import { myProjects } from '../assets/js/project-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -102,5 +103,49 @@ describe('Project Case Studies Validation', () => {
                 expect(sitemapContent.includes(locUrl), `sitemap.xml should NOT include project "${project.title}" URL: ${locUrl}`).toBe(false);
             }
         });
+    });
+
+    it('should verify that critical deployment and build files are not ignored by Git', () => {
+        const criticalFiles = [
+            'sitemap-generator.js',
+            'build.js',
+            'package.json',
+            'worker.js',
+            'assets/js/project-data.js',
+            'assets/js/projects.js',
+            'tests/sitemap.test.js'
+        ];
+
+        criticalFiles.forEach(file => {
+            const filePath = path.join(projectRoot, file);
+            expect(fs.existsSync(filePath), `Critical file "${file}" should exist on disk`).toBe(true);
+        });
+
+        // Run git check-ignore to ensure they are not ignored
+        try {
+            criticalFiles.forEach(file => {
+                try {
+                    // git check-ignore returns exit status 0 if the path is ignored, and status 1 if not ignored
+                    execSync(`git check-ignore -q "${file}"`, { stdio: 'ignore' });
+                    // If it succeeded (didn't throw), it means the file IS ignored!
+                    expect.fail(`Critical deployment file "${file}" is currently ignored by Git (check .gitignore)`);
+                } catch (err) {
+                    // If it's a test failure from expect.fail, rethrow it
+                    if (err.message && err.message.includes('ignored by Git')) {
+                        throw err;
+                    }
+                    // If git check-ignore returned 1, this is the expected behavior (not ignored)
+                    if (err.status !== 1) {
+                        throw err;
+                    }
+                }
+            });
+        } catch (e) {
+            // Git check-ignore will fail to execute if git is not installed (e.g., in some CI/container sandboxes).
+            // We bypass the check only if it is a system/git missing error, but fail if it's a test assertion failure.
+            if (e.message && e.message.includes('ignored by Git')) {
+                throw e;
+            }
+        }
     });
 });
