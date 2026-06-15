@@ -203,12 +203,6 @@ export default {
 
             const cleanPath = normalizePath(path);
 
-            console.log('--- Worker Request Debug ---');
-            console.log('Incoming path:', path);
-            console.log('Normalized cleanPath:', cleanPath);
-            console.log('Matches /portfolio prefix?:', cleanPath.startsWith('/portfolio'));
-            console.log('----------------------------');
-
             // Redirect /admin or /admin/ to /admin.html
             if (cleanPath === '/admin') {
                 return new Response(null, {
