@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "python3 dev/serve.py",
+    "dev:worker": "npx wrangler dev --persist-to /tmp/wrangler-persist",
     "build": "npm run test && node build.js",
     "test": "vitest run",
     "lint": "eslint .",
