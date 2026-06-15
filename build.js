@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { myProjects } from './assets/js/project-data.js';
-import { buildSitemapXml } from './dev/sitemap-generator.js';
+import { buildSitemapXml } from './sitemap-generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
