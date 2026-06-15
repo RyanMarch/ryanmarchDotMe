@@ -179,10 +179,17 @@ export default {
             const url = new URL(request.url);
 
             // Determine if running locally to bypass recursive routing loopback in wrangler dev
-            const isLocal = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
+            const isLocal = request.headers.has('mf-original-hostname') || url.hostname.startsWith('localhost') || url.hostname.startsWith('127.0.0.1') || url.hostname === 'assets.local';
             const assetHost = isLocal ? 'http://assets.local' : url.origin;
+            const redirectOrigin = isLocal ? url.origin : 'https://ryanmarch.me';
 
-            // Redirect www to non-www
+            // Redirect HTTP to HTTPS in production, cleaning www prefix if present
+            if (!isLocal && (url.protocol === 'http:' || request.headers.get('x-forwarded-proto') === 'http')) {
+                const cleanHostname = url.hostname.replace(/^www\./i, '');
+                return Response.redirect(`https://${cleanHostname}${url.pathname}${url.search}`, 301);
+            }
+
+            // Redirect www to non-www (HTTPS requests in production)
             if (url.hostname === 'www.ryanmarch.me') {
                 return Response.redirect(`https://ryanmarch.me${url.pathname}${url.search}`, 301);
             }
@@ -196,12 +203,18 @@ export default {
 
             const cleanPath = normalizePath(path);
 
+            console.log('--- Worker Request Debug ---');
+            console.log('Incoming path:', path);
+            console.log('Normalized cleanPath:', cleanPath);
+            console.log('Matches /portfolio prefix?:', cleanPath.startsWith('/portfolio'));
+            console.log('----------------------------');
+
             // Redirect /admin or /admin/ to /admin.html
             if (cleanPath === '/admin') {
                 return new Response(null, {
                     status: 301,
                     headers: {
-                        'Location': `https://ryanmarch.me/admin.html${url.search}`,
+                        'Location': `${redirectOrigin}/admin.html${url.search}`,
                         'X-Robots-Tag': 'noindex, nofollow'
                     }
                 });
@@ -311,24 +324,27 @@ export default {
                 }
             }
 
-            // 1. Check redirects first
+            // 1. Check legacy portfolio paths first
+            if (cleanPath === '/portfolio' || cleanPath.startsWith('/portfolio/')) {
+                const segments = cleanPath.split('/');
+                const projectSlug = segments[2];
+
+                if (projectSlug) {
+                    const searchSuffix = url.search ? url.search : '';
+                    return Response.redirect(`${redirectOrigin}/project/${projectSlug.toLowerCase()}/${searchSuffix}`, 301);
+                } else {
+                    return Response.redirect(`${redirectOrigin}/${url.search}`, 301);
+                }
+            }
+
+            // 1.2. Check standard redirects next
             const redirectMatch = redirects.find(r => normalizePath(r.source).toLowerCase() === cleanPath.toLowerCase());
             if (redirectMatch) {
-                const targetUrl = new URL(redirectMatch.destination, 'https://ryanmarch.me');
+                const targetUrl = new URL(redirectMatch.destination, redirectOrigin);
                 for (const [key, value] of url.searchParams) {
                     targetUrl.searchParams.set(key, value);
                 }
                 return Response.redirect(targetUrl.toString(), redirectMatch.permanent ? 301 : 302);
-            }
-
-            // 1.5. Redirect old portfolio paths to their new counterparts
-            if (cleanPath.startsWith('/portfolio/')) {
-                const projectSlug = cleanPath.substring('/portfolio/'.length);
-                if (projectSlug) {
-                    return Response.redirect(`https://ryanmarch.me/project/${projectSlug}/${url.search}`, 301);
-                }
-            } else if (cleanPath === '/portfolio') {
-                return Response.redirect(`https://ryanmarch.me/${url.search}`, 301);
             }
 
             // 1.7. Normalize trailing slash for project details
@@ -336,9 +352,9 @@ export default {
             if (projectNormalizeMatch) {
                 const projectId = projectNormalizeMatch[1];
                 const project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
-                // If they visited a valid project path, force redirect to a clean trailing-slash format in production
+                // If they visited a valid project path, force redirect to a clean trailing-slash format
                 if (project && !path.endsWith('/')) {
-                    return Response.redirect(`https://ryanmarch.me/project/${project.id}/${url.search}`, 301);
+                    return Response.redirect(`${redirectOrigin}/project/${project.id}/${url.search}`, 301);
                 }
             }
 
@@ -363,6 +379,7 @@ export default {
                     '/sitemap.xml',
                     '/favicon.ico',
                     '/404.html',
+                    '/404',
                     '/index.html',
                     '/admin.html'
                 ].includes(cleanPath.toLowerCase());
@@ -382,7 +399,7 @@ export default {
 
             if (!isValidRoute) {
                 // Fetch and return the custom 404 page
-                const response404 = await env.ASSETS.fetch(new Request(url.origin + '/404.html'));
+                const response404 = await fetch(url.origin + '/404');
                 return new Response(response404.body, {
                     status: 404,
                     headers: {
