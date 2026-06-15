@@ -331,15 +331,14 @@ export default {
                 return Response.redirect(`https://ryanmarch.me/${url.search}`, 301);
             }
 
-            // 1.7. Normalize trailing slash for project details (redirect /project/abc to /project/abc/)
-            if (path.startsWith('/project/') && !path.endsWith('/')) {
-                const projectMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
-                if (projectMatch) {
-                    const projectId = projectMatch[1];
-                    const project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
-                    if (project) {
-                        return Response.redirect(`https://ryanmarch.me/project/${project.id}/${url.search}`, 301);
-                    }
+            // 1.7. Normalize trailing slash for project details
+            const projectNormalizeMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
+            if (projectNormalizeMatch) {
+                const projectId = projectNormalizeMatch[1];
+                const project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
+                // If they visited a valid project path, force redirect to a clean trailing-slash format in production
+                if (project && !path.endsWith('/')) {
+                    return Response.redirect(`https://ryanmarch.me/project/${project.id}/${url.search}`, 301);
                 }
             }
 
@@ -394,15 +393,13 @@ export default {
             }
 
             // Fetch the asset — for valid project routes, explicitly serve index.html
-            // (we can't rely on SPA fallback since we removed not_found_handling)
-            // We use the hostname inside assetHost ('http://assets.local' locally) to prevent recursive loops
-            const assetUrl = new URL(url.pathname + url.search, assetHost);
+            // Force a clean GET request to the root index asset for SPA routes to bypass local Wrangler asset matching loops
             const assetRequest = isValidProject
-                ? new Request(`${assetHost}/`, request)
+                ? new Request(`${assetHost}/`, { method: 'GET', headers: request.headers })
                 : new Request(assetUrl.toString(), request);
             const response = await env.ASSETS.fetch(assetRequest);
 
-            // If it's a valid project route and the response is HTML, rewrite the meta tags
+            // If it's a valid project route and the response is HTML, rewrite the meta tags and drop homepage blocks
             if (isValidProject && project && response.headers.get('content-type')?.includes('text/html')) {
                 return new HTMLRewriter()
                     .on('title', new MetaRewriter(project))
@@ -413,6 +410,10 @@ export default {
                     .on('link[rel="canonical"]', new MetaRewriter(project))
                     .on('script#schema-data', new SchemaRewriter(project))
                     .on('link#lcp-preload', new PreloadRewriter(project))
+                    // Strip out the heavy homepage nodes so Google doesn't flag duplicate content
+                    .on('.top-row', { element(el) { el.remove(); } })
+                    .on('.filter-container', { element(el) { el.remove(); } })
+                    .on('#projects-grid', { element(el) { el.remove(); } })
                     .transform(response);
             }
 
