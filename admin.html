@@ -623,12 +623,17 @@
             padding: 0.5rem 0.25rem 0.75rem 0.25rem;
             margin-top: 0.25rem;
             border-bottom: 1px solid var(--card-border);
-            scrollbar-width: none; /* Hide scrollbar for Firefox */
-            -ms-overflow-style: none; /* Hide scrollbar for IE/Edge */
+            scrollbar-width: none;
+            /* Hide scrollbar for Firefox */
+            -ms-overflow-style: none;
+            /* Hide scrollbar for IE/Edge */
         }
+
         .editor-templates-bar::-webkit-scrollbar {
-            display: none; /* Hide scrollbar for Safari and Chrome */
+            display: none;
+            /* Hide scrollbar for Safari and Chrome */
         }
+
         .editor-templates-label {
             font-size: 0.8rem;
             color: var(--text-secondary);
@@ -636,6 +641,7 @@
             margin-right: 0.25rem;
             flex-shrink: 0;
         }
+
         .template-btn {
             font-size: 0.75rem !important;
             padding: 0.4rem 0.75rem !important;
@@ -683,11 +689,15 @@
 
             <!-- File Selector Card -->
             <section class="card" style="z-index: 10;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
                     <h2 style="margin: 0;">Select File to Edit</h2>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <label for="branch-select" style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-weight: 500;">Target Branch:</label>
-                        <select id="branch-select" onchange="changeBranch()" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; width: auto; height: auto; margin: 0;">
+                        <label for="branch-select"
+                            style="font-size: 0.85rem; color: var(--text-secondary); margin: 0; font-weight: 500;">Target
+                            Branch:</label>
+                        <select id="branch-select" onchange="changeBranch()"
+                            style="font-size: 0.85rem; padding: 0.35rem 0.75rem; border-radius: 6px; width: auto; height: auto; margin: 0;">
                             <option value="main">main</option>
                             <option value="develop">develop</option>
                         </select>
@@ -789,7 +799,7 @@
                                 style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--card-border); object-fit: contain;">
                             <div class="form-group">
                                 <label for="new-project-image-name">Filename to save as</label>
-                                <input type="text" id="new-project-image-name" placeholder="e.g. hero.webp"
+                                <input type="text" id="new-project-image-name" placeholder="e.g. hero.avif"
                                     style="padding: 0.4rem; font-size: 0.9rem;">
                             </div>
                         </div>
@@ -829,21 +839,34 @@
                 <div id="editor-templates-container" class="hidden editor-templates-bar">
                     <span class="editor-templates-label">Insert:</span>
                     <button class="btn btn-secondary template-btn" onclick="insertSectionDivider()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                            style="width:12px;height:12px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h7" />
+                        </svg>
                         <span>Divider</span>
                     </button>
                     <button class="btn btn-secondary template-btn" onclick="insertGalleryBlock()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            style="width:12px;height:12px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
                         <span>Gallery</span>
                     </button>
                     <button class="btn btn-secondary template-btn" onclick="insertAudioPlayerBlock()">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.0"
+                            style="width:12px;height:12px;">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                        </svg>
                         <span>Audio</span>
                     </button>
-                    
+
                     <!-- Vertical separator -->
-                    <div style="width: 1px; height: 16px; background: var(--card-border); flex-shrink: 0; align-self: center; margin: 0 0.25rem;"></div>
-                    
+                    <div
+                        style="width: 1px; height: 16px; background: var(--card-border); flex-shrink: 0; align-self: center; margin: 0 0.25rem;">
+                    </div>
+
                     <!-- HTML Quick Tags -->
                     <button class="btn btn-secondary template-btn" onclick="insertParagraphTag()">
                         <span>p</span>
@@ -916,7 +939,7 @@
                         <input type="file" id="upload-file" accept="image/*" onchange="suggestImageName()">
                     </div>
                     <div class="form-group">
-                        <label for="upload-name">Target Filename (e.g. hero.webp)</label>
+                        <label for="upload-name">Target Filename (e.g. hero.avif)</label>
                         <input type="text" id="upload-name" placeholder="filename.png" autocapitalize="none"
                             autocorrect="off">
                     </div>
@@ -1011,7 +1034,7 @@
                     <div class="form-group">
                         <label for="edit-project-image-path">Image Path</label>
                         <input type="text" id="edit-project-image-path"
-                            placeholder="content/my-awesome-project/images/hero.webp" autocomplete="off">
+                            placeholder="content/my-awesome-project/images/hero.avif" autocomplete="off">
                     </div>
 
                     <div class="form-group">
@@ -1023,7 +1046,7 @@
                                 style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid var(--card-border); object-fit: contain;">
                             <div class="form-group">
                                 <label for="edit-project-image-name">Filename to save as</label>
-                                <input type="text" id="edit-project-image-name" placeholder="e.g. hero.webp"
+                                <input type="text" id="edit-project-image-name" placeholder="e.g. hero.avif"
                                     style="padding: 0.4rem; font-size: 0.9rem;">
                             </div>
                         </div>
@@ -1642,17 +1665,17 @@
         }
 
         // Target Branch Helpers
-        window.getSelectedBranch = function() {
+        window.getSelectedBranch = function () {
             const select = document.getElementById('branch-select');
             return select ? select.value : (localStorage.getItem('admin_selected_branch') || 'main');
         };
 
-        window.changeBranch = function() {
+        window.changeBranch = function () {
             const select = document.getElementById('branch-select');
             if (!select) return;
             const branch = select.value;
             localStorage.setItem('admin_selected_branch', branch);
-            
+
             // If there's an active file being edited, reload it from the new branch
             if (currentFile && currentFile.path) {
                 if (confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
@@ -1699,7 +1722,7 @@
 
             try {
                 // Fetch file payload through proxy API
-                 const res = await fetch(`/api/admin/file?path=${filePath}&branch=${window.getSelectedBranch()}`, {
+                const res = await fetch(`/api/admin/file?path=${filePath}&branch=${window.getSelectedBranch()}`, {
                     headers: {
                         ...getAuthHeaders()
                     }
@@ -2008,7 +2031,7 @@
                     range.deleteContents();
                     const textNode = document.createTextNode(templateText);
                     range.insertNode(textNode);
-                    
+
                     // Move cursor after the inserted content
                     range.setStartAfter(textNode);
                     range.setEndAfter(textNode);
@@ -2039,7 +2062,7 @@
 
         function insertGalleryBlock() {
             const slug = getProjectSlug();
-            const template = `<div class="project-gallery">\n    <div class="gallery-item">\n        <img alt="Image Alt Text" src="content/${slug}/images/hero.webp" loading="lazy" />\n        <div class="gallery-caption">Caption text goes here.</div>\n    </div>\n</div>\n`;
+            const template = `<div class="project-gallery">\n    <div class="gallery-item">\n        <img alt="Image Alt Text" src="content/${slug}/images/hero.avif" loading="lazy" />\n        <div class="gallery-caption">Caption text goes here.</div>\n    </div>\n</div>\n`;
             insertTemplate(template);
         }
 
@@ -2061,18 +2084,18 @@
                 const range = sel.getRangeAt(0);
                 if (editorEl.contains(range.commonAncestorContainer)) {
                     const selectedText = range.toString();
-                    
+
                     range.deleteContents();
-                    
+
                     const openNode = document.createTextNode(openTag);
                     const textNode = document.createTextNode(selectedText);
                     const closeNode = document.createTextNode(closeTag);
-                    
+
                     // Insert nodes in reverse order to place them correctly in DOM
                     range.insertNode(closeNode);
                     range.insertNode(textNode);
                     range.insertNode(openNode);
-                    
+
                     // Position cursor between tags (after selected text)
                     range.setStartAfter(textNode);
                     range.setEndBefore(closeNode);
@@ -2099,7 +2122,7 @@
         function isInsideUl() {
             const editorEl = document.getElementById('editor-textarea');
             if (!editorEl) return false;
-            
+
             let textBeforeCursor = '';
             if (jar) {
                 const pos = jar.save();
@@ -2108,10 +2131,10 @@
             } else {
                 textBeforeCursor = editorEl.textContent;
             }
-            
+
             const lastUl = textBeforeCursor.lastIndexOf('<ul');
             const lastCloseUl = textBeforeCursor.lastIndexOf('</ul>');
-            
+
             return lastUl > lastCloseUl;
         }
 
@@ -2573,7 +2596,7 @@
                     try {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
-                        
+
                         // Set the target width based on project specs, or default to 50% width
                         // max width 800px is excellent for case studies / mobile screens
                         let targetWidth = Math.round(img.width / 2);
@@ -2591,7 +2614,7 @@
                             // Default to max 800px or half original width
                             targetWidth = Math.min(800, targetWidth);
                         }
-                        
+
                         // Don't upscale if the original image is already smaller than target width
                         if (img.width <= targetWidth) {
                             resolve(null); // skip resizing
@@ -2673,7 +2696,7 @@
                             const checkData = await checkRes.json();
                             existingSha = checkData.sha;
                         }
-                    } catch (e) {}
+                    } catch (e) { }
 
                     const res = await fetch('/api/admin/file', {
                         method: 'POST',
@@ -2717,7 +2740,7 @@
                                     smallName = targetName + suffix;
                                 }
                                 const smallPath = `${folderSelect.value}/${smallName}`;
-                                
+
                                 // Upload resized file in parallel
                                 await uploadFileApi(smallPath, resizedB64);
                                 successHtml += `<br>Auto-resized variant uploaded to <strong>${smallPath}</strong>.`;

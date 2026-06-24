@@ -171,41 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
                 const loadingAttr = project.featured ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
 
-                let srcsetAttr = '';
-                let sizesAttr = '';
-                const extIndex = project.image.lastIndexOf('.');
-                if (extIndex !== -1 && (project.id === 'icon-studio' || project.id === 'motion-poster' || project.id === 'bowserstack' || project.id === 'rentpress' || project.id === 'aasc-analytics')) {
-                    const base = project.image.substring(0, extIndex);
-                    const ext = project.image.substring(extIndex);
-                    const suffix = project.id === 'aasc-analytics' ? '-small' : '-sm';
-                    const smImage = `${base}${suffix}${ext}`;
-
-                    let lgWidth = project.imageWidth;
-                    let smWidth = Math.round(project.imageWidth / 2);
-                    if (project.id === 'icon-studio') {
-                        lgWidth = 800;
-                        smWidth = 400;
-                        // } else if (project.id === 'motion-poster') {
-                        //     lgWidth = 1000;
-                        //     smWidth = 600;
-                    } else if (project.id === 'bowserstack') {
-                        lgWidth = 480;
-                        smWidth = 300;
-                    } else if (project.id === 'rentpress') {
-                        lgWidth = 800;
-                        smWidth = 485;
-                    } else if (project.id === 'aasc-analytics') {
-                        lgWidth = 1920;
-                        smWidth = 800;
-                    }
-
-                    srcsetAttr = ` srcset="${smImage} ${smWidth}w, ${project.image} ${lgWidth}w"`;
-
-                    const desktopSize = project.size === 'large' ? '500px' : '300px';
-                    sizesAttr = ` sizes="(max-width: 700px) 90vw, (max-width: 1050px) 45vw, ${desktopSize}"`;
-                }
-
-                visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr}${sizesAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
             } else {
                 let iconSvg;
                 if (project.symbol === 'data') {
