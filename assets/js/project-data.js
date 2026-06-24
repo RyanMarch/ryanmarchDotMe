@@ -58,7 +58,7 @@ export const myProjects = [
         ],
         featured: true,
         size: "large",
-        image: "/content/motion-poster/images/motion-poster-framed.webp",
+        image: "/content/motion-poster/images/eventPoster.avif",
         imageWidth: 1000,
         imageHeight: 750,
         imageClass: "poster-preview-img",
