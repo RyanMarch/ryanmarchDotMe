@@ -5,7 +5,7 @@
         "**/*.code-search": true,
         "project/": true,
         "**/*.webp": true,
-        "**/*.png": true,
+        "**/*.avif": true,
         "**/*.jpg": true,
         "**/*.jpeg": true,
         "**/*.gif": true,
