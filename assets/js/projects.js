@@ -185,9 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (project.id === 'icon-studio') {
                         lgWidth = 800;
                         smWidth = 400;
-                    } else if (project.id === 'motion-poster') {
-                        lgWidth = 1000;
-                        smWidth = 600;
+                        // } else if (project.id === 'motion-poster') {
+                        //     lgWidth = 1000;
+                        //     smWidth = 600;
                     } else if (project.id === 'bowserstack') {
                         lgWidth = 480;
                         smWidth = 300;
@@ -383,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCustomAudioPlayers(projectDetailArea);
     }
 
-        if (projectDetailArea) {
+    if (projectDetailArea) {
         setupContentClicks(projectDetailArea, projectDetailArea);
     }
 
