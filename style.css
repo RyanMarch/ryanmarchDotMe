@@ -1211,6 +1211,7 @@ body.standalone-page {
     color: var(--text-primary);
     font-size: 1.1rem;
     line-height: 1.75;
+    text-wrap: pretty;
 }
 
 .project-detail-content ul,
@@ -1225,6 +1226,7 @@ body.standalone-page {
 
 .project-detail-content li {
     margin-bottom: .5rem;
+    text-wrap: pretty;
 }
 
 .project-detail-content img {
@@ -1279,9 +1281,48 @@ body.standalone-page {
     display: none;
 }
 
+/* Grid View Modifier */
+.project-gallery.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+    padding: 0;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+.project-gallery.grid-view .gallery-item {
+    flex: none;
+    scroll-snap-align: none;
+}
+
+.project-gallery.grid-view .gallery-item img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    max-height: none;
+    width: 100%;
+}
+
+@media (max-width: 950px) {
+    .project-gallery.grid-view {
+        grid-template-columns: repeat(2, 1fr);
+        margin: 1.5rem 0;
+        width: 100%;
+    }
+}
+
+@media (max-width: 500px) {
+    .project-gallery.grid-view {
+        grid-template-columns: 1fr;
+    }
+}
+
 .gallery-item {
     flex: 0 0 85%;
-    scroll-snap-align: center;
+    scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -2121,7 +2162,7 @@ body.standalone-page {
 
     .gallery-item {
         flex: 0 0 85%;
-        scroll-snap-align: center;
+        scroll-snap-align: start;
     }
 
     .gallery-item:has(img.aspect-auto) {
