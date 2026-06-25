@@ -14,7 +14,7 @@ describe('Lightbox Overlay Behavior', () => {
     beforeEach(() => {
         // Clear DOM
         document.body.innerHTML = '';
-        
+
         // Setup container for content click tests
         container = document.createElement('div');
         container.innerHTML = `
@@ -40,7 +40,7 @@ describe('Lightbox Overlay Behavior', () => {
     it('should initialize and create lightbox overlay if not present', () => {
         expect(document.getElementById('lightbox-overlay')).toBeNull();
         initializeLightbox();
-        
+
         const overlay = document.getElementById('lightbox-overlay');
         expect(overlay).not.toBeNull();
         expect(overlay.getAttribute('role')).toBe('dialog');
@@ -96,7 +96,7 @@ describe('Lightbox Overlay Behavior', () => {
         setupContentClicks(container, container);
 
         const img = container.querySelector('.test-img');
-        
+
         // Mock scrollIntoView since jsdom doesn't support layout
         window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
@@ -118,7 +118,7 @@ describe('Lightbox Overlay Behavior', () => {
 
         const overlay = document.getElementById('lightbox-overlay');
         const closeBtn = overlay.querySelector('.lightbox-close');
-        
+
         // Mock querySelectorAll for focusable elements
         const button = document.createElement('button');
         button.focus = vi.fn();
@@ -161,7 +161,7 @@ describe('Lightbox Overlay Behavior', () => {
     it('should return early when missing lightbox or elements', () => {
         // We test close/open early returns by not initializing or clearing variables
         expect(() => closeLightbox()).not.toThrow();
-        expect(() => openLightbox('img.png', 'alt', 'caption')).not.toThrow();
+        expect(() => openLightbox('img.avif', 'alt', 'caption')).not.toThrow();
         expect(() => openDiagramLightbox('diagram.html', 'caption')).not.toThrow();
     });
 
@@ -171,7 +171,7 @@ describe('Lightbox Overlay Behavior', () => {
 
         // Click a diagram section
         const diagramSec = container.querySelector('.diagram-section');
-        
+
         // Trigger click on diagram section (or mock click bubble)
         diagramSec.click();
         const overlay = document.getElementById('lightbox-overlay');
@@ -192,7 +192,7 @@ describe('Lightbox Overlay Behavior', () => {
         openDiagramLightbox('test-diagram.html', 'Diagram description text');
 
         closeLightbox();
-        
+
         // Allow close timeout animation to execute
         await new Promise(resolve => setTimeout(resolve, 450));
 
