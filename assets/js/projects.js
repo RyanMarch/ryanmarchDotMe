@@ -22,22 +22,22 @@ document.addEventListener('DOMContentLoaded', () => {
         {
             id: 'professional',
             label: 'Professional',
-            match: (project) => project.tags.some(t => ['professional', 'platform', 'real estate'].includes(t.label.toLowerCase()))
+            match: (project) => project.tags.some(t => ['professional', 'platform', 'real estate', 'marketing'].includes(t.label.toLowerCase()))
         },
         {
             id: 'web-apps',
             label: 'Web & Apps',
-            match: (project) => project.tags.some(t => ['web development', 'design tool', 'app', 'platform', 'digital signage', 'backend', 'experimentation', 'analytics'].includes(t.label.toLowerCase()))
+            match: (project) => project.tags.some(t => ['web development', 'app', 'platform', 'digital signage', 'backend', 'experimentation', 'analytics', "web app", "website"].includes(t.label.toLowerCase()))
         },
         {
             id: 'audio-music',
             label: 'Audio & Music',
-            match: (project) => project.tags.some(t => ['audio production', 'composition', 'radio', 'podcast', 'mixing'].includes(t.label.toLowerCase()))
+            match: (project) => project.tags.some(t => ['audio production', 'composition', 'radio', 'podcast', 'mixing', 'music', 'audio', 'podcast', 'music production', 'music business'].includes(t.label.toLowerCase()))
         },
         {
             id: 'video-film',
             label: 'Video & Film',
-            match: (project) => project.tags.some(t => ['video production', 'comedy'].includes(t.label.toLowerCase()))
+            match: (project) => project.tags.some(t => ['video production', 'comedy', 'film', 'video'].includes(t.label.toLowerCase()))
         },
         {
             id: 'archive',

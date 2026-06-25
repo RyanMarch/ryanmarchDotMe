@@ -8,7 +8,8 @@ export const myProjects = [
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },
-            { label: "Project", color: "gray" }
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
         size: "large",
@@ -31,7 +32,8 @@ export const myProjects = [
         tags: [
             { label: "Completed", color: "green" },
             { label: "Experimentation", color: "pink" },
-            { label: "Project", color: "gray" }
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: false,
         size: "medium",
@@ -54,7 +56,8 @@ export const myProjects = [
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Digital Signage", color: "purple" },
-            { label: "Project", color: "gray" }
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
         size: "large",
@@ -120,7 +123,9 @@ export const myProjects = [
         tags: [
             { label: "Analytics", color: "purple" },
             { label: "Non-Profit", color: "teal" },
-            { label: "Marketing", color: "orange" }
+            { label: "Marketing", color: "orange" },
+            { label: "Professional", color: "blue", priority: "low" },
+            { label: "Website", color: "gray", priority: "low" }
         ],
         featured: false,
         size: "medium",
