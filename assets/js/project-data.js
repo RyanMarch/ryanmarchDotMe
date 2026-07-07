@@ -2,9 +2,9 @@ export const myProjects = [
     {
         id: "qr-maker",
         title: "QR Maker",
-        subtitle: "A lightweight browser-based utility to design and generate custom styled QR codes offline.",
+        subtitle: "Finally, QR codes with personality. Customize colors, shapes, logos, and use the companion API or Apple Shortcuts.",
         seoTitle: "QR Maker - Custom QR Code Generator & Designer",
-        seoDescription: "Finally, QR codes with personality. Customize colors, shapes, logos, and use the companion API or Apple Shortcuts.",
+        seoDescription: "A lightweight browser-based utility to design and generate custom styled QR codes offline.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },

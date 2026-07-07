@@ -7,36 +7,47 @@
     with Personality</div>
 <p>
     Most online QR code generators are bloated with ads, aggressive sign-up popups, and invasive tracking redirect
-    links. QR Maker is a clean, fast, and beautiful alternative that is lightning fast and runs entirely locally, so
-    there are no tracking cookies or ad networks.
+    links. As a Product Manager, I designed QR Maker to address this market gap: a clean, beautiful, and lightning-fast
+    utility with a privacy-forward approach.
 </p>
 <p>
-    Beyond building a simple utility, this project was a playground to keep my product management and technical skills
-    sharp. It gave me an opportunity to design responsive layouts, explore Cloudflare infrastructure, write <a
-        href="https://qrmaker.ryanmarch.me/docs/" target="_blank" rel="noopener noreferrer">user documentation</a> and
-    <a href="https://qrmaker.ryanmarch.me/api/" target="_blank" rel="noopener noreferrer">API docs</a>,
-    and deliver a stable, production-ready product.
+    Beyond building a simple utility, this project was an exercise in end-to-end product delivery and technical
+    stewardship. It provided an opportunity for me to conduct competitor analysis, build responsive layouts, leverage
+    edge network infrastructure, write developer-focused <a href="https://qrmaker.ryanmarch.me/docs/" target="_blank"
+        rel="noopener noreferrer">user documentation</a>, and deploy an automated <a
+        href="https://qrmaker.ryanmarch.me/api/" target="_blank" rel="noopener noreferrer">API ecosystem</a> that scales
+    at zero marginal cost.
 </p>
 <p>
-    QR Maker is a simple, tool to build custom-styled QR codes. There are no accounts to set up, no subscription fees,
-    and it's built with a privacy-first mindset. All QR generation and customizations are performed locally on device,
-    ensuring all inputs remain private.
+    The privacy-first framework eliminates account setup bottlenecks and data liability. All
+    computation happens locally on the user's device. The end result is a fast and delightful experience with endless
+    customizations.
 </p>
 
 <div class="project-gallery">
     <div class="gallery-item">
-        <picture>
+        <picture class="light-only">
             <source type="image/avif" srcset="content/qr-maker/images/qr-maker-home-page.avif">
             <img src="content/qr-maker/images/qr-maker-home-page.png" alt="QR Maker home page" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <picture class="dark-only">
+            <source type="image/avif" srcset="content/qr-maker/images/qr-maker-home-page-dark.avif">
+            <img src="content/qr-maker/images/qr-maker-home-page-dark.png" alt="QR Maker home page" class="aspect-auto"
                 loading="lazy">
         </picture>
         <div class="gallery-caption">The home page, featuring examples of custom-styled QR codes.</div>
     </div>
     <div class="gallery-item">
-        <picture>
-            <source type="image/avif" srcset="content/qr-maker/images/app-overview-light-theme.avif">
-            <img src="content/qr-maker/images/app-overview-light-theme.png" alt="QR Maker app overview light"
-                class="aspect-auto" loading="lazy">
+        <picture class="light-only">
+            <source type="image/avif" srcset="content/qr-maker/images/app-overview.avif">
+            <img src="content/qr-maker/images/app-overview.png" alt="QR Maker app overview light" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <picture class="dark-only">
+            <source type="image/avif" srcset="content/qr-maker/images/app-overview-dark.avif">
+            <img src="content/qr-maker/images/app-overview-dark.png" alt="QR Maker app overview" class="aspect-auto"
+                loading="lazy">
         </picture>
         <div class="gallery-caption">The main app for QR maker showing tools in the sidebar and a large preview.</div>
     </div>
@@ -50,36 +61,36 @@
                 <video src="content/qr-maker/video/qr-maker-color-selection.mp4" autoplay loop muted playsinline
                     width="872" height="1888"></video>
             </div>
-            <figcaption class="media-caption">Real-time styling controls with a live contrast warnings overlay.
-            </figcaption>
+            <figcaption class="media-caption">Picking colors and styles for a QR code.</figcaption>
         </figure>
     </div>
     <div class="col-content">
         <p>
-            QR codes aren't know for being very aesthetic. The custom editor in QR maker lets users match a brand style
-            or their own personality:
+            Standard QR codes aren't known for pleasing aesthetics. To solve this, I built the custom design
+            studio to act as place for users to build beautiful QR codes that match their needs:
         </p>
         <ul class="help-list">
-            <li><strong>Pixel Shapes:</strong> Swap standard square blocks for dots, rounded points, capsules, or
-                connected grid lines.</li>
-            <li><strong>Corner Markers:</strong> Multiple shapes for the outer corner markers.</li>
-            <li><strong>Custom Colors:</strong> Select from preset or custom colors for the pixels and background. Set
-                solid background colors or go fully transparent.</li>
-            <li><strong>Contrast Warnings:</strong> Analyzes the contrast ratio between elements and warns the user if
-                the layout could be hard to scan.</li>
+            <li><strong>Pixel Shapes:</strong> Users can swap standard square blocks for dots, rounded points, capsules,
+                or connected grid lines.</li>
+            <li><strong>Corner Markers:</strong> Adjust outer corner shapes to match your brand identity.</li>
+            <li><strong>Custom Colors:</strong> Users can select from optimized preset palettes or define exact hex
+                values for pixels and backgrounds, including transparency support.</li>
+            <li><strong>Contrast Warnings:</strong> Real-time WCAG contrast validation proactively alerts users
+                if a custom combination risks dropping below proper scan thresholds.</li>
         </ul>
     </div>
 </div>
 
 <div class="col-split col-50-50" style="margin-top: 4rem;">
     <div class="col-content">
-        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Input Types & Branding</h3>
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Input Types & Error Correction</h3>
         <p>
-            The interface supports standard inputs like URLs, plain text notes, Wi-Fi credentials, and contact cards.
+            Users can choose to encode standard URLs, plain text notes, Wi-Fi configurations, contact vCards, map
+            coordinates, and calendar events.
         </p>
         <p>
-            Users can also overlay logos, brand icons, or emojis in the center. To make sure this doesn't break the
-            code, the tool automatically raises the error correction level.
+            Users can also overlay logos, brand icons, or emojis in the center. To make sure that the code is still
+            easily scannable, the tool automatically raises the error correction level.
         </p>
     </div>
     <div class="col-media">
@@ -99,45 +110,75 @@
 
 <h4 id="api-shortcuts" class="section-divider"><span>The API & Apple Shortcut</span></h4>
 <p>
-    QR Maker also features a <a href="https://qrmaker.ryanmarch.me/api/" target="_blank"
-        rel="noopener noreferrer">developer API</a> for those who want to integrate the tool into their own applications
-    or
-    workflows.
+    QR Maker also features an <a href="https://qrmaker.ryanmarch.me/api/" target="_blank" rel="noopener noreferrer">API
+        for developers</a> to integrate the tool into their own applications or
+    workflows. The API is full-featured, well documented, and free to use. It delivers the same reliable QR code
+    generation as the main app with the same lightning-fast response times.
 
-    The API is full-featured, well documented, and free to use. It is built with a privacy-first mindset. It delivers
-    the same reliable QR code generation as the main app with the same lightning-fast response times.
 </p>
-
 <p>
-    The companion API generates customized codes on the fly using standard query parameters (like content, size, colors,
-    and icon overlays). To make sure the product was truly stable, I also built and hosted <a
+    Custom configurations are declared entirely via standard query parameters (controlling size, blocks, boundaries, and
+    overlays). To lower developer friction, I treated documentation as a core product requirement. An <a
         href="https://qrmaker.ryanmarch.me/api/" target="_blank" rel="noopener noreferrer">interactive API
-        documentation</a>, complete with a request playground, code generators, and Postman collections.
+        playground</a> featuring code examples, agent code generation tools, and validated Postman collections to
+    expedite integration.
 </p>
 
 <div class="project-gallery" style="margin-top: 1.5rem;">
     <div class="gallery-item">
-        <picture>
+        <picture class="light-only">
             <source type="image/avif" srcset="content/qr-maker/images/api-docs-interactive-playground.avif">
             <img src="content/qr-maker/images/api-docs-interactive-playground.png"
+                alt="API Documentation Interactive Playground" class="aspect-auto" loading="lazy">
+        </picture>
+        <picture class="dark-only">
+            <source type="image/avif" srcset="content/qr-maker/images/api-docs-interactive-playground-dark.avif">
+            <img src="content/qr-maker/images/api-docs-interactive-playground-dark.png"
                 alt="API Documentation Interactive Playground" class="aspect-auto" loading="lazy">
         </picture>
         <div class="gallery-caption">API documentation with interactive playground, code examples, and downloadable
             resources.</div>
     </div>
+    <div class="gallery-item">
+        <picture class="light-only">
+            <source type="image/avif" srcset="content/qr-maker/images/api-docs-resources.avif">
+            <img src="content/qr-maker/images/api-docs-resources.png" alt="API Resources" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <picture class="dark-only">
+            <source type="image/avif" srcset="content/qr-maker/images/api-docs-resources-dark.avif">
+            <img src="content/qr-maker/images/api-docs-resources-dark.png" alt="API Resources" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Postman/Bruno collections and Agent specifications are included in the resources
+            download section.</div>
+    </div>
+    <div class="gallery-item">
+        <picture class="light-only">
+            <source type="image/avif" srcset="content/qr-maker/images/api-docs-bruno-example.avif">
+            <img src="content/qr-maker/images/api-docs-bruno-example.png"
+                alt="Bruno API development app showing example usage." class="aspect-auto" loading="lazy">
+        </picture>
+        <picture class="dark-only">
+            <source type="image/avif" srcset="content/qr-maker/images/api-docs-bruno-example-dark.avif">
+            <img src="content/qr-maker/images/api-docs-bruno-example-dark.png"
+                alt="Bruno API development app showing example usage." class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Bruno API development app showing example usage.</div>
+    </div>
 </div>
 
 <div class="col-split col-60-40">
     <div class="col-content">
-        <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 0.5rem;">Proof of Concept: Apple Shortcut</h3>
+        <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 0.5rem;">Apple Shortcut Integration</h3>
         <p>
-            To prove the API worked in the real world and to learn how to build and distribute native iOS integrations,
-            I
-            built a custom Apple Shortcut.
+            To prove the viability of the headless endpoint further extend the capabilities of the tool, I built and
+            distributed an official Apple Shortcut companion.
         </p>
         <p>
-            Users can highlight text, links, or contact info anywhere on macOS or iOS, call the API in the
-            background, and customize their QR code instantly via the system Share Sheet.
+            This shortcut can take clipboard selections, highlighted text blocks, or structured contacts directly to
+            the API, allowing users on iOS and macOS to generate QR codes natively via the platform Share Sheet
+            right into existing workflows.
         </p>
     </div>
     <div class="col-media"
@@ -199,21 +240,53 @@
 
 <h4 id="architecture" class="section-divider"><span>Architecture & Infrastructure</span></h4>
 <p>
-    Delivering a stable, lightning-fast product required a architecture that doesn't rely on databases or server
-    backends:
+    To keep the site highly reliable and free to run, I used a serverless, stateless architecture optimized for speed
+    and performance:
 </p>
 <ul class="help-list">
-    <li><strong>Client-Side Engine:</strong> QR code compiling and canvas drawing are handled entirely in the browser.
-        This keeps the application fast and privacy-first, since user data is processed locally.</li>
-    <li><strong>Decoupled State:</strong> Because there is no database backing, user designs are saved and shared by
-        encoding their design directly into the URL query parameters.</li>
-    <li><strong>Offline PWA Support:</strong> Service workers cache core CSS, JS, and font assets so the application
-        launches instantly and works offline.</li>
-    <li><strong>Cloudinary Integration:</strong> To keep shared URLs functional when users upload custom logo files, the
-        app uploads images to Cloudinary and embeds the remote image URL in the shared link.</li>
-    <li><strong>Infrastructure & Analytics:</strong> Deployed via Cloudflare to leverage edge-network caching, with
-        Cloudflare Web Analytics enabled to monitor performance and traffic.</li>
+    <li><strong>Client-Side Computation:</strong> I run core compilation, rendering pipelines, and code generation
+        logic in the user's browser, keeping with the goals of privacy and speed.</li>
+    <li><strong>Share via URL:</strong> To achieve shareability without an active database layer, I
+        add design variations directly into URL query parameters, paired with a system to reconstruct a shared design on
+        the receiving end.</li>
+    <li><strong>Service Worker Cache Strategy:</strong> Progressive Web App (PWA) workflows cache stylesheets,
+        JavaScript modules, and fonts to achieve sub-second load times and support full offline creation.</li>
+    <li><strong>Cloudinary Image Pipeline:</strong> Logo image uploads use an image CDN layer, returning an optimized
+        asset which can then be sent to URL parameters for sharing.</li>
+    <li><strong>Cloudflare Network Delivery:</strong> I deployed the site via Cloudflare infrastructure to guarantee
+        high performance and worldwide availability.</li>
 </ul>
+
+<h4 id="tooling-workflows" class="section-divider"><span>Custom Tooling & Workflows</span></h4>
+<p>
+    To support rapid iteration and maintain performance at scale, I developed custom utility tooling and structured
+    local workflows:
+</p>
+<ul class="help-list">
+    <li><strong>Asset Optimization:</strong> Created automated image processing scripts to compress, resize, and convert
+        screenshots and visual mockups into high-efficiency formats (like AVIF and WebP), keeping load times minimal.
+    </li>
+    <li><strong>Mockup & Video Production:</strong> Designed a workflow to capture and render device mockups and
+        showcase videos, demonstrating touch mechanics and native app layouts.</li>
+    <li><strong>Cloudflare & Mobile Testing:</strong> Configured local proxy routing to replicate Cloudflare Pages
+        behavior and established physical device environments for debugging PWA behavior and native Share Sheet
+        interactions.</li>
+    <li><strong>Project Verification:</strong> Implemented regression tests to validate QR generation, accessibility,
+        and API responses.</li>
+</ul>
+
+<h4 id="outcomes" class="section-divider"><span>Product Outcomes & Lessons</span></h4>
+<p>
+    Building QR Maker proved that complex client-side applications can run fast and reliably at scale. Combining edge
+    caching with local browser execution kept the average <span class="variable">Largest Contentful Paint (LCP)</span>
+    time measured in milliseconds. Storing the user's configuration entirely in the URL also showed that complex app
+    states can be shared instantly without needing a database.
+</p>
+<p>
+    The biggest design challenge was balancing user customization (like custom logos and colors) with strict QR code
+    scanning rules. Implementing real-time contrast checking and automated error correction keeps users from creating
+    broken or unscannable codes, illustrating how automated validation can guide users toward success.
+</p>
 
 <figure class="media-figure" style="margin-top: 2rem;">
     <div class="media-container has-image" style="margin: 0; border: none;" title="PWA UI Showcase">
