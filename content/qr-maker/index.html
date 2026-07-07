@@ -1,0 +1,228 @@
+<h2 class="project-title">QR Maker</h2>
+<p class="project-subtitle">Design Tool, API Integration, & Apple Shortcut</p>
+<p class="project-description">Product Manager & Creator • 2026</p>
+
+<h4 id="the-product" class="section-divider"><span>The Product</span></h4>
+<div style="font-size: 1.25rem; font-weight: 800; text-align: center; margin: 0 auto 1.5rem auto;">Finally, QR Codes
+    with Personality</div>
+<p>
+    Most online QR code generators are bloated with ads, aggressive sign-up popups, and invasive tracking redirect
+    links. QR Maker is a clean, fast, and beautiful alternative that is lightning fast and runs entirely locally, so
+    there are no tracking cookies or ad networks.
+</p>
+<p>
+    Beyond building a simple utility, this project was a playground to keep my product management and technical skills
+    sharp. It gave me an opportunity to design responsive layouts, explore Cloudflare infrastructure, write <a
+        href="https://qrmaker.ryanmarch.me/docs/" target="_blank" rel="noopener noreferrer">user documentation</a> and
+    <a href="https://qrmaker.ryanmarch.me/api/" target="_blank" rel="noopener noreferrer">API docs</a>,
+    and deliver a stable, production-ready product.
+</p>
+<p>
+    QR Maker is a simple, tool to build custom-styled QR codes. There are no accounts to set up, no subscription fees,
+    and it's built with a privacy-first mindset. All QR generation and customizations are performed locally on device,
+    ensuring all inputs remain private.
+</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/qr-maker/images/qr-maker-home-page.avif">
+            <img src="content/qr-maker/images/qr-maker-home-page.png" alt="QR Maker home page" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">The home page, featuring examples of custom-styled QR codes.</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/qr-maker/images/app-overview-light-theme.avif">
+            <img src="content/qr-maker/images/app-overview-light-theme.png" alt="QR Maker app overview light"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">The main app for QR maker showing tools in the sidebar and a large preview.</div>
+    </div>
+</div>
+
+<h4 id="design-studio" class="section-divider"><span>Custom Design Studio</span></h4>
+<div class="col-split col-50-50">
+    <div class="col-media">
+        <figure class="media-figure">
+            <div class="media-container has-video" style="margin: 0;" title="Demonstrating Color Selection">
+                <video src="content/qr-maker/video/qr-maker-color-selection.mp4" autoplay loop muted playsinline
+                    width="872" height="1888"></video>
+            </div>
+            <figcaption class="media-caption">Real-time styling controls with a live contrast warnings overlay.
+            </figcaption>
+        </figure>
+    </div>
+    <div class="col-content">
+        <p>
+            QR codes aren't know for being very aesthetic. The custom editor in QR maker lets users match a brand style
+            or their own personality:
+        </p>
+        <ul class="help-list">
+            <li><strong>Pixel Shapes:</strong> Swap standard square blocks for dots, rounded points, capsules, or
+                connected grid lines.</li>
+            <li><strong>Corner Markers:</strong> Multiple shapes for the outer corner markers.</li>
+            <li><strong>Custom Colors:</strong> Select from preset or custom colors for the pixels and background. Set
+                solid background colors or go fully transparent.</li>
+            <li><strong>Contrast Warnings:</strong> Analyzes the contrast ratio between elements and warns the user if
+                the layout could be hard to scan.</li>
+        </ul>
+    </div>
+</div>
+
+<div class="col-split col-50-50" style="margin-top: 4rem;">
+    <div class="col-content">
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Input Types & Branding</h3>
+        <p>
+            The interface supports standard inputs like URLs, plain text notes, Wi-Fi credentials, and contact cards.
+        </p>
+        <p>
+            Users can also overlay logos, brand icons, or emojis in the center. To make sure this doesn't break the
+            code, the tool automatically raises the error correction level.
+        </p>
+    </div>
+    <div class="col-media">
+        <figure class="media-figure">
+            <div class="media-container has-image" style="margin: 0; border: none;"
+                title="Custom Logo & Emoji Placement">
+                <picture>
+                    <source type="image/avif" srcset="content/qr-maker/images/app-icon-emoji-alien.avif">
+                    <img src="content/qr-maker/images/app-icon-emoji-alien.png"
+                        alt="QR Code with central emoji branding" loading="lazy">
+                </picture>
+            </div>
+            <figcaption class="media-caption">Adding an emoji in the center of a QR code.</figcaption>
+        </figure>
+    </div>
+</div>
+
+<h4 id="api-shortcuts" class="section-divider"><span>The API & Apple Shortcut</span></h4>
+<p>
+    QR Maker also features a <a href="https://qrmaker.ryanmarch.me/api/" target="_blank"
+        rel="noopener noreferrer">developer API</a> for those who want to integrate the tool into their own applications
+    or
+    workflows.
+
+    The API is full-featured, well documented, and free to use. It is built with a privacy-first mindset. It delivers
+    the same reliable QR code generation as the main app with the same lightning-fast response times.
+</p>
+
+<p>
+    The companion API generates customized codes on the fly using standard query parameters (like content, size, colors,
+    and icon overlays). To make sure the product was truly stable, I also built and hosted <a
+        href="https://qrmaker.ryanmarch.me/api/" target="_blank" rel="noopener noreferrer">interactive API
+        documentation</a>, complete with a request playground, code generators, and Postman collections.
+</p>
+
+<div class="project-gallery" style="margin-top: 1.5rem;">
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/qr-maker/images/api-docs-interactive-playground.avif">
+            <img src="content/qr-maker/images/api-docs-interactive-playground.png"
+                alt="API Documentation Interactive Playground" class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">API documentation with interactive playground, code examples, and downloadable
+            resources.</div>
+    </div>
+</div>
+
+<div class="col-split col-60-40">
+    <div class="col-content">
+        <h3 style="font-size: 1.15rem; margin-top: 0; margin-bottom: 0.5rem;">Proof of Concept: Apple Shortcut</h3>
+        <p>
+            To prove the API worked in the real world and to learn how to build and distribute native iOS integrations,
+            I
+            built a custom Apple Shortcut.
+        </p>
+        <p>
+            Users can highlight text, links, or contact info anywhere on macOS or iOS, call the API in the
+            background, and customize their QR code instantly via the system Share Sheet.
+        </p>
+    </div>
+    <div class="col-media"
+        style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;">
+        <div class="shortcuts-widget-aside">
+            <a href="https://qrmaker.ryanmarch.me/shortcut" target="_blank" rel="noopener noreferrer">
+                <div class="native-shortcuts-card">
+                    <div class="card-top-row">
+                        <svg class="widget-qr-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="6" height="6" rx="1" />
+                            <rect x="5" y="5" width="2" height="2" />
+                            <rect x="3" y="15" width="6" height="6" rx="1" />
+                            <rect x="5" y="17" width="2" height="2" />
+                            <rect x="15" y="3" width="6" height="6" rx="1" />
+                            <rect x="17" y="5" width="2" height="2" />
+                            <rect x="14" y="14" width="2" height="2" fill="#ffffff" stroke="none" />
+                            <rect x="18" y="18" width="2" height="2" fill="#ffffff" stroke="none" />
+                            <rect x="14" y="18" width="2" height="2" fill="#ffffff" stroke="none" />
+                            <rect x="18" y="14" width="2" height="2" fill="#ffffff" stroke="none" />
+                            <rect x="10" y="10" width="2" height="2" fill="#ffffff" stroke="none" />
+                        </svg>
+                        <div class="widget-play-orb">
+                            <svg viewBox="0 0 24 24" fill="#ffffff">
+                                <polygon points="6 4 20 12 6 20 6 4" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="widget-app-title">QR Maker</div>
+                </div>
+            </a>
+        </div>
+        <a href="https://qrmaker.ryanmarch.me/shortcut" class="apple-shortcuts-badge" target="_blank"
+            rel="noopener noreferrer" style="margin-top: 0;">
+            <picture class="apple-shortcuts-logo">
+                <source srcset="content/qr-maker/images/shortcuts-icon.avif" type="image/avif">
+                <source srcset="content/qr-maker/images/shortcuts-icon-40.png" type="image/png">
+                <img src="content/qr-maker/images/shortcuts-icon.png" alt="Apple Shortcuts Logo" width="40" height="40"
+                    style="display: block; object-fit: contain;">
+            </picture>
+            <div class="badge-text-wrapper">
+                <span class="badge-label">Add to</span>
+                <span class="badge-title">Apple Shortcuts</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<figure class="media-figure shortcuts-demo-video-figure">
+    <div class="media-container has-video fullwidth-video" style="margin: 0;"
+        title="QR Maker for Apple Shortcuts demo video">
+        <video autoplay muted loop playsinline>
+            <source src="content/qr-maker/video/qr-maker-shortcuts-demo.mp4" type="video/mp4">
+        </video>
+    </div>
+    <figcaption class="media-caption">Highlight text and generate styled codes instantly using the Apple Shortcut.
+    </figcaption>
+</figure>
+
+<h4 id="architecture" class="section-divider"><span>Architecture & Infrastructure</span></h4>
+<p>
+    Delivering a stable, lightning-fast product required a architecture that doesn't rely on databases or server
+    backends:
+</p>
+<ul class="help-list">
+    <li><strong>Client-Side Engine:</strong> QR code compiling and canvas drawing are handled entirely in the browser.
+        This keeps the application fast and privacy-first, since user data is processed locally.</li>
+    <li><strong>Decoupled State:</strong> Because there is no database backing, user designs are saved and shared by
+        encoding their design directly into the URL query parameters.</li>
+    <li><strong>Offline PWA Support:</strong> Service workers cache core CSS, JS, and font assets so the application
+        launches instantly and works offline.</li>
+    <li><strong>Cloudinary Integration:</strong> To keep shared URLs functional when users upload custom logo files, the
+        app uploads images to Cloudinary and embeds the remote image URL in the shared link.</li>
+    <li><strong>Infrastructure & Analytics:</strong> Deployed via Cloudflare to leverage edge-network caching, with
+        Cloudflare Web Analytics enabled to monitor performance and traffic.</li>
+</ul>
+
+<figure class="media-figure" style="margin-top: 2rem;">
+    <div class="media-container has-image" style="margin: 0; border: none;" title="PWA UI Showcase">
+        <picture>
+            <source type="image/avif" srcset="content/qr-maker/images/qr-maker-multi-device.avif">
+            <img src="content/qr-maker/images/qr-maker-multi-device.png"
+                alt="QR Maker as a web app on iPad Mini and iPhone" loading="lazy">
+        </picture>
+    </div>
+    <figcaption class="media-caption">QR Maker running as a standalone offline web app across multiple devices.
+    </figcaption>
+</figure>
