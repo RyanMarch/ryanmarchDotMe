@@ -349,6 +349,43 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeCustomAudioPlayers(projectDetailArea);
     }
 
+    function initializeProjectGalleries(container) {
+        if (!container) return;
+        const galleries = container.querySelectorAll('.project-gallery:not(.grid-view)');
+        galleries.forEach(gallery => {
+            const updateGalleryFade = () => {
+                const scrollLeft = gallery.scrollLeft;
+                const maxScrollLeft = gallery.scrollWidth - gallery.clientWidth;
+
+                requestAnimationFrame(() => {
+                    if (scrollLeft > 50) {
+                        gallery.classList.add('scrolled-left');
+                    } else {
+                        gallery.classList.remove('scrolled-left');
+                    }
+
+                    if (scrollLeft < maxScrollLeft - 50 && maxScrollLeft > 50) {
+                        gallery.classList.add('scrolled-right');
+                    } else {
+                        gallery.classList.remove('scrolled-right');
+                    }
+                });
+            };
+
+            gallery.addEventListener('scroll', updateGalleryFade);
+            // Run initial check at multiple intervals to ensure layout has stabilized
+            setTimeout(updateGalleryFade, 50);
+            setTimeout(updateGalleryFade, 150);
+            setTimeout(updateGalleryFade, 300);
+            setTimeout(updateGalleryFade, 500);
+            window.addEventListener('resize', updateGalleryFade);
+        });
+    }
+
+    if (projectDetailArea) {
+        initializeProjectGalleries(projectDetailArea);
+    }
+
     if (projectDetailArea) {
         setupContentClicks(projectDetailArea, projectDetailArea);
     }
@@ -451,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 9. Wire up handlers
             initializeCustomAudioPlayers(projectDetailArea);
+            initializeProjectGalleries(projectDetailArea);
 
             // Initialize CLEAR Tech brochure tabs if applicable
             if (projectId === 'clear-tech') {
