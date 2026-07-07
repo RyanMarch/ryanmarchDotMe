@@ -587,10 +587,11 @@ main {
     margin-bottom: 0.25rem;
     display: block;
     width: fit-content;
-    background: var(--title-gradient);
+    /* background: var(--title-gradient);
     -webkit-background-clip: text;
     background-clip: text;
-    -webkit-text-fill-color: transparent;
+    -webkit-text-fill-color: transparent; */
+    color: white;
     letter-spacing: -0.02em;
 }
 
@@ -822,10 +823,6 @@ main {
     }
 }
 
-
-
-
-
 /* --- Standalone Project Pages --- */
 body.standalone-page {
     display: block;
@@ -919,7 +916,7 @@ body.standalone-page {
 }
 
 .slim-header-container {
-    max-width: 670px;
+    max-width: 1430px;
     width: 100%;
     height: 100%;
     margin: 0 auto;
@@ -928,6 +925,10 @@ body.standalone-page {
     justify-content: space-between;
     align-items: center;
     box-sizing: border-box;
+}
+
+.standalone-page .slim-header-container {
+    /* max-width: 1000px; */
 }
 
 .slim-header-brand {
@@ -1011,7 +1012,7 @@ body.standalone-page {
 .project-detail-content ol,
 .project-detail-content .project-detail-tags,
 .project-detail-content .project-nav {
-    max-width: 670px;
+    max-width: 800px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -1042,7 +1043,7 @@ body.standalone-page {
 .project-detail-content .project-description {
     color: var(--text-secondary);
     line-height: 1.35;
-    max-width: 670px;
+    max-width: 800px;
     font-size: clamp(0.95rem, 2vw, 1.05rem);
     margin-bottom: 1rem;
     margin-left: auto;
@@ -2883,7 +2884,7 @@ body.standalone-page {
 /* --- Premium Details / Accordion Styles --- */
 .premium-details {
     margin: 2rem auto;
-    max-width: 670px;
+    max-width: 800px;
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
@@ -3499,20 +3500,18 @@ body.standalone-page {
     .col-split:has(.media-container.has-video) .media-figure {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        height: auto;
         width: 100%;
     }
 
     .col-split:has(.media-container.has-video) .media-container {
-        flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 0;
     }
 
     .col-split:has(.media-container.has-video) video {
-        max-height: 100%;
+        max-height: 500px;
         height: auto;
         width: auto;
         max-width: 100%;
@@ -3712,4 +3711,29 @@ body.standalone-page {
     line-height: 1.55;
     margin: 0;
     color: var(--text-secondary);
+}
+
+/* --- Theme-Aware Display Utilities --- */
+.light-only {
+    display: none !important;
+}
+.dark-only {
+    display: block !important;
+}
+
+/* Light Theme Active: Show light, hide dark */
+:root[data-theme="light"] .light-only {
+    display: block !important;
+}
+:root[data-theme="light"] .dark-only {
+    display: none !important;
+}
+
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) .light-only {
+        display: block !important;
+    }
+    :root:not([data-theme="dark"]) .dark-only {
+        display: none !important;
+    }
 }
