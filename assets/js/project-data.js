@@ -1,5 +1,29 @@
 export const myProjects = [
     {
+        id: "qr-maker",
+        title: "QR Maker",
+        subtitle: "A lightweight browser-based utility to design and generate custom styled QR codes offline.",
+        seoTitle: "QR Maker - Custom QR Code Generator & Designer",
+        seoDescription: "Finally, QR codes with personality. Customize colors, shapes, logos, and use the companion API or Apple Shortcuts.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Design Tool", color: "purple" },
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
+        ],
+        featured: true,
+        size: "large",
+        image: "/content/qr-maker/images/qr-maker-multi-device.avif",
+        imageWidth: 800,
+        imageHeight: 500,
+        imageClass: "destination-icon",
+        actionText: "Launch QR Maker",
+        actionUrl: "https://qrmaker.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/qrMaker",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "icon-studio",
         title: "Icon Studio",
         subtitle: "A web-based design toolkit for crafting custom icons with custom photos, gradients, frames, and badges.",
