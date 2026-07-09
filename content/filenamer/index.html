@@ -1,0 +1,126 @@
+<h2 class="project-title">FileNamer</h2>
+<p class="project-subtitle">Build naming conventions and bulk rename files locally</p>
+<p class="project-description">Product Manager & Creator • 2026</p>
+
+<h4 id="introduction" class="section-divider"><span>The Product</span></h4>
+
+<div class="project-gallery">
+    <div class="gallery-item no-border">
+        <picture>
+            <source type="image/avif" srcset="content/filenamer/images/filenameMaker-logo.avif">
+            <img src="content/filenamer/images/filenameMaker-logo.png" alt="FileNamer icon" class="aspect-auto"
+                loading="lazy">
+        </picture>
+    </div>
+</div>
+
+<p>FileNamer is a lightweight, local-first web utility for designing standardized naming templates and batch renaming
+    files directly in the browser. It is designed for professionals and teams who need to maintain strict, structured
+    guidelines for document and media file naming.</p>
+
+<p>Professionals need reliable ways to structure files without relying on complex scripting or risking data privacy.
+    Uploading sensitive project files to remote servers for processing presents a security liability, while manual
+    renaming is tedious and prone to formatting errors.</p>
+
+<p>To address this, I built a privacy-first application prioritizing native browser tools and lightweight web assets,
+    ensuring all processing occurs locally without heavy external scripts.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item no-border">
+        <picture class="light-only">
+            <source type="image/avif" srcset="content/filenamer/images/app-overview-macbook.avif">
+            <img src="content/filenamer/images/app-overview-macbook.png" alt="FileNamer overview" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <picture class="dark-only">
+            <source type="image/avif" srcset="content/filenamer/images/app-overview-macbook-dark.avif">
+            <img src="content/filenamer/images/app-overview-macbook-dark.png" alt="FileNamer overview"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">The template selector, field builder, and output preview.</div>
+    </div>
+</div>
+
+<h4 id="features" class="section-divider"><span>Features</span></h4>
+
+<ul class="help-list">
+    <li><strong>Drag-and-drop Field Builder:</strong> Compose naming templates from reusable field types — free text,
+        dates (with format tokens like YYYY-MM-DD), auto-incrementing counters, and fixed separators. Fields can be
+        reordered and removed at any time.</li>
+    <li><strong>Live Output Preview:</strong> As fields are configured, a real-time preview renders the exact filename
+        that will be produced, giving users immediate feedback before any files are touched.</li>
+    <li><strong>Bulk Edit Grid:</strong> Drop files onto the grid to queue them for renaming. Each row exposes per-file
+        overrides for dynamic fields, and columns can be filled down or imported from a CSV for large batches.</li>
+    <li><strong>CSV Import / Export:</strong> Teams can maintain naming metadata in a spreadsheet and import it
+        directly, then export the completed mapping as a reference after processing.</li>
+    <li><strong>Local File System Rename:</strong> Files are renamed entirely in the browser using the File System
+        Access API — no uploads, no server round-trips, no data ever leaves the device.</li>
+    <li><strong>ZIP Download Fallback:</strong> Where the File System Access API is unsupported, renamed files are
+        packaged into a ZIP archive for manual download, preserving the privacy-first guarantee.</li>
+    <li><strong>Shareable Templates via URL:</strong> Template configurations are serialized into the URL hash,
+        allowing users to share a fully configured template as a single link — no account or database required.</li>
+    <li><strong>Offline PWA Support:</strong> A Service Worker caches all assets, enabling the tool to load and
+        operate without a network connection after the first visit.</li>
+    <li><strong>Help Center:</strong> Integrated in-app documentation covers the full workflow, including template
+        management, bulk renaming, and sharing guides.</li>
+</ul>
+
+<p>More about FileNamer features can be found in the <a href="https://filenamer.ryanmarch.me/docs/app-features/">Help
+        Center</a>.</p>
+
+<h4 id="my-role" class="section-divider"><span>My Role</span></h4>
+
+<p>I served as the sole product manager and creator on FileNamer — responsible for the full product lifecycle from
+    initial discovery through ongoing iteration.</p>
+
+<ul class="help-list">
+    <li><strong>Discovery & Problem Framing:</strong> Identified the gap through firsthand friction managing large
+        media libraries. Reviewed existing options (command-line tools, server-based apps) and determined they created
+        either a technical barrier for non-developer users or a privacy risk for enterprise users. Worked directly with
+        users to understand their existing workflows and pain points for naming files.</li>
+    <li><strong>Product Decisions:</strong> Prioritized a zero-install, zero-dependency approach. Shipping a static web
+        app allows for maximum reach and eliminates update friction. URL-based template sharing provided a viable
+        sharing feature without backend infrastructure.</li>
+    <li><strong>UX & Interaction Design:</strong> Designed the drag-and-drop field builder interaction model to make
+        template composition approachable for non-technical users, while preserving the power needed by operations and
+        production teams who manage thousands of files.</li>
+    <li><strong>Roadmap & Prioritization:</strong> Scoped the initial release around the core build and preview
+        workflow. Introduced the Bulk Edit Grid, CSV import, and subsequent interface iterations based on user
+        feedback.</li>
+    <li><strong>Documentation:</strong> Authored the product's <a href="https://filenamer.ryanmarch.me/docs/">Help
+            Center</a>, structuring content around the key
+        jobs users needed to accomplish rather than feature-by-feature documentation.</li>
+</ul>
+
+<h4 id="gallery" class="section-divider"><span>Screenshots</span></h4>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/filenamer/images/filenamer-field-builder.avif">
+            <img src="content/filenamer/images/filenamer-field-builder.png" alt="FileNamer field builder interface"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Drag-and-drop builder to create naming templates.</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/filenamer/images/filenamer-bulk-edit.avif">
+            <img alt="FileNamer bulk edit grid" src="content/filenamer/images/filenamer-bulk-edit.png"
+                class="aspect-auto" loading="lazy" />
+        </picture>
+        <div class="gallery-caption">Bulk edit interface for renaming files in batches.</div>
+    </div>
+</div>
+
+<h4 id="outcomes" class="section-divider"><span>Outcomes & Impact</span></h4>
+
+<p>The application enables users to safely package renamed files into a .zip archive. All processing happens locally,
+    guaranteeing files never leave their device.</p>
+
+<p>From a technical perspective: leveraging Service Worker caching for offline support and encoding template rules
+    directly into the URL, the tool delivers a highly accessible, database-free sharing experience.</p>
+
+<p>With extensive user documentation, FileNamer is easy to pick up for users of all experience levels. The included
+    templates allow for all kinda of needs to be met right away, and easily inspire users to pick up the field builder
+    and create their own custom templates. </p>
