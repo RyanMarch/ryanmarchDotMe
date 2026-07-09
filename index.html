@@ -192,6 +192,18 @@
     </main>
 
 
+    <footer class="site-footer">
+        <div class="site-footer-divider" aria-hidden="true"></div>
+        <div class="site-footer-inner">
+            <span class="site-footer-copy">&copy; <span id="footer-year"></span> Ryan March</span>
+            <!-- <nav class="site-footer-links" aria-label="Footer links">
+                <a href="https://www.linkedin.com/in/ryanmarch/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">LinkedIn</a>
+                <a href="https://github.com/RyanMarch" target="_blank" rel="noopener noreferrer" aria-label="GitHub">GitHub</a>
+                <a href="https://mastodon.social/@ryanmarch" target="_blank" rel="noopener noreferrer" aria-label="Mastodon">Mastodon</a>
+            </nav> -->
+        </div>
+    </footer>
+
     <!-- Lightbox Overlay -->
     <div id="lightbox-overlay" class="lightbox-overlay" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true"
         aria-label="Image gallery lightbox">
@@ -211,6 +223,7 @@
     <!-- Data and Rendering Script -->
     <script type="module" src="/assets/js/projects.js?v=3"></script>
     <script src="/assets/js/theme.js" defer></script>
+    <script>document.getElementById('footer-year').textContent = new Date().getFullYear();</script>
 
     <script>
         // Slim header scroll trigger
