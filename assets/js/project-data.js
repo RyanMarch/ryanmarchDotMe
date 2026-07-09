@@ -1,5 +1,22 @@
 export const myProjects = [
     {
+        id: "filenamer",
+        title: "FileNamer",
+        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files",
+        tags: [
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal" },
+            { label: "Product", color: "gray" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/filenamer/images/app-screenshot-with-icon.avif",
+        actionText: "View Project",
+        actionUrl: "https://filenamer.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/fileNamer",
+        hasExtendedContent: true
+    },
+    {
         id: "qr-maker",
         title: "QR Maker",
         subtitle: "Finally, QR codes with personality. Customize colors, shapes, logos, and use the companion API or Apple Shortcuts.",
