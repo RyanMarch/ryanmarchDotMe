@@ -3,6 +3,8 @@ export const myProjects = [
         id: "filenamer",
         title: "FileNamer",
         subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files",
+        seoTitle: "FileNamer - File Renaming Utility",
+        seoDescription: "FileNamer is an intuitive, browser-based utility for defining and applying consistent file naming templates. Drag and drop files, configure presets, preview results in real time, and export renamed files instantly.",
         tags: [
             { label: "Project", color: "gray" },
             { label: "Web App", color: "teal" },
@@ -14,7 +16,8 @@ export const myProjects = [
         actionText: "View Project",
         actionUrl: "https://filenamer.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/fileNamer",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: true
     },
     {
         id: "qr-maker",
@@ -65,30 +68,6 @@ export const myProjects = [
         showLaunchButton: true
     },
     {
-        id: "bowserstack",
-        title: "Bowserstack",
-        subtitle: "An interactive Bowserstack testing tool to help get to the bottom of web-based issues.",
-        seoTitle: "Bowserstack - Interactive Bowser Debugger",
-        seoDescription: "Bowser issues can be hard to diagnose. Use Bowserstack's interactive testing tool to test your optimization strategy.",
-        tags: [
-            { label: "Completed", color: "green" },
-            { label: "Experimentation", color: "pink" },
-            { label: "Project", color: "gray" },
-            { label: "Web App", color: "teal", priority: "low" }
-        ],
-        featured: false,
-        size: "medium",
-        image: "/assets/img/bowser-icon.avif",
-        imageWidth: 600,
-        imageHeight: 450,
-        imageClass: "bowser-preview-img",
-        actionText: "Launch Bowserstack",
-        actionUrl: "https://bowserstack.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/bowserstack",
-        hasExtendedContent: false,
-        showLaunchButton: true
-    },
-    {
         id: "motion-poster",
         title: "Motion Poster",
         subtitle: "Atmospheric, living digital centerpieces bring immersive, customizable art to event venues. Now with multiple themes and remote control.",
@@ -113,26 +92,28 @@ export const myProjects = [
         showLaunchButton: true
     },
     {
-        id: "rentpress",
-        title: "RentPress for Apartments",
-        subtitle: "A comprehensive property management and marketing solution to build the ultimate online leasing office.",
-        seoTitle: "RentPress - Apartment Property Marketing Platform",
-        seoDescription: "A powerful property management and real estate integration tool for WordPress. Sync floor plans, pricing, and availability in real time.",
+        id: "bowserstack",
+        title: "Bowserstack",
+        subtitle: "An interactive Bowserstack testing tool to help get to the bottom of web-based issues.",
+        seoTitle: "Bowserstack - Interactive Bowser Debugger",
+        seoDescription: "Bowser issues can be hard to diagnose. Use Bowserstack's interactive testing tool to test your optimization strategy.",
         tags: [
-            { label: "Professional", color: "blue" },
-            { label: "Platform", color: "purple" },
-            { label: "Real Estate", color: "teal", priority: "low" }
+            { label: "Completed", color: "green" },
+            { label: "Experimentation", color: "pink" },
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: false,
-        size: "large",
-        image: "/content/rentpress/images/floor-plan-grid.avif",
-        imageWidth: 970,
-        imageHeight: 560,
-        imageClass: "destination-icon",
-        actionText: "Visit RentPress.io",
-        actionUrl: "https://rentpress.io",
-        sourceUrl: "https://wordpress.org/plugins/rentpress-for-websites/",
-        hasExtendedContent: true
+        size: "medium",
+        image: "/assets/img/bowser-icon.avif",
+        imageWidth: 600,
+        imageHeight: 450,
+        imageClass: "bowser-preview-img",
+        actionText: "Launch Bowserstack",
+        actionUrl: "https://bowserstack.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/bowserstack",
+        hasExtendedContent: false,
+        showLaunchButton: true
     },
     {
         id: "aasc-analytics",
@@ -176,6 +157,28 @@ export const myProjects = [
         imageClass: "destination-icon",
         actionText: "Visit Website",
         actionUrl: "https://www.delhihistoricalsociety.org",
+        hasExtendedContent: true
+    },
+    {
+        id: "rentpress",
+        title: "RentPress for Apartments",
+        subtitle: "A comprehensive property management and marketing solution to build the ultimate online leasing office.",
+        seoTitle: "RentPress - Apartment Property Marketing Platform",
+        seoDescription: "A powerful property management and real estate integration tool for WordPress. Sync floor plans, pricing, and availability in real time.",
+        tags: [
+            { label: "Professional", color: "blue" },
+            { label: "Platform", color: "purple" },
+            { label: "Real Estate", color: "teal", priority: "low" }
+        ],
+        featured: false,
+        size: "large",
+        image: "/content/rentpress/images/floor-plan-grid.avif",
+        imageWidth: 970,
+        imageHeight: 560,
+        imageClass: "destination-icon",
+        actionText: "Visit RentPress.io",
+        actionUrl: "https://rentpress.io",
+        sourceUrl: "https://wordpress.org/plugins/rentpress-for-websites/",
         hasExtendedContent: true
     },
     {
