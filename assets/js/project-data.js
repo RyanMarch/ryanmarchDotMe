@@ -1,5 +1,28 @@
 export const myProjects = [
     {
+        id: "tripdeck",
+        title: "TripDeck",
+        subtitle: "A privacy-first travel itinerary dashboard with live maps, weather, and smart packing lists.",
+        seoTitle: "TripDeck - Private Travel Itinerary Dashboard",
+        seoDescription: "Turn flight confirmations and hotel bookings into one visual, offline-capable itinerary. End-to-end encrypted, passkey sign-in, live maps and weather, zero-knowledge sharing.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Travel", color: "purple" },
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
+        ],
+        featured: true,
+        size: "large",
+        image: "content/tripdeck/images/tripdeck-app-timeline-map.avif",
+        imageWidth: 1600,
+        imageHeight: 1000,
+        actionText: "Launch TripDeck",
+        actionUrl: "https://tripdeck.app",
+        sourceUrl: "https://github.com/RyanMarch/tripDeck",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "filenamer",
         title: "FileNamer",
         subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files",
@@ -66,6 +89,27 @@ export const myProjects = [
         sourceUrl: "https://github.com/RyanMarch/iconStudio",
         hasExtendedContent: true,
         showLaunchButton: true
+    },
+    {
+        id: "help-center",
+        title: "Help Center",
+        subtitle: "A portable documentation system with client-side search and auto-generated navigation.",
+        seoTitle: "Help Center - Portable Documentation System",
+        seoDescription: "A self-contained, zero-build-step documentation system built with native Web Components. Client-side search, auto-generated navigation, and a scaffolding CLI, drop it into any project.",
+        tags: [
+            { label: "Dev Tooling", color: "purple" },
+            { label: "Project", color: "gray" },
+            { label: "Product", color: "gray" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/help-center/images/helpcenter-docs-home.avif",
+        imageWidth: 1600,
+        imageHeight: 1000,
+        actionText: "See It in Action",
+        actionUrl: "https://tripdeck.ryanmarch.me/docs/",
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "motion-poster",
