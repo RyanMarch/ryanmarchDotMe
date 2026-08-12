@@ -1,4 +1,4 @@
-import { myProjects } from './project-data.js?v=1';
+import { myProjects } from './project-data.js?v=2';
 import { initializeCustomAudioPlayers } from './audio-player.js?v=1';
 import { initializeLightbox, setupContentClicks } from './lightbox.js?v=1';
 import { initClearTechBrochure } from './brochure.js?v=1';
