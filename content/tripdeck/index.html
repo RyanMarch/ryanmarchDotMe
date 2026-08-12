@@ -1,0 +1,154 @@
+<h2 class="project-title">TripDeck</h2>
+<p class="project-subtitle">A local-first, end-to-end encrypted travel itinerary dashboard</p>
+<p class="project-description">Product Manager & Creator • 2026</p>
+
+<h4 id="introduction" class="section-divider"><span>The Product</span></h4>
+
+<div class="project-gallery">
+    <div class="gallery-item no-border">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-logo.avif">
+            <img src="content/tripdeck/images/tripdeck-logo.png" alt="TripDeck icon" class="aspect-auto" loading="lazy">
+        </picture>
+    </div>
+</div>
+
+<p>TripDeck is a travel itinerary dashboard that organizes flight confirmations, hotel reservations, and notes into a
+    clean, visual timeline. As users add trip details, TripDeck automatically populates flight schedules,
+    addresses, hourly weather, and interactive map pins, while maintaining a real-time countdown to upcoming events.</p>
+
+<p>Most itinerary tools force a choice between forms that don't fit unstructured plans, or unstructured notes
+    apps that lack real-time utility. TripDeck combines the speed of plaintext editing with the
+    organization of an interactive dashboard.</p>
+
+<p>TripDeck is built with zero-knowledge encryption. 100% of data is encrypted end-to-end client-side. The app
+    operates completely offline after initial load, and shared trips only expose what the creator explicitly chooses to
+    share.</p>
+
+<div class="project-gallery">
+    <div class="gallery-item no-border">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-app-timeline-map.avif">
+            <img src="content/tripdeck/images/tripdeck-app-timeline-map.png"
+                alt="TripDeck timeline, map, and weather view" class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">The dual-pane workspace: visual builder on the left, live timeline and map on the
+            right.</div>
+    </div>
+</div>
+
+<h4 id="features" class="section-divider"><span>Features</span></h4>
+
+<ul class="help-list">
+    <li><strong>Visual Builder & Markdown Editor:</strong> Edit itineraries using a drag-and-drop visual outline or a
+        raw
+        markdown editor. Both views remain synchronized in real time.</li>
+    <li><strong>Flight & Location Lookup:</strong> Enter a flight number to automatically pull route details, schedules,
+        and status.</li>
+    <li><strong>Place Finding:</strong> Search hotels or venues to automatically import addresses and map
+        coordinates.</li>
+    <li><strong>Live Status HUD:</strong> Features a mechanical split-flap countdown ticker for the next scheduled
+        event alongside current weather conditions.</li>
+    <li><strong>Interactive Map View:</strong> Automatically plots airports, accommodations, reservations, and
+        activities.</li>
+    <li><strong>Contextual Packing Lists:</strong> Generates custom packing checklists based on trip destinations,
+        dates, and forecasted weather, with support for saving custom templates.</li>
+</ul>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-packing-in-progress.avif">
+            <img src="content/tripdeck/images/tripdeck-packing-in-progress.png"
+                alt="TripDeck interactive packing checklist in progress" class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Packing in progress</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-packing-suggestions.avif">
+            <img src="content/tripdeck/images/tripdeck-packing-suggestions.png" alt="TripDeck smart packing suggestions"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Smart suggestions</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-packing-load-list.avif">
+            <img src="content/tripdeck/images/tripdeck-packing-load-list.png"
+                alt="TripDeck loading a packing list template" class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Load list</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-packing-my-lists.avif">
+            <img src="content/tripdeck/images/tripdeck-packing-my-lists.png" alt="TripDeck saved packing lists overview"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">My Lists</div>
+    </div>
+</div>
+<ul>
+    <li><strong>Offline-First & PWA Support:</strong> Itineraries, gate numbers, and notes remain accessible offline
+        without network connectivity.</li>
+    <li><strong>Passkey Authentication:</strong> WebAuthn integration supports Face ID, Touch ID, Windows Hello, and
+        hardware security keys, eliminating passwords entirely.</li>
+    <li><strong>Customizable Sharing:</strong> Generates read-only or collaborator links. Sensitive
+        values (such as confirmation codes) are automatically omitted on public links, and new links can be created
+        at any time.</li>
+    <li><strong>Custom Visual Themes:</strong> Includes four distinct themes: Slate Dark, Vintage Journal, Terminal
+        Light, and Roadtrip, each paired with custom-styled map layers.</li>
+</ul>
+
+<p>More detail on how these features work is in the <a href="https://tripdeck.ryanmarch.me/docs/">Help Center</a>.</p>
+
+<h4 id="my-role" class="section-divider"><span>My Role</span></h4>
+
+<p>As the sole product manager and creator of TripDeck, I directed the project through concept development, interaction
+    design, security architecture, and client-side engineering.</p>
+
+<ul class="help-list">
+    <li><strong>Discovery & Problem Framing:</strong> Identified friction in existing tools used for travel (including
+        spreadsheets) and found rigid
+        data structures or no real-time utility. Scoped a flexible, text-based editor capable of
+        structuring complex travel plans in a beautiful, usable layout.</li>
+    <li><strong>Privacy & Account Architecture:</strong> Established client-side encryption as a core product
+        requirement from day one. Designed passkey authentication to eliminate passwords and implemented instant guest
+        mode access so users can build itineraries without creating an account.</li>
+    <li><strong>UX & Interface Design:</strong> Designed a dual-pane interface keeping the visual drag-and-drop builder
+        and raw markdown editor fully synchronized, allowing users to switch fluidly between typing and visual layout.
+    </li>
+    <li><strong>Security & Sharing System:</strong> Designed a cryptographic sharing architecture for read-only and
+        collaboration links, as well as supporting link rotation.</li>
+    <li><strong>Product Strategy & Roadmap:</strong> Phased development around a local-first core, ensuring complete
+        offline functionality before layering cloud sync, passkey authentication, and further product expansion.</li>
+</ul>
+
+<h4 id="architecture" class="section-divider"><span>Technical Architecture</span></h4>
+
+<p>TripDeck is built as a modern progressive web app using native script modules, vanilla CSS, and HTML with no
+    frameworks or bundlers. Serverless Cloudflare Functions securely proxy API endpoints (Mapbox GL, Open-Meteo weather
+    forecasts, Google Places, and AirLabs flight status tracking) and interface with a Cloudflare D1 SQL database for
+    encrypted storage.</p>
+
+<p>The encryption architecture ensures complete user privacy. Account data is encrypted client-side prior
+    to transmission, deriving encryption keys directly from the user's passkey. Shared
+    trips utilize independent content keys wrapped with envelope encryption. Rotating share links
+    invalidates previous access keys without affecting original trip data.</p>
+
+<p>Offline capabilities are powered by a Service Worker caching strategy that pre-caches application assets, Mapbox GL
+    components, and timezone libraries. Local-first storage guarantees that itineraries remain fully accessible and
+    editable on the client device without network availability or account creation.</p>
+
+<h4 id="outcomes" class="section-divider"><span>Outcomes & Impact</span></h4>
+
+<p>TripDeck demonstrates that privacy-first architecture and rich web experiences can deliver an easy-to-use product
+    without compromising
+    performance. By combining client-side encryption with passkey authentication, user itineraries
+    remain completely unreadable to backend servers and eliminate password storage liabilities altogether.</p>
+
+<p>From a user experience standpoint, pairing guest access with plaintext markdown editing created an efficient travel
+    planning workflow. Users can convert unstructured confirmation emails into a clear timeline and interactive,
+    sharable map in
+    seconds, maintaining reliable offline access when traveling without cellular service.</p>
