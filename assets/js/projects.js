@@ -369,6 +369,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         gallery.classList.remove('scrolled-right');
                     }
+
+                    // Short rows (fewer/narrower items than the container) read as
+                    // stranded at the left edge - center them. Rows that actually
+                    // need to scroll keep flex-start; centering those would clip the
+                    // first item under overflow, since centered flex content splits
+                    // its overflow on both sides instead of starting at scrollLeft 0.
+                    gallery.classList.toggle('no-overflow', maxScrollLeft <= 1);
                 });
             };
 
@@ -379,6 +386,16 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(updateGalleryFade, 300);
             setTimeout(updateGalleryFade, 500);
             window.addEventListener('resize', updateGalleryFade);
+
+            // aspect-auto images have no intrinsic width until they finish loading
+            // (width is derived from height x aspect-ratio), so scrollWidth is
+            // artificially small - and thus rows can be wrongly measured as fitting
+            // without scrolling - until every image has loaded at least once.
+            gallery.querySelectorAll('img').forEach(img => {
+                if (!img.complete) {
+                    img.addEventListener('load', updateGalleryFade, { once: true });
+                }
+            });
         });
     }
 
