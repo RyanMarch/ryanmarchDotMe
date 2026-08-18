@@ -2,7 +2,7 @@ export const myProjects = [
     {
         id: "tripdeck",
         title: "TripDeck",
-        subtitle: "A privacy-first travel itinerary dashboard with live maps, weather, and smart packing lists.",
+        subtitle: "A privacy-first travel itinerary dashboard with maps, weather, and smart packing lists.",
         seoTitle: "TripDeck - Private Travel Itinerary Dashboard",
         seoDescription: "Turn flight confirmations and hotel bookings into one visual, offline-capable itinerary. End-to-end encrypted, passkey sign-in, live maps and weather, zero-knowledge sharing.",
         tags: [
@@ -17,7 +17,7 @@ export const myProjects = [
         imageWidth: 1600,
         imageHeight: 1000,
         actionText: "Launch TripDeck",
-        actionUrl: "https://tripdeck.app",
+        actionUrl: "https://tripdeck.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/tripDeck",
         hasExtendedContent: true,
         showLaunchButton: true

@@ -1340,6 +1340,11 @@ body.standalone-page {
     /* Negative margin to hit edges */
     padding: 0 2.5rem 1.5rem;
     /* Padding back to align first/last items */
+    /* Scroll Snap aligns to the padding box, so without this the browser
+       auto-snaps the first item flush against the padding edge on load,
+       scrolling the padding itself out of view - leaving zero visible gap
+       even though padding is set. This reserves it instead. */
+    scroll-padding-inline: 2.5rem;
     scrollbar-width: none;
     -ms-overflow-style: none;
 
@@ -1367,6 +1372,16 @@ body.standalone-page {
 
 .project-gallery::-webkit-scrollbar {
     display: none;
+}
+
+/* Applied via JS once a row's content is measured to fit without scrolling
+   (see initializeProjectGalleries in projects.js) - centers short rows
+   instead of leaving them stranded at the left edge. Left off by default
+   (flex-start) because centering a row that DOES overflow would clip the
+   first item, as centered flex content splits overflow on both sides rather
+   than starting at scrollLeft 0. */
+.project-gallery.no-overflow {
+    justify-content: center;
 }
 
 /* Grid View Modifier */
@@ -1416,8 +1431,48 @@ body.standalone-page {
     gap: 0.75rem;
 }
 
-.gallery-item:has(img.aspect-auto) {
+/* A no-border item is always a lone hero shot (one per .project-gallery),
+   meant to be seen whole, not swiped through. flex: 0 0 100% gives it the
+   gallery's actual (bounded) width, so the image can scale to fill it
+   exactly - no overflow, no horizontal scroll, no carousel affordance. */
+.gallery-item.no-border:has(img.aspect-auto) {
+    flex: 0 0 100%;
+}
+
+/* Screenshots vary wildly in native aspect ratio (portrait phone frames vs.
+   wide desktop mockups). Locking every row to a shared HEIGHT - rather than
+   stretching every item to a shared WIDTH, or boxing it in a fixed
+   aspect-ratio frame - keeps captions aligned and stops the carousel from
+   jumping vertically as you scroll, while letting each card keep its image's
+   true shape: portrait screenshots stay narrow, wide ones stay wide. No
+   letterboxing, no empty gutters. --gallery-row-height is set per breakpoint
+   below (smaller on narrower viewports) and inherited from .project-gallery.
+
+   The height is pinned on the PICTURE, not the item. Captions vary in
+   length and can wrap to one or two lines - if the fixed height lived on
+   the item, a longer caption would eat into its own image's share of that
+   height and shrink it relative to its neighbors. Pinning the picture keeps
+   every image in a row exactly the same height regardless of caption
+   length; the item's total height (and caption baseline) is then free to
+   vary slightly, which is the correct place for that variation to live. */
+.gallery-item:has(img.aspect-auto):not(.no-border) {
     flex: 0 0 auto;
+}
+
+.gallery-item:has(img.aspect-auto):not(.no-border) picture {
+    display: flex;
+    flex: none;
+    height: var(--gallery-row-height, 400px);
+    align-items: center;
+    justify-content: center;
+}
+
+.gallery-item:not(.no-border) img.aspect-auto {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    align-self: center;
 }
 
 .gallery-item:only-child {
@@ -1449,10 +1504,26 @@ body.standalone-page {
     box-shadow: none;
 }
 
+/* Uniform-height filmstrip images sit plainly, edge to edge - no card
+   chrome (border/shadow) so a row of different-width shots reads as one
+   continuous strip rather than a set of boxed tiles. */
+.project-detail-content .gallery-item img.aspect-auto {
+    border: none;
+    box-shadow: none;
+}
 
-.gallery-item img.aspect-auto {
+.gallery-item.no-border img.aspect-auto {
     width: auto;
+    height: auto;
     max-width: 100%;
+    max-height: 70vh;
+    /* Both axes stay auto so the browser picks a single uniform scale that
+       satisfies whichever constraint (container width, or the 70vh safety
+       cap for an unusually tall/portrait shot) is more restrictive - the
+       image's own box always matches its rendered content exactly, so
+       there's never empty letterboxed space around it. An explicit
+       width: 100% would force the box to full width even when max-height
+       is what's actually constraining it, leaving dead space on the sides. */
     align-self: center;
 }
 
@@ -1568,6 +1639,7 @@ body.standalone-page {
         margin-right: -1.2rem;
         padding-left: 1.2rem;
         padding-right: 1.2rem;
+        scroll-padding-inline: 1.2rem;
         --mask-left: 0px;
         --mask-right: 1.2rem;
         -webkit-mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
@@ -1584,15 +1656,7 @@ body.standalone-page {
 
     .gallery-item {
         flex: 0 0 100%;
-    }
-
-    .gallery-item:has(img.aspect-auto) {
-        flex: 0 0 100%;
-        min-width: 0;
-    }
-
-    .gallery-item img.aspect-auto {
-        width: 100%;
+        --gallery-row-height: 340px;
     }
 }
 
@@ -2263,6 +2327,7 @@ body.standalone-page {
         display: flex;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
+        scroll-padding-inline: 1.4rem;
         gap: 1.25rem;
         -webkit-overflow-scrolling: touch;
         --mask-left: 0px;
@@ -2282,11 +2347,7 @@ body.standalone-page {
     .gallery-item {
         flex: 0 0 85%;
         scroll-snap-align: start;
-    }
-
-    .gallery-item:has(img.aspect-auto) {
-        flex: 0 0 85%;
-        min-width: 0;
+        --gallery-row-height: 300px;
     }
 
     .project-detail-content hr {
