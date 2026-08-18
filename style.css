@@ -1431,11 +1431,12 @@ body.standalone-page {
     gap: 0.75rem;
 }
 
-/* A no-border item is always a lone hero shot (one per .project-gallery),
-   meant to be seen whole, not swiped through. flex: 0 0 100% gives it the
+/* is-hero marks a lone full-bleed shot (one per .project-gallery), meant to
+   be seen whole, not swiped through - distinct from a plain multi-item row
+   that just happens to want borderless images. flex: 0 0 100% gives it the
    gallery's actual (bounded) width, so the image can scale to fill it
    exactly - no overflow, no horizontal scroll, no carousel affordance. */
-.gallery-item.no-border:has(img.aspect-auto) {
+.gallery-item.is-hero:has(img.aspect-auto) {
     flex: 0 0 100%;
 }
 
@@ -1455,11 +1456,11 @@ body.standalone-page {
    every image in a row exactly the same height regardless of caption
    length; the item's total height (and caption baseline) is then free to
    vary slightly, which is the correct place for that variation to live. */
-.gallery-item:has(img.aspect-auto):not(.no-border) {
+.gallery-item:has(img.aspect-auto):not(.is-hero) {
     flex: 0 0 auto;
 }
 
-.gallery-item:has(img.aspect-auto):not(.no-border) picture {
+.gallery-item:has(img.aspect-auto):not(.is-hero) picture {
     display: flex;
     flex: none;
     height: var(--gallery-row-height, 400px);
@@ -1467,7 +1468,7 @@ body.standalone-page {
     justify-content: center;
 }
 
-.gallery-item:not(.no-border) img.aspect-auto {
+.gallery-item:not(.is-hero) img.aspect-auto {
     height: 100%;
     width: auto;
     max-width: 100%;
@@ -1494,12 +1495,12 @@ body.standalone-page {
     border: 1px solid var(--img-border);
 }
 
-.gallery-item.no-border img {
+.gallery-item.is-hero img {
     border: none;
     box-shadow: none;
 }
 
-.gallery-item.no-border img:hover {
+.gallery-item.is-hero img:hover {
     border: none;
     box-shadow: none;
 }
@@ -1512,7 +1513,7 @@ body.standalone-page {
     box-shadow: none;
 }
 
-.gallery-item.no-border img.aspect-auto {
+.gallery-item.is-hero img.aspect-auto {
     width: auto;
     height: auto;
     max-width: 100%;
