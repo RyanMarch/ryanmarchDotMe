@@ -407,7 +407,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setupContentClicks(projectDetailArea, projectDetailArea);
     }
 
-    function performScrollRestorationOrScrollToTop() {
+    function performScrollRestorationOrScrollToTop(restoreY) {
+        if (typeof restoreY === 'number') {
+            window.scrollTo(0, restoreY);
+            return;
+        }
+
         const scrollX = sessionStorage.getItem('live_reload_scroll_x');
         const scrollY = sessionStorage.getItem('live_reload_scroll_y');
         if (scrollX !== null && scrollY !== null) {
@@ -550,7 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function navigateHome(pushState = true) {
+    function navigateHome(pushState = true, restoreY) {
         if (pushState && window.location.pathname !== '/') {
             history.pushState(null, '', '/');
         } else if (!pushState && window.location.pathname !== '/') {
@@ -601,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 archiveDivider.style.display = (showActive && showArchive) ? 'flex' : 'none';
             }
 
-            performScrollRestorationOrScrollToTop();
+            performScrollRestorationOrScrollToTop(restoreY);
 
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -623,16 +628,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Listen for History popstate (Back/Forward buttons)
-    window.addEventListener('popstate', handleUrlRoute);
+    window.addEventListener('popstate', (event) => handleUrlRoute(event.state));
 
-    function handleUrlRoute() {
+    function handleUrlRoute(state) {
         const path = window.location.pathname;
         const match = path.match(/^\/project\/([^/]+)\/?/);
         if (match) {
             const projectId = match[1];
             loadProject(projectId);
         } else {
-            navigateHome(false);
+            navigateHome(false, state && typeof state.scrollY === 'number' ? state.scrollY : undefined);
         }
     }
 
@@ -658,6 +663,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 const url = readMoreBtn.getAttribute('href');
                 const projectId = readMoreBtn.getAttribute('data-project-id');
+                // Record the home scroll position on the current history entry so
+                // that navigating back restores it instead of landing at the top.
+                history.replaceState({ scrollY: window.scrollY }, '', window.location.href);
                 history.pushState(null, '', url);
                 loadProject(projectId);
             }
@@ -668,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupGridClickInterception(archiveGrid);
 
     // Initial Route Check
-    handleUrlRoute();
+    handleUrlRoute(history.state);
 
     // Intercept slim-header brand link to use SPA navigation
     const headerBrand = document.querySelector('.slim-header-brand');
