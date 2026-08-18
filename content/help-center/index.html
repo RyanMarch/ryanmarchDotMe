@@ -15,24 +15,29 @@
     </div>
 </div>
 
-<p>Help Center is a lightweight, self-contained documentation engine built with native Web Components. Designed as
-    portable internal infrastructure, it allows web applications to ship fully searchable support documentation by using
-    clean infrastructure and simple configuration.</p>
+<p>
+    Help Center is a lightweight, self-contained documentation engine built using native Web Components. It provides
+    portable internal infrastructure enabling web applications to add searchable support documentation via simple
+    configuration.
+</p>
 
-<p>After working on projects like <a href="/project/qr-maker/">QR Maker</a>, <a
-        href="/project/filenamer/">FileNamer</a>, and <a href="/project/icon-studio/">Icon Studio</a>, the pattern was
-    clear: every web tool needs public documentation with client-side search, structured category browsing,
-    heading-based navigation, and dark mode support. Help Center extracts those shared requirements into a single
-    reusable foundation.</p>
+<p>
+    While working on projects such as <a href="/project/qr-maker/">QR Maker</a>, <a
+        href="/project/filenamer/">FileNamer</a>, and <a href="/project/icon-studio/">Icon Studio</a>, I observed a
+    recurring need. Each web tool needs public documentation that offers client-side search, category browsing,
+    heading-based navigation, and dark mode. Help Center merges these requirements into a single reusable foundation.
+</p>
 
-<p>The original QR Maker support page was a single static HTML file with no search or scaffolding. FileNamer expanded on
-    this by organizing articles into dedicated folders with client-side fuzzy search, but hardcoded project names
+<p>
+    The original QR Maker support page was a single static HTML file with no search or scaffolding. FileNamer expanded
+    on this by organizing articles into dedicated folders with client-side fuzzy search, but hardcoded project names
     directly into the components. When Icon Studio needed user documentation, the need for a repeatable solution became
     clear.
 </p>
 
-<p>Help Center decouples all app-specific branding, routing, navigation CTAs, and metadata into
-    <code>docs-config.json</code>, keeping the Web Component source code identical across every deployment.
+<p>
+    Help Center isolates all application branding, routing, navigation links, and metadata into a file called
+    docs-config.json. This keeps the Web Component source code identical for each deployment.
 </p>
 
 <div class="project-gallery">
@@ -91,26 +96,32 @@
         multiple standalone web apps. Standardized client-side search, layout templates, and asset pipelines into a
         unified codebase.</li>
     <li><strong>Architecture & Portability:</strong> Abstracted app-specific identifiers, URLs, promotional links,
-        and themes into a centralized configuration file, ensuring component files remain 100% agnostic.</li>
+        and themes into a centralized configuration file, keeping component files 100% agnostic.</li>
     <li><strong>Component Engineering:</strong> Built native HTML5 Web Components for search indexing, responsive
         sidebars, theme toggling, and image lightboxes using zero external libraries or bundlers.</li>
     <li><strong>Upstream Iteration & Maintenance:</strong> Integrated Help Center into active projects like TripDeck
-        and Icon Studio, feeding real-world usability fixes—such as keyboard accessibility and dynamic sidebar
+        and Icon Studio, feeding real-world usability fixes such as keyboard accessibility and dynamic sidebar
         CTAs back into the core template.</li>
 </ul>
 
 <h4 id="outcomes" class="section-divider"><span>Deployments & Impact</span></h4>
 
-<p>Help Center powers support sites across several production web applications, including <a
+<p>
+    Help Center powers support sites across several production web applications, including <a
         href="https://qrmaker.ryanmarch.me/docs/">QR Maker</a>, <a href="https://iconstudio.ryanmarch.me/support/">Icon
         Studio</a>, <a href="https://filenamer.ryanmarch.me/docs/">FileNamer</a>, and <a
-        href="https://tripdeck.ryanmarch.me/docs/">TripDeck</a>—featuring
-    comprehensive guides, image lightboxes, and app CTAs.</p>
+        href="https://tripdeck.ryanmarch.me/docs/">TripDeck</a>, all featuring
+    comprehensive guides, image lightboxes, and app CTAs.
+</p>
 
-<p>Standardizing Help Center drastically reduced the setup time for new product documentation. Spinning up a new
+<p>
+    Standardizing Help Center reduced the setup time for new product documentation. Spinning up a new
     help site now requires only running the setup script, defining <code>docs-config.json</code>, and writing user
-    guides in vanilla HTML files. Custom front-end UI work for each new application has been eliminated.</p>
+    guides in vanilla HTML files. Custom front-end UI work for each new application has been eliminated.
+</p>
 
-<p>Treating documentation infrastructure like a real product paid off: it delivered a consistent, searchable support
-    experience for end-users while creating an easy authoring workflow for every new product I work on, allowing me
-    to focus on product, documentation, and features.</p>
+<p>
+    Treating documentation infrastructure like a product it delivered a consistent, searchable support
+    experience for end-users and an easy authoring workflow for every new product I work on, allowing me
+    to focus on product, documentation, and features.
+</p>

@@ -1268,15 +1268,28 @@ body.standalone-page {
     color: rgba(255, 255, 255, 0.9);
 }
 
+:root[data-theme="light"] .project-detail-content pre {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    border-left-color: var(--accent-color);
+    color: #1e293b;
+}
+
+:root[data-theme="light"] .project-detail-content code {
+    background: rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #1e293b;
+}
+
 @media (prefers-color-scheme: light) {
-    .project-detail-content pre {
+    :root:not([data-theme="dark"]) .project-detail-content pre {
         background: rgba(0, 0, 0, 0.05);
         border-color: rgba(0, 0, 0, 0.1);
         border-left-color: var(--accent-color);
         color: #1e293b;
     }
 
-    .project-detail-content code {
+    :root:not([data-theme="dark"]) .project-detail-content code {
         background: rgba(0, 0, 0, 0.06);
         border-color: rgba(0, 0, 0, 0.12);
         color: #1e293b;
