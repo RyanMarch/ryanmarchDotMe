@@ -3,6 +3,13 @@ import { initializeCustomAudioPlayers } from './audio-player.js?v=1';
 import { initializeLightbox, setupContentClicks } from './lightbox.js?v=1';
 import { initClearTechBrochure } from './brochure.js?v=1';
 
+// The SPA router owns scroll position via history state (see performScrollRestorationOrScrollToTop).
+// Opting out of the browser's automatic per-entry scroll restoration prevents it from fighting
+// that logic — e.g. jumping to a stale offset on a plain reload of "/".
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('projects-grid');
     const archiveGrid = document.getElementById('archive-projects-grid');
@@ -675,8 +682,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupGridClickInterception(grid);
     setupGridClickInterception(archiveGrid);
 
-    // Initial Route Check
-    handleUrlRoute(history.state);
+    // Initial Route Check (never restore a scroll position from stale history.state on a fresh load —
+    // that's only valid in response to an actual popstate/back-forward navigation)
+    handleUrlRoute();
 
     // Intercept slim-header brand link to use SPA navigation
     const headerBrand = document.querySelector('.slim-header-brand');
