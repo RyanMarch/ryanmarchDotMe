@@ -148,4 +148,37 @@ describe('Project Case Studies Validation', () => {
             }
         }
     });
+
+    it('should not contain any debug console.log or console.debug statements in any client-facing or worker JavaScript files', () => {
+        const jsFiles = [
+            path.join(projectRoot, 'worker.js')
+        ];
+
+        const assetsJsDir = path.join(projectRoot, 'assets/js');
+        const assetsFiles = fs.readdirSync(assetsJsDir);
+        assetsFiles.forEach(file => {
+            if (file.endsWith('.js') && file !== 'beacon.min.js') {
+                jsFiles.push(path.join(assetsJsDir, file));
+            }
+        });
+
+        const violations = [];
+
+        jsFiles.forEach(file => {
+            const content = fs.readFileSync(file, 'utf8');
+            const cleanContent = content
+                .replace(/\/\*[\s\S]*?\*\//g, '')
+                .replace(/\/\/.*/g, '');
+            
+            const debugLogRegex = /console\.(log|debug|dir|trace)\(/g;
+            const matches = [...cleanContent.matchAll(debugLogRegex)];
+            
+            if (matches.length > 0) {
+                const relativePath = path.relative(projectRoot, file);
+                violations.push(`${relativePath} (${matches.length} match(es))`);
+            }
+        });
+
+        expect(violations, `Found active debug logging calls in the following files:\n${violations.join('\n')}`).toEqual([]);
+    });
 });
