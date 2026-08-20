@@ -4,6 +4,9 @@ import { initializeLightbox, setupContentClicks } from './lightbox.js?v=1';
 import { initClearTechBrochure } from './brochure.js?v=1';
 import { globalAudio } from './global-audio.js';
 import { initializeMiniPlayer } from './mini-player.js';
+import { globalVideo } from './global-video.js';
+import { initializeVideoMiniPlayer } from './video-mini-player.js';
+import { initializeVideoSlots } from './video-player.js';
 
 // The SPA router owns scroll position via history state (see performScrollRestorationOrScrollToTop).
 // Opting out of the browser's automatic per-entry scroll restoration prevents it from fighting
@@ -23,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Header Mini Audio Player
     initializeMiniPlayer();
+
+    // Initialize Floating Mini Video Player
+    initializeVideoMiniPlayer();
 
     // Define sophisticated category filters
     const filterCategories = [
@@ -477,6 +483,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!rawProject) { navigateHome(false); return; }
         const project = normalizeProject(rawProject);
 
+        // Detach any in-page video into the floating dock before this view's
+        // content gets wiped out below, so playback survives the navigation.
+        globalVideo.float();
+
         // Fade out home view before switching
         const topRow = document.querySelector('.top-row');
         const filterContainer = document.querySelector('.filter-container');
@@ -557,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 9. Wire up handlers
             initializeCustomAudioPlayers(projectDetailArea, projectId);
+            initializeVideoSlots(projectDetailArea, projectId);
             initializeProjectGalleries(projectDetailArea);
 
             // Initialize CLEAR Tech brochure tabs if applicable
@@ -606,6 +617,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function navigateHome(pushState = true, restoreY) {
+        // Detach any in-page video into the floating dock before this view's
+        // content gets wiped out below, so playback survives the navigation.
+        globalVideo.float();
+
         // Notify global audio of route change to home
         globalAudio.setCurrentRoute(null);
 
