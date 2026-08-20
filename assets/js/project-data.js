@@ -180,7 +180,8 @@ export const myProjects = [
         imageClass: "destination-icon",
         actionText: "Visit Website",
         actionUrl: "https://www.servicecoordinator.org",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "delhi-historical-society",
@@ -203,7 +204,8 @@ export const myProjects = [
         imageClass: "destination-icon",
         actionText: "Visit Website",
         actionUrl: "https://www.delhihistoricalsociety.org",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "rentpress",
@@ -225,7 +227,8 @@ export const myProjects = [
         actionText: "Visit RentPress.io",
         actionUrl: "https://rentpress.io",
         sourceUrl: "https://wordpress.org/plugins/rentpress-for-websites/",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "rentpress-local",
@@ -246,7 +249,8 @@ export const myProjects = [
         imageClass: "destination-icon",
         actionText: "Visit RentPress Local",
         actionUrl: "https://rentpress.io/local/",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "rentpress-lead-sync",
@@ -268,7 +272,8 @@ export const myProjects = [
         actionText: "View Plugin",
         actionUrl: "https://wordpress.org/plugins/rentpress-gravity-forms-add-on/",
         sourceUrl: "https://support.30lines.com/documentation/rentpress-gravity-forms-add-on/",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "rentpress-data-hub",
@@ -286,7 +291,7 @@ export const myProjects = [
         image: "",
         symbol: "hub",
         imageClass: "destination-icon",
-        actionText: "Learn More",
+        actionText: "Read More",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -310,7 +315,8 @@ export const myProjects = [
         actionText: "View Plugin",
         actionUrl: "https://wordpress.org/plugins/rentpress-amenities-manager-add-on/",
         sourceUrl: "https://support.30lines.com/documentation/rentpress-amenities-manager-add-on/",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "rentpress-email",
@@ -442,7 +448,8 @@ export const myProjects = [
         imageClass: "destination-icon",
         actionText: "View App",
         actionUrl: "https://web.archive.org/web/20150715014523/http://apps.microsoft.com/windows/en-us/app/forecast-weather/de8bdabd-1707-4512-9866-f1c3c0652914",
-        hasExtendedContent: true
+        hasExtendedContent: true,
+        showLaunchButton: false
     },
     {
         id: "the-danger-ranger",
