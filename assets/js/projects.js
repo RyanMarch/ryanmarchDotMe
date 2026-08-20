@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </a>
                 `;
             } else if (project.hasExtendedContent) {
-                // ONE button: Read More (Primary)
+                // ONE button: Read More / Primary CTA
                 actionsHtml = `
                     <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}">
                         <span>Read More <span class="sr-only">about ${project.title}</span></span>
