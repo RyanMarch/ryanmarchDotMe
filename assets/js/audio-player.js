@@ -1,18 +1,33 @@
-export function initializeCustomAudioPlayers(container) {
+import { globalAudio } from './global-audio.js';
+
+export function initializeCustomAudioPlayers(container, projectId) {
     const players = container.querySelectorAll('.custom-audio-player');
 
-    players.forEach(player => {
-        const initialAudio = player.querySelector('audio');
-        if (!initialAudio) return;
+    players.forEach((player, index) => {
+        // Prevent duplicate initializations
+        if (player.dataset.initialized === 'true') return;
+        player.dataset.initialized = 'true';
 
-        const src = initialAudio.getAttribute('src');
+        const initialAudio = player.querySelector('audio');
+        const rawSrc = initialAudio ? initialAudio.getAttribute('src') : player.getAttribute('data-src');
+        if (!rawSrc) return;
+
+        // Auto-resolve CDN URL if relative path
+        const src = rawSrc.replace(/(?:\.\/)?content\/[^/]+\/audio\/([^"]+\.mp3)/g, 'https://media.ryanmarch.me/$1');
         const title = player.getAttribute('data-title') || 'Audio Track';
         const subtitle = player.getAttribute('data-subtitle') || 'Local File';
+        const trackId = `${projectId || 'page'}-${index}-${title.replace(/\s+/g, '-').toLowerCase()}`;
+
+        const trackData = {
+            id: trackId,
+            src: src,
+            title: title,
+            subtitle: subtitle,
+            projectId: projectId || null
+        };
 
         // Dynamically build audio player UI inside the container.
         player.innerHTML = `
-            <audio src="${src}" preload="metadata"></audio>
-            
             <!-- Top Row: Title & Info -->
             <div class="player-header">
                 <span class="player-title">${title}</span>
@@ -39,6 +54,7 @@ export function initializeCustomAudioPlayers(container) {
                     </button>
                     <div class="player-volume-slider-container" aria-label="Volume slider" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
                         <div class="player-volume-slider-bar" style="width: 100%;"></div>
+                        <div class="player-volume-knob" style="left: 100%;"></div>
                     </div>
                 </div>
 
@@ -53,7 +69,6 @@ export function initializeCustomAudioPlayers(container) {
             </div>
         `;
 
-        const audio = player.querySelector('audio');
         const playPauseBtn = player.querySelector('.player-play-pause');
         const iconPlay = player.querySelector('.icon-play');
         const iconPause = player.querySelector('.icon-pause');
@@ -67,8 +82,7 @@ export function initializeCustomAudioPlayers(container) {
         const iconMuted = player.querySelector('.icon-muted');
         const volumeSliderContainer = player.querySelector('.player-volume-slider-container');
         const volumeSliderBar = player.querySelector('.player-volume-slider-bar');
-
-        if (!audio || !playPauseBtn) return;
+        const volumeKnob = player.querySelector('.player-volume-knob');
 
         function formatTime(seconds) {
             if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
@@ -77,170 +91,195 @@ export function initializeCustomAudioPlayers(container) {
             return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
         }
 
-        playPauseBtn.addEventListener('click', () => {
-            document.querySelectorAll('audio').forEach(otherAudio => {
-                if (otherAudio !== audio && !otherAudio.paused) {
-                    otherAudio.pause();
-                }
-            });
+        function isThisTrackActive(state) {
+            return state.track && (state.track.id === trackData.id || state.track.src === trackData.src);
+        }
 
-            if (audio.paused) {
-                audio.play().catch(e => console.error("Play failed:", e));
+        // Sync UI with Global Audio Manager State
+        const unsubscribe = globalAudio.subscribe((state) => {
+            // Check if player element is still connected to DOM
+            if (!player.isConnected) {
+                unsubscribe();
+                return;
+            }
+
+            const active = isThisTrackActive(state);
+
+            // Play / Pause Icon
+            if (active && !state.isPaused) {
+                if (iconPlay) iconPlay.style.display = 'none';
+                if (iconPause) iconPause.style.display = 'block';
+                playPauseBtn.setAttribute('aria-label', 'Pause');
             } else {
-                audio.pause();
+                if (iconPlay) iconPlay.style.display = 'block';
+                if (iconPause) iconPause.style.display = 'none';
+                playPauseBtn.setAttribute('aria-label', 'Play');
             }
-        });
 
-        audio.addEventListener('play', () => {
-            if (iconPlay) iconPlay.style.display = 'none';
-            if (iconPause) iconPause.style.display = 'block';
-            playPauseBtn.setAttribute('aria-label', 'Pause');
-        });
-
-        audio.addEventListener('pause', () => {
-            if (iconPlay) iconPlay.style.display = 'block';
-            if (iconPause) iconPause.style.display = 'none';
-            playPauseBtn.setAttribute('aria-label', 'Play');
-        });
-
-        audio.addEventListener('ended', () => {
-            if (iconPlay) iconPlay.style.display = 'block';
-            if (iconPause) iconPause.style.display = 'none';
-            if (progressBar) progressBar.style.width = '0%';
-            if (progressBarKnob) progressBarKnob.style.left = '0%';
-            if (progressBarContainer) {
-                progressBarContainer.style.setProperty('--progress-percent', '0%');
-                progressBarContainer.setAttribute('aria-valuenow', '0');
-            }
-            if (timeCurrent) timeCurrent.textContent = '0:00';
-            playPauseBtn.setAttribute('aria-label', 'Play');
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            const current = audio.currentTime;
-            const duration = audio.duration;
-            if (duration && !isNaN(duration) && isFinite(duration)) {
-                const percent = (current / duration) * 100;
-                if (progressBar) progressBar.style.width = `${percent}%`;
-                if (progressBarKnob) progressBarKnob.style.left = `${percent}%`;
+            // Progress / Time Scrubber
+            if (active && !state.audioEnded) {
+                const current = state.currentTime;
+                const duration = state.duration;
+                if (duration && !isNaN(duration) && isFinite(duration)) {
+                    const percent = (current / duration) * 100;
+                    if (progressBar) progressBar.style.width = `${percent}%`;
+                    if (progressBarKnob) progressBarKnob.style.left = `${percent}%`;
+                    if (progressBarContainer) {
+                        progressBarContainer.style.setProperty('--progress-percent', `${percent}%`);
+                        progressBarContainer.setAttribute('aria-valuenow', Math.round(percent).toString());
+                    }
+                    if (timeDuration) timeDuration.textContent = formatTime(duration);
+                }
+                if (timeCurrent) timeCurrent.textContent = formatTime(current);
+            } else {
+                // Reset player progress if track ended, stopped, or another track is active
+                if (progressBar) progressBar.style.width = '0%';
+                if (progressBarKnob) progressBarKnob.style.left = '0%';
                 if (progressBarContainer) {
-                    progressBarContainer.style.setProperty('--progress-percent', `${percent}%`);
-                    progressBarContainer.setAttribute('aria-valuenow', Math.round(percent).toString());
+                    progressBarContainer.style.setProperty('--progress-percent', '0%');
+                    progressBarContainer.setAttribute('aria-valuenow', '0');
                 }
-                if (timeDuration) timeDuration.textContent = formatTime(duration);
+                if (timeCurrent) timeCurrent.textContent = '0:00';
             }
-            if (timeCurrent) timeCurrent.textContent = formatTime(current);
+
+            // Volume & Mute UI
+            const vol = state.volume;
+            const isMuted = state.muted || vol === 0;
+            const displayPercent = isMuted ? 0 : vol * 100;
+            if (iconVolume) iconVolume.style.display = isMuted ? 'none' : 'block';
+            if (iconMuted) iconMuted.style.display = isMuted ? 'block' : 'none';
+            if (muteBtn) muteBtn.setAttribute('aria-label', isMuted ? 'Unmute' : 'Mute');
+            if (volumeSliderBar) volumeSliderBar.style.width = `${displayPercent}%`;
+            if (volumeKnob) volumeKnob.style.left = `${displayPercent}%`;
+            if (volumeSliderContainer) volumeSliderContainer.setAttribute('aria-valuenow', Math.round(displayPercent).toString());
         });
 
-        const setDuration = () => {
-            if (timeDuration && audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-                timeDuration.textContent = formatTime(audio.duration);
+        // Click Play / Pause
+        playPauseBtn.addEventListener('click', () => {
+            const state = globalAudio.getState();
+            if (isThisTrackActive(state)) {
+                globalAudio.togglePlay();
+            } else {
+                globalAudio.loadAndPlay(trackData);
             }
-        };
+        });
 
-        if (audio.readyState >= 1) {
-            setDuration();
-        } else {
-            audio.addEventListener('loadedmetadata', setDuration);
-        }
-        audio.addEventListener('durationchange', setDuration);
-
+        // Scrubber / Seek
         if (progressBarContainer) {
-            progressBarContainer.addEventListener('click', (e) => {
+            let isSeeking = false;
+
+            const updateSeekFromPointer = (e) => {
                 const rect = progressBarContainer.getBoundingClientRect();
+                if (rect.width <= 0) return;
                 const clickX = e.clientX - rect.left;
-                const width = rect.width;
-                const percent = Math.min(Math.max(clickX / width, 0), 1);
+                const percent = Math.min(Math.max(clickX / rect.width, 0), 1);
 
-                if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-                    audio.currentTime = percent * audio.duration;
-                    if (progressBar) progressBar.style.width = `${percent * 100}%`;
-                    if (progressBarKnob) progressBarKnob.style.left = `${percent * 100}%`;
+                const state = globalAudio.getState();
+                if (!isThisTrackActive(state)) {
+                    globalAudio.loadAndPlay(trackData);
                 }
-            });
-
-            // Keyboard accessibility for Seek Slider
-            progressBarContainer.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-                        audio.currentTime = Math.min(audio.currentTime + 5, audio.duration);
-                    }
-                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    audio.currentTime = Math.max(audio.currentTime - 5, 0);
-                } else if (e.key === 'Home') {
-                    e.preventDefault();
-                    audio.currentTime = 0;
-                } else if (e.key === 'End') {
-                    e.preventDefault();
-                    if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration)) {
-                        audio.currentTime = audio.duration;
-                    }
-                }
-            });
-        }
-
-        if (muteBtn) {
-            muteBtn.addEventListener('click', () => {
-                audio.muted = !audio.muted;
-                if (audio.muted) {
-                    if (iconVolume) iconVolume.style.display = 'none';
-                    if (iconMuted) iconMuted.style.display = 'block';
-                    if (volumeSliderBar) volumeSliderBar.style.width = '0%';
-                    volumeSliderContainer.setAttribute('aria-valuenow', '0');
-                    muteBtn.setAttribute('aria-label', 'Unmute');
-                } else {
-                    if (iconVolume) iconVolume.style.display = 'block';
-                    if (iconMuted) iconMuted.style.display = 'none';
-                    if (volumeSliderBar) volumeSliderBar.style.width = `${audio.volume * 100}%`;
-                    volumeSliderContainer.setAttribute('aria-valuenow', Math.round(audio.volume * 100).toString());
-                    muteBtn.setAttribute('aria-label', 'Mute');
-                }
-            });
-        }
-
-        if (volumeSliderContainer) {
-            const updateVolumeUI = (percent) => {
-                audio.volume = percent;
-                if (volumeSliderBar) volumeSliderBar.style.width = `${percent * 100}%`;
-                volumeSliderContainer.setAttribute('aria-valuenow', Math.round(percent * 100).toString());
-
-                if (percent === 0) {
-                    audio.muted = true;
-                    if (iconVolume) iconVolume.style.display = 'none';
-                    if (iconMuted) iconMuted.style.display = 'block';
-                    muteBtn.setAttribute('aria-label', 'Unmute');
-                } else {
-                    audio.muted = false;
-                    if (iconVolume) iconVolume.style.display = 'block';
-                    if (iconMuted) iconMuted.style.display = 'none';
-                    muteBtn.setAttribute('aria-label', 'Mute');
-                }
+                globalAudio.seekPercent(percent);
             };
 
-            volumeSliderContainer.addEventListener('click', (e) => {
-                const rect = volumeSliderContainer.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const width = rect.width;
-                const percent = Math.min(Math.max(clickX / width, 0), 1);
-                updateVolumeUI(percent);
+            progressBarContainer.addEventListener('pointerdown', (e) => {
+                isSeeking = true;
+                progressBarContainer.setPointerCapture(e.pointerId);
+                updateSeekFromPointer(e);
             });
 
-            // Keyboard accessibility for Volume Slider
-            volumeSliderContainer.addEventListener('keydown', (e) => {
+            progressBarContainer.addEventListener('pointermove', (e) => {
+                if (!isSeeking) return;
+                updateSeekFromPointer(e);
+            });
+
+            const stopSeek = (e) => {
+                if (!isSeeking) return;
+                isSeeking = false;
+                try {
+                    progressBarContainer.releasePointerCapture(e.pointerId);
+                } catch (_) {}
+            };
+
+            progressBarContainer.addEventListener('pointerup', stopSeek);
+            progressBarContainer.addEventListener('pointercancel', stopSeek);
+
+            progressBarContainer.addEventListener('keydown', (e) => {
+                const state = globalAudio.getState();
+                if (!isThisTrackActive(state)) return;
+
                 if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
                     e.preventDefault();
-                    updateVolumeUI(Math.min(audio.volume + 0.05, 1));
+                    globalAudio.seek(state.currentTime + 5);
                 } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
                     e.preventDefault();
-                    updateVolumeUI(Math.max(audio.volume - 0.05, 0));
+                    globalAudio.seek(state.currentTime - 5);
                 } else if (e.key === 'Home') {
                     e.preventDefault();
-                    updateVolumeUI(0);
+                    globalAudio.seek(0);
                 } else if (e.key === 'End') {
                     e.preventDefault();
-                    updateVolumeUI(1);
+                    if (state.duration) globalAudio.seek(state.duration);
+                }
+            });
+        }
+
+        // Mute / Unmute
+        if (muteBtn) {
+            muteBtn.addEventListener('click', () => {
+                globalAudio.toggleMute();
+            });
+        }
+
+        // Volume Slider with Drag & Pointer Capture Support
+        if (volumeSliderContainer) {
+            let isDraggingVol = false;
+
+            const updateVolumeFromPointer = (e) => {
+                const rect = volumeSliderContainer.getBoundingClientRect();
+                if (rect.width <= 0) return;
+                const clickX = e.clientX - rect.left;
+                const percent = Math.min(Math.max(clickX / rect.width, 0), 1);
+                globalAudio.setVolume(percent);
+            };
+
+            volumeSliderContainer.addEventListener('pointerdown', (e) => {
+                isDraggingVol = true;
+                volumeSliderContainer.classList.add('is-dragging');
+                volumeSliderContainer.setPointerCapture(e.pointerId);
+                updateVolumeFromPointer(e);
+            });
+
+            volumeSliderContainer.addEventListener('pointermove', (e) => {
+                if (!isDraggingVol) return;
+                updateVolumeFromPointer(e);
+            });
+
+            const stopVolDrag = (e) => {
+                if (!isDraggingVol) return;
+                isDraggingVol = false;
+                volumeSliderContainer.classList.remove('is-dragging');
+                try {
+                    volumeSliderContainer.releasePointerCapture(e.pointerId);
+                } catch (_) {}
+            };
+
+            volumeSliderContainer.addEventListener('pointerup', stopVolDrag);
+            volumeSliderContainer.addEventListener('pointercancel', stopVolDrag);
+
+            volumeSliderContainer.addEventListener('keydown', (e) => {
+                const state = globalAudio.getState();
+                if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    globalAudio.setVolume(state.volume + 0.05);
+                } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    globalAudio.setVolume(state.volume - 0.05);
+                } else if (e.key === 'Home') {
+                    e.preventDefault();
+                    globalAudio.setVolume(0);
+                } else if (e.key === 'End') {
+                    e.preventDefault();
+                    globalAudio.setVolume(1);
                 }
             });
         }

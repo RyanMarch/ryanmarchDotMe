@@ -25,7 +25,7 @@ export const myProjects = [
     {
         id: "filenamer",
         title: "FileNamer",
-        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files",
+        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files.",
         seoTitle: "FileNamer - File Renaming Utility",
         seoDescription: "FileNamer is an intuitive, browser-based utility for defining and applying consistent file naming templates. Drag and drop files, configure presets, preview results in real time, and export renamed files instantly.",
         tags: [
@@ -36,7 +36,9 @@ export const myProjects = [
         featured: false,
         size: "medium",
         image: "content/filenamer/images/app-screenshot-with-icon.avif",
-        actionText: "View Project",
+        imageWidth: 800,
+        imageHeight: 600,
+        actionText: "Launch FileNamer",
         actionUrl: "https://filenamer.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/fileNamer",
         hasExtendedContent: true,
@@ -333,6 +335,27 @@ export const myProjects = [
         hasExtendedContent: true
     },
     {
+        id: "replay-in-the-dark",
+        title: "Replay In The Dark",
+        subtitle: "This mashup brings Iyaz and Hoobastank together, against better judgement.",
+        seoTitle: "Replay In The Dark - Iyaz vs. Hoobastank Mashup",
+        seoDescription: "A mashup of Iyaz's 'Replay' and Hoobastank's 'Crawling In The Dark'.",
+        tags: [
+            { label: "Audio Production", color: "indigo" },
+            { label: "Archive", color: "gray", priority: "low" },
+            { label: "Mixing", color: "indigo" }
+        ],
+        featured: false,
+        size: "small",
+        image: "/content/replay-in-the-dark/images/replay-in-the-dark.avif",
+        imageWidth: 350,
+        imageHeight: 350,
+        actionText: "View Mashup",
+        actionUrl: "",
+        sourceUrl: "",
+        hasExtendedContent: true
+    },
+    {
         id: "night-riots-interview",
         title: "Night Riots Interview",
         subtitle: "An exclusive on-tour artist interview broadcast on WXCU Radio.",
@@ -352,27 +375,6 @@ export const myProjects = [
         imageHeight: 400,
         imageClass: "destination-icon",
         actionText: "View Interview",
-        actionUrl: "",
-        hasExtendedContent: true
-    },
-    {
-        id: "breaking-winter",
-        title: "Breaking Winter",
-        subtitle: "Original Composition",
-        seoTitle: "Breaking Winter - Original Music Composition",
-        seoDescription: "Listen to Breaking Winter, an original atmospheric musical composition featuring ambient soundscapes and orchestration.",
-        tags: [
-            { label: "Audio Production", color: "blue" },
-            { label: "Composition", color: "purple" },
-            { label: "Archive", color: "gray", priority: "low" }
-        ],
-        featured: false,
-        size: "small",
-        image: "/content/breaking-winter/images/bw.avif",
-        imageWidth: 350,
-        imageHeight: 350,
-        imageClass: "destination-icon",
-        actionText: "View Project",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -400,6 +402,27 @@ export const myProjects = [
         hasExtendedContent: true
     },
     {
+        id: "breaking-winter",
+        title: "Breaking Winter",
+        subtitle: "Original Composition",
+        seoTitle: "Breaking Winter - Original Music Composition",
+        seoDescription: "Listen to Breaking Winter, an original atmospheric musical composition featuring ambient soundscapes and orchestration.",
+        tags: [
+            { label: "Audio Production", color: "blue" },
+            { label: "Composition", color: "purple" },
+            { label: "Archive", color: "gray", priority: "low" }
+        ],
+        featured: false,
+        size: "small",
+        image: "/content/breaking-winter/images/bw.avif",
+        imageWidth: 350,
+        imageHeight: 350,
+        imageClass: "destination-icon",
+        actionText: "View Composition",
+        actionUrl: "",
+        hasExtendedContent: true
+    },
+    {
         id: "forecast-weather",
         title: "Forecast Weather",
         subtitle: "Get the seven day forecast for an entered location.",
@@ -417,7 +440,7 @@ export const myProjects = [
         imageWidth: 512,
         imageHeight: 512,
         imageClass: "destination-icon",
-        actionText: "View Project",
+        actionText: "View App",
         actionUrl: "https://web.archive.org/web/20150715014523/http://apps.microsoft.com/windows/en-us/app/forecast-weather/de8bdabd-1707-4512-9866-f1c3c0652914",
         hasExtendedContent: true
     },
@@ -499,7 +522,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Project",
+        actionText: "View Song",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -541,7 +564,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 375,
         imageClass: "destination-icon",
-        actionText: "View Project",
+        actionText: "View Film",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -583,7 +606,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Cover",
+        actionText: "View Song",
         actionUrl: "",
         hasExtendedContent: true
     },

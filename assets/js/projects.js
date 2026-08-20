@@ -1,7 +1,12 @@
 import { myProjects } from './project-data.js?v=2';
-import { initializeCustomAudioPlayers } from './audio-player.js?v=1';
+import { initializeCustomAudioPlayers } from './audio-player.js?v=2';
 import { initializeLightbox, setupContentClicks } from './lightbox.js?v=1';
 import { initClearTechBrochure } from './brochure.js?v=1';
+import { globalAudio } from './global-audio.js';
+import { initializeMiniPlayer } from './mini-player.js';
+import { globalVideo } from './global-video.js';
+import { initializeVideoMiniPlayer } from './video-mini-player.js';
+import { initializeVideoSlots } from './video-player.js';
 
 // The SPA router owns scroll position via history state (see performScrollRestorationOrScrollToTop).
 // Opting out of the browser's automatic per-entry scroll restoration prevents it from fighting
@@ -18,6 +23,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 1. Dynamic Lightbox Setup (programmatically creates the lightbox if it is missing)
     initializeLightbox();
+
+    // Initialize Header Mini Audio Player
+    initializeMiniPlayer();
+
+    // Initialize Floating Mini Video Player
+    initializeVideoMiniPlayer();
 
     // Define sophisticated category filters
     const filterCategories = [
@@ -57,6 +68,39 @@ document.addEventListener('DOMContentLoaded', () => {
     filterCategories.forEach(cat => {
         cat.count = myProjects.filter(p => cat.match(p)).length;
     });
+
+    // Helper function to normalize project data and provide consistent guards/fallbacks
+    function normalizeProject(rawProject) {
+        const project = { ...rawProject };
+
+        // 1. Subtitle punctuation guard: ensure subtitles ending cleanly with a period
+        if (project.subtitle && typeof project.subtitle === 'string') {
+            const trimmed = project.subtitle.trim();
+            if (trimmed.length > 0 && !/[.!?]$/.test(trimmed)) {
+                project.subtitle = `${trimmed}.`;
+            } else {
+                project.subtitle = trimmed;
+            }
+        }
+
+        // 2. Default showLaunchButton to true if actionUrl exists and showLaunchButton is not explicitly set
+        if (project.actionUrl && project.showLaunchButton === undefined) {
+            project.showLaunchButton = true;
+        }
+
+        // 3. Smart actionText backstop/fallback
+        if (!project.actionText || project.actionText.trim() === '') {
+            if (project.actionUrl) {
+                // If it has a web app or dev tool tag, default to "Launch <Title>"
+                const isApp = project.tags?.some(t => ['web app', 'app', 'design tool', 'dev tooling', 'experimentation'].includes(t.label.toLowerCase()));
+                project.actionText = isApp ? `Launch ${project.title}` : 'Visit Website';
+            } else {
+                project.actionText = 'View Project';
+            }
+        }
+
+        return project;
+    }
 
     if (grid) {
         // Render Filter Pills
@@ -128,7 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Render Projects
-        myProjects.forEach(project => {
+        myProjects.forEach(rawProject => {
+            const project = normalizeProject(rawProject);
             const card = document.createElement('div');
             const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
             card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
@@ -434,8 +479,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // === SPA ROUTER ===
 
     async function loadProject(projectId) {
-        const project = myProjects.find(p => p.id === projectId);
-        if (!project) { navigateHome(false); return; }
+        const rawProject = myProjects.find(p => p.id === projectId);
+        if (!rawProject) { navigateHome(false); return; }
+        const project = normalizeProject(rawProject);
+
+        // Detach any in-page video into the floating dock before this view's
+        // content gets wiped out below, so playback survives the navigation.
+        globalVideo.float();
 
         // Fade out home view before switching
         const topRow = document.querySelector('.top-row');
@@ -452,8 +502,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error("Content missing");
             let htmlContent = await response.text();
 
-            // 2. Rewrite Audio URLs to R2
-            htmlContent = htmlContent.replace(/(src|href)="(?:\.\/)?content\/[^/]+\/audio\/([^"]+\.mp3)"/g, '$1="https://media.ryanmarch.me/$2"');
+            // 2. Rewrite Media & File URLs to R2
+            htmlContent = htmlContent.replace(/(src|href)="(?:\.\/)?content\/[^/]+\/(?:audio|downloads|files)?\/?([^"]+\.(?:mp3|m4a|zip|aup3))"/g, '$1="https://media.ryanmarch.me/$2"');
 
             // 3. Extract Headings for TOC
             const tempDiv = document.createElement('div');
@@ -516,7 +566,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // 9. Wire up handlers
-            initializeCustomAudioPlayers(projectDetailArea);
+            initializeCustomAudioPlayers(projectDetailArea, projectId);
+            initializeVideoSlots(projectDetailArea, projectId);
             initializeProjectGalleries(projectDetailArea);
 
             // Initialize CLEAR Tech brochure tabs if applicable
@@ -530,6 +581,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.preventDefault();
                 navigateHome();
             }));
+
+            // Notify global audio of current project route
+            globalAudio.setCurrentRoute(projectId);
 
             // 10. Show Project View, Hide Home (after fade out completes)
             homeEls.forEach(el => { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; });
@@ -563,6 +617,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function navigateHome(pushState = true, restoreY) {
+        // Detach any in-page video into the floating dock before this view's
+        // content gets wiped out below, so playback survives the navigation.
+        globalVideo.float();
+
+        // Notify global audio of route change to home
+        globalAudio.setCurrentRoute(null);
+
         if (pushState && window.location.pathname !== '/') {
             history.pushState(null, '', '/');
         } else if (!pushState && window.location.pathname !== '/') {
@@ -636,6 +697,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Listen for History popstate (Back/Forward buttons)
     window.addEventListener('popstate', (event) => handleUrlRoute(event.state));
+
+    // Listen for mini player or other components requesting SPA navigation
+    window.addEventListener('spa-navigate-to-project', (event) => {
+        const projectId = event.detail && event.detail.projectId;
+        if (projectId) {
+            history.replaceState({ scrollY: window.scrollY }, '', window.location.href);
+            history.pushState(null, '', `/project/${projectId}/`);
+            loadProject(projectId);
+        }
+    });
 
     function handleUrlRoute(state) {
         const path = window.location.pathname;

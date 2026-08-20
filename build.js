@@ -14,7 +14,12 @@ const filesToMinify = [
   { path: 'assets/js/projects.js', loader: 'js' },
   { path: 'assets/js/theme.js', loader: 'js' },
   { path: 'assets/js/project-data.js', loader: 'js' },
+  { path: 'assets/js/global-audio.js', loader: 'js' },
   { path: 'assets/js/audio-player.js', loader: 'js' },
+  { path: 'assets/js/mini-player.js', loader: 'js' },
+  { path: 'assets/js/global-video.js', loader: 'js' },
+  { path: 'assets/js/video-player.js', loader: 'js' },
+  { path: 'assets/js/video-mini-player.js', loader: 'js' },
   { path: 'assets/js/lightbox.js', loader: 'js' },
   { path: 'assets/js/brochure.js', loader: 'js' }
 ];
