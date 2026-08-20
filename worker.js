@@ -445,7 +445,8 @@ export default {
 
             return response;
         } catch (err) {
-            return new Response(`Worker Error: ${err.message}\nStack: ${err.stack}`, {
+            console.error('Worker Error:', err.message, err.stack);
+            return new Response('Internal Server Error', {
                 status: 500,
                 headers: { 'Content-Type': 'text/plain' }
             });
