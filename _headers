@@ -24,6 +24,16 @@
   Cache-Control: public, max-age=31536000, immutable
 /assets/js/audio-player.js
   Cache-Control: public, max-age=31536000, immutable
+/assets/js/global-audio.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/js/mini-player.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/js/global-video.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/js/video-player.js
+  Cache-Control: public, max-age=31536000, immutable
+/assets/js/video-mini-player.js
+  Cache-Control: public, max-age=31536000, immutable
 /assets/js/lightbox.js
   Cache-Control: public, max-age=31536000, immutable
 /assets/js/brochure.js

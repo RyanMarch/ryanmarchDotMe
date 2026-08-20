@@ -180,7 +180,8 @@ export function initializeMiniPlayer() {
             document.body.classList.add('has-mini-player');
 
             const trackId = state.track ? state.track.id : null;
-            if (trackId !== lastTrackId) {
+            const trackChanged = trackId !== lastTrackId;
+            if (trackChanged) {
                 lastTrackId = trackId;
                 if (titleEl) titleEl.textContent = state.track.title || 'Audio Track';
                 if (menuTitle) menuTitle.textContent = state.track.title || 'Audio Track';
@@ -189,7 +190,7 @@ export function initializeMiniPlayer() {
 
             // Update "Return to Project" / "Scroll to Player" button icon and label
             const onSourcePage = state.currentRouteProjectId === (state.track && state.track.projectId);
-            if (state.currentRouteProjectId !== lastRoute || trackId !== lastTrackId) {
+            if (state.currentRouteProjectId !== lastRoute || trackChanged) {
                 lastRoute = state.currentRouteProjectId;
                 if (menuLinkBtn) {
                     const linkSpan = menuLinkBtn.querySelector('span');
