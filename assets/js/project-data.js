@@ -651,6 +651,24 @@ export const myProjects = [
         actionText: "View Case Study",
         actionUrl: "",
         hasExtendedContent: true
+    },
+
+    {
+        id: "replay-in-the-dark",
+        title: "Replay In The Dark",
+        subtitle: "This mashup brings Iyaz and Hoobastank together, against better judgement.",
+        tags: [
+            { label: "Audio Production", color: "indigo" },
+            { label: "Archive", color: "gray" },
+            { label: "Mixing", color: "indigo" }
+        ],
+        featured: false,
+        size: "small",
+        image: "content/replay-in-the-dark/images/replay-in-the-dark.png",
+        actionText: "View Project",
+        actionUrl: "",
+        sourceUrl: "",
+        hasExtendedContent: true
     }
 ];
 
