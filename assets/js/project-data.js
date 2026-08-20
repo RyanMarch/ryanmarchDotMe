@@ -25,7 +25,7 @@ export const myProjects = [
     {
         id: "filenamer",
         title: "FileNamer",
-        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files",
+        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files.",
         seoTitle: "FileNamer - File Renaming Utility",
         seoDescription: "FileNamer is an intuitive, browser-based utility for defining and applying consistent file naming templates. Drag and drop files, configure presets, preview results in real time, and export renamed files instantly.",
         tags: [
