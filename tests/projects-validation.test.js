@@ -181,4 +181,33 @@ describe('Project Case Studies Validation', () => {
 
         expect(violations, `Found active debug logging calls in the following files:\n${violations.join('\n')}`).toEqual([]);
     });
+
+    it('should validate project data formatting and required fields in project-data.js', () => {
+        myProjects.forEach(project => {
+            const { id, title, subtitle, seoTitle, seoDescription, tags } = project;
+
+            // Required core fields
+            expect(id, `Project missing id`).toBeDefined();
+            expect(id.trim().length).toBeGreaterThan(0);
+            expect(title, `Project (${id}) missing title`).toBeDefined();
+            expect(title.trim().length).toBeGreaterThan(0);
+
+            // Subtitle check
+            expect(subtitle, `Project "${title}" (${id}) missing subtitle`).toBeDefined();
+            expect(typeof subtitle).toBe('string');
+            expect(subtitle.trim().length).toBeGreaterThan(0);
+
+            // SEO metadata
+            expect(seoTitle, `Project "${title}" (${id}) missing seoTitle`).toBeDefined();
+            expect(seoDescription, `Project "${title}" (${id}) missing seoDescription`).toBeDefined();
+
+            // Tags
+            expect(Array.isArray(tags), `Project "${title}" (${id}) tags should be an array`).toBe(true);
+            expect(tags.length, `Project "${title}" (${id}) must have at least one tag`).toBeGreaterThan(0);
+            tags.forEach((tag, idx) => {
+                expect(tag.label, `Project "${title}" (${id}) tag at index ${idx} missing label`).toBeDefined();
+                expect(tag.color, `Project "${title}" (${id}) tag at index ${idx} missing color`).toBeDefined();
+            });
+        });
+    });
 });
