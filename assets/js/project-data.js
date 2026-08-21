@@ -336,7 +336,6 @@ export const myProjects = [
         imageHeight: 350,
         symbol: "email",
         imageClass: "destination-icon",
-        actionText: "Learn More",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -356,7 +355,7 @@ export const myProjects = [
         image: "/content/replay-in-the-dark/images/replay-in-the-dark.avif",
         imageWidth: 350,
         imageHeight: 350,
-        actionText: "View Mashup",
+        cardActionText: "View Mashup",
         actionUrl: "",
         sourceUrl: "",
         hasExtendedContent: true
@@ -380,7 +379,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 400,
         imageClass: "destination-icon",
-        actionText: "View Interview",
+        cardActionText: "View Interview",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -403,7 +402,7 @@ export const myProjects = [
         imageWidth: 800,
         imageHeight: 450,
         imageClass: "destination-icon",
-        actionText: "View Case Study",
+        cardActionText: "View Case Study",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -424,7 +423,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Composition",
+        cardActionText: "View Composition",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -468,7 +467,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 338,
         imageClass: "destination-icon",
-        actionText: "View Film",
+        cardActionText: "View Film",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -488,7 +487,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 338,
         imageClass: "destination-icon",
-        actionText: "View Music Video",
+        cardActionText: "View Music Video",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -509,7 +508,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 360,
         imageClass: "destination-icon",
-        actionText: "View Podcast",
+        cardActionText: "View Podcast",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -529,7 +528,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Song",
+        cardActionText: "View Song",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -550,7 +549,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Project",
+        cardActionText: "View Project",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -571,7 +570,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 375,
         imageClass: "destination-icon",
-        actionText: "View Film",
+        cardActionText: "View Film",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -592,7 +591,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Covers",
+        cardActionText: "View Covers",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -613,7 +612,7 @@ export const myProjects = [
         imageWidth: 350,
         imageHeight: 350,
         imageClass: "destination-icon",
-        actionText: "View Song",
+        cardActionText: "View Song",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -634,7 +633,7 @@ export const myProjects = [
         imageWidth: 600,
         imageHeight: 428,
         imageClass: "destination-icon",
-        actionText: "View Promo",
+        cardActionText: "View Promo",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -656,7 +655,7 @@ export const myProjects = [
         imageWidth: 740,
         imageHeight: 820,
         imageClass: "destination-icon",
-        actionText: "View Case Study",
+        cardActionText: "View Case Study",
         actionUrl: "",
         hasExtendedContent: true
     },
@@ -678,7 +677,7 @@ export const myProjects = [
         imageWidth: 800,
         imageHeight: 680,
         imageClass: "destination-icon",
-        actionText: "View Case Study",
+        cardActionText: "View Case Study",
         actionUrl: "",
         hasExtendedContent: true
     }
