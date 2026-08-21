@@ -200,10 +200,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     </a>
                 `;
             } else if (project.hasExtendedContent) {
-                // ONE button: Read More / Primary CTA
+                // ONE button: Custom Card Action / Read More Primary CTA
+                const buttonLabel = project.cardActionText || 'Read More';
                 actionsHtml = `
                     <a href="/project/${project.id}/" class="project-btn read-more-btn" data-project-id="${project.id}">
-                        <span>Read More <span class="sr-only">about ${project.title}</span></span>
+                        <span>${buttonLabel} <span class="sr-only">about ${project.title}</span></span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                     </a>
                 `;
