@@ -128,99 +128,11 @@
     --placeholder-border: rgba(255, 255, 255, 0.1);
 }
 
-/* Light Theme — System Preference (canonical full set) */
-@media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-        --bg-color: #f7f9fc;
-        --card-bg: rgba(247, 249, 252, 0.8);
-        --card-border: rgba(0, 0, 0, 0.06);
-        --text-primary: #0f172a;
-        --text-secondary: #334155;
-        --accent-color: #0284c7;
-        color-scheme: light;
-        --divider-gradient: linear-gradient(90deg, transparent 2%, rgba(0, 0, 0, 0.1) 21%, rgba(0, 0, 0, 0.1) 74%, transparent 91%);
-
-        --bg-radial: radial-gradient(circle at 50% 50%, #f7f9fc 0%, #eef1f6 100%);
-        --body-bg: rgba(247, 249, 252, 0.4);
-        --header-bg: rgba(247, 249, 252, 0.75);
-        --project-detail-bg: #f7f9fc;
-        --title-gradient: linear-gradient(to right, #0f172a, #475569);
-        --avatar-gradient: linear-gradient(to bottom right, #062a65, #0c4a6e);
-        --orb-1-color: rgba(160, 196, 255, 0.7);
-        --orb-2-color: rgba(251, 251, 251, 0.6);
-        --img-shadow: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.1));
-        --project-detail-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
-        --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-        --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
-        --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.1);
-        --text-muted: #475569;
-        --btn-bg: #e2e8f0;
-        --btn-text: #0f172a;
-        --glass-bg: rgba(0, 0, 0, 0.03);
-        --glass-border: rgba(0, 0, 0, 0.08);
-        --glass-text: #0f172a;
-        --glass-hover-bg: rgba(0, 0, 0, 0.06);
-        --glass-hover-text: #000000;
-        --btn-hover-bg: rgba(0, 0, 0, 0.06);
-        --btn-hover-text: #0f172a;
-        --btn-hover-border: rgba(0, 0, 0, 0.15);
-        --btn-secondary-bg: rgba(0, 0, 0, 0.04);
-        --btn-secondary-border: rgba(0, 0, 0, 0.1);
-        --btn-secondary-text: #334155;
-        --scrollbar-thumb: rgba(0, 0, 0, 0.15);
-        --glimmer-color: rgba(0, 0, 0, 0.35);
-
-        --lightbox-close-bg: rgba(247, 249, 252, 0.8);
-        --lightbox-close-border: rgba(0, 0, 0, 0.15);
-        --lightbox-bg: rgba(247, 249, 252, 0.95);
-        --img-border: rgba(0, 0, 0, 0.08);
-        --placeholder-bg: linear-gradient(135deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.01) 100%);
-        --placeholder-border: rgba(0, 0, 0, 0.08);
-
-        --tag-blue: #0284c7;
-        --tag-blue-bg: rgba(2, 132, 199, 0.08);
-        --tag-blue-border: rgba(2, 132, 199, 0.15);
-        --tag-green: #16a34a;
-        --tag-green-bg: rgba(22, 163, 74, 0.08);
-        --tag-green-border: rgba(22, 163, 74, 0.15);
-        --tag-purple: #9333ea;
-        --tag-purple-bg: rgba(147, 51, 234, 0.08);
-        --tag-purple-border: rgba(147, 51, 234, 0.15);
-        --tag-orange: #ea580c;
-        --tag-orange-bg: rgba(234, 88, 12, 0.08);
-        --tag-orange-border: rgba(234, 88, 12, 0.15);
-        --tag-rose: #e11d48;
-        --tag-rose-bg: rgba(225, 29, 72, 0.08);
-        --tag-rose-border: rgba(225, 29, 72, 0.15);
-        --tag-pink: #db2777;
-        --tag-pink-bg: rgba(219, 39, 119, 0.08);
-        --tag-pink-border: rgba(219, 39, 119, 0.15);
-        --tag-cyan: #0891b8;
-        --tag-cyan-bg: rgba(8, 145, 178, 0.08);
-        --tag-cyan-border: rgba(8, 145, 178, 0.15);
-        --tag-indigo: #4f46e5;
-        --tag-indigo-bg: rgba(79, 70, 229, 0.08);
-        --tag-indigo-border: rgba(79, 70, 229, 0.15);
-        --tag-gold: #d97706;
-        --tag-gold-bg: rgba(217, 119, 6, 0.08);
-        --tag-gold-border: rgba(217, 119, 6, 0.15);
-        --tag-teal: #0d948b;
-        --tag-teal-bg: rgba(13, 148, 136, 0.08);
-        --tag-teal-border: rgba(13, 148, 136, 0.15);
-        --tag-white: #475569;
-        --tag-white-bg: rgba(71, 85, 105, 0.08);
-        --tag-white-border: rgba(71, 85, 105, 0.15);
-        --tag-gray: #475569;
-        --tag-gray-bg: rgba(71, 85, 105, 0.08);
-        --tag-gray-border: rgba(71, 85, 105, 0.15);
-    }
-}
-
 /* Light Theme — Manual Override (full variable set, identical to system light) */
 :root[data-theme="light"] {
     --bg-color: #f7f9fc;
-    --card-bg: rgba(247, 249, 252, 0.8);
-    --card-border: rgba(0, 0, 0, 0.06);
+    --card-bg: rgba(255, 255, 255, 0.92);
+    --card-border: rgba(15, 23, 42, 0.1);
     --text-primary: #0f172a;
     --text-secondary: #334155;
     --accent-color: #0284c7;
@@ -237,9 +149,9 @@
     --orb-2-color: rgba(251, 251, 251, 0.6);
     --img-shadow: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.1));
     --project-detail-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
-    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.1);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
     --text-muted: #475569;
     --btn-bg: #e2e8f0;
     --btn-text: #0f172a;
@@ -588,11 +500,7 @@ main {
     margin-bottom: 0.25rem;
     display: block;
     width: fit-content;
-    /* background: var(--title-gradient);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent; */
-    color: white;
+    color: var(--text-primary);
     letter-spacing: -0.02em;
 }
 
@@ -1160,14 +1068,6 @@ body.standalone-page {
     background: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.12);
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
-}
-
-@media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) .mini-player-menu {
-        background: #ffffff;
-        border: 1px solid rgba(0, 0, 0, 0.12);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.05);
-    }
 }
 
 /* Shimmering subtle border accent */
@@ -1812,21 +1712,6 @@ body.standalone-page {
     color: #1e293b;
 }
 
-@media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) .project-detail-content pre {
-        background: rgba(0, 0, 0, 0.05);
-        border-color: rgba(0, 0, 0, 0.1);
-        border-left-color: var(--accent-color);
-        color: #1e293b;
-    }
-
-    :root:not([data-theme="dark"]) .project-detail-content code {
-        background: rgba(0, 0, 0, 0.06);
-        border-color: rgba(0, 0, 0, 0.12);
-        color: #1e293b;
-    }
-}
-
 @media (max-width: 600px) {
     .project-detail-content pre {
         white-space: pre-wrap;
@@ -1862,56 +1747,34 @@ body.standalone-page {
 
 
 
-@property --mask-left {
-    syntax: '<length-percentage>';
-    inherits: false;
-    initial-value: 0px;
-}
-
-@property --mask-right {
-    syntax: '<length-percentage>';
-    inherits: false;
-    initial-value: 2.5rem;
-}
-
 /* --- Project Gallery (CSS Scroll Snap) --- */
 .project-gallery {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 1.5rem;
-    margin: 2rem -2.5rem;
-    /* Negative margin to hit edges */
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    /* Break out to the true viewport edge, not just this row's own
+       (possibly narrow, possibly off-center) ancestor - .project-detail
+       -content is capped at 900px on standalone project pages and at
+       other widths embedded in the SPA panel, so a plain negative margin
+       sized to cancel just its own padding would only ever reach that
+       inner column's edge, never the window's. left: 50% + a -50%
+       transform re-centers on the viewport regardless of any of that. */
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
     padding: 0 2.5rem 1.5rem;
-    /* Padding back to align first/last items */
-    /* Scroll Snap aligns to the padding box, so without this the browser
-       auto-snaps the first item flush against the padding edge on load,
-       scrolling the padding itself out of view - leaving zero visible gap
-       even though padding is set. This reserves it instead. */
-    scroll-padding-inline: 2.5rem;
+    /* Base edge padding - JS (initializeProjectGalleries) measures each
+       row's first/last item and widens this per-row so that item can be
+       scrolled all the way to the center of the viewport, the same resting
+       position every other item snaps to. Rows whose items already fill
+       the row edge-to-edge (nothing left to peek at) are left at this
+       base value instead. */
     scrollbar-width: none;
     -ms-overflow-style: none;
-
-    --mask-left: 0px;
-    --mask-right: 2.5rem;
-
-    /* Subtle edge fade vignettes using transitioned custom properties */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
-
-    /* Force GPU compositing layer promotion to bypass Safari mask-image mouse-hover/cursor rendering bug */
-    will-change: transform;
-    transform: translateZ(0);
-
-    transition: --mask-left 0.3s ease, --mask-right 0.3s ease;
-}
-
-.project-gallery.scrolled-left {
-    --mask-left: 2.5rem;
-}
-
-.project-gallery:not(.scrolled-right) {
-    --mask-right: 0px;
 }
 
 .project-gallery::-webkit-scrollbar {
@@ -1937,8 +1800,12 @@ body.standalone-page {
     padding: 0;
     overflow-x: visible;
     scroll-snap-type: none;
-    -webkit-mask-image: none;
-    mask-image: none;
+    /* Not a swipeable row - stay within the text column instead of
+       breaking out to the viewport edge like the base rule does. */
+    width: auto;
+    position: static;
+    left: auto;
+    transform: none;
 }
 
 .project-gallery.grid-view .gallery-item {
@@ -1969,7 +1836,7 @@ body.standalone-page {
 
 .gallery-item {
     flex: 0 0 85%;
-    scroll-snap-align: start;
+    scroll-snap-align: center;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -1982,6 +1849,16 @@ body.standalone-page {
    exactly - no overflow, no horizontal scroll, no carousel affordance. */
 .gallery-item.is-hero:has(img.aspect-auto) {
     flex: 0 0 100%;
+}
+
+/* The image's own align-self: center (below) only works if it's a flex
+   item - but its actual parent is <picture>, a plain block, so without
+   this the image (which rarely fills the full row width once row width
+   is edge-to-edge viewport width instead of a bounded column) sits flush
+   left with the leftover width as dead space on the right. */
+.gallery-item.is-hero picture {
+    display: flex;
+    justify-content: center;
 }
 
 /* Screenshots vary wildly in native aspect ratio (portrait phone frames vs.
@@ -2180,23 +2057,8 @@ body.standalone-page {
 /* Mobile Adjustments for Edge-to-Edge */
 @media (max-width: 950px) {
     .project-gallery {
-        margin-left: -1.2rem;
-        margin-right: -1.2rem;
         padding-left: 1.2rem;
         padding-right: 1.2rem;
-        scroll-padding-inline: 1.2rem;
-        --mask-left: 0px;
-        --mask-right: 1.2rem;
-        -webkit-mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
-        mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
-    }
-
-    .project-gallery.scrolled-left {
-        --mask-left: 1.2rem;
-    }
-
-    .project-gallery:not(.scrolled-right) {
-        --mask-right: 0px;
     }
 
     .gallery-item {
@@ -2864,32 +2726,19 @@ body.standalone-page {
 
     /* FULL-WIDTH GALLERY BLEED (Separated from Text Padding) */
     .project-gallery {
-        margin: 2.5rem -1.4rem;
+        margin-top: 2.5rem;
+        margin-bottom: 2.5rem;
         padding: 0 1.4rem 1.25rem;
-        width: calc(100% + 2.8rem);
         display: flex;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
-        scroll-padding-inline: 1.4rem;
         gap: 1.25rem;
         -webkit-overflow-scrolling: touch;
-        --mask-left: 0px;
-        --mask-right: 1.4rem;
-        -webkit-mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
-        mask-image: linear-gradient(to right, transparent 0%, black var(--mask-left), black calc(100% - var(--mask-right)), transparent 100%);
-    }
-
-    .project-gallery.scrolled-left {
-        --mask-left: 1.4rem;
-    }
-
-    .project-gallery:not(.scrolled-right) {
-        --mask-right: 0px;
     }
 
     .gallery-item {
         flex: 0 0 85%;
-        scroll-snap-align: start;
+        scroll-snap-align: center;
         --gallery-row-height: 300px;
     }
 
@@ -3215,37 +3064,24 @@ body.standalone-page {
     transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Toggle Animation State */
-[data-theme="dark"] .sun-icon,
-[data-theme="dark"] .system-icon {
+/* Toggle Animation State — dark is the default regardless of OS
+   preference, so the moon shows unless light is explicitly chosen. */
+.sun-icon {
     opacity: 0;
     transform: rotate(45deg) scale(0.5);
 }
 
-[data-theme="dark"] .moon-icon {
+.moon-icon {
     opacity: 1;
     transform: rotate(0) scale(1);
 }
 
-[data-theme="light"] .moon-icon,
-[data-theme="light"] .system-icon {
+[data-theme="light"] .moon-icon {
     opacity: 0;
     transform: rotate(-45deg) scale(0.5);
 }
 
 [data-theme="light"] .sun-icon {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-}
-
-/* System / Auto state (no data-theme attribute) */
-:root:not([data-theme]) .sun-icon,
-:root:not([data-theme]) .moon-icon {
-    opacity: 0;
-    transform: rotate(-45deg) scale(0.5);
-}
-
-:root:not([data-theme]) .system-icon {
     opacity: 1;
     transform: rotate(0) scale(1);
 }
@@ -4419,16 +4255,6 @@ body.standalone-page {
 
 :root[data-theme="light"] .dark-only {
     display: none !important;
-}
-
-@media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) .light-only {
-        display: block !important;
-    }
-
-    :root:not([data-theme="dark"]) .dark-only {
-        display: none !important;
-    }
 }
 
 /* ─── Site Footer ────────────────────────────────────────── */

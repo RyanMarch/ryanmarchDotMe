@@ -6,15 +6,14 @@
     <script>
         // Theme initialization
         (function () {
+            // Stored value is only ever 'light' or 'dark' — an explicit override.
+            // No stored value means no override: leave data-theme unset so the
+            // CSS media queries resolve it from the OS preference instead.
             const savedTheme = localStorage.getItem('theme');
-            // If no theme is saved, default to 'dark' (as requested)
-            // If theme is 'system', we leave data-theme unset to let CSS media queries take over
-            const theme = savedTheme || 'dark';
-
-            if (theme === 'system') {
-                document.documentElement.removeAttribute('data-theme');
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', savedTheme);
             } else {
-                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.removeAttribute('data-theme');
             }
         })();
 
@@ -107,7 +106,7 @@
                 <div class="slim-avatar" aria-hidden="true">RM</div>
                 <span class="slim-name">Ryan March</span>
             </a>
-            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+            <button id="theme-toggle" class="theme-toggle" aria-label="Switch theme">
                 <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="12" cy="12" r="5"></circle>
@@ -123,12 +122,6 @@
                 <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                </svg>
-                <svg class="system-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                    <line x1="8" y1="21" x2="16" y2="21"></line>
-                    <line x1="12" y1="17" x2="12" y2="21"></line>
                 </svg>
                 <span id="theme-status" class="theme-status" aria-live="polite"></span>
             </button>
