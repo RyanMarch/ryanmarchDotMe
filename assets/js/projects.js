@@ -406,47 +406,75 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!container) return;
         const galleries = container.querySelectorAll('.project-gallery:not(.grid-view)');
         galleries.forEach(gallery => {
-            const updateGalleryFade = () => {
-                const scrollLeft = gallery.scrollLeft;
-                const maxScrollLeft = gallery.scrollWidth - gallery.clientWidth;
+            // Growing the edge padding doesn't move the scroll position - the
+            // browser only re-snaps on user-driven scrolling, never just
+            // because padding changed under it. Left alone, the row sits at
+            // whatever scrollLeft an earlier (smaller-padding) pass left it
+            // at, which now lands mid-item instead of on the first item's
+            // centered resting spot - different per row depending on each
+            // one's own padding, which is what read as "random" images.
+            // This tracks whether the user has actually grabbed this row;
+            // until they have, every recompute re-settles it on item one.
+            let userInteracted = false;
+            gallery.addEventListener('pointerdown', () => { userInteracted = true; }, { once: true, passive: true });
+            gallery.addEventListener('wheel', () => { userInteracted = true; }, { once: true, passive: true });
 
-                requestAnimationFrame(() => {
-                    if (scrollLeft > 50) {
-                        gallery.classList.add('scrolled-left');
-                    } else {
-                        gallery.classList.remove('scrolled-left');
+            const updateGalleryLayout = () => {
+                // Measure against the CSS base padding, not whatever this
+                // function last set - a fixed-percentage flex-basis item's
+                // rendered width shrinks with the content box, so remeasuring
+                // against a moving target would compound toward zero over
+                // repeated calls instead of converging.
+                gallery.style.paddingLeft = '';
+                gallery.style.paddingRight = '';
+
+                const items = gallery.querySelectorAll(':scope > .gallery-item');
+                // Short rows (fewer/narrower items than the container) read as
+                // stranded at the left edge - center the whole cluster via
+                // flexbox instead. Rows that actually need to scroll get the
+                // per-item edge padding below instead - the two centering
+                // mechanisms must stay mutually exclusive, since flexbox
+                // centering the row would shift everything out from under
+                // the padding math and misplace the resting scroll position.
+                const isShortRow = gallery.scrollWidth - gallery.clientWidth <= 1;
+                gallery.classList.toggle('no-overflow', isShortRow);
+
+                // Give the first/last item enough edge padding to be scrolled all
+                // the way to the center of the viewport - the same resting spot
+                // every other item snaps to (scroll-snap-align: center handles
+                // that automatically once the runway exists). A row with only one
+                // item (e.g. an is-hero shot) never scrolls, so it's left alone.
+                if (items.length > 1 && !isShortRow) {
+                    const clientWidth = gallery.clientWidth;
+                    const firstWidth = items[0].getBoundingClientRect().width;
+                    const lastWidth = items[items.length - 1].getBoundingClientRect().width;
+
+                    gallery.style.paddingLeft = Math.max(0, (clientWidth - firstWidth) / 2) + 'px';
+                    gallery.style.paddingRight = Math.max(0, (clientWidth - lastWidth) / 2) + 'px';
+
+                    // paddingLeft is sized so item one's center already lands on
+                    // the viewport center at scrollLeft 0 - that's the resting
+                    // position to restore, not paddingLeft itself.
+                    if (!userInteracted) {
+                        gallery.scrollLeft = 0;
                     }
-
-                    if (scrollLeft < maxScrollLeft - 50 && maxScrollLeft > 50) {
-                        gallery.classList.add('scrolled-right');
-                    } else {
-                        gallery.classList.remove('scrolled-right');
-                    }
-
-                    // Short rows (fewer/narrower items than the container) read as
-                    // stranded at the left edge - center them. Rows that actually
-                    // need to scroll keep flex-start; centering those would clip the
-                    // first item under overflow, since centered flex content splits
-                    // its overflow on both sides instead of starting at scrollLeft 0.
-                    gallery.classList.toggle('no-overflow', maxScrollLeft <= 1);
-                });
+                }
             };
 
-            gallery.addEventListener('scroll', updateGalleryFade);
             // Run initial check at multiple intervals to ensure layout has stabilized
-            setTimeout(updateGalleryFade, 50);
-            setTimeout(updateGalleryFade, 150);
-            setTimeout(updateGalleryFade, 300);
-            setTimeout(updateGalleryFade, 500);
-            window.addEventListener('resize', updateGalleryFade);
+            setTimeout(updateGalleryLayout, 50);
+            setTimeout(updateGalleryLayout, 150);
+            setTimeout(updateGalleryLayout, 300);
+            setTimeout(updateGalleryLayout, 500);
+            window.addEventListener('resize', updateGalleryLayout);
 
             // aspect-auto images have no intrinsic width until they finish loading
-            // (width is derived from height x aspect-ratio), so scrollWidth is
-            // artificially small - and thus rows can be wrongly measured as fitting
-            // without scrolling - until every image has loaded at least once.
+            // (width is derived from height x aspect-ratio), so item/scroll widths
+            // are artificially small - and thus rows can be measured wrong - until
+            // every image has loaded at least once.
             gallery.querySelectorAll('img').forEach(img => {
                 if (!img.complete) {
-                    img.addEventListener('load', updateGalleryFade, { once: true });
+                    img.addEventListener('load', updateGalleryLayout, { once: true });
                 }
             });
         });
