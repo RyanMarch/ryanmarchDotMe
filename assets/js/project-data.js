@@ -95,7 +95,7 @@ export const myProjects = [
     {
         id: "help-center",
         title: "Help Center",
-        subtitle: "A portable documentation system with client-side search and auto-generated navigation.",
+        subtitle: "A portable documentation system with automatically generated search and navigation.",
         seoTitle: "Help Center - Portable Documentation System",
         seoDescription: "A self-contained, zero-build-step documentation system built with native Web Components. Client-side search, auto-generated navigation, and a scaffolding CLI, drop it into any project.",
         tags: [
@@ -235,7 +235,7 @@ export const myProjects = [
         title: "RentPress Local",
         subtitle: "Local listings management product for automatic map updates.",
         seoTitle: "RentPress Local - Map & Listing Management",
-        seoDescription: "Automate local business listing updates, map configurations, and property location directories seamlessly for real estate websites.",
+        seoDescription: "Automate local business listing updates, map configurations, and property location directories for real estate websites.",
         tags: [
             { label: "Professional", color: "blue" },
             { label: "Real Estate", color: "teal", priority: "low" },
