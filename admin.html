@@ -17,12 +17,14 @@
     <script>
         // Theme initialization (critical to run before paint to prevent flash)
         (function () {
+            // Stored value is only ever 'light' or 'dark' — an explicit override.
+            // No stored value means no override: leave data-theme unset so the
+            // CSS media queries resolve it from the OS preference instead.
             const savedTheme = localStorage.getItem('theme');
-            const theme = savedTheme || 'system';
-            if (theme === 'system') {
-                document.documentElement.removeAttribute('data-theme');
+            if (savedTheme === 'light' || savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', savedTheme);
             } else {
-                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.removeAttribute('data-theme');
             }
         })();
 

@@ -46,7 +46,7 @@
     </div>
 </div>
 
-<p>TripDeck also has four themes each with custom typography, color tokens, and
+<p>TripDeck also has multiple themes each with custom typography, color tokens, and
     custom-styled Mapbox map layers (with more themes in active development):</p>
 
 <div class="project-gallery">
@@ -56,7 +56,7 @@
             <img src="content/tripdeck/images/theme-roadtrip.png" alt="TripDeck Roadtrip Theme" class="aspect-auto"
                 loading="lazy">
         </picture>
-        <div class="gallery-caption">Roadtrip Theme</div>
+        <div class="gallery-caption">Roadtrip</div>
     </div>
     <div class="gallery-item">
         <picture>
@@ -64,15 +64,7 @@
             <img src="content/tripdeck/images/theme-vintage-journal.png" alt="TripDeck Vintage Journal Theme"
                 class="aspect-auto" loading="lazy">
         </picture>
-        <div class="gallery-caption">Vintage Journal Theme</div>
-    </div>
-    <div class="gallery-item">
-        <picture>
-            <source type="image/avif" srcset="content/tripdeck/images/theme-terminal-desktop.avif">
-            <img src="content/tripdeck/images/theme-terminal-desktop.png" alt="TripDeck Terminal Light Theme"
-                class="aspect-auto" loading="lazy">
-        </picture>
-        <div class="gallery-caption">Terminal Light Theme</div>
+        <div class="gallery-caption">Vintage Journal</div>
     </div>
     <div class="gallery-item">
         <picture>
@@ -80,7 +72,31 @@
             <img src="content/tripdeck/images/theme-slate-dark.png" alt="TripDeck Slate Dark Theme" class="aspect-auto"
                 loading="lazy">
         </picture>
-        <div class="gallery-caption">Slate Dark Theme</div>
+        <div class="gallery-caption">Slate Dark</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/theme-terminal-desktop.avif">
+            <img src="content/tripdeck/images/theme-terminal-desktop.png" alt="TripDeck Terminal Light Theme"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Terminal Light</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/theme-velocity.avif">
+            <img src="content/tripdeck/images/theme-velocity.png" alt="TripDeck Velocity Theme" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Velocity</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/tripdeck/images/theme-start95.avif">
+            <img src="content/tripdeck/images/theme-start95.png" alt="TripDeck Start95 Theme" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Start95</div>
     </div>
 </div>
 
@@ -97,6 +113,13 @@
         and a dedicated ideas scratchpad for things you might want to do later.</li>
     <li><strong>Interactive Route Map:</strong> Automatically plots your full journey including air routes, transit
         connections, accommodations, and activities.</li>
+    <li><strong>Multi-Currency Spend & Budget Tracking:</strong> Set a trip spending limit, tag expenses directly on
+        items (such as <code>Cost: 120 EUR</code>), convert foreign currencies to your preferred home currency
+        automatically,
+        record general expenses, and export CSV reports.</li>
+    <li><strong>Printable Pocket Guide:</strong> Generate a paper-friendly agenda ready for print or PDF export.
+        Customize it by including packing lists, and QR codes linking directly back to your live digital
+        itinerary.</li>
 </ul>
 
 <div class="project-gallery">
@@ -232,7 +255,26 @@
 
 <p>Explore the <a href="https://tripdeck.ryanmarch.me/docs/">TripDeck Help Center</a> for more guides.</p>
 
-<h4 id="product-management" class="section-divider"><span>Product Strategy & Leadership</span></h4>
+<h4 id="admin-operations" class="section-divider"><span>Admin Dashboard</span></h4>
+
+<p>
+    To monitor usage, performance, and app behavior, TripDeck includes an internal administrative dashboard built to
+    monitor platform health, manage runtime controls, and inspect real-time service operations:
+</p>
+
+<ul class="help-list">
+    <li><strong>Provider Usage & Cost Tracking:</strong> Live tracking monitors usage across maps, flight
+        status services, weather endpoints, and geocoding APIs. Detailed request counts, success rates, and calculated
+        monthly costs prevent unexpected billing spikes.</li>
+    <li><strong>Runtime Feature Controls:</strong> System controls let administrators toggle feature flags, display
+        global announcement banners, or toggle maintenance mode.</li>
+    <li><strong>Role-Based Access:</strong> Administrative access is permission-based and requires passkey verification.
+    </li>
+    <li><strong>Help Center Telemetry:</strong> Anonymous search monitoring logs queries and
+        zero-result questions, providing a direct signal on where documentation needs improvement.</li>
+</ul>
+
+<h4 id="product-management" class="section-divider"><span>Product Strategy</span></h4>
 
 <p>As the product manager and creator of TripDeck, I led the product from initial discovery through user experience
     design, system architecture, and launch.</p>
@@ -267,12 +309,16 @@
     <li><strong>Serverless Cloudflare Backend:</strong> Deployed on Cloudflare with lightweight functions
         that securely proxy real-time flight data, Transitland rail systems, Google Places, Mapbox GL maps, and
         Open-Meteo weather APIs.</li>
+    <li><strong>Resilient Flight & Venue Data Caching:</strong> A dual-provider flight engine uses AeroDataBox with
+        automatic AirLabs fallback, backed by timetable caching so flight routes and schedules
+        stay accessible. Venue data is enriched with open hours, phone numbers,
+        and links, all cached to keep external API costs low.</li>
     <li><strong>Client-Side End-to-End Encryption:</strong> Itinerary data is encrypted on the client device before
         syncing to cloud storage (Cloudflare D1), deriving master keys directly from WebAuthn passkeys so that server
         infrastructure never sees raw travel details.</li>
-    <li><strong>Offline Caching & Conflict-Safe Sync:</strong> A Service Worker pre-caches application assets for
-        offline travel, while a conflict-safe concurrency queue prevents data loss when making edits across multiple
-        browser tabs or spotty connections.</li>
+    <li><strong>Offline Caching & Multi-User Merge:</strong> A Service Worker pre-caches application assets for
+        offline travel. When planning with others, a three-way merge engine handles simultaneous edits cleanly across
+        devices without overwriting collaborator updates.</li>
 </ul>
 
 <h4 id="learnings-and-takeaways" class="section-divider"><span>Learnings & Takeaways</span></h4>
