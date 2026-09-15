@@ -27,12 +27,12 @@
         "GEMINI.md": true,
         "_headers": true,
         ".assetsignore": true,
-        "build.js": true
+        "scripts": true
     },
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.expand": false,
     "explorer.fileNesting.patterns": {
-        "package.json": "package-lock.json, .gitignore, .assetsignore, wrangler.jsonc, README.md, robots.txt, sitemap.xml, GEMINI.md, build.js, worker.js, _headers",
+        "package.json": "package-lock.json, .gitignore, .assetsignore, wrangler.jsonc, README.md, robots.txt, sitemap.xml, GEMINI.md, worker.js, _headers",
         // "index.html": "404.html, admin.html, redirects.json, style.css"
     },
     "liveServer.settings.ignoreFiles": [
