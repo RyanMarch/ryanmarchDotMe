@@ -48,7 +48,7 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
                             headers: { 'Content-Type': 'text/html; charset=utf-8' }
                         }));
                     }
-                    if (url.pathname === '/style.css') {
+                    if (url.pathname === '/assets/css/style.css') {
                         return Promise.resolve(new Response('body {}', {
                             headers: { 'Content-Type': 'text/css' }
                         }));
