@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "python3 dev/serve.py",
     "dev:worker": "npx wrangler dev --persist-to /tmp/wrangler-persist",
-    "build": "npm run test && node build.js",
+    "build": "npm run test && node scripts/build.js",
     "create-project": "node dev/create-project.js",
     "test": "vitest run",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "eslint --config config/eslint.config.js .",
+    "lint:fix": "eslint --config config/eslint.config.js . --fix"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

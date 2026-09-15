@@ -368,7 +368,6 @@ export default {
                 cleanPath.startsWith('/assets/') ||
                 cleanPath.startsWith('/content/') ||
                 [
-                    '/style.css',
                     '/robots.txt',
                     '/sitemap.xml',
                     '/favicon.ico',

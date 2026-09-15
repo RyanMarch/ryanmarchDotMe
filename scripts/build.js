@@ -3,14 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
-import { myProjects } from './assets/js/project-data.js';
+import { myProjects } from '../assets/js/project-data.js';
 import { buildSitemapXml } from './sitemap-generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.resolve(path.dirname(__filename), '..');
 
 const filesToMinify = [
-  { path: 'style.css', loader: 'css' },
+  { path: 'assets/css/style.css', loader: 'css' },
   { path: 'assets/js/projects.js', loader: 'js' },
   { path: 'assets/js/theme.js', loader: 'js' },
   { path: 'assets/js/project-data.js', loader: 'js' },

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildSitemapXml, getGitLastMod } from '../sitemap-generator.js';
+import { buildSitemapXml, getGitLastMod } from '../scripts/sitemap-generator.js';
 
 describe('Sitemap XML Generation Tests', () => {
     const dummyProjects = [
