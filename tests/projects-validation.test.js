@@ -114,8 +114,8 @@ describe('Project Case Studies Validation', () => {
 
     it('should verify that critical deployment and build files are not ignored by Git', () => {
         const criticalFiles = [
-            'sitemap-generator.js',
-            'build.js',
+            'scripts/sitemap-generator.js',
+            'scripts/build.js',
             'package.json',
             'worker.js',
             'assets/js/project-data.js',
