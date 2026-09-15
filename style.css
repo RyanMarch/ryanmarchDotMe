@@ -2973,14 +2973,18 @@ body.standalone-page {
         /* Soft and theme-aware shadow on hover */
     }
 
-    .project-detail-content .gallery-item img:hover {
+    .project-detail-content .gallery-item:not(.is-hero) img:hover {
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         /* Calibrated, visible light-mode lift */
     }
 
-    :root[data-theme="dark"] .project-detail-content .gallery-item img:hover {
+    :root[data-theme="dark"] .project-detail-content .gallery-item:not(.is-hero) img:hover {
         box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
         /* Glowing dark-mode lift */
+    }
+
+    .project-detail-content .gallery-item.is-hero img:hover {
+        box-shadow: none;
     }
 }
 
@@ -4319,4 +4323,8 @@ body.standalone-page {
     .site-footer-links {
         position: static;
     }
+}
+
+#project-image-speakeasy {
+    max-height: 330px;
 }
