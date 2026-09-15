@@ -9,8 +9,8 @@
     "build": "npm run test && node scripts/build.js",
     "create-project": "node dev/create-project.js",
     "test": "vitest run",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "eslint --config config/eslint.config.js .",
+    "lint:fix": "eslint --config config/eslint.config.js . --fix"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
