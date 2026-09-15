@@ -10,3 +10,13 @@ node_modules/
 
 # Exclude development scripts and templates from deployed assets
 dev/
+scripts/
+tests/
+
+# Exclude repo/tooling metadata that has no reason to be publicly fetchable
+package.json
+package-lock.json
+eslint.config.js
+wrangler.jsonc
+redirects.json
+.github/
