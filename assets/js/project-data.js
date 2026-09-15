@@ -45,6 +45,28 @@ export const myProjects = [
         showLaunchButton: true
     },
     {
+        id: "speakeasy",
+        title: "Speakeasy",
+        subtitle: "Craft cocktail companion and recipe library. Visualize and understand your drinks.",
+        seoTitle: "Speakeasy - Craft Cocktail Companion & Recipe Library",
+        seoDescription: "Browse hundreds of curated cocktail recipes with interactive glassware visuals, track your home bar inventory, and find out what you can mix right now. No accounts, paywalls, or ads required.",
+        tags: [
+            { label: "Web App", color: "teal" },
+            { label: "Project", color: "gray" },
+            { label: "Drinks", color: "gray" }
+        ],
+        featured: false,
+        size: "large",
+        image: "content/speakeasy/images/hero.avif",
+        imageWidth: 800,
+        imageHeight: 600,
+        actionText: "Launch Speakeasy",
+        actionUrl: "https://speakeasy.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/speakeasy",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "qr-maker",
         title: "QR Maker",
         subtitle: "Finally, QR codes with personality. Customize colors, shapes, logos, and use the companion API or Apple Shortcuts.",
