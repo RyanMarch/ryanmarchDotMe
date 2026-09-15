@@ -1835,7 +1835,7 @@ body.standalone-page {
 }
 
 .gallery-item {
-    flex: 0 0 85%;
+    flex: 0 0 auto;
     scroll-snap-align: center;
     display: flex;
     flex-direction: column;
@@ -1847,7 +1847,7 @@ body.standalone-page {
    that just happens to want borderless images. flex: 0 0 100% gives it the
    gallery's actual (bounded) width, so the image can scale to fill it
    exactly - no overflow, no horizontal scroll, no carousel affordance. */
-.gallery-item.is-hero:has(img.aspect-auto) {
+.gallery-item.is-hero {
     flex: 0 0 100%;
 }
 
@@ -1877,11 +1877,7 @@ body.standalone-page {
    every image in a row exactly the same height regardless of caption
    length; the item's total height (and caption baseline) is then free to
    vary slightly, which is the correct place for that variation to live. */
-.gallery-item:has(img.aspect-auto):not(.is-hero) {
-    flex: 0 0 auto;
-}
-
-.gallery-item:has(img.aspect-auto):not(.is-hero) picture {
+.gallery-item:not(.is-hero) picture {
     display: flex;
     flex: none;
     height: var(--gallery-row-height, 400px);
@@ -1889,12 +1885,25 @@ body.standalone-page {
     justify-content: center;
 }
 
-.gallery-item:not(.is-hero) img.aspect-auto {
+.project-gallery.grid-view .gallery-item picture {
+    height: auto;
+    display: block;
+}
+
+.gallery-item:not(.is-hero) img {
     height: 100%;
     width: auto;
     max-width: 100%;
     object-fit: contain;
     align-self: center;
+}
+
+.project-gallery.grid-view .gallery-item img {
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    max-height: none;
+    height: auto;
+    width: 100%;
 }
 
 .gallery-item:only-child {
@@ -1903,17 +1912,10 @@ body.standalone-page {
 
 .project-detail-content .gallery-item img {
     margin: 0;
-    width: 100%;
-    height: auto;
-    max-height: 450px;
-    /* Limit vertical height of very tall/portrait images on desktop */
-    aspect-ratio: 16 / 9;
-    object-fit: contain;
     border-radius: 12px;
     object-position: center;
-    box-shadow: var(--shadow-sm);
-    /* Soft elegant shadow that never clips */
-    border: 1px solid var(--img-border);
+    border: none;
+    box-shadow: none;
 }
 
 .gallery-item.is-hero img {
@@ -1934,6 +1936,7 @@ body.standalone-page {
     box-shadow: none;
 }
 
+.gallery-item.is-hero img,
 .gallery-item.is-hero img.aspect-auto {
     width: auto;
     height: auto;
@@ -2973,14 +2976,18 @@ body.standalone-page {
         /* Soft and theme-aware shadow on hover */
     }
 
-    .project-detail-content .gallery-item img:hover {
+    .project-detail-content .gallery-item:not(.is-hero) img:hover {
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         /* Calibrated, visible light-mode lift */
     }
 
-    :root[data-theme="dark"] .project-detail-content .gallery-item img:hover {
+    :root[data-theme="dark"] .project-detail-content .gallery-item:not(.is-hero) img:hover {
         box-shadow: 0 12px 25px rgba(0, 0, 0, 0.4);
         /* Glowing dark-mode lift */
+    }
+
+    .project-detail-content .gallery-item.is-hero img:hover {
+        box-shadow: none;
     }
 }
 
@@ -4319,4 +4326,8 @@ body.standalone-page {
     .site-footer-links {
         position: static;
     }
+}
+
+#project-image-speakeasy {
+    max-height: 330px;
 }
