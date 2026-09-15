@@ -1,4 +1,7 @@
 {
+    "eslint.options": {
+        "overrideConfigFile": "config/eslint.config.js"
+    },
     "search.exclude": {
         "**/node_modules": true,
         "**/bower_components": true,
@@ -33,7 +36,7 @@
     "explorer.fileNesting.expand": false,
     "explorer.fileNesting.patterns": {
         "package.json": "package-lock.json, .gitignore, .assetsignore, wrangler.jsonc, README.md, robots.txt, sitemap.xml, GEMINI.md, worker.js, _headers",
-        // "index.html": "404.html, admin.html, redirects.json, style.css"
+        // "index.html": "404.html, admin.html, redirects.json"
     },
     "liveServer.settings.ignoreFiles": [
         "**/.git/**",

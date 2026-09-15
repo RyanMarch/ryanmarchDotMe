@@ -35,6 +35,9 @@ node_modules/
 # Local-only AI instruction file
 GEMINI.md
 
+# Claude Code project config (local dev-server/session config, not shareable)
+.claude/
+
 # Build artifacts
 sitemap.xml
 coverage/
