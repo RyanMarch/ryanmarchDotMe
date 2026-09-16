@@ -53,7 +53,7 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
                             headers: { 'Content-Type': 'text/css' }
                         }));
                     }
-                    if (url.pathname === '/404.html') {
+                    if (url.pathname === '/404' || url.pathname === '/404.html') {
                         return Promise.resolve(new Response('Custom 404 Page', {
                             headers: { 'Content-Type': 'text/html; charset=utf-8' }
                         }));
