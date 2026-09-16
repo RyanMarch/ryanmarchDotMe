@@ -391,8 +391,8 @@ export default {
             const isValidRoute = cleanPath === '/' || isStaticAsset || isValidProject;
 
             if (!isValidRoute) {
-                // Fetch and return the custom 404 page
-                const response404 = await fetch(url.origin + '/404');
+                // Fetch and return the custom 404 page directly from static assets
+                const response404 = await env.ASSETS.fetch(new Request(`${assetHost}/404.html`, request));
                 return new Response(response404.body, {
                     status: 404,
                     headers: {
