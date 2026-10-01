@@ -8,6 +8,9 @@
     "dev:worker": "wrangler dev --persist-to /tmp/wrangler-persist",
     "build": "npm run test && node scripts/build.js",
     "create-project": "node dev/create-project.js",
+    "image-variants": "node dev/make-image-variants.mjs",
+    "shrink-images": "node dev/shrink-images.mjs",
+    "sync-lcp": "node scripts/lcp-preload.js",
     "test": "vitest run",
     "lint": "eslint --config config/eslint.config.js .",
     "lint:fix": "eslint --config config/eslint.config.js . --fix"

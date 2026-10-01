@@ -1,4 +1,5 @@
 import { myProjects } from './project-data.js?v=2';
+import { buildImageSrcset } from './image-utils.js';
 import { initializeCustomAudioPlayers } from './audio-player.js?v=2';
 import { initializeLightbox, setupContentClicks } from './lightbox.js?v=1';
 import { initClearTechBrochure } from './brochure.js?v=1';
@@ -224,7 +225,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
                 const loadingAttr = project.featured ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
 
-                visualHtml = `<img id="project-image-${project.id}" src="${project.image}" alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+                const responsive = buildImageSrcset(project);
+                const srcsetAttr = responsive ? ` srcset="${responsive.srcset}" sizes="${responsive.sizes}"` : '';
+
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
             } else {
                 let iconSvg;
                 if (project.symbol === 'data') {
@@ -658,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (!pushState && window.location.pathname !== '/') {
             history.replaceState(null, '', '/');
         }
-        document.title = 'Ryan March | Product & Technology';
+        document.title = 'Ryan March | Product Manager & Creative Technologist';
 
         // Update canonical URL
         let canonicalLink = document.querySelector('link[rel="canonical"]');
