@@ -1,5 +1,28 @@
 export const myProjects = [
     {
+        id: "spindex",
+        title: "Spindex",
+        subtitle: "Browse your record collection like flipping through a real crate.",
+        seoTitle: "Spindex - 3D Vinyl Record Crate & Collection Browser",
+        seoDescription: "Browse your vinyl record collection like flipping through a real crate. Tactile 3D crate browsing, gatefold album inspector, barcode scanning, collection insights, and ambient turntable screensaver.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Music", color: "purple" },
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
+        ],
+        featured: true,
+        size: "large",
+        image: "content/spindex/images/multi-device-shot.avif",
+        imageWidth: 1920,
+        imageHeight: 1920,
+        actionText: "Launch Spindex",
+        actionUrl: "https://spindex.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/spindex",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "tripdeck",
         title: "TripDeck",
         subtitle: "A privacy-first travel itinerary dashboard with maps, weather, and smart packing lists.",
@@ -97,7 +120,7 @@ export const myProjects = [
         seoTitle: "Icon Studio - App Icon Generator & Maker",
         seoDescription: "Design and generate custom app icons online. Create high-fidelity icons for iOS, macOS, Android, and PWAs with gradients, skeuomorphic frames, and badges.",
         tags: [
-            { label: "Recently Updated", color: "gold" },
+            // { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },
             { label: "Project", color: "gray" },
             { label: "Web App", color: "teal", priority: "low" }
@@ -142,7 +165,7 @@ export const myProjects = [
         seoTitle: "Motion Poster - Dynamic Digital Art Signage",
         seoDescription: "A living digital centerpiece application bringing responsive, atmospheric art and customizable digital signage to event venues.",
         tags: [
-            { label: "Recently Updated", color: "gold" },
+            // { label: "Recently Updated", color: "gold" },
             { label: "Digital Signage", color: "purple" },
             { label: "Project", color: "gray" },
             { label: "Web App", color: "teal", priority: "low" }
