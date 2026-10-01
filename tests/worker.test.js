@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import worker from '../worker.js';
+import { myProjects } from '../assets/js/project-data.js';
 
 // Mock HTMLRewriter since JSDOM/Node do not have it natively
 class MockHTMLRewriter {
@@ -169,5 +170,21 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         expect(selectors).toContain('meta[property="og:title"]');
         expect(selectors).toContain('.top-row');
         expect(selectors).toContain('#projects-grid');
+    });
+    it('should use ogImage for social tags and responsive srcset for the preload when a project defines them', async () => {
+        const res = await worker.fetch(new Request('https://ryanmarch.me/project/spindex/'), mockEnv);
+        const spindex = myProjects.find(p => p.id === 'spindex');
+        const handlerFor = (selector) => res.htmlRewriterHandlers.find(h => h.selector === selector).handler;
+
+        const attrs = {};
+        const meta = { tagName: 'meta', getAttribute: (n) => (n === 'property' ? 'og:image' : null), setAttribute: (n, v) => { attrs[n] = v; } };
+        handlerFor('meta[property="og:image"]').element(meta);
+        expect(attrs.content).toBe(`https://ryanmarch.me/${spindex.ogImage}`);
+
+        const preload = {};
+        const link = { setAttribute: (n, v) => { preload[n] = v; }, removeAttribute: vi.fn(), remove: vi.fn() };
+        handlerFor('link#lcp-preload').element(link);
+        expect(preload.href).toBe(`/${spindex.image}`);
+        expect(preload.imagesrcset).toContain(`${spindex.imageWidths[0]}w`);
     });
 });
