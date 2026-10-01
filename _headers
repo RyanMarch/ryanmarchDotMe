@@ -22,6 +22,8 @@
   Cache-Control: public, max-age=31536000, immutable
 /assets/js/project-data.js
   Cache-Control: public, max-age=31536000, immutable
+/assets/js/image-utils.js
+  Cache-Control: public, max-age=31536000, immutable
 /assets/js/audio-player.js
   Cache-Control: public, max-age=31536000, immutable
 /assets/js/global-audio.js
