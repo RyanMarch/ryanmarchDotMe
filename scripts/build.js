@@ -5,6 +5,7 @@ import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { myProjects } from '../assets/js/project-data.js';
 import { buildSitemapXml } from './sitemap-generator.js';
+import { syncIndexHtml } from './lcp-preload.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.resolve(path.dirname(__filename), '..');
@@ -14,6 +15,7 @@ const filesToMinify = [
   { path: 'assets/js/projects.js', loader: 'js' },
   { path: 'assets/js/theme.js', loader: 'js' },
   { path: 'assets/js/project-data.js', loader: 'js' },
+  { path: 'assets/js/image-utils.js', loader: 'js' },
   { path: 'assets/js/global-audio.js', loader: 'js' },
   { path: 'assets/js/audio-player.js', loader: 'js' },
   { path: 'assets/js/mini-player.js', loader: 'js' },
@@ -103,6 +105,9 @@ async function build() {
 
   // Generate sitemap FIRST before minifying project-data.js in-place
   await generateSitemap();
+
+  console.log('🖼️ Syncing homepage LCP preload...');
+  syncIndexHtml(myProjects);
 
   console.log('🏁 Starting in-place assets minification...');
 
