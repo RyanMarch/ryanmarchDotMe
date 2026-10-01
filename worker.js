@@ -1,4 +1,5 @@
 import { myProjects } from './assets/js/project-data.js';
+import { buildImageSrcset } from './assets/js/image-utils.js';
 import redirects from './redirects.json';
 
 /**
@@ -28,10 +29,12 @@ class MetaRewriter {
             } else if (property === 'og:description') {
                 element.setAttribute('content', this.project.seoDescription || this.project.subtitle);
             } else if (property === 'og:image') {
-                if (this.project.image) {
-                    const imageUrl = this.project.image.startsWith('http')
-                        ? this.project.image
-                        : `https://ryanmarch.me/${this.project.image.replace(/^\/+/, '')}`;
+                // Social crawlers don't reliably render AVIF, so prefer a dedicated ogImage (JPEG/PNG, 1200x630).
+                const shareImage = this.project.ogImage || this.project.image;
+                if (shareImage) {
+                    const imageUrl = shareImage.startsWith('http')
+                        ? shareImage
+                        : `https://ryanmarch.me/${shareImage.replace(/^\/+/, '')}`;
                     element.setAttribute('content', imageUrl);
                 }
             } else if (name === 'description') {
@@ -75,10 +78,11 @@ class SchemaRewriter {
             schema.keywords = tags.map(t => t.label).join(', ');
         }
 
-        if (this.project.image) {
-            schema.image = this.project.image.startsWith('http')
-                ? this.project.image
-                : `https://ryanmarch.me/${this.project.image.replace(/^\/+/, '')}`;
+        const schemaImage = this.project.ogImage || this.project.image;
+        if (schemaImage) {
+            schema.image = schemaImage.startsWith('http')
+                ? schemaImage
+                : `https://ryanmarch.me/${schemaImage.replace(/^\/+/, '')}`;
         }
 
         if (isSoftware) {
@@ -124,6 +128,14 @@ class PreloadRewriter {
             : `/${this.project.image}`;
 
         element.setAttribute('href', imagePath);
+
+        // Data-driven variants (imageWidths in project-data.js) take priority over the legacy list below.
+        const responsive = buildImageSrcset(this.project);
+        if (responsive) {
+            element.setAttribute('imagesrcset', responsive.srcset);
+            element.setAttribute('imagesizes', responsive.sizes);
+            return;
+        }
 
         // Build srcset and sizes in the same way as projects.js
         const dotIndex = imagePath.lastIndexOf(".");
