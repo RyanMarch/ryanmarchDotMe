@@ -10,6 +10,16 @@
     "permanent": true
   },
   {
+    "source": "/project",
+    "destination": "/",
+    "permanent": true
+  },
+  {
+    "source": "/projects",
+    "destination": "/",
+    "permanent": true
+  },
+  {
     "source": "/projects/bowserstack",
     "destination": "https://bowserstack.ryanmarch.me/",
     "permanent": false
