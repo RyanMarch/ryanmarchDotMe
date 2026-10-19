@@ -92,10 +92,7 @@
         header h1 {
             font-size: 1.5rem;
             font-weight: 700;
-            background: var(--title-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--text-primary);
         }
 
         .logout-btn {
@@ -350,7 +347,7 @@
         }
 
         .alert-info {
-            background: rgba(56, 189, 248, 0.15);
+            background: rgba(var(--accent-rgb), 0.15);
             border: 1px solid var(--accent-color);
             color: #7dd3fc;
         }
@@ -656,8 +653,6 @@
 <body class="admin-body">
     <!-- Floating background decorative elements matching main site -->
     <div class="background-container">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
     </div>
 
     <div class="admin-container">

@@ -1,16 +1,16 @@
 (function () {
     const themeToggle = document.getElementById('theme-toggle');
-    const themeStatus = document.getElementById('theme-status');
-    let themeStatusTimeout;
+    const lookToggle = document.getElementById('look-toggle');
+    const statusTimeouts = new Map();
 
-    const showThemeStatus = (text) => {
-        if (!themeStatus) return;
-        themeStatus.textContent = text;
-        themeStatus.classList.add('visible');
-        clearTimeout(themeStatusTimeout);
-        themeStatusTimeout = setTimeout(() => {
-            themeStatus.classList.remove('visible');
-        }, 2000);
+    const showStatus = (el, text) => {
+        if (!el) return;
+        el.textContent = text;
+        el.classList.add('visible');
+        clearTimeout(statusTimeouts.get(el));
+        statusTimeouts.set(el, setTimeout(() => {
+            el.classList.remove('visible');
+        }, 2000));
     };
 
     if (themeToggle) {
@@ -43,8 +43,51 @@
                 localStorage.setItem('theme', target);
             }
 
-            showThemeStatus(target === 'dark' ? 'Dark Theme' : 'Light Theme');
+            showStatus(document.getElementById('theme-status'), target === 'dark' ? 'Dark Theme' : 'Light Theme');
             updateAriaLabel(target);
+        });
+    }
+
+    if (lookToggle) {
+        // Looks: 'new' (the default), 'ember' and 'classic'. Each look is a
+        // stylesheet; the classic one replaces the current stylesheet, while
+        // ember layers on top of it. A disabled sheet uses media="not all".
+        const LOOKS = ['new', 'ember', 'classic'];
+        const LOOK_NAMES = { new: 'New Look', ember: 'Ember Look', classic: 'Classic Look' };
+        const root = document.documentElement;
+        const sheets = {
+            current: document.getElementById('look-new-css'),
+            ember: document.getElementById('look-ember-css'),
+            classic: document.getElementById('look-classic-css')
+        };
+
+        const getLook = () => {
+            const attr = root.getAttribute('data-look');
+            return LOOKS.includes(attr) ? attr : 'new';
+        };
+        const nextLook = (look) => LOOKS[(LOOKS.indexOf(look) + 1) % LOOKS.length];
+
+        const updateLookLabel = () => {
+            lookToggle.setAttribute('aria-label', `Switch to ${LOOK_NAMES[nextLook(getLook())].toLowerCase()}`);
+        };
+        updateLookLabel();
+
+        lookToggle.addEventListener('click', () => {
+            const look = nextLook(getLook());
+            if (sheets.current) sheets.current.media = look === 'classic' ? 'not all' : 'all';
+            if (sheets.ember) sheets.ember.media = look === 'ember' ? 'all' : 'not all';
+            if (sheets.classic) sheets.classic.media = look === 'classic' ? 'all' : 'not all';
+            if (look === 'new') {
+                root.removeAttribute('data-look');
+            } else {
+                root.setAttribute('data-look', look);
+            }
+            try {
+                if (look === 'new') localStorage.removeItem('look');
+                else localStorage.setItem('look', look);
+            } catch { /* storage unavailable: look applies for this page only */ }
+            showStatus(document.getElementById('look-status'), LOOK_NAMES[look]);
+            updateLookLabel();
         });
     }
 })();

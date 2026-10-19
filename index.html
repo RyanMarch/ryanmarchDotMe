@@ -42,7 +42,8 @@
     <meta name="description"
         content="Personal website and portfolio of Ryan March, a Product Manager and Creative Technologist. Explore interactive case studies, design tools, and web applications.">
     <link rel="preload" href="/assets/css/style.css?v=4" as="style" fetchpriority="high">
-    <link rel="preload" href="/assets/fonts/outfit-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="/assets/fonts/dmsans-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
+    <link rel="preload" href="/assets/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" id="lcp-preload" href="/content/spindex/images/multi-device-shot-no-title.avif" as="image" imagesrcset="/content/spindex/images/multi-device-shot-no-title-360.avif 360w, /content/spindex/images/multi-device-shot-no-title.avif 691w" imagesizes="(max-width: 1050px) 186px, 332px" fetchpriority="high">
     <link rel="modulepreload" href="/assets/js/projects.js?v=4">
     <link rel="modulepreload" href="/assets/js/project-data.js?v=2">
@@ -56,7 +57,30 @@
     <link rel="modulepreload" href="/assets/js/lightbox.js?v=1">
     <link rel="modulepreload" href="/assets/js/brochure.js?v=1">
     <meta name="color-scheme" content="light dark">
-    <link rel="stylesheet" href="/assets/css/style.css?v=4">
+    <link rel="stylesheet" id="look-new-css" href="/assets/css/style.css?v=4">
+    <link rel="stylesheet" id="look-classic-css" href="/assets/css/style-classic.css" media="not all">
+    <link rel="stylesheet" id="look-ember-css" href="/assets/css/style-ember.css" media="not all">
+    <script>
+        // Look initialization: the current design is the default. "classic" restores
+        // the previous one and "ember" applies the editorial restyle on top of the
+        // current one. ?look=classic / ember / new switch it from a URL.
+        (function () {
+            try {
+                const q = new URLSearchParams(location.search).get('look');
+                if (q === 'classic' || q === 'ember') localStorage.setItem('look', q);
+                else if (q === 'new') localStorage.removeItem('look');
+                const look = localStorage.getItem('look');
+                if (look === 'classic') {
+                    document.documentElement.setAttribute('data-look', 'classic');
+                    document.getElementById('look-new-css').media = 'not all';
+                    document.getElementById('look-classic-css').media = 'all';
+                } else if (look === 'ember') {
+                    document.documentElement.setAttribute('data-look', 'ember');
+                    document.getElementById('look-ember-css').media = 'all';
+                }
+            } catch (e) { /* storage unavailable: keep the default look */ }
+        })();
+    </script>
     <link rel="me" href="https://mastodon.social/@ryanmarch">
 
     <!-- Open Graph tags for iMessage previews -->
@@ -105,6 +129,7 @@
                 <div class="slim-avatar" aria-hidden="true">RM</div>
                 <span class="slim-name">Ryan March</span>
             </a>
+            <div class="header-actions">
             <button id="theme-toggle" class="theme-toggle" aria-label="Switch theme">
                 <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -124,6 +149,15 @@
                 </svg>
                 <span id="theme-status" class="theme-status" aria-live="polite"></span>
             </button>
+            <button id="look-toggle" class="theme-toggle look-toggle" aria-label="Switch to classic look">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <path d="M12 3l9 5-9 5-9-5 9-5z"></path>
+                    <path d="M3 13l9 5 9-5"></path>
+                </svg>
+                <span id="look-status" class="theme-status" aria-live="polite"></span>
+            </button>
+            </div>
         </div>
     </header>
 
@@ -249,12 +283,13 @@
             }
         })();
 
-        // Glimmering border effect - only on desktop
+        // Glimmering border effect - only on desktop, and only in the classic look
         if (window.matchMedia("(min-width: 951px)").matches) {
             let mouseX = 0;
             let mouseY = 0;
 
             const updateGlimmers = () => {
+                if (document.documentElement.dataset.look !== 'classic') return;
                 const cards = Array.from(document.querySelectorAll('.glimmer-card'));
                 // Batch reads
                 const cardRects = cards.map(card => ({
@@ -271,6 +306,7 @@
             };
 
             document.addEventListener('mousemove', (e) => {
+                if (document.documentElement.dataset.look !== 'classic') return;
                 mouseX = e.clientX;
                 mouseY = e.clientY;
                 updateGlimmers();

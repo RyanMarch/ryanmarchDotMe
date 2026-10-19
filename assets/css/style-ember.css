@@ -1,0 +1,609 @@
+/* =====================================================================
+   "Ember" look — a warm, editorial restyle of the site.
+
+   Design inspired by the Ember NetNewsWire theme by Dave Marquard
+   (https://ember.marquard.org, Apache-2.0): warm off-white / charcoal
+   grounds, a vermilion accent, heavy tightly-tracked headlines in Apple
+   system fonts, hairline rules, accent datelines, a drop cap, flagged
+   section heads and serif-italic captions. No Ember code is copied.
+
+   This sheet is a layer on top of style.css: it is enabled together with
+   it (see theme.js) and only applies under :root[data-look="ember"].
+   Dark is the site's default theme; light is :root[data-theme="light"].
+   ===================================================================== */
+
+:root[data-look="ember"] {
+    /* Ember tokens (dark) */
+    --ember-bg: #1a1613;
+    --ember-ink: #ece6df;
+    --ember-ink-soft: #cbc3ba;
+    --ember-ink-mute: #9a9088;
+    --ember-accent: #ff7a50;
+    --ember-on-accent: #1a1613;
+    --ember-surface: #2a2320;
+    --ember-frame: rgba(236, 230, 223, 0.04);
+    --ember-rule: rgba(236, 230, 223, 0.12);
+    --ember-rule-strong: rgba(236, 230, 223, 0.28);
+    --ember-quote-bg: rgba(255, 122, 80, 0.08);
+
+    /* Map onto the site's existing variables */
+    --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto, sans-serif;
+    --font-display: var(--font-main);
+    --bg-color: var(--ember-bg);
+    --card-bg: var(--ember-surface);
+    --card-border: var(--ember-rule);
+    --text-primary: var(--ember-ink);
+    --text-secondary: var(--ember-ink-soft);
+    --text-muted: var(--ember-ink-mute);
+    --accent-color: var(--ember-accent);
+    --accent-rgb: 255, 122, 80;
+    --header-bg: rgba(26, 22, 19, 0.88);
+    --project-detail-bg: var(--ember-bg);
+    --avatar-gradient: var(--ember-accent);
+    --grain-opacity: 0;
+    --img-shadow: none;
+    --project-detail-shadow: none;
+    --shadow-sm: none;
+    --shadow-md: none;
+    --shadow-lg: none;
+    --btn-bg: var(--ember-accent);
+    --btn-text: var(--ember-on-accent);
+    --btn-secondary-bg: transparent;
+    --btn-secondary-border: transparent;
+    --btn-secondary-text: var(--ember-accent);
+    --glass-bg: var(--ember-surface);
+    --glass-border: var(--ember-rule);
+    --glass-hover-bg: var(--ember-surface);
+    --scrollbar-thumb: var(--ember-rule-strong);
+
+    /* Tags become plain datelines: muted text, no pill */
+    --tag-blue: var(--ember-accent);
+    --tag-gold: var(--ember-accent);
+    --tag-green: var(--ember-ink-mute);
+    --tag-purple: var(--ember-ink-mute);
+    --tag-orange: var(--ember-ink-mute);
+    --tag-rose: var(--ember-ink-mute);
+    --tag-pink: var(--ember-ink-mute);
+    --tag-cyan: var(--ember-ink-mute);
+    --tag-indigo: var(--ember-ink-mute);
+    --tag-teal: var(--ember-ink-mute);
+    --tag-white: var(--ember-ink-mute);
+    --tag-gray: var(--ember-ink-mute);
+}
+
+:root[data-look="ember"][data-theme="light"] {
+    --ember-bg: #fdfcfa;
+    --ember-ink: #1b1714;
+    --ember-ink-soft: #3b342e;
+    --ember-ink-mute: #857b72;
+    --ember-accent: #d6421f;
+    --ember-on-accent: #ffffff;
+    --ember-surface: #f2ece4;
+    --ember-frame: rgba(27, 23, 20, 0.035);
+    --ember-rule: rgba(27, 23, 20, 0.1);
+    --ember-rule-strong: rgba(27, 23, 20, 0.28);
+    --ember-quote-bg: rgba(214, 66, 31, 0.05);
+    --accent-rgb: 214, 66, 31;
+    --header-bg: rgba(253, 252, 250, 0.88);
+}
+
+/* ---------- Home: masthead ---------------------------------------- */
+
+:root[data-look="ember"] {
+
+    .glimmer-card {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .top-row {
+        gap: 2.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid var(--ember-rule-strong);
+    }
+
+    .bio-module {
+        padding: 0.5rem 0;
+        gap: 1.75rem;
+    }
+
+    .bio-avatar,
+    .slim-avatar {
+        color: var(--ember-on-accent);
+        border-radius: 12px;
+    }
+
+    .bio-info h1 {
+        font-size: clamp(2.6rem, 6vw, 3.6rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.02;
+    }
+
+    .bio-info .subtitle {
+        color: var(--ember-accent);
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-top: 0.35rem;
+    }
+
+    .profile-links {
+        gap: 0;
+    }
+
+    .top-row .profile-btn {
+        justify-content: flex-start;
+        padding: 0.7rem 0;
+        border-radius: 0;
+        border-bottom: 1px solid var(--ember-rule);
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        color: var(--ember-ink);
+        background: transparent;
+    }
+
+    .top-row .profile-btn::before {
+        display: none;
+    }
+
+    .top-row .profile-btn:hover {
+        color: var(--ember-accent);
+        transform: none;
+    }
+
+    /* ---------- Filters: text tabs ---------------------------------- */
+
+    .filter-bar {
+        padding: 0.9rem 0;
+        border-bottom: 1px solid var(--ember-rule);
+        border-radius: 0;
+    }
+
+    .filter-header {
+        color: var(--ember-ink-mute);
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+    }
+
+    .filter-pill,
+    .filter-pill[data-category] {
+        background: transparent;
+        border: 0;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        padding: 0.35rem 0.1rem;
+        color: var(--ember-ink-mute);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        box-shadow: none;
+    }
+
+    .filter-pill:hover {
+        background: transparent;
+        color: var(--ember-ink);
+    }
+
+    .filter-pill.active {
+        background: transparent;
+        color: var(--ember-ink);
+        border-bottom-color: var(--ember-accent);
+    }
+
+    /* ---------- Home: restyled grid --------------------------------- */
+
+    /* An even editorial grid: every project is the same shape — a framed
+       visual, then dateline, headline, deck and actions. Rows size to
+       content, so there are no fixed heights or spans to look ragged. */
+    .destinations-grid,
+    .archive-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: auto;
+        column-gap: 2.5rem;
+        row-gap: 3rem;
+        min-height: 0;
+    }
+
+    @media (min-width: 768px) {
+
+        .destinations-grid,
+        .archive-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (min-width: 1100px) {
+
+        .destinations-grid,
+        .archive-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    .destination-card,
+    .destination-card.size-small,
+    .destination-card.size-medium,
+    .destination-card.size-large,
+    .destination-card.size-wide,
+    .destination-card.size-tall {
+        grid-column: auto;
+        grid-row: auto;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto auto 1fr;
+        grid-template-areas:
+            "visual"
+            "tags"
+            "content";
+        padding: 0;
+        border-top: 0;
+        row-gap: 0.9rem;
+        contain-intrinsic-size: 0 480px;
+    }
+
+    .destination-visual,
+    .destination-standalone-visual,
+    .destination-card.size-small .destination-visual,
+    .destination-card.size-tall .destination-visual {
+        display: block;
+        position: relative;
+        aspect-ratio: 4 / 3;
+        background: var(--ember-frame);
+        border-radius: 10px;
+        overflow: hidden;
+        filter: none;
+    }
+
+    .destination-visual img,
+    .destination-standalone-visual img {
+        position: absolute;
+        inset: 1.25rem;
+        width: calc(100% - 2.5rem);
+        height: calc(100% - 2.5rem);
+        max-width: none;
+        max-height: none;
+        object-fit: contain;
+        margin: 0;
+        scale: 1;
+        border-radius: 4px;
+    }
+
+    .destination-visual .project-placeholder-icon,
+    .destination-standalone-visual .project-placeholder-icon {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background: none;
+        border: 0;
+        box-shadow: none;
+        border-radius: 0;
+        opacity: 1;
+        transform: none;
+    }
+
+    /* The RentPress logo is white-on-transparent, so its frame stays dark
+       in both themes. */
+    .destination-visual .project-placeholder-icon.hub-motif {
+        background: #1e293b;
+    }
+
+    .destination-visual .project-placeholder-icon::after {
+        display: none;
+    }
+
+    .destination-visual .project-placeholder-icon:not(.hub-motif) svg {
+        color: var(--ember-ink-mute);
+    }
+
+    .destination-visual .project-placeholder-icon.hub-motif img {
+        position: static;
+        width: auto;
+        height: auto;
+        max-width: 60%;
+        filter: none;
+    }
+
+    .tag-list {
+        gap: 0;
+        justify-content: flex-start;
+    }
+
+    .tag,
+    .tag-list .tag {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        border-radius: 0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        color: var(--ember-ink-mute);
+    }
+
+    .tag + .tag::before {
+        content: "\00b7";
+        margin: 0 0.55rem;
+        color: var(--ember-ink-mute);
+        font-weight: 400;
+    }
+
+    .tag.tag-gold {
+        color: var(--ember-accent);
+    }
+
+    .destination-content h2 {
+        font-size: clamp(1.7rem, 3vw, 2.3rem);
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        line-height: 1.08;
+    }
+
+    .destination-content p {
+        color: var(--ember-ink-soft);
+        line-height: 1.45;
+    }
+
+    /* Buttons: one vermilion action, quiet text links for the rest */
+    .project-btn {
+        padding: 0.6rem 1.15rem;
+        background-color: var(--ember-ink);
+        border: 0;
+        border-radius: 8px;
+        color: var(--ember-bg);
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        box-shadow: none;
+        transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .project-btn::before {
+        display: none;
+    }
+
+    .project-btn:hover {
+        background-color: var(--ember-accent);
+        color: var(--ember-on-accent);
+        box-shadow: none;
+    }
+
+    /* The old buttons slide a plus/arrow icon in over the label on hover;
+       here the label stays put and the icon is dropped. */
+    .project-btn .btn-icon {
+        display: none;
+    }
+
+    .project-btn:hover span {
+        transform: none;
+    }
+
+    .project-btn.btn-secondary span::after {
+        content: "\2192";
+        display: inline-block;
+        margin-left: 0.35em;
+        transition: transform 0.25s ease;
+    }
+
+    .project-btn.btn-secondary:hover span::after {
+        transform: translateX(3px);
+    }
+
+    .project-btn.btn-secondary {
+        background: transparent;
+        border-color: transparent;
+        color: var(--ember-accent);
+        padding-left: 0.4rem;
+        padding-right: 0.4rem;
+    }
+
+    .project-btn.btn-secondary:hover {
+        background: transparent;
+        border-color: transparent;
+        color: var(--ember-accent);
+        text-decoration: underline;
+        text-underline-offset: 0.25em;
+        filter: none;
+    }
+
+    .slim-header {
+        box-shadow: none;
+        border-bottom: 1px solid var(--ember-rule);
+    }
+
+    /* ---------- Project writeups ------------------------------------ */
+
+    .project-detail-content h2 {
+        font-size: clamp(2.2rem, 6.5vw, 3.5rem);
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.04;
+        margin-bottom: 0.6rem;
+    }
+
+    /* Deck */
+    .project-detail-content .project-subtitle {
+        color: var(--ember-ink-soft);
+        font-size: clamp(1.15rem, 2.6vw, 1.4rem);
+        font-weight: 500;
+        letter-spacing: -0.005em;
+        line-height: 1.35;
+        text-transform: none;
+        margin-bottom: 0.9rem;
+    }
+
+    /* Dateline */
+    .project-detail-content .project-description {
+        color: var(--ember-accent);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding-bottom: 1.1rem;
+        margin-bottom: 1.75rem;
+        border-bottom: 1px solid var(--ember-rule-strong);
+    }
+
+    .project-detail-content p {
+        font-size: 1.12rem;
+        line-height: 1.65;
+        color: var(--ember-ink);
+    }
+
+    /* Drop cap on the opening paragraph */
+    .project-detail-content > p:not(.project-subtitle, .project-description):not(p:not(.project-subtitle, .project-description) ~ p)::first-letter {
+        float: left;
+        font-size: 3.6em;
+        font-weight: 800;
+        line-height: 0.82;
+        padding: 0.06em 0.1em 0 0;
+        color: var(--ember-accent);
+    }
+
+    /* Flagged section headings */
+    .project-detail-content h4.section-divider {
+        display: block;
+        text-align: left;
+        max-width: 800px;
+        margin: 3.5rem auto 1.25rem;
+    }
+
+    .project-detail-content h4.section-divider::before {
+        position: static;
+        display: block;
+        width: 2.4rem;
+        height: 3px;
+        margin-bottom: 0.7rem;
+        background: var(--ember-accent);
+    }
+
+    .project-detail-content h4.section-divider span {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: none;
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.015em;
+        text-transform: none;
+        color: var(--ember-ink);
+    }
+
+    /* Serif-italic captions, soft image corners */
+    .gallery-caption {
+        font-family: ui-serif, "New York", Georgia, serif;
+        font-style: italic;
+        font-size: 0.95rem;
+        color: var(--ember-ink-mute);
+    }
+
+    .project-detail-content .gallery-item img,
+    .gallery-item.is-hero img {
+        border-radius: 6px;
+    }
+
+    /* "In this project" nav: an unboxed contents line between hairlines */
+    .project-detail-content .project-nav {
+        margin-top: 2rem;
+        margin-bottom: 2.5rem;
+        padding: 0.9rem 0;
+        background: transparent;
+        border: 0;
+        border-bottom: 1px solid var(--ember-rule);
+        border-radius: 0;
+        backdrop-filter: none;
+        will-change: auto;
+    }
+
+    .project-detail-content .project-nav::before {
+        position: static;
+        padding: 0;
+        background: none;
+        border: 0;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        color: var(--ember-ink-mute);
+    }
+
+    /* Numbered contents list, read straight down */
+    .project-detail-content .nav-links {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 0.5rem;
+        counter-reset: ember-toc;
+    }
+
+    .project-detail-content .nav-links a:not(.project-btn) {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        white-space: normal;
+        color: var(--ember-ink);
+        font-weight: 600;
+        counter-increment: ember-toc;
+    }
+
+    .project-detail-content .nav-links a::before,
+    .project-detail-content .nav-links a:not(:first-child)::before {
+        content: counter(ember-toc, decimal-leading-zero);
+        position: static;
+        display: inline;
+        width: auto;
+        height: auto;
+        background: none;
+        border-radius: 0;
+        opacity: 1;
+        transform: none;
+        flex: none;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        font-variant-numeric: tabular-nums;
+        color: var(--ember-ink-mute);
+    }
+
+    .project-detail-content .nav-links:hover a {
+        opacity: 1;
+    }
+
+    .project-detail-content .nav-links a:not(.project-btn):hover {
+        color: var(--ember-accent);
+    }
+
+    .project-detail-content .nav-links a:hover::before {
+        color: var(--ember-accent);
+    }
+
+    /* Pull-quotes: tinted panel with an accent rule */
+    .project-detail-content blockquote {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 1.1rem 1.4rem;
+        background: var(--ember-quote-bg);
+        border-left: 3px solid var(--ember-accent);
+        border-radius: 0 8px 8px 0;
+        font-size: 1.2rem;
+        font-weight: 600;
+        line-height: 1.5;
+    }
+
+    .project-detail-content a:not(.project-btn) {
+        color: var(--ember-accent);
+        text-decoration: none;
+    }
+
+    .project-detail-content a:not(.project-btn):hover {
+        text-decoration: underline;
+    }
+}

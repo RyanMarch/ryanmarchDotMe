@@ -53,8 +53,9 @@ export function initializeMiniPlayer() {
 
         // Insert between the brand logo and theme toggle
         const themeToggle = document.getElementById('theme-toggle');
-        if (themeToggle) {
-            headerContainer.insertBefore(miniPlayer, themeToggle);
+        const anchor = themeToggle && (themeToggle.closest('.header-actions') || themeToggle);
+        if (anchor) {
+            headerContainer.insertBefore(miniPlayer, anchor);
         } else {
             headerContainer.appendChild(miniPlayer);
         }

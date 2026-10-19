@@ -16,6 +16,10 @@
 # ── changes a file's content automatically busts old caches via a new URL.
 /assets/css/style.css
   Cache-Control: public, max-age=31536000, immutable
+/assets/css/style-classic.css
+  Cache-Control: public, max-age=31536000, immutable
+/assets/css/style-ember.css
+  Cache-Control: public, max-age=31536000, immutable
 /assets/js/projects.js
   Cache-Control: public, max-age=31536000, immutable
 /assets/js/theme.js
