@@ -453,15 +453,57 @@ main {
     font-size: clamp(0.95rem, 2vw, 1.05rem);
 }
 
+/* Header row: avatar | name | profile | links. Narrower screens wrap the
+   profile and links onto their own rows (see the 1050px query below). */
+.bio-module .bio-info {
+    flex-grow: 0;
+}
+
 .bio-profile {
-    width: 100%;
-    margin: 0.25rem 0 0;
-    padding: 1.1rem max(0px, calc(100% - 58ch)) 0 0;
-    border-top: 1px solid var(--card-border);
-    font-size: 0.98rem;
+    flex: 1 1 340px;
+    width: auto;
+    margin: 0;
+    padding: 0 0 0 2rem;
+    border: 0;
+    border-left: 1px solid var(--card-border);
+    font-size: 0.95rem;
     line-height: 1.6;
     color: var(--text-secondary);
     text-wrap: pretty;
+}
+
+.bio-module .profile-links {
+    width: auto;
+    flex: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.bio-module .profile-links .profile-btn {
+    flex: none;
+    justify-content: flex-start;
+    padding: 0.65rem 1.25rem;
+}
+
+@media (max-width: 1050px) {
+    .bio-profile {
+        flex-basis: 100%;
+        padding: 1rem 0 0;
+        border-left: 0;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .bio-module .profile-links {
+        width: 100%;
+        flex-direction: row;
+        margin-left: 0;
+    }
+
+    .bio-module .profile-links .profile-btn {
+        flex: 1;
+        justify-content: center;
+    }
 }
 
 
@@ -518,10 +560,10 @@ main {
 }
 
 .destination-card {
-    padding: 1.5rem 1.5rem;
+    padding: 1.25rem 1.4rem;
     display: grid;
     container-type: inline-size;
-    row-gap: 0.75rem;
+    row-gap: 0.6rem;
     column-gap: 1.5rem;
     position: relative;
     overflow: hidden;
@@ -587,7 +629,7 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 0.75rem;
+    gap: 0.5rem;
     z-index: 2;
     position: relative;
 }
@@ -2208,15 +2250,15 @@ body.standalone-page {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.8rem 1.8rem;
+    padding: 0.6rem 1.35rem;
     background-color: var(--btn-bg);
     /* Silver base */
     border: 1px solid #94a3b8;
-    border-radius: 14px;
+    border-radius: 12px;
     color: var(--btn-text);
     text-decoration: none;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     letter-spacing: 0.02em;
     margin-top: 0;
     width: fit-content;
@@ -4271,4 +4313,11 @@ body.standalone-page {
 
 #project-image-speakeasy {
     max-height: 330px;
+}
+
+/* Comfortable tap targets for the filter pills on phones */
+@media (max-width: 700px) {
+    .filter-pill {
+        min-height: 40px;
+    }
 }

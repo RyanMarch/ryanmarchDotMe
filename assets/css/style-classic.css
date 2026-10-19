@@ -520,15 +520,57 @@ main {
     font-size: clamp(0.95rem, 2vw, 1.05rem);
 }
 
+/* Header row: avatar | name | profile | links. Narrower screens wrap the
+   profile and links onto their own rows (see the 1050px query below). */
+.bio-module .bio-info {
+    flex-grow: 0;
+}
+
 .bio-profile {
-    width: 100%;
-    margin: 0.25rem 0 0;
-    padding: 1.1rem max(0px, calc(100% - 58ch)) 0 0;
-    border-top: 1px solid var(--card-border);
-    font-size: 0.98rem;
+    flex: 1 1 340px;
+    width: auto;
+    margin: 0;
+    padding: 0 0 0 2rem;
+    border: 0;
+    border-left: 1px solid var(--card-border);
+    font-size: 0.95rem;
     line-height: 1.6;
     color: var(--text-secondary);
     text-wrap: pretty;
+}
+
+.bio-module .profile-links {
+    width: auto;
+    flex: none;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.bio-module .profile-links .profile-btn {
+    flex: none;
+    justify-content: flex-start;
+    padding: 0.65rem 1.25rem;
+}
+
+@media (max-width: 1050px) {
+    .bio-profile {
+        flex-basis: 100%;
+        padding: 1rem 0 0;
+        border-left: 0;
+        border-top: 1px solid var(--card-border);
+    }
+
+    .bio-module .profile-links {
+        width: 100%;
+        flex-direction: row;
+        margin-left: 0;
+    }
+
+    .bio-module .profile-links .profile-btn {
+        flex: 1;
+        justify-content: center;
+    }
 }
 
 

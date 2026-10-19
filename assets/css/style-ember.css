@@ -111,9 +111,20 @@
         gap: 1.75rem;
     }
 
-    .bio-avatar,
     .slim-avatar {
         color: var(--ember-on-accent);
+        border-radius: 12px;
+    }
+
+    /* A quiet monogram tile so the name leads, not the avatar */
+    .bio-avatar {
+        width: 72px;
+        height: 72px;
+        font-size: 2.1rem;
+        font-weight: 700;
+        background: var(--ember-surface);
+        color: var(--ember-accent);
+        border: 1px solid var(--ember-rule-strong);
         border-radius: 12px;
     }
 
@@ -140,9 +151,12 @@
     }
 
     .bio-profile {
+        order: 1;
+        flex: none;
+        width: 100%;
         margin: 0;
         padding: 0 max(0px, calc(100% - 62ch)) 0 0;
-        border-top: 0;
+        border: 0;
         font-size: clamp(1.05rem, 1.8vw, 1.2rem);
         font-weight: 500;
         line-height: 1.5;
@@ -151,20 +165,21 @@
 
     @media (min-width: 701px) {
         .bio-profile {
-            padding-left: calc(100px + 1.75rem);
-            padding-right: max(0px, calc(100% - 62ch - 100px - 1.75rem));
+            padding-left: calc(72px + 1.75rem);
+            padding-right: max(0px, calc(100% - 62ch - 72px - 1.75rem));
         }
     }
 
-    .profile-links {
-        gap: 0;
+    .bio-module .profile-links {
+        flex-direction: row;
+        gap: 1.5rem;
     }
 
     .top-row .profile-btn {
         justify-content: flex-start;
-        padding: 0.7rem 0;
+        padding: 0.25rem 0;
         border-radius: 0;
-        border-bottom: 1px solid var(--ember-rule);
+        border-bottom: 0;
         font-size: 1rem;
         font-weight: 600;
         letter-spacing: 0;
@@ -336,8 +351,9 @@
         filter: none;
     }
 
-    .tag-list {
-        gap: 0;
+    .tag-list,
+    .project-detail-content .project-detail-tags {
+        gap: 0.35rem 1.1rem;
         justify-content: flex-start;
     }
 
@@ -350,14 +366,8 @@
         font-size: 0.72rem;
         font-weight: 700;
         letter-spacing: 0.08em;
+        line-height: 1.35;
         color: var(--ember-ink-mute);
-    }
-
-    .tag + .tag::before {
-        content: "\00b7";
-        margin: 0 0.55rem;
-        color: var(--ember-ink-mute);
-        font-weight: 400;
     }
 
     .tag.tag-gold {
@@ -642,5 +652,31 @@
 
     .project-detail-content a:not(.project-btn):hover {
         text-decoration: underline;
+    }
+
+    /* Below 1050px the links get their own centered row, like the Resume look.
+       The base styles stretch each button to half the row; shrink them to
+       their content so the icon + label sit in the middle. */
+    @media (max-width: 1050px) {
+        .bio-module .profile-links {
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .bio-module .profile-links .profile-btn {
+            flex: none;
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .top-row .profile-btn {
+            padding: 0.7rem 0.5rem;
+        }
+
+        .filter-pill,
+        .filter-pill[data-category] {
+            padding: 0.7rem 0.25rem;
+        }
     }
 }
