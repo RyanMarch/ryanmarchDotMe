@@ -14,6 +14,7 @@ const filesToMinify = [
   { path: 'assets/css/style.css', loader: 'css' },
   { path: 'assets/css/style-classic.css', loader: 'css' },
   { path: 'assets/css/style-ember.css', loader: 'css' },
+  { path: 'assets/css/style-resume.css', loader: 'css' },
   { path: 'assets/js/projects.js', loader: 'js' },
   { path: 'assets/js/theme.js', loader: 'js' },
   { path: 'assets/js/project-data.js', loader: 'js' },

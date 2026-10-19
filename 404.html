@@ -28,23 +28,25 @@
     <link rel="stylesheet" id="look-new-css" href="/assets/css/style.css">
     <link rel="stylesheet" id="look-classic-css" href="/assets/css/style-classic.css" media="not all">
     <link rel="stylesheet" id="look-ember-css" href="/assets/css/style-ember.css" media="not all">
+    <link rel="stylesheet" id="look-resume-css" href="/assets/css/style-resume.css" media="not all">
     <script>
         // Look initialization: the current design is the default. "classic" restores
-        // the previous one and "ember" applies the editorial restyle on top of the
-        // current one. ?look=classic / ember / new switch it from a URL.
+        // the previous one; "ember" and "resume" are restyles layered on top of the
+        // current one. ?look=classic / ember / resume / new switch it from a URL.
         (function () {
             try {
                 const q = new URLSearchParams(location.search).get('look');
-                if (q === 'classic' || q === 'ember') localStorage.setItem('look', q);
+                if (q === 'classic' || q === 'ember' || q === 'resume') localStorage.setItem('look', q);
                 else if (q === 'new') localStorage.removeItem('look');
                 const look = localStorage.getItem('look');
                 if (look === 'classic') {
                     document.documentElement.setAttribute('data-look', 'classic');
                     document.getElementById('look-new-css').media = 'not all';
                     document.getElementById('look-classic-css').media = 'all';
-                } else if (look === 'ember') {
-                    document.documentElement.setAttribute('data-look', 'ember');
+                } else if (look === 'ember' || look === 'resume') {
+                    document.documentElement.setAttribute('data-look', look);
                     document.getElementById('look-ember-css').media = 'all';
+                    if (look === 'resume') document.getElementById('look-resume-css').media = 'all';
                 }
             } catch (e) { /* storage unavailable: keep the default look */ }
         })();

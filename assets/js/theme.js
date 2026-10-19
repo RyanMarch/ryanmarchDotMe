@@ -49,15 +49,16 @@
     }
 
     if (lookToggle) {
-        // Looks: 'new' (the default), 'ember' and 'classic'. Each look is a
-        // stylesheet; the classic one replaces the current stylesheet, while
-        // ember layers on top of it. A disabled sheet uses media="not all".
-        const LOOKS = ['new', 'ember', 'classic'];
-        const LOOK_NAMES = { new: 'New Look', ember: 'Ember Look', classic: 'Classic Look' };
+        // Looks: 'new' (the default), 'ember', 'resume' and 'classic'. The classic
+        // look replaces the current stylesheet; ember layers on top of it, and
+        // resume layers on top of ember. A disabled sheet uses media="not all".
+        const LOOKS = ['new', 'ember', 'resume', 'classic'];
+        const LOOK_NAMES = { new: 'New Look', ember: 'Ember Look', resume: 'Resume Look', classic: 'Classic Look' };
         const root = document.documentElement;
         const sheets = {
             current: document.getElementById('look-new-css'),
             ember: document.getElementById('look-ember-css'),
+            resume: document.getElementById('look-resume-css'),
             classic: document.getElementById('look-classic-css')
         };
 
@@ -75,7 +76,8 @@
         lookToggle.addEventListener('click', () => {
             const look = nextLook(getLook());
             if (sheets.current) sheets.current.media = look === 'classic' ? 'not all' : 'all';
-            if (sheets.ember) sheets.ember.media = look === 'ember' ? 'all' : 'not all';
+            if (sheets.ember) sheets.ember.media = look === 'ember' || look === 'resume' ? 'all' : 'not all';
+            if (sheets.resume) sheets.resume.media = look === 'resume' ? 'all' : 'not all';
             if (sheets.classic) sheets.classic.media = look === 'classic' ? 'all' : 'not all';
             if (look === 'new') {
                 root.removeAttribute('data-look');

@@ -8,11 +8,13 @@
    section heads and serif-italic captions. No Ember code is copied.
 
    This sheet is a layer on top of style.css: it is enabled together with
-   it (see theme.js) and only applies under :root[data-look="ember"].
+   it (see theme.js) and applies under :root[data-look="ember"]. The
+   "resume" look reuses this structure and re-skins it in style-resume.css,
+   so both looks load this sheet.
    Dark is the site's default theme; light is :root[data-theme="light"].
    ===================================================================== */
 
-:root[data-look="ember"] {
+:root:is([data-look="ember"], [data-look="resume"]) {
     /* Ember tokens (dark) */
     --ember-bg: #1a1613;
     --ember-ink: #ece6df;
@@ -89,7 +91,7 @@
 
 /* ---------- Home: masthead ---------------------------------------- */
 
-:root[data-look="ember"] {
+:root:is([data-look="ember"], [data-look="resume"]) {
 
     .glimmer-card {
         background: transparent;
@@ -129,6 +131,29 @@
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-top: 0.35rem;
+    }
+
+    /* The profile is the article "deck": larger, unboxed, set under the name
+       and aligned with it rather than with the avatar */
+    .bio-module {
+        row-gap: 1rem;
+    }
+
+    .bio-profile {
+        margin: 0;
+        padding: 0 max(0px, calc(100% - 62ch)) 0 0;
+        border-top: 0;
+        font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+        font-weight: 500;
+        line-height: 1.5;
+        color: var(--ember-ink-soft);
+    }
+
+    @media (min-width: 701px) {
+        .bio-profile {
+            padding-left: calc(100px + 1.75rem);
+            padding-right: max(0px, calc(100% - 62ch - 100px - 1.75rem));
+        }
     }
 
     .profile-links {
@@ -416,6 +441,18 @@
     .slim-header {
         box-shadow: none;
         border-bottom: 1px solid var(--ember-rule);
+    }
+
+    /* Mini player popover: the base styles hard-code a blue-slate panel */
+    .mini-player-menu {
+        background: var(--ember-surface);
+        border: 1px solid var(--ember-rule-strong);
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .mini-player-menu::before {
+        display: none;
     }
 
     /* ---------- Project writeups ------------------------------------ */
