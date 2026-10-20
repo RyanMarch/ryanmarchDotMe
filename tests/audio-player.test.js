@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { initializeCustomAudioPlayers } from '../assets/js/audio-player.js';
-import { globalAudio } from '../assets/js/global-audio.js';
+import { initializeCustomAudioPlayers } from '../public/assets/js/audio-player.js';
+import { globalAudio } from '../public/assets/js/global-audio.js';
 
 describe('Custom Audio Player Behavior', () => {
     let container;

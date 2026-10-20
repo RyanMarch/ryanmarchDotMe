@@ -6,7 +6,7 @@ import { execSync } from 'child_process';
  */
 export function getGitLastMod(filePath, fallbackDate) {
   try {
-    const stdout = execSync(`git log -1 --format=%cs -- "${filePath}"`, { stdio: ['ignore', 'pipe', 'ignore'] });
+    const stdout = execSync(`git log -1 --format=%cs -- "public/${filePath}"`, { stdio: ['ignore', 'pipe', 'ignore'] });
     const dateStr = stdout.toString().trim();
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
       return dateStr;

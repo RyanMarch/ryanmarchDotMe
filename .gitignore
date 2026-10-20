@@ -7,8 +7,13 @@
 ehthumbs.db
 Thumbs.db
 
-# Dev folder (local tools/scripts, not committed to git)
-dev/
+# Dev folder: only the shared tooling is tracked; everything else (notes, one-off scripts, R2 secrets/cache) stays local
+dev/*
+!dev/serve.py
+!dev/create-project.js
+!dev/make-image-variants.mjs
+!dev/shrink-images.mjs
+!dev/upload_media.py
 
 # Code workspace files
 *.code-workspace
@@ -41,3 +46,7 @@ GEMINI.md
 # Build artifacts
 sitemap.xml
 coverage/
+
+# Editor workspace and Pixelmator source files (local only)
+.vscode/
+*.pxd

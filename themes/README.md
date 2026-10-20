@@ -1,13 +1,13 @@
 # Archived looks
 
-The site ships one look (the one in `assets/css/style.css`). These are the other
+The site ships one look (the one in `public/assets/css/style.css`). These are the other
 looks we built and compared before settling on it, kept so they can be picked up
-again later. **This folder is not deployed** (`themes/` is listed in
-`.assetsignore`) and nothing in the build reads it.
+again later. **This folder is not deployed** (it sits outside `public/`,
+the only folder Wrangler uploads) and nothing in the build reads it.
 
 They are a snapshot, not drop-ins: they were written against the stylesheet as it
 was *before* the final merge, so they sit on `base-before-merge.css`, not on
-today's `assets/css/style.css`.
+today's `public/assets/css/style.css`.
 
 ## What is here
 
@@ -17,7 +17,7 @@ today's `assets/css/style.css`.
 | `classic.css` | The original blue, glass-card look with floating orbs and the cursor "glimmer" border. A **full replacement** for `base-before-merge.css`, not a layer. |
 | `ember.css` | Warm editorial look inspired by the Ember NetNewsWire theme: warm black/off-white, vermilion accent, system fonts, unboxed grid, drop cap, numbered contents. A **layer** on `base-before-merge.css`. |
 | `resume.css` | The look that mirrors the résumé PDF: teal top band, tracked-caps Montserrat name, thick teal rules. A **layer** on `ember.css`, which it reuses for layout. |
-| `hybrid.css` | The look that was chosen, in its pre-merge form (palette + overrides only). It is now merged into `assets/css/style.css`, so this file is for reference. A **layer** on `ember.css`. |
+| `hybrid.css` | The look that was chosen, in its pre-merge form (palette + overrides only). It is now merged into `public/assets/css/style.css`, so this file is for reference. A **layer** on `ember.css`. |
 | `fonts/` | Fonts those looks need: DM Sans, Bricolage Grotesque, Montserrat, and the Outfit latin-ext file. |
 
 Layering: `base-before-merge.css` → `ember.css` → `resume.css` **or** `hybrid.css`.
@@ -27,7 +27,7 @@ and each look sets `data-look` on `<html>`.
 
 ## Reviving a look
 
-1. Copy the fonts you need from `themes/fonts/` back to `assets/fonts/` (the CSS
+1. Copy the fonts you need from `themes/fonts/` back to `public/assets/fonts/` (the CSS
    references `/assets/fonts/...`).
 2. Load the sheets as `<link>`s with ids and set `data-look` on `<html>` (below).
 3. `classic.css` also needs the two orb divs back inside `.background-container`

@@ -223,12 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (project.image) {
                 const widthAttr = project.imageWidth ? ` width="${project.imageWidth}"` : '';
                 const heightAttr = project.imageHeight ? ` height="${project.imageHeight}"` : '';
+                const ratioAttr = project.imageWidth && project.imageHeight ? ` style="--ar:${(project.imageWidth / project.imageHeight).toFixed(4)}"` : '';
                 const loadingAttr = project.featured ? 'loading="eager" fetchpriority="high"' : 'loading="lazy"';
 
                 const responsive = buildImageSrcset(project);
                 const srcsetAttr = responsive ? ` srcset="${responsive.srcset}" sizes="${responsive.sizes}"` : '';
 
-                visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
+                visualHtml = `<img id="project-image-${project.id}" src="${project.image}"${srcsetAttr} alt="${project.title} Preview" ${loadingAttr}${widthAttr}${heightAttr}${ratioAttr} class="${project.featured ? 'destination-image-standalone' : 'destination-icon'} ${project.imageClass}">`;
             } else {
                 let iconSvg;
                 if (project.symbol === 'data') {

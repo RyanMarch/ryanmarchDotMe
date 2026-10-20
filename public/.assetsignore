@@ -1,0 +1,3 @@
+# Keep local-only media and OS files out of the Wrangler asset upload (audio is served from R2)
+*.mp3
+.DS_Store

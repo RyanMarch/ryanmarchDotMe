@@ -8,7 +8,7 @@ export default [
         ignores: [
             'node_modules/**',
             '.wrangler/**',
-            'assets/js/beacon.min.js',
+            'public/assets/js/beacon.min.js',
             'coverage/**'
         ]
     },

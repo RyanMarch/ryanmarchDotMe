@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://ryanmarch.me">
-    <img src="assets/img/og-image.jpg" alt="Ryan March" width="600">
+    <img src="public/assets/img/og-image.jpg" alt="Ryan March" width="600">
   </a>
 </p>
 

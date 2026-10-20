@@ -50,30 +50,6 @@ export const myProjects = [
         showLaunchButton: true
     },
     {
-        id: "filenamer",
-        title: "FileNamer",
-        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files.",
-        seoTitle: "FileNamer - File Renaming Utility",
-        seoDescription: "FileNamer is an intuitive, browser-based utility for defining and applying consistent file naming templates. Drag and drop files, configure presets, preview results in real time, and export renamed files instantly.",
-        tags: [
-            { label: "Project", color: "gray" },
-            { label: "Web App", color: "teal" },
-            { label: "Product", color: "gray" }
-        ],
-        featured: false,
-        size: "medium",
-        image: "content/filenamer/images/app-screenshot-with-icon.avif",
-        imageWidth: 1200,
-        imageHeight: 900,
-        imageWidths: [360, 640, 1200],
-        ogImage: "content/filenamer/images/og.jpg",
-        actionText: "Launch FileNamer",
-        actionUrl: "https://filenamer.ryanmarch.me",
-        sourceUrl: "https://github.com/RyanMarch/fileNamer",
-        hasExtendedContent: true,
-        showLaunchButton: true
-    },
-    {
         id: "speakeasy",
         title: "Speakeasy",
         subtitle: "Craft cocktail companion and recipe library. Visualize and understand your drinks.",
@@ -94,6 +70,30 @@ export const myProjects = [
         actionText: "Launch Speakeasy",
         actionUrl: "https://speakeasy.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/speakeasy",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
+        id: "filenamer",
+        title: "FileNamer",
+        subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files.",
+        seoTitle: "FileNamer - File Renaming Utility",
+        seoDescription: "FileNamer is an intuitive, browser-based utility for defining and applying consistent file naming templates. Drag and drop files, configure presets, preview results in real time, and export renamed files instantly.",
+        tags: [
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal" },
+            { label: "Product", color: "gray" }
+        ],
+        featured: false,
+        size: "medium",
+        image: "content/filenamer/images/app-screenshot-with-icon.avif",
+        imageWidth: 1200,
+        imageHeight: 900,
+        imageWidths: [360, 640, 1200],
+        ogImage: "content/filenamer/images/og.jpg",
+        actionText: "Launch FileNamer",
+        actionUrl: "https://filenamer.ryanmarch.me",
+        sourceUrl: "https://github.com/RyanMarch/fileNamer",
         hasExtendedContent: true,
         showLaunchButton: true
     },
