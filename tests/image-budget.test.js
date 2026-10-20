@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { myProjects } from '../assets/js/project-data.js';
-import { imageVariantPath } from '../assets/js/image-utils.js';
+import { myProjects } from '../public/assets/js/project-data.js';
+import { imageVariantPath } from '../public/assets/js/image-utils.js';
 import baseline from './image-budget-baseline.json';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 const MAX_AVIF_WIDTH = 2400;
 
 // AVIF is an ISO-BMFF container; the `ispe` box holds the pixel size, so no image library is needed.

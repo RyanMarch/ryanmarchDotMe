@@ -3,12 +3,13 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
-import { myProjects } from '../assets/js/project-data.js';
+import { myProjects } from '../public/assets/js/project-data.js';
 import { buildSitemapXml } from './sitemap-generator.js';
 import { syncIndexHtml } from './lcp-preload.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.resolve(path.dirname(__filename), '..');
+const siteDir = path.join(__dirname, 'public');
 
 const filesToMinify = [
   { path: 'assets/css/style.css', loader: 'css' },
@@ -46,7 +47,7 @@ function rewriteAssetRefs(content, webPath, hash) {
 
 async function generateSitemap() {
   console.log('🗺️ Generating sitemap.xml...');
-  const sitemapPath = path.resolve(__dirname, 'sitemap.xml');
+  const sitemapPath = path.resolve(siteDir, 'sitemap.xml');
   const today = new Date().toISOString().split('T')[0];
   const xml = buildSitemapXml(myProjects, today);
   fs.writeFileSync(sitemapPath, xml, 'utf8');
@@ -63,12 +64,12 @@ async function versionAssets() {
   const hashes = {};
 
   for (const file of leafFiles) {
-    const absolutePath = path.resolve(__dirname, file.path);
+    const absolutePath = path.resolve(siteDir, file.path);
     const content = fs.readFileSync(absolutePath, 'utf8');
     hashes[file.path] = hashContent(content);
   }
 
-  const projectsPath = path.resolve(__dirname, 'assets/js/projects.js');
+  const projectsPath = path.resolve(siteDir, 'assets/js/projects.js');
   let projectsContent = fs.readFileSync(projectsPath, 'utf8');
   for (const [filePath, hash] of Object.entries(hashes)) {
     if (filePath.startsWith('assets/js/')) {
@@ -81,7 +82,7 @@ async function versionAssets() {
   hashes['assets/js/projects.js'] = hashContent(projectsContent);
 
   for (const htmlFile of htmlFilesToVersion) {
-    const absolutePath = path.resolve(__dirname, htmlFile);
+    const absolutePath = path.resolve(siteDir, htmlFile);
     if (!fs.existsSync(absolutePath)) continue;
     let html = fs.readFileSync(absolutePath, 'utf8');
     for (const [filePath, hash] of Object.entries(hashes)) {
@@ -112,7 +113,7 @@ async function build() {
   console.log('🏁 Starting in-place assets minification...');
 
   for (const file of filesToMinify) {
-    const absolutePath = path.resolve(__dirname, file.path);
+    const absolutePath = path.resolve(siteDir, file.path);
     if (!fs.existsSync(absolutePath)) {
       console.warn(`⚠️ File not found: ${file.path}`);
       continue;

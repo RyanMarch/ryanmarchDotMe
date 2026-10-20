@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+# Keep the GitHub language bar about the site's code, not the writeups or archived looks
+public/content/** linguist-documentation
+themes/** linguist-documentation
+
+# Binary assets
+*.avif binary
+*.webp binary
+*.jpg binary
+*.png binary
+*.woff2 binary
+*.mp3 binary

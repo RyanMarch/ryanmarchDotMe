@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { initClearTechBrochure } from '../assets/js/brochure.js';
+import { initClearTechBrochure } from '../public/assets/js/brochure.js';
 
 describe('Brochure Tabs Switcher Behavior', () => {
     let container;

@@ -1,6 +1,6 @@
-import { myProjects } from './assets/js/project-data.js';
-import { buildImageSrcset } from './assets/js/image-utils.js';
-import redirects from './redirects.json';
+import { myProjects } from './public/assets/js/project-data.js';
+import { buildImageSrcset } from './public/assets/js/image-utils.js';
+import redirects from './config/redirects.json';
 
 /**
  * Cloudflare Worker for Ryan March | Product & Technology
@@ -270,12 +270,15 @@ export default {
                     return new Response('Forbidden path', { status: 403 });
                 }
 
+                // Admin paths are site-relative; in the repo they live under public/ (redirects in config/)
+                const repoPath = filePath === 'redirects.json' ? 'config/redirects.json' : `public/${filePath}`;
+
                 const githubRepo = env.GITHUB_REPO;
                 const githubUserAgent = `${githubRepo.split('/').pop()}-Cloudflare-Worker`;
 
                 if (request.method === 'GET') {
                     // Fetch file from GitHub with ref branch parameter
-                    const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${filePath}?ref=${branch}`;
+                    const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${repoPath}?ref=${branch}`;
                     const ghRes = await fetch(githubApiUrl, {
                         headers: {
                             'Authorization': `token ${env.GITHUB_PAT}`,
@@ -299,7 +302,7 @@ export default {
                 } else if (request.method === 'POST') {
                     // Commit file to GitHub
                     const body = await request.json();
-                    const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${filePath}`;
+                    const githubApiUrl = `https://api.github.com/repos/${githubRepo}/contents/${repoPath}`;
                     const ghRes = await fetch(githubApiUrl, {
                         method: 'PUT',
                         headers: {

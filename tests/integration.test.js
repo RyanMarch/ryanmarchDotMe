@@ -69,7 +69,7 @@ describe('RyanMarchDotMe Full Page Integration Tests', () => {
         vi.spyOn(window.history, 'replaceState');
 
         // Read index.html contents
-        const indexPath = path.resolve(__dirname, '../index.html');
+        const indexPath = path.resolve(__dirname, '../public/index.html');
         htmlContent = fs.readFileSync(indexPath, 'utf8');
 
         // Extract body element content
@@ -81,7 +81,7 @@ describe('RyanMarchDotMe Full Page Integration Tests', () => {
         global.fetch = vi.fn().mockImplementation((url) => {
             const cleanUrl = url.split('?')[0]; // strip version/cache query parameters
             const relativePath = cleanUrl.replace(/^\//, ''); // remove leading slash
-            const absolutePath = path.resolve(__dirname, '../', relativePath, 'index.html');
+            const absolutePath = path.resolve(__dirname, '../public', relativePath, 'index.html');
 
             if (fs.existsSync(absolutePath)) {
                 const fileData = fs.readFileSync(absolutePath, 'utf8');
@@ -99,7 +99,7 @@ describe('RyanMarchDotMe Full Page Integration Tests', () => {
 
         // Dynamically import projects.js to trigger DOMContentLoaded event binding
         // Clean cache to allow re-importing in each test case
-        const modulePath = '../assets/js/projects.js';
+        const modulePath = '../public/assets/js/projects.js';
         await import(`${modulePath}?t=${Date.now()}`);
 
         // Fire DOMContentLoaded to trigger projects.js initialization

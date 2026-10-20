@@ -6,7 +6,7 @@ import {
     openDiagramLightbox,
     closeLightbox,
     setupContentClicks
-} from '../assets/js/lightbox.js';
+} from '../public/assets/js/lightbox.js';
 
 describe('Lightbox Overlay Behavior', () => {
     let container;
