@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { myProjects } from '../assets/js/project-data.js';
+import { myProjects } from '../public/assets/js/project-data.js';
 import { findLcpProject, syncLcpPreload } from '../scripts/lcp-preload.js';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 
 describe('Homepage LCP preload', () => {
     it('index.html preloads the image of the first grid card (run `npm run sync-lcp` to fix)', () => {

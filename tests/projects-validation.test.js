@@ -3,11 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
-import { myProjects } from '../assets/js/project-data.js';
+import { myProjects } from '../public/assets/js/project-data.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const projectRoot = path.resolve(__dirname, '../');
+const projectRoot = path.resolve(__dirname, '../public');
+const repoRoot = path.resolve(__dirname, '..');
 
 describe('Project Case Studies Validation', () => {
     it('should validate every project in project-data.js has consistent properties and assets', () => {
@@ -118,13 +119,13 @@ describe('Project Case Studies Validation', () => {
             'scripts/build.js',
             'package.json',
             'worker.js',
-            'assets/js/project-data.js',
-            'assets/js/projects.js',
+            'public/assets/js/project-data.js',
+            'public/assets/js/projects.js',
             'tests/sitemap.test.js'
         ];
 
         criticalFiles.forEach(file => {
-            const filePath = path.join(projectRoot, file);
+            const filePath = path.join(repoRoot, file);
             expect(fs.existsSync(filePath), `Critical file "${file}" should exist on disk`).toBe(true);
         });
 
@@ -158,7 +159,7 @@ describe('Project Case Studies Validation', () => {
 
     it('should not contain any debug console.log or console.debug statements in any client-facing or worker JavaScript files', () => {
         const jsFiles = [
-            path.join(projectRoot, 'worker.js')
+            path.join(repoRoot, 'worker.js')
         ];
 
         const assetsJsDir = path.join(projectRoot, 'assets/js');

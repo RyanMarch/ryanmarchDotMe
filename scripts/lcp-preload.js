@@ -4,9 +4,9 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { buildImageSrcset } from '../assets/js/image-utils.js';
+import { buildImageSrcset } from '../public/assets/js/image-utils.js';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 
 // projects.js appends cards in array order and diverts "Archive" projects to a separate grid,
 // so the first card in the main grid is the first non-archived project.
@@ -42,7 +42,7 @@ export function syncIndexHtml(projects, indexPath = path.join(root, 'index.html'
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-    const { myProjects } = await import('../assets/js/project-data.js');
+    const { myProjects } = await import('../public/assets/js/project-data.js');
     const changed = syncIndexHtml(myProjects);
     console.log(changed ? '✅ Updated index.html LCP preload' : '✅ index.html LCP preload already up to date');
 }

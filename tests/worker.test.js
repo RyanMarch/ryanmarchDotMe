@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import worker from '../worker.js';
-import { myProjects } from '../assets/js/project-data.js';
+import { myProjects } from '../public/assets/js/project-data.js';
 
 // Mock HTMLRewriter since JSDOM/Node do not have it natively
 class MockHTMLRewriter {

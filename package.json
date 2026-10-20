@@ -2,6 +2,14 @@
   "name": "ryanmarchdotme",
   "version": "1.0.0",
   "private": true,
+  "description": "Personal portfolio site for Ryan March, served from Cloudflare Workers.",
+  "author": "Ryan March",
+  "license": "UNLICENSED",
+  "homepage": "https://ryanmarch.me",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RyanMarch/ryanmarchDotMe.git"
+  },
   "type": "module",
   "scripts": {
     "dev": "python3 dev/serve.py",
