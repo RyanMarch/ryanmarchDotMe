@@ -9,14 +9,14 @@
 
    This sheet is a layer on top of style.css: it is enabled together with
    it (see theme.js) and applies under :root[data-look="ember"]. The
-   "resume" look reuses this structure and re-skins it in style-resume.css,
-   so both looks load this sheet.
+   "resume" and "hybrid" looks reuse this structure and re-skin it in
+   style-resume.css / style-hybrid.css, so all three looks load this sheet.
    Dark is the site's default theme; light is :root[data-theme="light"].
    ===================================================================== */
 
-:root:is([data-look="ember"], [data-look="resume"]) {
+:root:is([data-look="ember"], [data-look="resume"], [data-look="hybrid"]) {
     /* Ember tokens (dark) */
-    --ember-bg: #1a1613;
+    --ember-bg: #0e0f11;
     --ember-ink: #ece6df;
     --ember-ink-soft: #cbc3ba;
     --ember-ink-mute: #9a9088;
@@ -91,7 +91,7 @@
 
 /* ---------- Home: masthead ---------------------------------------- */
 
-:root:is([data-look="ember"], [data-look="resume"]) {
+:root:is([data-look="ember"], [data-look="resume"], [data-look="hybrid"]) {
 
     .glimmer-card {
         background: transparent;
@@ -163,10 +163,18 @@
         color: var(--ember-ink-soft);
     }
 
+    /* Top-align the monogram with the name so it spans the name + role line;
+       centering it on the whole block looks low because the name is heavy */
+    @media (min-width: 701px) {
+        .bio-avatar {
+            align-self: flex-start;
+        }
+    }
+
     @media (min-width: 701px) {
         .bio-profile {
             padding-left: calc(72px + 1.75rem);
-            padding-right: max(0px, calc(100% - 62ch - 72px - 1.75rem));
+            padding-right: max(0px, calc(100% - 69ch - 72px - 1.75rem));
         }
     }
 
@@ -505,7 +513,7 @@
     }
 
     /* Drop cap on the opening paragraph */
-    .project-detail-content > p:not(.project-subtitle, .project-description):not(p:not(.project-subtitle, .project-description) ~ p)::first-letter {
+    .project-detail-content>p:not(.project-subtitle, .project-description):not(p:not(.project-subtitle, .project-description) ~ p)::first-letter {
         float: left;
         font-size: 3.6em;
         font-weight: 800;
@@ -670,6 +678,10 @@
     }
 
     @media (max-width: 700px) {
+        .project-btn {
+            min-height: 44px;
+        }
+
         .top-row .profile-btn {
             padding: 0.7rem 0.5rem;
         }

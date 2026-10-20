@@ -42,8 +42,6 @@
     <meta name="description"
         content="Personal website and portfolio of Ryan March, a Product Manager and Creative Technologist. Explore interactive case studies, design tools, and web applications.">
     <link rel="preload" href="/assets/css/style.css?v=4" as="style" fetchpriority="high">
-    <link rel="preload" href="/assets/fonts/dmsans-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-    <link rel="preload" href="/assets/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" id="lcp-preload" href="/content/spindex/images/multi-device-shot-no-title.avif" as="image" imagesrcset="/content/spindex/images/multi-device-shot-no-title-360.avif 360w, /content/spindex/images/multi-device-shot-no-title.avif 691w" imagesizes="(max-width: 1050px) 186px, 332px" fetchpriority="high">
     <link rel="modulepreload" href="/assets/js/projects.js?v=4">
     <link rel="modulepreload" href="/assets/js/project-data.js?v=2">
@@ -57,32 +55,7 @@
     <link rel="modulepreload" href="/assets/js/lightbox.js?v=1">
     <link rel="modulepreload" href="/assets/js/brochure.js?v=1">
     <meta name="color-scheme" content="light dark">
-    <link rel="stylesheet" id="look-new-css" href="/assets/css/style.css?v=4">
-    <link rel="stylesheet" id="look-classic-css" href="/assets/css/style-classic.css" media="not all">
-    <link rel="stylesheet" id="look-ember-css" href="/assets/css/style-ember.css" media="not all">
-    <link rel="stylesheet" id="look-resume-css" href="/assets/css/style-resume.css" media="not all">
-    <script>
-        // Look initialization: the current design is the default. "classic" restores
-        // the previous one; "ember" and "resume" are restyles layered on top of the
-        // current one. ?look=classic / ember / resume / new switch it from a URL.
-        (function () {
-            try {
-                const q = new URLSearchParams(location.search).get('look');
-                if (q === 'classic' || q === 'ember' || q === 'resume') localStorage.setItem('look', q);
-                else if (q === 'new') localStorage.removeItem('look');
-                const look = localStorage.getItem('look');
-                if (look === 'classic') {
-                    document.documentElement.setAttribute('data-look', 'classic');
-                    document.getElementById('look-new-css').media = 'not all';
-                    document.getElementById('look-classic-css').media = 'all';
-                } else if (look === 'ember' || look === 'resume') {
-                    document.documentElement.setAttribute('data-look', look);
-                    document.getElementById('look-ember-css').media = 'all';
-                    if (look === 'resume') document.getElementById('look-resume-css').media = 'all';
-                }
-            } catch (e) { /* storage unavailable: keep the default look */ }
-        })();
-    </script>
+    <link rel="stylesheet" href="/assets/css/style.css?v=4">
     <link rel="me" href="https://mastodon.social/@ryanmarch">
 
     <!-- Open Graph tags for iMessage previews -->
@@ -119,8 +92,6 @@
 
 <body>
     <div class="background-container" aria-hidden="true">
-        <div class="orb orb-1"></div>
-        <div class="orb orb-2"></div>
     </div>
 
 
@@ -151,21 +122,13 @@
                 </svg>
                 <span id="theme-status" class="theme-status" aria-live="polite"></span>
             </button>
-            <button id="look-toggle" class="theme-toggle look-toggle" aria-label="Switch to classic look">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round">
-                    <path d="M12 3l9 5-9 5-9-5 9-5z"></path>
-                    <path d="M3 13l9 5 9-5"></path>
-                </svg>
-                <span id="look-status" class="theme-status" aria-live="polite"></span>
-            </button>
             </div>
         </div>
     </header>
 
     <main>
         <div class="top-row">
-            <div class="glimmer-card bio-module">
+            <div class="card bio-module">
                 <div class="bio-avatar" aria-hidden="true">RM</div>
                 <div class="bio-info">
                     <div class="bio-title-group">
@@ -178,7 +141,7 @@
                     complex behavioral data and operational workflows into simple, human-centered tools.
                     Passionate about documentation and thoughtful design.</p>
                 <nav class="profile-links">
-                    <a href="https://www.linkedin.com/in/ryanmarch/" class="glimmer-card profile-btn" target="_blank"
+                    <a href="https://www.linkedin.com/in/ryanmarch/" class="card profile-btn" target="_blank"
                         rel="noopener noreferrer" aria-label="LinkedIn (opens in a new tab)">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -186,7 +149,7 @@
                         </svg>
                         <span>LinkedIn</span>
                     </a>
-                    <a href="https://github.com/RyanMarch" class="glimmer-card profile-btn" target="_blank"
+                    <a href="https://github.com/RyanMarch" class="card profile-btn" target="_blank"
                         rel="noopener noreferrer" aria-label="GitHub (opens in a new tab)">
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -202,7 +165,7 @@
 
         <!-- Filter Bar -->
         <div class="filter-container">
-            <div class="filter-bar glimmer-card">
+            <div class="filter-bar card">
                 <div class="filter-header">
                     <svg class="filter-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -288,38 +251,6 @@
                 observer.observe(topRow);
             }
         })();
-
-        // Glimmering border effect - only on desktop, and only in the classic look
-        if (window.matchMedia("(min-width: 951px)").matches) {
-            let mouseX = 0;
-            let mouseY = 0;
-
-            const updateGlimmers = () => {
-                if (document.documentElement.dataset.look !== 'classic') return;
-                const cards = Array.from(document.querySelectorAll('.glimmer-card'));
-                // Batch reads
-                const cardRects = cards.map(card => ({
-                    card,
-                    rect: card.getBoundingClientRect()
-                }));
-                // Batch writes
-                requestAnimationFrame(() => {
-                    cardRects.forEach(({ card, rect }) => {
-                        card.style.setProperty('--mouse-x', `${mouseX - rect.left}px`);
-                        card.style.setProperty('--mouse-y', `${mouseY - rect.top}px`);
-                    });
-                });
-            };
-
-            document.addEventListener('mousemove', (e) => {
-                if (document.documentElement.dataset.look !== 'classic') return;
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                updateGlimmers();
-            });
-
-            document.addEventListener('scroll', updateGlimmers, { capture: true, passive: true });
-        }
     </script>
     <!-- Cloudflare Web Analytics (Self-Hosted for Cache Optimization) -->
     <script defer src="/assets/js/beacon.min.js"

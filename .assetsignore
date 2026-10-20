@@ -13,6 +13,7 @@ dev/
 scripts/
 tests/
 config/
+themes/
 
 # Exclude repo/tooling metadata that has no reason to be publicly fetchable
 package.json

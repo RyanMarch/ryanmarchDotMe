@@ -231,7 +231,7 @@ export const myProjects = [
         tags: [
             { label: "Analytics", color: "purple" },
             { label: "Marketing", color: "orange" },
-            { label: "Professional", color: "blue" }
+            { label: "Professional", color: "gray" }
         ],
         featured: false,
         size: "large",
@@ -256,7 +256,7 @@ export const myProjects = [
             { label: "Analytics", color: "purple" },
             { label: "Non-Profit", color: "teal" },
             { label: "Marketing", color: "orange" },
-            { label: "Professional", color: "blue", priority: "low" },
+            { label: "Professional", color: "gray", priority: "low" },
             { label: "Website", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -279,7 +279,7 @@ export const myProjects = [
         seoTitle: "RentPress - Apartment Property Marketing Platform",
         seoDescription: "A powerful property management and real estate integration tool for WordPress. Sync floor plans, pricing, and availability in real time.",
         tags: [
-            { label: "Professional", color: "blue" },
+            { label: "Professional", color: "gray" },
             { label: "Platform", color: "purple" },
             { label: "Real Estate", color: "teal", priority: "low" }
         ],
@@ -303,7 +303,7 @@ export const myProjects = [
         seoTitle: "RentPress Local - Map & Listing Management",
         seoDescription: "Automate local business listing updates, map configurations, and property location directories for real estate websites.",
         tags: [
-            { label: "Professional", color: "blue" },
+            { label: "Professional", color: "gray" },
             { label: "Real Estate", color: "teal", priority: "low" },
             { label: "Product", color: "gray" }
         ],
@@ -326,7 +326,7 @@ export const myProjects = [
         seoTitle: "RentPress Lead Sync - Real Estate Form Integration",
         seoDescription: "Integrate with property management APIs to capture, validate, and route leasing leads automatically without writing custom code.",
         tags: [
-            { label: "Professional", color: "blue" },
+            { label: "Professional", color: "gray" },
             { label: "Real Estate", color: "teal", priority: "low" },
             { label: "Product", color: "gray" }
         ],
@@ -350,7 +350,7 @@ export const myProjects = [
         seoTitle: "RentPress Data Hub - Real Estate API Engine",
         seoDescription: "A centralized data engine and API integration hub designed to sync real estate listings and floor plans with marketing platforms.",
         tags: [
-            { label: "Professional", color: "blue" },
+            { label: "Professional", color: "gray" },
             { label: "Real Estate", color: "teal", priority: "low" },
             { label: "Backend", color: "purple" }
         ],
@@ -370,7 +370,7 @@ export const myProjects = [
         seoTitle: "RentPress Amenities Manager - WordPress Add-On",
         seoDescription: "An intuitive dashboard plugin to filter, and cusotmize apartment amenities and community features on multifamily websites.",
         tags: [
-            { label: "Professional", color: "blue" },
+            { label: "Professional", color: "gray" },
             { label: "Real Estate", color: "teal", priority: "low" },
             { label: "Add-On", color: "gray" }
         ],
@@ -394,7 +394,7 @@ export const myProjects = [
         seoTitle: "RentPress Email - Automated Real Estate Marketing",
         seoDescription: "Automate email marketing and CRM workflows for multifamily properties using real estate data and prospect behavior.",
         tags: [
-            { label: "Professional", color: "blue" },
+            { label: "Professional", color: "gray" },
             { label: "Real Estate", color: "teal", priority: "low" },
             { label: "Product", color: "gray" }
         ],
@@ -438,10 +438,10 @@ export const myProjects = [
         seoTitle: "Night Riots Interview - WXCU Radio Broadcast",
         seoDescription: "An exclusive on-tour interview production and broadcast featuring the indie rock band Night Riots on WXCU Radio.",
         tags: [
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Interview", color: "cyan" },
             { label: "Radio", color: "purple" },
-            { label: "Podcast", color: "gold", priority: "low" },
+            { label: "Podcast", color: "gray", priority: "low" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -464,7 +464,7 @@ export const myProjects = [
         seoDescription: "A comprehensive case study on web design, custom audio streaming player integration, and digital branding for a collegiate radio station.",
         tags: [
             { label: "Web Development", color: "green" },
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Branding", color: "purple", priority: "low" },
             { label: "Marketing", color: "orange" },
             { label: "Archive", color: "gray", priority: "low" }
@@ -488,7 +488,7 @@ export const myProjects = [
         seoTitle: "Breaking Winter - Original Music Composition",
         seoDescription: "Listen to Breaking Winter, an original atmospheric musical composition featuring ambient soundscapes and orchestration.",
         tags: [
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Composition", color: "purple" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
@@ -535,7 +535,7 @@ export const myProjects = [
         seoDescription: "A satirical vehicle review short film showcasing comedic pacing, creative video production, and sound design.",
         tags: [
             { label: "Video Production", color: "rose" },
-            { label: "Comedy", color: "gold" },
+            { label: "Comedy", color: "gray" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -579,8 +579,8 @@ export const myProjects = [
         seoTitle: "Taylor Swift Analysis Hour - Podcast Segment",
         seoDescription: "A podcast segment focusing on pop music songwriting structure, production design, and music marketing strategies.",
         tags: [
-            { label: "Audio Production", color: "blue" },
-            { label: "Podcast", color: "gold" },
+            { label: "Audio Production", color: "gray" },
+            { label: "Podcast", color: "gray" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -602,7 +602,7 @@ export const myProjects = [
         seoTitle: "Sbut - 'Feel Right' - Music Production",
         seoDescription: "A recording project covering Mark Ronson & Mystikal's track, highlighting multitrack mixing and production.",
         tags: [
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
         featured: false,
@@ -623,7 +623,7 @@ export const myProjects = [
         seoTitle: "Music Festival Radio Spot - Audio Sweeper",
         seoDescription: "A high-impact promotional radio sweeper and audio spot designed for marketing an extremely loud music festival.",
         tags: [
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Marketing", color: "orange" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
@@ -669,7 +669,7 @@ export const myProjects = [
         seoTitle: "Chris Jamison Covers - Studio Audio Production",
         seoDescription: "A collection of studio cover recordings, vocal production sessions, and high-fidelity multitrack music mixes.",
         tags: [
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Mixing", color: "indigo" },
             { label: "Archive", color: "gray", priority: "low" }
         ],
@@ -691,7 +691,7 @@ export const myProjects = [
         seoTitle: "Fess's Mess - 'Paris' - Audio Mixing",
         seoDescription: "Audio recording, track alignment, and production for a studio cover of Grace Potter's popular song.",
         tags: [
-            { label: "Audio Production", color: "blue" },
+            { label: "Audio Production", color: "gray" },
             { label: "Mixing", color: "indigo" },
             { label: "Archive", color: "gray", priority: "low" }
         ],

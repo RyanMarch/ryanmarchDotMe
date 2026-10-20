@@ -1,0 +1,136 @@
+/* =====================================================================
+   "Hybrid" look — Ember's editorial structure and system-font type, with
+   the résumé's thick teal rule and short teal bars, on a neutral charcoal
+   (dark) or clean white (light) ground.
+
+   Loaded after style-ember.css, which supplies the layout (unboxed cards,
+   even three-column grid, numbered contents list, flagged section heads).
+   Only applies under :root[data-look="hybrid"].
+   ===================================================================== */
+
+/* ---------- Palette: dark (the site default) ------------------------- */
+
+:root[data-look="hybrid"] {
+    --ember-bg: #0e0f11;
+    --ember-ink: #edeeef;
+    --ember-ink-soft: #c9cdd0;
+    --ember-ink-mute: #9aa0a5;
+    --ember-accent: #8fc9d0;
+    --ember-on-accent: #0f1f23;
+    --ember-surface: #37393c;
+    --ember-frame: rgba(255, 255, 255, 0.055);
+    --ember-rule: rgba(255, 255, 255, 0.12);
+    --ember-rule-strong: rgba(255, 255, 255, 0.28);
+    --ember-quote-bg: rgba(143, 201, 208, 0.08);
+    --resume-bar: #8fc9d0;
+    --accent-rgb: 143, 201, 208;
+    --header-bg: rgba(28, 30, 33, 0.92);
+    --grain-opacity: 0.1;
+}
+
+/* ---------- Palette: light ------------------------------------------- */
+
+:root[data-look="hybrid"][data-theme="light"] {
+    --ember-bg: #fcfcfb;
+    --ember-ink: #1d2023;
+    --ember-ink-soft: #3f454a;
+    --ember-ink-mute: #6c7378;
+    --ember-accent: #2c7a85;
+    --ember-on-accent: #ffffff;
+    --ember-surface: #f1f4f5;
+    --ember-frame: rgba(44, 122, 133, 0.06);
+    --ember-rule: rgba(29, 32, 35, 0.12);
+    --ember-rule-strong: rgba(29, 32, 35, 0.25);
+    --ember-quote-bg: rgba(160, 203, 208, 0.2);
+    --resume-bar: #a0cbd0;
+    --accent-rgb: 44, 122, 133;
+    --header-bg: rgba(252, 252, 251, 0.92);
+    --grain-opacity: 0.1;
+}
+
+:root[data-look="hybrid"] {
+
+    /* Thick teal rule closes the masthead */
+    .top-row {
+        border-bottom: 5px solid var(--resume-bar);
+        padding-bottom: 1.5rem;
+    }
+
+    /* Short teal bar under each card title */
+    .destination-content h2::after {
+        content: "";
+        display: block;
+        width: 2.4rem;
+        height: 4px;
+        margin-top: 0.6rem;
+        background: var(--resume-bar);
+    }
+
+    .filter-pill.active {
+        border-bottom-color: var(--resume-bar);
+    }
+
+    /* Writeups: the title block ends on the same thick rule */
+    .project-detail-content .project-description {
+        border-bottom: 5px solid var(--resume-bar);
+    }
+
+    .project-detail-content h4.section-divider::before {
+        background: var(--resume-bar);
+    }
+
+    /* No drop cap */
+    .project-detail-content>p:not(.project-subtitle, .project-description):not(p:not(.project-subtitle, .project-description) ~ p)::first-letter {
+        float: none;
+        font-size: inherit;
+        font-weight: inherit;
+        line-height: inherit;
+        padding: 0;
+        color: inherit;
+    }
+
+    .project-detail-content p {
+        font-size: 1.08rem;
+    }
+
+    /* ---------- Type scale and hierarchy ---------------------------------
+
+       Home masthead: name 58 > profile 17.6 > tagline 16 > role label 13.6,
+       with breathing room between the name block's lines. */
+    .bio-info .subtitle {
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .bio-info p:not(.subtitle) {
+        margin-top: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .bio-profile {
+        font-size: clamp(1rem, 1.6vw, 1.1rem);
+    }
+
+    /* Micro labels: small caps-style labels get a 12px floor */
+    .tag,
+    .tag-list .tag,
+    .filter-header {
+        font-size: 0.75rem;
+    }
+
+    .filter-pill,
+    .filter-pill[data-category] {
+        font-size: 0.8125rem;
+    }
+
+    /* Writeup body: a ~70-character measure, left edge aligned with the
+       800px title block instead of centered on its own */
+    .project-detail-content p:not(.project-subtitle):not(.project-description),
+    .project-detail-content ul,
+    .project-detail-content ol {
+        max-width: 38rem;
+        margin-left: max(0px, calc((100% - 800px) / 2));
+        margin-right: auto;
+        font-size: 1.08rem;
+    }
+}

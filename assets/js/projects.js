@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const project = normalizeProject(rawProject);
             const card = document.createElement('div');
             const sizeClass = project.size ? `size-${project.size}` : 'size-medium';
-            card.className = `glimmer-card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
+            card.className = `card destination-card ${sizeClass} ${project.featured ? 'featured' : ''}`;
 
             // Map matching categories to this card for fast filtering
             const matchingCats = filterCategories
