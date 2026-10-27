@@ -1,6 +1,5 @@
 <h2 class="project-title">TripDeck</h2>
-<p class="project-subtitle">Privacy-first travel itinerary dashboard with maps, weather, and smart packing
-    lists.</p>
+<p class="project-subtitle">Privacy-first travel itinerary dashboard with maps, weather, and smart packing lists.</p>
 <p class="project-description">Product Manager & Creator • 2026</p>
 
 <h4 id="the-product" class="section-divider"><span>The Product</span></h4>
@@ -46,8 +45,19 @@
     </div>
 </div>
 
-<p>TripDeck also has multiple themes each with custom typography, color tokens, and
-    custom-styled Mapbox map layers (with more themes in active development):</p>
+<p>
+    TripDeck turns flight confirmations, train bookings, hotel reservations, and loose travel ideas into an organized,
+    interactive timeline. As plans take shape, TripDeck automatically pulls in flight routes, train stations, venue
+    details, and weather forecasts, keeping everything accessible even when traveling offline.
+</p>
+
+<p>
+    Built with a privacy-first architecture, itineraries are encrypted directly on device with zero-knowledge sharing
+    and passkey sign-in. Travelers can build trips immediately without an account, switch between online and offline
+    modes, and collaborate with travel companions in real time.
+</p>
+
+<p>TripDeck includes multiple curated themes with custom typography, color schemes, and styled Mapbox map layers:</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
@@ -105,21 +115,20 @@
 <ul class="help-list">
     <li><strong>Dual-Pane Workspace:</strong> Edit itineraries using a visual drag-and-drop outline or a markdown
         editor. Changes in either pane update the other instantly.</li>
-    <li><strong>Multi-Modal Transit & Flights:</strong> Type a flight number or search train and transit lines to fetch
-        routes, departure coordinates, and scheduled times.</li>
-    <li><strong>Find & Add Places:</strong> Search for hotels, restaurants, and sights to add. TripDeck fills in
-        addresses, map pins, and local details.</li>
-    <li><strong>Scheduled Events & Flexible Ideas:</strong> Organize time-bound events alongside unscheduled activities
-        and a dedicated ideas scratchpad for things you might want to do later.</li>
-    <li><strong>Interactive Route Map:</strong> Automatically plots your full journey including air routes, transit
-        connections, accommodations, and activities.</li>
-    <li><strong>Multi-Currency Spend & Budget Tracking:</strong> Set a trip spending limit, tag expenses directly on
-        items (such as <code>Cost: 120 EUR</code>), convert foreign currencies to your preferred home currency
-        automatically,
-        record general expenses, and export CSV reports.</li>
-    <li><strong>Printable Pocket Guide:</strong> Generate a paper-friendly agenda ready for print or PDF export.
-        Customize it by including packing lists, and QR codes linking directly back to your live digital
-        itinerary.</li>
+    <li><strong>Multi-Modal Transit & Flights:</strong> Enter a flight number or search train and transit lines to fetch
+        routes, departure coordinates, terminal gates, and scheduled times.</li>
+    <li><strong>Notes Board & Link Previews:</strong> Stage ideas, hotel options, and restaurant recommendations before
+        scheduling. Web links generate rich previews, and saved notes can be searched and promoted onto the timeline
+        with a click.</li>
+    <li><strong>Interactive Route Map:</strong> Plots complete journeys including flight arcs, transit connections,
+        accommodations, and scheduled stops with direct navigation links.</li>
+    <li><strong>Multi-Currency Spend & Budget Tracking:</strong> Set spending limits, tag item costs, convert foreign
+        currencies using European Central Bank rates, log general expenses, and export CSV reports.</li>
+    <li><strong>Printable Pocket Guide:</strong> Generate a paper-friendly agenda or PDF with custom toggles for packing
+        lists, confirmation codes, and a QR code linking to the live digital itinerary.</li>
+    <li><strong>Traveler Utilities:</strong> Batch-shift entire trip dates forward or backward at once, monitor tight
+        connection warnings between transit legs, use keyboard shortcuts for frequent actions, and save research via a
+        browser bookmarklet.</li>
 </ul>
 
 <div class="project-gallery">
@@ -141,9 +150,8 @@
     </div>
 </div>
 
-<p><strong>Smart Packing Engine:</strong> Add packing items directly to your trip plan, save lists as reusable
-    templates, and generate packing suggestions based on your destinations, trip length, and forecasted
-    weather:</p>
+<p><strong>Smart Packing Engine:</strong> Manage packing items directly within the trip plan, save lists as reusable
+    templates, and generate checklist suggestions based on destination forecasts and trip duration:</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
@@ -164,14 +172,6 @@
     </div>
     <div class="gallery-item">
         <picture>
-            <source type="image/avif" srcset="content/tripdeck/images/tripdeck-packing-load-list.avif">
-            <img src="content/tripdeck/images/tripdeck-packing-load-list.png"
-                alt="TripDeck loading a packing list template" class="aspect-auto" loading="lazy">
-        </picture>
-        <div class="gallery-caption">Reusable list templates</div>
-    </div>
-    <div class="gallery-item">
-        <picture>
             <source type="image/avif" srcset="content/tripdeck/images/tripdeck-packing-my-lists.avif">
             <img src="content/tripdeck/images/tripdeck-packing-my-lists.png" alt="TripDeck saved packing lists overview"
                 class="aspect-auto" loading="lazy">
@@ -180,8 +180,8 @@
     </div>
 </div>
 
-<p><strong>Live HUD & Environmental Intelligence:</strong> A live countdown ticker shows you your next move, paired with
-    destination weather forecasts and hourly conditions:</p>
+<p><strong>Live HUD & Weather Forecasts:</strong> A countdown ticker tracks upcoming departures,
+    paired with destination hourly and 7-day forecasts, wind, UV index, air quality metrics, and radar:</p>
 
 <div class="project-gallery">
     <div class="gallery-item">
@@ -202,17 +202,17 @@
     </div>
 </div>
 
-<p><strong>Zero-Knowledge Sharing & Security:</strong> Share travel plans without exposing personal privacy or
-    exposing sensitive confirmation codes:</p>
+<p><strong>Private Sharing & Security:</strong> Share travel plans without compromising sensitive travel details:</p>
 
 <div class="col-split col-60-40">
     <div class="col-content">
         <ul class="help-list">
-            <li><strong>Easy Passkey Sign-in:</strong> Sign in with Face ID, Touch ID, or Windows Hello across
-                your devices without passwords or PINs.</li>
-            <li><strong>View-Only Sharing:</strong> Generates secure links that redact sensitive
-                confirmation numbers, gate codes, and private notes.</li>
-            <li><strong>Collaborator Access:</strong> Invite co-planners with full editing capabilities.</li>
+            <li><strong>Easy Passkey Access:</strong> Access TripDeck from any device with Face ID, Touch ID, or
+                Windows Hello without passwords.</li>
+            <li><strong>View-Only Sharing:</strong> Share trip links without personal details like confirmation codes,
+                door keys, and private notes.</li>
+            <li><strong>Collaborator Access:</strong> Invite co-planners with full editing capabilities and multi-user
+                merge conflict resolution.</li>
             <li><strong>Instant Revocation:</strong> Rotating or generating a new share link revokes previous links
                 immediately.</li>
         </ul>
@@ -231,49 +231,6 @@
     </div>
 </div>
 
-<p><strong>Mobile-First Offline Experience:</strong> Travel happens on the move. Timelines, station coordinates, gate
-    details, and map routes remain fully responsive and 100% accessible offline without cellular service:</p>
-
-<div class="project-gallery">
-    <div class="gallery-item">
-        <picture>
-            <source type="image/avif" srcset="content/tripdeck/images/theme-roadtrip-mobile.avif">
-            <img src="content/tripdeck/images/theme-roadtrip-mobile.png" alt="TripDeck Mobile Roadtrip Theme"
-                class="aspect-auto" loading="lazy">
-        </picture>
-        <div class="gallery-caption">Roadtrip</div>
-    </div>
-    <div class="gallery-item">
-        <picture>
-            <source type="image/avif" srcset="content/tripdeck/images/theme-vintage-journal-mobile.avif">
-            <img src="content/tripdeck/images/theme-vintage-journal-mobile.png" alt="TripDeck Mobile Vintage Theme"
-                class="aspect-auto" loading="lazy">
-        </picture>
-        <div class="gallery-caption">Vintage Journal</div>
-    </div>
-</div>
-
-<p>Explore the <a href="https://tripdeck.ryanmarch.me/docs/">TripDeck Help Center</a> for more guides.</p>
-
-<h4 id="admin-operations" class="section-divider"><span>Admin Dashboard</span></h4>
-
-<p>
-    To monitor usage, performance, and app behavior, TripDeck includes an internal administrative dashboard built to
-    monitor platform health, manage runtime controls, and inspect real-time service operations:
-</p>
-
-<ul class="help-list">
-    <li><strong>Provider Usage & Cost Tracking:</strong> Live tracking monitors usage across maps, flight
-        status services, weather endpoints, and geocoding APIs. Detailed request counts, success rates, and calculated
-        monthly costs prevent unexpected billing spikes.</li>
-    <li><strong>Runtime Feature Controls:</strong> System controls let administrators toggle feature flags, display
-        global announcement banners, or toggle maintenance mode.</li>
-    <li><strong>Role-Based Access:</strong> Administrative access is permission-based and requires passkey verification.
-    </li>
-    <li><strong>Help Center Telemetry:</strong> Anonymous search monitoring logs queries and
-        zero-result questions, providing a direct signal on where documentation needs improvement.</li>
-</ul>
-
 <h4 id="product-management" class="section-divider"><span>Product Strategy</span></h4>
 
 <p>As the product manager and creator of TripDeck, I led the product from initial discovery through user experience
@@ -284,10 +241,9 @@
         unstructured documents despite dozens of travel apps. Identified that people want structured
         travel plans that work both before and during their trip.</li>
     <li><strong>Frictionless Onboarding Strategy:</strong> Designed an instantly-accessible "Guest Mode" where users can
-        immediately
-        start typing or pasting plans without hitting a registration wall. Trip data saves directly to the browser,
-        proving value before asking for user commitment.</li>
-    <li><strong>Multi-Modal Transit Expansion:</strong> Extended itinerary intelligence beyond basic restaurants and
+        immediately start typing or pasting plans without hitting a registration wall. Trip data saves directly to the
+        browser, proving value before asking for user commitment.</li>
+    <li><strong>Multi-Modal Transit Expansion:</strong> Extended itinerary intelligence beyond restaurants and
         activities to include flights, trains, subways, and public transit systems, creating a unified door-to-door
         journey planner.
     </li>
@@ -301,24 +257,23 @@
 
 <h4 id="technical-specifications" class="section-divider"><span>Technical Architecture</span></h4>
 
-<p>TripDeck is built as a modern web application designed for speed, portability, and zero-maintenance reliability:</p>
+<p>TripDeck is built as a lightweight web application designed for speed, portability, and zero-maintenance reliability:
+</p>
 
 <ul class="help-list">
     <li><strong>Vanilla Web Stack:</strong> Built with native ES6 JavaScript modules, modern CSS custom properties, and
-        semantic HTML operating without heavy frontend frameworks or compilation build steps.</li>
-    <li><strong>Serverless Cloudflare Backend:</strong> Deployed on Cloudflare with lightweight functions
-        that securely proxy real-time flight data, Transitland rail systems, Google Places, Mapbox GL maps, and
-        Open-Meteo weather APIs.</li>
-    <li><strong>Resilient Flight & Venue Data Caching:</strong> A dual-provider flight engine uses AeroDataBox with
-        automatic AirLabs fallback, backed by timetable caching so flight routes and schedules
-        stay accessible. Venue data is enriched with open hours, phone numbers,
-        and links, all cached to keep external API costs low.</li>
-    <li><strong>Client-Side End-to-End Encryption:</strong> Itinerary data is encrypted on the client device before
-        syncing to cloud storage (Cloudflare D1), deriving master keys directly from WebAuthn passkeys so that server
-        infrastructure never sees raw travel details.</li>
-    <li><strong>Offline Caching & Multi-User Merge:</strong> A Service Worker pre-caches application assets for
-        offline travel. When planning with others, a three-way merge engine handles simultaneous edits cleanly across
-        devices without overwriting collaborator updates.</li>
+        semantic HTML without heavy frontend frameworks or bundling steps.</li>
+    <li><strong>Serverless Cloudflare Backend:</strong> Deployed on Cloudflare with edge functions that securely
+        retrieve real-time flight data, Transitland rail schedules, Google Places information, Mapbox GL maps, and
+        Open-Meteo
+        weather endpoints, complete with quota and cost tracking.</li>
+    <li><strong>Resilient Flight & Venue Caching:</strong> A dual-provider flight engine uses AeroDataBox with automatic
+        AirLabs fallback, backed by timetable caching in Cloudflare D1 so schedules remain accessible during network
+        drops.</li>
+    <li><strong>Client-Side End-to-End Encryption:</strong> Itinerary data is encrypted on device before syncing,
+        deriving master keys from WebAuthn passkeys so server infrastructure never sees plaintext travel plans.</li>
+    <li><strong>Offline Caching & Multi-User Merge:</strong> A Service Worker pre-caches application assets for offline
+        travel. A three-way merge engine handles simultaneous edits cleanly across collaborator devices.</li>
 </ul>
 
 <h4 id="learnings-and-takeaways" class="section-divider"><span>Learnings & Takeaways</span></h4>
@@ -327,6 +282,7 @@
     defaults perform better than complex settings menus, and privacy can coexist with a collaborative user experience.
 </p>
 
-<p>By treating travel planning as an iterative process supporting everything from flight confirmations to
-    half-formed itinerary ideas, TripDeck provides travelers with clarity when planning at home and confidence while on
-    the move.</p>
+<p>By treating travel planning as an iterative process supporting everything from flight confirmations to early research
+    notes, TripDeck provides clarity when planning at home and confidence while on the move.</p>
+
+<p>Explore the <a href="https://tripdeck.ryanmarch.me/docs/">TripDeck Help Center</a> for detailed user guides.</p>
