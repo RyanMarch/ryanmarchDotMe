@@ -1,0 +1,329 @@
+<h2 class="project-title">Ledger</h2>
+<p class="project-subtitle">Private, local-first personal finance tracker for one person or a couple.</p>
+<p class="project-description">Product Manager & Creator • 2026</p>
+
+<h4 id="the-product" class="section-divider"><span>The Product</span></h4>
+
+<div class="project-gallery">
+    <div class="gallery-item is-hero">
+        <picture>
+            <source type="image/avif"
+                srcset="content/ledger/images/together-640.avif 640w, content/ledger/images/together.avif 1200w"
+                sizes="(max-width: 800px) 100vw, 800px">
+            <img src="content/ledger/images/together.png"
+                alt="Ledger Together view combining net worth, cash flow, and shared accounts for two partners"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">The Together view combines both partners' shared finances, counting joint accounts
+            once.</div>
+    </div>
+</div>
+
+<p>
+    Ledger is a personal finance tracker that pulls in balances and transactions automatically from connected accounts
+    and lets two people see their finances together. It brings net worth, monthly spending pace, budgets, investments,
+    and retirement planning into one place without ads, upsells, or recurring subscription fees.
+</p>
+
+<p>
+    Your financial records stay in a private encrypted vault inside your browser rather than sitting in a company
+    database. Every account, transaction, and backup is locked on your device before it is saved, so no third party can
+    read your balances or sell your spending habits.
+</p>
+
+<p>
+    Ledger is self-hosted for personal use, so I also put together a <a href="https://ledgerdemo.ryanmarch.me/"
+        target="_blank" rel="noopener noreferrer">live demo</a> loaded with sample accounts for two partners. You can
+    click through the Personal, Partner, and Together views right in your browser.
+</p>
+
+<h4 id="how-it-started" class="section-divider"><span>How It Started</span></h4>
+
+<p>
+    For years I relied on Mint and Personal Capital to keep track of spending, balances, and investments. Both were
+    eventually bought and steadily grew worse: Mint shut down, and Personal Capital turned into a wall of wealth
+    management pitches and cluttered upsells.
+</p>
+
+<p>
+    When I started looking for a replacement, I ran into a second problem. I wanted to see our net worth, investments,
+    and spending together in one place without having to maintain a shared spreadsheet by hand. None of the apps I tried
+    handled household finances cleanly for two people.
+</p>
+
+<p>
+    I built Ledger so two people can see their shared picture without merging every single account, and to do it better
+    than any spreadsheet ever could by pulling in real-time transactions and balances from both people automatically.
+</p>
+
+<h4 id="seeing-finances-together" class="section-divider"><span>Seeing Finances Together</span></h4>
+
+<p>
+    Two people can share a single Ledger setup without giving up separate accounts or private logins. Each person keeps
+    their own locked vault with their own passphrase, then decides what to share with their partner on an
+    account-by-account basis:
+</p>
+
+<ul class="help-list">
+    <li><strong>Per-Account Visibility:</strong> Mark any account as <em>Private</em> (only you can see it),
+        <em>Shared</em> (visible to your partner), or <em>Joint</em> (linked by both of you).
+    </li>
+    <li><strong>No Double-Counting:</strong> When both partners connect the same joint checking account, house, or
+        mortgage, Ledger pairs them so balances and transactions count once in the combined view.</li>
+    <li><strong>Synced Categories:</strong> When either person categorizes a transaction on a joint account by hand, the
+        change carries over to the other partner's view. Automatic bank rules never overwrite a manual choice.</li>
+    <li><strong>Switch Views Anywhere:</strong> Toggle between Personal, Partner, and Together at the top of the page to
+        view combined net worth, shared monthly budgets, upcoming bills, and a joint retirement plan.</li>
+</ul>
+
+<h4 id="key-features" class="section-divider"><span>Key Features</span></h4>
+
+<p>
+    <strong>Full Financial Picture &amp; Automatic Bank Sync:</strong> Track cash savings, brokerage accounts,
+    retirement funds, real estate, credit cards, and loans together in one place. Connect accounts directly through
+    Plaid for automatic daily updates, import CSVs or historical spreadsheets, or keep manual accounts current with
+    configurable scheduled update reminders. Ledger also pulls automated home value estimates and other properties or
+    assets so you can see your total net worth.
+</p>
+
+<div class="project-gallery">
+    <div class="gallery-item is-hero">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/overview.avif">
+            <img src="content/ledger/images/overview.png"
+                alt="Ledger personal net worth overview showing historical chart, spending pace, and cash flow"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">The main Overview page tracks net worth over time alongside monthly spending pace
+            and cash flow.</div>
+    </div>
+</div>
+
+<hr class="project-detail-footer-divider">
+
+<p>
+    <strong>Spending Pace, Budgets &amp; Searchable Register:</strong> Ledger plots your day-by-day cumulative spending
+    against the previous month so you know right away if you are running ahead or behind your usual rhythm. Set flexible
+    category budgets, use custom count rules so a bill clearing on the 31st always counts toward the next month, track
+    upcoming card due dates, and check the blended effective APY earned across your interest-bearing accounts.
+</p>
+
+<p>
+    The Transactions tab includes weekly spending breakdowns and instant search with the <code>/</code> shortcut,
+    supporting filters like <code>&gt;100</code>, <code>cat:groceries</code>, and <code>OR</code> queries.
+</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/budget.avif">
+            <img src="content/ledger/images/budget.png"
+                alt="Ledger monthly budget summary and cumulative spending pace chart" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Monthly budget overview and day-by-day spending pace compared against last month.
+        </div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/transactions.avif">
+            <img src="content/ledger/images/transactions.png"
+                alt="Ledger transactions page with weekly category spending bars and filterable register"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Weekly spending by category above a searchable transaction register.</div>
+    </div>
+</div>
+
+<hr class="project-detail-footer-divider">
+
+<p>
+    <strong>Investment Tracking:</strong> View holdings, cost basis, gains since purchase, and asset allocation across
+    brokerage and retirement accounts. Target allocation checks flag which asset classes are underweight so you know
+    where to direct new contributions. Investment buys and dividend reinvestments stay isolated from your everyday
+    register so they never skew monthly spending totals.
+</p>
+
+<div class="project-gallery">
+    <div class="gallery-item is-hero">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/investments.avif">
+            <img src="content/ledger/images/investments.png"
+                alt="Ledger investments page showing asset allocation targets and individual fund holdings"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Holdings, cost basis, gains since purchase, and target allocation alerts across
+            investment accounts.</div>
+    </div>
+</div>
+
+<hr class="project-detail-footer-divider">
+
+<p>
+    <strong>Retirement Planner:</strong> Run a month-by-month simulation across cash, taxable brokerage, Roth IRA, and
+    401(k) accounts to find the earliest date you can stop contributing while keeping your money lasting through your
+    target end age. The planner pulls real spending from your transactions, models bridge years before retirement
+    accounts unlock, factors in Social Security ages and mortgage payoff dates, and includes a 401(k) paycheck
+    front-loading calculator. And of course it works for one person or two people together.
+</p>
+
+<div class="project-gallery">
+    <div class="gallery-item is-hero">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/planner.avif">
+            <img src="content/ledger/images/planner.png"
+                alt="Ledger retirement planner timeline showing stop-contributing date, phase breakdown, and projected balances"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">The Retirement Planner estimates the earliest date you can stop contributing and
+            charts the bridge years until retirement accounts open.</div>
+    </div>
+</div>
+
+<hr class="project-detail-footer-divider">
+
+<p>
+    <strong>Phone Companion &amp; Weekly Digest:</strong> Check balances and spending on the go with a lightweight
+    mobile view that saves right to your phone's Home Screen. On macOS, you can also add Ledger to your Dock from
+    Safari so it opens in its own standalone window.
+</p>
+
+<div class="col-split col-60-40">
+    <div class="col-content">
+        <ul class="help-list">
+            <li><strong>Quick Biometric Unlock:</strong> Open the mobile view with Touch ID, Face ID, or a passphrase.
+            </li>
+            <li><strong>Essential Snapshot:</strong> Shows net worth history, current balances, monthly budget progress,
+                recent transactions, and retirement projections without keeping bank tokens on your phone.</li>
+            <li><strong>Bank Alerts:</strong> Optional push notifications alert you if a bank connection disconnects and
+                needs attention, without ever putting dollar amounts in a notification.</li>
+            <li><strong>Configurable Weekly Digest:</strong> A scheduled weekly summary covering 7-day net worth
+                changes, top account movers, spending pace, and manual accounts due for an update.</li>
+        </ul>
+    </div>
+    <div class="col-media">
+        <figure class="media-figure">
+            <div class="media-container has-image" style="margin: 0; border: none;" title="Ledger Mobile Phone View">
+                <picture>
+                    <source type="image/avif" srcset="content/ledger/images/mobile.avif">
+                    <img src="content/ledger/images/mobile.png"
+                        alt="Ledger mobile view showing net worth chart and cash accounts" loading="lazy">
+                </picture>
+            </div>
+            <figcaption class="media-caption">Mobile view for quick balance checks and weekly digests.</figcaption>
+        </figure>
+    </div>
+</div>
+
+<hr class="project-detail-footer-divider">
+
+<p>
+    <strong>Five Different Themes (Each with Light &amp; Dark):</strong> Evolv is the default theme shown above, along
+    with four other built-in themes: Foundation, Color Pop, Metal, and Workstation. Every theme supports both light and
+    dark modes and follows your system preference automatically unless you override it.
+</p>
+
+<div class="project-gallery">
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/theme-evolv-dark.avif">
+            <img src="content/ledger/images/theme-evolv-dark.png" alt="Ledger Evolv Dark theme" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Evolv (Dark)</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/theme-foundation.avif">
+            <img src="content/ledger/images/theme-foundation.png" alt="Ledger Foundation theme" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Foundation</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/theme-colorpop.avif">
+            <img src="content/ledger/images/theme-colorpop.png" alt="Ledger Color Pop theme" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Color Pop</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/theme-colorpop-dark.avif">
+            <img src="content/ledger/images/theme-colorpop-dark.png" alt="Ledger Color Pop Dark theme"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Color Pop (Dark)</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/theme-metal.avif">
+            <img src="content/ledger/images/theme-metal.png" alt="Ledger Metal theme" class="aspect-auto"
+                loading="lazy">
+        </picture>
+        <div class="gallery-caption">Metal</div>
+    </div>
+    <div class="gallery-item">
+        <picture>
+            <source type="image/avif" srcset="content/ledger/images/theme-workstation-dark.avif">
+            <img src="content/ledger/images/theme-workstation-dark.png" alt="Ledger Workstation Dark theme"
+                class="aspect-auto" loading="lazy">
+        </picture>
+        <div class="gallery-caption">Workstation (Dark)</div>
+    </div>
+</div>
+
+<h4 id="product-decisions" class="section-divider"><span>Product Decisions</span></h4>
+
+<p>
+    Most couples don't fit an all-or-nothing approach to money. Some accounts are joint, some are shared so both people
+    can see the full picture, and some stay individual. Designing Ledger around per-account sharing and paired joint
+    accounts reflects how households actually work day to day.
+</p>
+
+<p>
+    On the spending side, I chose to focus on monthly pace instead of strict envelope budgeting. Comparing where your
+    spending sits today against the same point last month tells you quickly if a month is running hot, without making
+    you categorize every coffee on the spot.
+</p>
+
+<p>
+    Small details matter when you look at your finances every week. Everyday transactions show cents while long-term
+    retirement projections round to whole dollars. In Together mode, if a partner hasn't shared their spending or
+    retirement age, the planner flags what's missing instead of quietly printing an overly optimistic date.
+</p>
+
+<p>
+    Unlike some of my other projects, there is no separate help center site for Ledger. Both the user guide and full
+    manual are built right into the app under Settings &gt; About, so everything stays in one place.
+</p>
+
+<h4 id="technical-details" class="section-divider"><span>Technical Details</span></h4>
+
+<p>
+    A quick look at how Ledger is built:
+</p>
+
+<ul class="help-list">
+    <li><strong>Vanilla Web Stack:</strong> Built with plain HTML, modern CSS custom properties, and native ES modules
+        with no frontend framework or build step. Core financial calculations (accounting, budgets, mortgage
+        amortization, retirement simulation, and partner merging) live in pure, unit-tested modules separated from the
+        UI.</li>
+    <li><strong>Client-Side Encryption:</strong> Vault data, bank access tokens, balances, and transaction history are
+        encrypted in the browser via WebCrypto (PBKDF2 and AES-GCM) before being written to IndexedDB. Biometric unlock
+        uses WebAuthn PRF so Touch ID and Face ID can unlock the local vault without storing plaintext keys.</li>
+    <li><strong>Self-Hosted on Cloudflare:</strong> While your primary vault lives in your browser, a small set of
+        Cloudflare Pages Functions handles Plaid syncing and stores encrypted blobs in Workers KV for partner sharing,
+        mobile snapshots, and optional encrypted backups. The server never sees plaintext financial data. Cloudflare
+        Access gates sign-in for both users, and a nightly cron Worker refreshes balances and sends disconnect alerts
+        and weekly digests.</li>
+    <li><strong>Demo Site:</strong> Because the real app sits behind private access controls, <a
+            href="https://ledgerdemo.ryanmarch.me/" target="_blank" rel="noopener noreferrer">I also launched a demo
+            site</a> pre-loaded with sample data for two partners to show off the feature set.</li>
+</ul>
+
+<p>
+    The repository is private while I maintain Ledger for personal use, though I'm happy to share it if you're
+    interested in self-hosting a copy. Feel free to reach out if you'd like to take a look.
+</p>

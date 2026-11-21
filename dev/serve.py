@@ -1,4 +1,5 @@
 import http.server
+import re
 import socketserver
 import urllib.parse
 import os
@@ -252,8 +253,8 @@ class SPA_RequestHandler(http.server.SimpleHTTPRequestHandler):
                 with open(file_to_serve, 'r', encoding='utf-8', errors='ignore') as f:
                     html_content = f.read()
                 
-                # Replace ?v=1 with dynamic dev version to bypass browser module loader cache
-                html_content = html_content.replace('?v=1', f'?v={dev_version}')
+                # Replace ?v=<n> with dynamic dev version to bypass browser module loader cache
+                html_content = re.sub(r'\?v=\d+', f'?v={dev_version}', html_content)
                 
                 # Inject live reload script before </body>
                 lr_script = """
@@ -307,7 +308,7 @@ class SPA_RequestHandler(http.server.SimpleHTTPRequestHandler):
             if ctype in ('application/javascript', 'text/javascript') or file_to_serve.endswith('.js'):
                 with open(file_to_serve, 'r', encoding='utf-8', errors='ignore') as f:
                     js_content = f.read()
-                js_content = js_content.replace('?v=1', f'?v={dev_version}')
+                js_content = re.sub(r'\?v=\d+', f'?v={dev_version}', js_content)
                 content = js_content.encode('utf-8')
             else:
                 with open(file_to_serve, 'rb') as f:
