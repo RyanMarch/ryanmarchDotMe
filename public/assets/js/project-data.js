@@ -1,5 +1,27 @@
 export const myProjects = [
     {
+        id: "ledger",
+        title: "Ledger",
+        subtitle: "Private, local-first personal finance tracker for one person or a couple.",
+        seoTitle: "Ledger - Private Personal Finance Tracker for Individuals & Couples",
+        seoDescription: "Track net worth, spending pace, budgets, investments, and retirement plans in an encrypted browser vault. Pull in bank transactions automatically and view household finances together.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Finance", color: "purple" },
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
+        ],
+        image: "content/ledger/images/card.avif",
+        imageWidth: 1200,
+        imageHeight: 779,
+        imageWidths: [360, 640, 1200],
+        ogImage: "content/ledger/images/og.jpg",
+        actionText: "Try Live Demo",
+        actionUrl: "https://ledgerdemo.ryanmarch.me/",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "spindex",
         title: "Spindex",
         subtitle: "Browse your record collection like flipping through a real crate.",
@@ -8,15 +30,15 @@ export const myProjects = [
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Music", color: "purple" },
-            { label: "Project", color: "gray" },
+            { label: "Product", color: "purple" },
             { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
         size: "large",
-        image: "content/spindex/images/multi-device-shot-no-title.avif",
-        imageWidth: 691,
-        imageHeight: 667,
-        imageWidths: [360, 691],
+        image: "content/spindex/images/card.avif",
+        imageWidth: 780,
+        imageHeight: 651,
+        imageWidths: [360, 640, 780],
         ogImage: "content/spindex/images/og.jpg",
         actionText: "Launch Spindex",
         actionUrl: "https://spindex.ryanmarch.me",
@@ -33,14 +55,14 @@ export const myProjects = [
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Travel", color: "purple" },
-            { label: "Project", color: "gray" },
+            { label: "Product", color: "purple" },
             { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
         size: "large",
-        image: "content/tripdeck/images/tripdeck-app-timeline-map.avif",
+        image: "content/tripdeck/images/card.avif",
         imageWidth: 1200,
-        imageHeight: 845,
+        imageHeight: 790,
         imageWidths: [360, 640, 1200],
         ogImage: "content/tripdeck/images/og.jpg",
         actionText: "Launch TripDeck",
@@ -57,7 +79,7 @@ export const myProjects = [
         seoDescription: "Browse hundreds of curated cocktail recipes with interactive glassware visuals, track your home bar inventory, and find out what you can mix right now. No accounts, paywalls, or ads required.",
         tags: [
             { label: "Web App", color: "teal" },
-            { label: "Project", color: "gray" },
+            { label: "Product", color: "gray" },
             { label: "Drinks", color: "gray" }
         ],
         featured: false,
@@ -104,9 +126,9 @@ export const myProjects = [
         seoTitle: "QR Maker - Custom QR Code Generator & Designer",
         seoDescription: "A lightweight browser-based utility to design and generate custom styled QR codes offline.",
         tags: [
-            { label: "Recently Updated", color: "gold" },
+            // { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },
-            { label: "Project", color: "gray" },
+            { label: "Product", color: "gray" },
             { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
@@ -132,14 +154,15 @@ export const myProjects = [
         tags: [
             // { label: "Recently Updated", color: "gold" },
             { label: "Design Tool", color: "purple" },
-            { label: "Project", color: "gray" },
+            { label: "Product", color: "gray" },
             { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
         size: "large",
-        image: "/content/icon-studio/images/icon-studio-framed.avif",
+        image: "content/icon-studio/images/card.avif",
         imageWidth: 800,
-        imageHeight: 514,
+        imageHeight: 520,
+        imageWidths: [360, 640, 800],
         ogImage: "content/icon-studio/images/og.jpg",
         imageClass: "destination-icon",
         actionText: "Launch Icon Studio",
@@ -157,7 +180,7 @@ export const myProjects = [
         tags: [
             { label: "Dev Tooling", color: "purple" },
             { label: "Project", color: "gray" },
-            { label: "Product", color: "gray" }
+            { label: "Documentation", color: "gray" }
         ],
         featured: false,
         size: "medium",
@@ -180,14 +203,15 @@ export const myProjects = [
         tags: [
             // { label: "Recently Updated", color: "gold" },
             { label: "Digital Signage", color: "purple" },
-            { label: "Project", color: "gray" },
+            { label: "Product", color: "gray" },
+            { label: "Themes", color: "gray" },
             { label: "Web App", color: "teal", priority: "low" }
         ],
         featured: true,
         size: "large",
-        image: "content/motion-poster/images/eventPoster.avif",
+        image: "content/motion-poster/images/card.avif",
         imageWidth: 1200,
-        imageHeight: 751,
+        imageHeight: 791,
         imageWidths: [360, 640, 1200],
         ogImage: "content/motion-poster/images/og.jpg",
         imageClass: "poster-preview-img",
