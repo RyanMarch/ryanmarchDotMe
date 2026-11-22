@@ -450,6 +450,7 @@ export default {
                 const assetResponse = await env.ASSETS.fetch(rewrittenRequest);
                 const newHeaders = new Headers(assetResponse.headers);
                 newHeaders.set('X-Robots-Tag', 'noindex, nofollow');
+                newHeaders.set('Cache-Control', 'no-store');
                 return new Response(assetResponse.body, {
                     status: assetResponse.status,
                     statusText: assetResponse.statusText,
