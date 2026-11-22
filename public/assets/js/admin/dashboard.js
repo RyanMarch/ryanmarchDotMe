@@ -12,9 +12,10 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const [overview, analytics] = await Promise.all([
+    const [overview, analytics, health] = await Promise.all([
         api(`/api/admin/overview?branch=${encodeURIComponent(branch)}`),
-        api('/api/admin/analytics?days=7')
+        api('/api/admin/analytics?days=7'),
+        api('/api/admin/health?scope=summary')
     ]);
 
     const parts = [];
@@ -37,6 +38,15 @@ export async function render(root) {
     const commitList = commits
         ? `<ul class="rows">${commits.map(c => `<li><span class="label"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}</span></span><span class="value">${esc(relativeTime(c.date))}</span></li>`).join('')}</ul>`
         : `<ul class="rows"><li class="empty">${esc(o?.commitsError ? `GitHub: ${o.commitsError}` : 'GitHub access is not configured for this environment.')}</li></ul>`;
+
+    const hc = health.ok ? health.body.counts : null;
+    const top = health.ok ? health.body.findings.filter(f => f.severity !== 'info').slice(0, 5) : [];
+    parts.push(`<section class="panel"><header><h2>Content health</h2><a href="#/health" class="meta">Full audit</a></header>
+        ${hc
+            ? `<p class="panel-body health-line">${hc.error ? `<strong>${hc.error} error${hc.error === 1 ? '' : 's'}</strong>` : 'No errors'}, ${hc.warning} warning${hc.warning === 1 ? '' : 's'}, ${hc.info} note${hc.info === 1 ? '' : 's'} <span class="muted">(quick check; the full audit also reads write-ups and images)</span></p>
+               ${top.length ? `<ul class="rows">${top.map(f => `<li><span class="label wrap"><span class="sev sev-${f.severity}">${f.severity === 'error' ? 'Error' : 'Warning'}</span> <strong>${esc(f.id)}</strong>: ${esc(f.message)}</span></li>`).join('')}</ul>` : ''}`
+            : `<p class="panel-body muted">${esc(apiProblem(health))}</p>`}
+    </section>`);
 
     parts.push(`<div class="cols">
         <section class="panel"><header><h2>Top pages</h2><a href="#/analytics" class="meta">All analytics</a></header>${a ? barRows(a.paths.slice(0, 6), i => pageLabel(i.label)) : '<ul class="rows"><li class="empty">No analytics data.</li></ul>'}</section>

@@ -228,7 +228,11 @@ export default {
             }
 
             // Analytics + dashboard endpoints (see admin-api.js)
-            const adminApiResponse = await handleAdminApi(request, env, url, cleanPath, { projects: myProjects });
+            const adminApiResponse = await handleAdminApi(request, env, url, cleanPath, {
+                projects: myProjects,
+                redirects,
+                assetFetch: (p, method = 'GET') => env.ASSETS.fetch(new Request(`${assetHost}${p}`, { method }))
+            });
             if (adminApiResponse) return adminApiResponse;
 
             // Handle API proxy for the admin editor (GitHub contents API)

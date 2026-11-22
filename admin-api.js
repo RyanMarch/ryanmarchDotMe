@@ -13,7 +13,15 @@
  *   CF_ANALYTICS_HOST             hostname to query (default ryanmarch.me)
  *   GITHUB_REPO, GITHUB_PAT       for /overview
  *   ADMIN_KV                      KV namespace, caches analytics responses
+ *
+ * /health audits the *deployed* site: the bundled project data and redirects,
+ * plus files read from the static-assets binding (a few subrequests per
+ * project, so the UI audits one project per call).
  */
+
+import {
+    auditProjectHtml, auditProjectMeta, auditRedirects, auditSitemap, sortFindings, summarize
+} from './public/assets/js/admin/audit.js';
 
 const JSON_HEADERS = {
     'Content-Type': 'application/json',
@@ -262,17 +270,80 @@ async function handleOverview(request, env, url, fetchImpl, projects) {
     return jsonResponse(out);
 }
 
+const ID_PATTERN = /^[a-z0-9_-]+$/i;
+
+async function assetExists(assetFetch, path) {
+    try {
+        const res = await assetFetch(`/${String(path).replace(/^\/+/, '').split(/[?#]/)[0]}`, 'HEAD');
+        return res.ok;
+    } catch {
+        return false;
+    }
+}
+
+async function handleHealth(request, env, url, fetchImpl, ctx) {
+    const { projects, redirects = [], assetFetch } = ctx;
+    const scope = url.searchParams.get('scope');
+    const projectId = url.searchParams.get('project');
+    const withMeta = list => list.flatMap(p => auditProjectMeta(p));
+
+    if (projectId) {
+        const project = ID_PATTERN.test(projectId) && projects.find(p => p.id === projectId);
+        if (!project) return jsonResponse({ error: 'not_found', message: `No project "${projectId}".` }, 404);
+        if (!assetFetch) return jsonResponse({ error: 'not_configured', message: 'Asset access unavailable.' }, 501);
+
+        const findings = auditProjectMeta(project);
+        for (const [key, check, label] of [['image', 'card-image', 'Card image'], ['ogImage', 'og-image', 'OG image']]) {
+            if (project[key] && !(await assetExists(assetFetch, project[key]))) {
+                findings.push({ severity: 'error', check, id: project.id, message: `${label} file is missing: ${project[key]}` });
+            }
+        }
+        if (project.hasExtendedContent) {
+            try {
+                const res = await assetFetch(`/content/${project.id}/`);
+                if (!res.ok) findings.push({ severity: 'error', check: 'writeup-missing', id: project.id, message: `Write-up not found at /content/${project.id}/ (${res.status}).` });
+                else findings.push(...auditProjectHtml(project, await res.text()));
+            } catch (err) {
+                findings.push({ severity: 'error', check: 'writeup-missing', id: project.id, message: `Could not read the write-up: ${err.message}` });
+            }
+        }
+        const sorted = sortFindings(findings);
+        return jsonResponse({ project: project.id, findings: sorted, counts: summarize(sorted) });
+    }
+
+    if (scope === 'site') {
+        const findings = auditRedirects(redirects, projects);
+        if (assetFetch) {
+            try {
+                const res = await assetFetch('/sitemap.xml');
+                if (res.ok) findings.push(...auditSitemap(await res.text(), projects));
+                else findings.push({ severity: 'error', check: 'sitemap-missing', id: 'sitemap.xml', message: `sitemap.xml could not be read (${res.status}).` });
+            } catch { /* leave sitemap unchecked */ }
+        }
+        const sorted = sortFindings(findings);
+        return jsonResponse({ findings: sorted, counts: summarize(sorted) });
+    }
+
+    // Default / scope=summary: everything that needs no file reads.
+    const findings = sortFindings([...withMeta(projects), ...auditRedirects(redirects, projects)]);
+    return jsonResponse({ findings, counts: summarize(findings), projects: projects.length });
+}
+
 /**
- * Returns a Response for /api/admin/{analytics,overview}, or null if the path
+ * Returns a Response for /api/admin/{analytics,overview,health}, or null if the path
  * isn't one of ours.
  */
-export async function handleAdminApi(request, env, url, cleanPath, { projects = [], fetchImpl = fetch } = {}) {
-    const route = { '/api/admin/analytics': handleAnalytics, '/api/admin/overview': handleOverview }[cleanPath];
+export async function handleAdminApi(request, env, url, cleanPath, { projects = [], redirects = [], assetFetch, fetchImpl = fetch } = {}) {
+    const route = {
+        '/api/admin/analytics': handleAnalytics,
+        '/api/admin/overview': handleOverview,
+        '/api/admin/health': handleHealth
+    }[cleanPath];
     if (!route) return null;
 
     if (!(await isAdminRequest(request, env, fetchImpl))) return new Response('Unauthorized', { status: 401 });
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
-    return route === handleOverview
-        ? route(request, env, url, fetchImpl, projects)
-        : route(request, env, url, fetchImpl);
+    if (route === handleOverview) return route(request, env, url, fetchImpl, projects);
+    if (route === handleHealth) return route(request, env, url, fetchImpl, { projects, redirects, assetFetch });
+    return route(request, env, url, fetchImpl);
 }
