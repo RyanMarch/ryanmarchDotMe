@@ -11,11 +11,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.resolve(path.dirname(__filename), '..');
 const siteDir = path.join(__dirname, 'public');
 
-const filesToMinify = [
+export const filesToMinify = [
   { path: 'assets/css/style.css', loader: 'css' },
   { path: 'assets/js/projects.js', loader: 'js' },
   { path: 'assets/js/theme.js', loader: 'js' },
   { path: 'assets/js/project-data.js', loader: 'js' },
+  { path: 'assets/js/admin-project-parser.js', loader: 'js' },
   { path: 'assets/js/image-utils.js', loader: 'js' },
   { path: 'assets/js/global-audio.js', loader: 'js' },
   { path: 'assets/js/audio-player.js', loader: 'js' },
@@ -40,7 +41,7 @@ function escapeRegex(str) {
 }
 
 // Swaps any existing ?v=... on href/src="<webPath>" for the current hash.
-function rewriteAssetRefs(content, webPath, hash) {
+export function rewriteAssetRefs(content, webPath, hash) {
   const pattern = new RegExp(`(["'])${escapeRegex(webPath)}(?:\\?v=[^"']*)?(["'])`, 'g');
   return content.replace(pattern, `$1${webPath}?v=${hash}$2`);
 }
@@ -87,6 +88,7 @@ async function versionAssets() {
     let html = fs.readFileSync(absolutePath, 'utf8');
     for (const [filePath, hash] of Object.entries(hashes)) {
       html = rewriteAssetRefs(html, '/' + filePath, hash);
+      html = rewriteAssetRefs(html, './' + filePath, hash);
     }
     fs.writeFileSync(absolutePath, html, 'utf8');
   }
@@ -138,4 +140,6 @@ async function build() {
   await versionAssets();
 }
 
-build();
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  build();
+}

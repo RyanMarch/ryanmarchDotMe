@@ -147,6 +147,7 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         const res = await worker.fetch(req, mockEnv);
         expect(res.status).toBe(200);
         expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+        expect(res.headers.get('Cache-Control')).toBe('no-store');
     });
 
     it('should route invalid paths to the custom 404 page', async () => {

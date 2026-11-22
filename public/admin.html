@@ -65,10 +65,25 @@
             justify-content: flex-start;
             padding: calc(1.5rem + env(safe-area-inset-top, 0px)) calc(1rem + env(safe-area-inset-right, 0px)) calc(1.5rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px));
             min-height: 100vh;
+            min-height: 100dvh;
             background: var(--bg-radial);
             color: var(--text-primary);
             font-family: var(--font-main);
             overflow-y: auto;
+        }
+
+        body.admin-body .card {
+            overflow: visible;
+            -webkit-transform: none;
+            transform: none;
+            -webkit-backface-visibility: visible;
+            backface-visibility: visible;
+        }
+
+        .admin-container main,
+        .pwa-standalone .admin-container main {
+            padding: 0;
+            margin-top: 0;
         }
 
         .admin-container {
@@ -395,46 +410,190 @@
             margin: 0 0 0.3rem 0.5rem;
         }
 
-        /* Custom Search Dropdown Styles */
-        .search-result-item {
-            padding: 0.75rem;
+        /* File Selector & Search List Styles */
+        .file-search-row {
+            display: flex;
+            align-items: stretch;
+            gap: 0.5rem;
+        }
+
+        .file-search-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        #file-search {
+            padding-right: 2.5rem;
+            font-size: 16px;
+        }
+
+        .file-search-clear {
+            position: absolute;
+            right: 0.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
             cursor: pointer;
-            border-bottom: 1px solid var(--card-border);
-            font-size: 0.95rem;
+        }
+
+        .file-search-clear:hover,
+        .file-search-clear:focus-visible {
             color: var(--text-primary);
+            background: var(--btn-hover-bg);
+            outline: none;
+        }
+
+        .file-list-toggle {
+            flex-shrink: 0;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            padding: 0.5rem 0.85rem;
+        }
+
+        .projects-sync-status {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            min-height: 1.1em;
+        }
+
+        .projects-sync-status.is-warning {
+            color: var(--admin-warning);
+        }
+
+        .file-search-results,
+        .tag-search-results {
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            background: var(--bg-color);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            margin-top: 0.4rem;
+        }
+
+        .file-search-results {
+            max-height: 320px;
+            max-height: min(45dvh, 320px);
+        }
+
+        .tag-search-results {
+            max-height: 220px;
+            max-height: min(35dvh, 220px);
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 0.7rem 0.75rem;
+            background: transparent;
+            border: 0;
+            border-bottom: 1px solid var(--card-border);
+            border-radius: 0;
+            font-size: 0.95rem;
+            font-weight: 400;
+            text-align: left;
+            color: var(--text-primary);
+            cursor: pointer;
             transition: background-color 0.2s ease;
         }
 
+        .search-result-item:last-child {
+            border-bottom: 0;
+        }
+
         .search-result-item:hover,
+        .search-result-item:focus-visible {
+            background-color: var(--btn-hover-bg);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .search-result-item:focus-visible {
+            box-shadow: inset 2px 0 0 var(--accent-color);
+        }
+
         .search-result-item.selected {
-            background-color: var(--btn-secondary-bg);
+            background-color: rgba(var(--accent-rgb), 0.12);
             color: var(--text-primary);
         }
 
+        .search-result-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding: 0.15rem 0.45rem;
+            border-radius: 999px;
+            color: var(--accent-color);
+            background: rgba(var(--accent-rgb), 0.14);
+            flex-shrink: 0;
+        }
+
+        .search-empty-state {
+            padding: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
         .search-result-group-title {
-            padding: 0.4rem 0.75rem;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            padding: 0.45rem 0.75rem;
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
             color: var(--tag-blue);
-            background: rgba(0, 0, 0, 0.15);
+            background: var(--surface);
+            border-bottom: 1px solid var(--card-border);
         }
 
-        /* Responsive adaptations */
-        @media (min-width: 768px) {
-            #admin-view {
-                padding: 0 !important;
+        @media (pointer: coarse) {
+            .search-result-item,
+            .file-search-clear,
+            .file-list-toggle,
+            #file-search,
+            #branch-select {
+                min-block-size: 44px;
+            }
+
+            .file-search-clear {
+                min-inline-size: 44px;
+                right: 0;
+            }
+
+            #file-search {
+                padding-right: 2.75rem;
             }
         }
 
         @media (max-width: 480px) {
             body.admin-body {
-                padding: 1rem 0;
+                padding: calc(0.75rem + env(safe-area-inset-top, 0px)) env(safe-area-inset-right, 0px) calc(1.5rem + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 0px);
             }
 
             header.admin-header {
-                padding-left: 1rem;
-                padding-right: 1rem;
+                padding: 0.5rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.25rem;
             }
 
             .card {
@@ -679,7 +838,7 @@
         <main id="admin-view" class="hidden" style="display: flex; flex-direction: column; gap: 1.5rem;">
 
             <!-- File Selector Card -->
-            <section class="card" style="z-index: 10;">
+            <section class="card file-selector-card" style="z-index: 10;">
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
                     <h2 style="margin: 0;">Select File to Edit</h2>
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -690,12 +849,18 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group" style="position: relative;">
-                    <input type="text" id="file-search" placeholder="Type to search/filter files..." autocomplete="off"
-                        autocapitalize="none" autocorrect="off" spellcheck="false" onfocus="showSearchResults()"
-                        oninput="filterSearchResults()">
-                    <div id="file-search-results" class="hidden"
-                        style="position: absolute; top: 100%; left: 0; right: 0; max-height: 250px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                <div class="form-group">
+                    <div class="file-search-row">
+                        <div class="file-search-input-wrap">
+                            <input type="text" id="file-search" placeholder="Filter files or projects..." autocomplete="off"
+                                autocapitalize="none" autocorrect="off" spellcheck="false" onfocus="showSearchResults()"
+                                oninput="filterSearchResults()">
+                            <button type="button" id="file-search-clear" class="file-search-clear hidden" aria-label="Clear filter">✕</button>
+                        </div>
+                        <button type="button" id="file-list-toggle" class="btn btn-secondary file-list-toggle" aria-expanded="true" aria-controls="file-search-results">Hide List</button>
+                    </div>
+                    <div id="projects-sync-status" class="projects-sync-status" aria-live="polite"></div>
+                    <div id="file-search-results" class="file-search-results" role="region" aria-label="Available files">
                         <!-- Filled dynamically -->
                     </div>
                 </div>
@@ -751,8 +916,7 @@
                         </div>
                         <input type="text" id="new-project-tag-search" placeholder="Type to search and add tags..."
                             autocomplete="off" onfocus="showTagSearchResults()" oninput="filterTagSearchResults()">
-                        <div id="new-project-tag-results" class="hidden"
-                            style="position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                        <div id="new-project-tag-results" class="tag-search-results hidden">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
@@ -979,8 +1143,7 @@
                         <input type="text" id="edit-project-tag-search" placeholder="Type to search and add tags..."
                             autocomplete="off" onfocus="showEditTagSearchResults()"
                             oninput="filterEditTagSearchResults()">
-                        <div id="edit-project-tag-results" class="hidden"
-                            style="position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-color); border: 1px solid var(--card-border); border-radius: 8px; z-index: 100; box-shadow: var(--shadow-lg); margin-top: 4px;">
+                        <div id="edit-project-tag-results" class="tag-search-results hidden">
                             <!-- Populated dynamically -->
                         </div>
                     </div>
@@ -1045,7 +1208,8 @@
 
     <!-- Script Block utilizing ES Modules to read site config dynamically -->
     <script type="module">
-        import { myProjects } from './assets/js/project-data.js';
+        import { myProjects } from '/assets/js/project-data.js';
+        import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
         window.myProjects = myProjects;
 
         // Detect local dev vs production (Cloudflare Access is not active on localhost)
@@ -1060,34 +1224,37 @@
                 branchSelect.value = savedBranch;
             }
 
-            const uploadProjectSelect = document.getElementById('upload-project');
-
-            // Build the global list of files for the search UI
-            window.searchFiles = [
-                { path: 'index.html', title: 'Homepage Wrapper', category: 'Global Files' },
-                { path: 'assets/js/project-data.js', title: 'Projects Database', category: 'Global Files' }
-            ];
-
-            // Populate selector lists
-            myProjects.forEach(project => {
-                // Add projects (only those defined as having extended HTML content)
-                if (project.hasExtendedContent) {
-                    window.searchFiles.push({
-                        path: `content/${project.id}/index.html`,
-                        title: project.title,
-                        category: 'Projects'
-                    });
-                }
-            });
-
-            // Populate upload project dropdown
-            populateUploadProjectDropdown();
-
-            // Initialize search results list
-            renderSearchResults(window.searchFiles);
-
-            // Populate dynamic tags in form
+            // Initialize bundled list immediately, then refresh from selected branch when authenticated
+            applyProjectsList(myProjects);
             populateFormTags();
+            setFileListOpen(true);
+
+            const fileListToggle = document.getElementById('file-list-toggle');
+            if (fileListToggle) {
+                fileListToggle.addEventListener('click', () => {
+                    const resultsDiv = document.getElementById('file-search-results');
+                    const isOpen = resultsDiv && !resultsDiv.classList.contains('hidden');
+                    setFileListOpen(!isOpen);
+                    if (!isOpen) {
+                        filterSearchResults();
+                    }
+                });
+            }
+
+            const fileSearchClear = document.getElementById('file-search-clear');
+            if (fileSearchClear) {
+                fileSearchClear.addEventListener('click', () => {
+                    const searchInput = document.getElementById('file-search');
+                    if (searchInput) {
+                        searchInput.value = '';
+                    }
+                    setFileListOpen(true);
+                    filterSearchResults();
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                });
+            }
 
             // Set up slug generation listeners
             const titleInput = document.getElementById('new-project-title');
@@ -1263,29 +1430,117 @@
                 document.getElementById('auth-view').classList.add('hidden');
                 document.getElementById('admin-view').classList.remove('hidden');
                 document.getElementById('logout-btn').classList.remove('hidden');
+                window.syncProjectsForBranch(savedBranch);
             }
         });
 
         window.newProjectSelectedTags = [];
         window.allAvailableTags = [];
 
-        // Helper to populate form tags
-        function populateFormTags() {
+        function updateAvailableTags(projects = window.myProjects || []) {
             const tagsMap = new Map();
-            myProjects.forEach(project => {
-                if (project.tags && Array.isArray(project.tags)) {
+            projects.forEach(project => {
+                if (project && Array.isArray(project.tags)) {
                     project.tags.forEach(tag => {
-                        if (tag.label) {
+                        if (tag && tag.label) {
                             tagsMap.set(tag.label, tag.color || 'gray');
                         }
                     });
                 }
             });
             window.allAvailableTags = Array.from(tagsMap.entries()).map(([label, color]) => ({ label, color }));
+        }
+        window.updateAvailableTags = updateAvailableTags;
+
+        // Helper to populate form tags
+        function populateFormTags() {
+            updateAvailableTags(window.myProjects);
             window.newProjectSelectedTags = [];
             renderSelectedTags();
         }
         window.populateFormTags = populateFormTags;
+
+        function setFileListOpen(isOpen) {
+            const resultsDiv = document.getElementById('file-search-results');
+            const toggleBtn = document.getElementById('file-list-toggle');
+            if (resultsDiv) {
+                resultsDiv.classList.toggle('hidden', !isOpen);
+            }
+            if (toggleBtn) {
+                toggleBtn.textContent = isOpen ? 'Hide List' : 'Browse Files';
+                toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+            }
+        }
+        window.setFileListOpen = setFileListOpen;
+
+        function applyProjectsList(projects) {
+            if (!Array.isArray(projects)) return;
+            window.myProjects = projects;
+
+            const nextFiles = [
+                { path: 'index.html', title: 'Homepage Wrapper', category: 'Global Files' },
+                { path: 'assets/js/project-data.js', title: 'Projects Database', category: 'Global Files' }
+            ];
+            projects.forEach(project => {
+                if (project && project.hasExtendedContent) {
+                    nextFiles.push({
+                        path: `content/${project.id}/index.html`,
+                        title: project.title,
+                        category: 'Projects'
+                    });
+                }
+            });
+            window.searchFiles = nextFiles;
+
+            if (window.populateUploadProjectDropdown) {
+                window.populateUploadProjectDropdown();
+            }
+            updateAvailableTags(projects);
+            if (window.filterSearchResults) {
+                window.filterSearchResults();
+            }
+        }
+        window.applyProjectsList = applyProjectsList;
+
+        let projectSyncSeq = 0;
+        window.syncProjectsForBranch = async function (branch = (window.getSelectedBranch ? window.getSelectedBranch() : 'main')) {
+            const seq = ++projectSyncSeq;
+            const statusEl = document.getElementById('projects-sync-status');
+            if (statusEl) {
+                statusEl.classList.remove('is-warning');
+                statusEl.textContent = `Syncing projects from ${branch}...`;
+            }
+
+            try {
+                const headers = window.getAuthHeaders ? window.getAuthHeaders() : {};
+                const res = await fetch(`/api/admin/file?path=assets/js/project-data.js&branch=${encodeURIComponent(branch)}`, {
+                    headers,
+                    cache: 'no-store'
+                });
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                const data = await res.json();
+                const decode = window.b64DecodeUnicode || ((str) => new TextDecoder().decode(Uint8Array.from(atob(str), c => c.charCodeAt(0))));
+                const source = decode((data.content || '').replace(/\s/g, ''));
+                const parsedProjects = parseProjectDataSource(source);
+
+                if (seq !== projectSyncSeq) return;
+
+                applyProjectsList(parsedProjects);
+                const projectCount = parsedProjects.filter(p => p && p.hasExtendedContent).length;
+                if (statusEl) {
+                    statusEl.classList.remove('is-warning');
+                    statusEl.textContent = `Synced ${projectCount} projects from ${branch}`;
+                }
+            } catch {
+                if (seq !== projectSyncSeq) return;
+                if (statusEl) {
+                    statusEl.classList.add('is-warning');
+                    statusEl.textContent = `Could not refresh from ${branch} (showing bundled list)`;
+                }
+            }
+        };
 
         // Render selected tags as badges/pills
         function renderSelectedTags() {
@@ -1336,73 +1591,89 @@
         }
         window.showTagSearchResults = showTagSearchResults;
 
-        // Filter available tags in dropdown list
-        function filterTagSearchResults() {
-            const queryInput = document.getElementById('new-project-tag-search');
-            const resultsDiv = document.getElementById('new-project-tag-results');
+        // Shared tag search dropdown renderer for create & edit forms
+        window.renderTagDropdown = function (queryInputId, resultsDivId, selectedTags, renderSelectedFn) {
+            const queryInput = document.getElementById(queryInputId);
+            const resultsDiv = document.getElementById(resultsDivId);
             if (!queryInput || !resultsDiv) return;
 
             const query = queryInput.value.toLowerCase();
-            resultsDiv.innerHTML = '';
-
-            // Exclude tags already selected
-            const filtered = window.allAvailableTags.filter(tag => {
-                const isSelected = window.newProjectSelectedTags.some(t => t.label === tag.label);
+            const filtered = (window.allAvailableTags || []).filter(tag => {
+                const isSelected = selectedTags.some(t => t.label === tag.label);
                 const matchesQuery = tag.label.toLowerCase().includes(query);
                 return !isSelected && matchesQuery;
             });
 
             if (filtered.length === 0) {
                 const item = document.createElement('div');
-                item.style.padding = '0.75rem';
-                item.style.color = 'var(--text-secondary)';
-                item.style.fontSize = '0.9rem';
+                item.className = 'search-empty-state';
                 item.textContent = 'No matching tags available';
-                resultsDiv.appendChild(item);
+                resultsDiv.replaceChildren(item);
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
             filtered.forEach(tag => {
-                const item = document.createElement('div');
+                const item = document.createElement('button');
+                item.type = 'button';
                 item.className = 'search-result-item';
                 item.textContent = tag.label;
                 item.onclick = () => {
-                    window.newProjectSelectedTags.push(tag);
+                    selectedTags.push(tag);
                     queryInput.value = '';
                     resultsDiv.classList.add('hidden');
-                    renderSelectedTags();
+                    renderSelectedFn();
                 };
-                resultsDiv.appendChild(item);
+                fragment.appendChild(item);
             });
+            resultsDiv.replaceChildren(fragment);
+        };
+
+        // Filter available tags in dropdown list
+        function filterTagSearchResults() {
+            window.renderTagDropdown('new-project-tag-search', 'new-project-tag-results', window.newProjectSelectedTags, renderSelectedTags);
         }
         window.filterTagSearchResults = filterTagSearchResults;
 
         // Attach search functions globally
         window.showSearchResults = function () {
-            const resultsDiv = document.getElementById('file-search-results');
-            resultsDiv.classList.remove('hidden');
+            setFileListOpen(true);
+            filterSearchResults();
         };
 
         window.filterSearchResults = function () {
-            const query = document.getElementById('file-search').value.toLowerCase();
-            const filtered = window.searchFiles.filter(file =>
-                file.title.toLowerCase().includes(query) ||
-                file.path.toLowerCase().includes(query)
-            );
+            const searchInput = document.getElementById('file-search');
+            const clearBtn = document.getElementById('file-search-clear');
+            const rawQuery = searchInput ? searchInput.value : '';
+            const query = rawQuery.trim().toLowerCase();
+
+            if (clearBtn) {
+                clearBtn.classList.toggle('hidden', rawQuery.length === 0);
+            }
+
+            const files = window.searchFiles || [];
+            const filtered = query
+                ? files.filter(file =>
+                    file.title.toLowerCase().includes(query) ||
+                    file.path.toLowerCase().includes(query)
+                )
+                : files;
+
+            if (query.length > 0) {
+                setFileListOpen(true);
+            }
             renderSearchResults(filtered);
         };
 
         window.renderSearchResults = function (files) {
             const resultsDiv = document.getElementById('file-search-results');
-            resultsDiv.innerHTML = '';
+            if (!resultsDiv) return;
 
-            if (files.length === 0) {
+            if (!files || files.length === 0) {
                 const emptyDiv = document.createElement('div');
-                emptyDiv.style.padding = '0.75rem';
-                emptyDiv.style.color = 'var(--text-secondary)';
-                emptyDiv.style.fontSize = '0.9rem';
+                emptyDiv.className = 'search-empty-state';
                 emptyDiv.textContent = 'No matching files found.';
-                resultsDiv.appendChild(emptyDiv);
+                resultsDiv.replaceChildren(emptyDiv);
                 return;
             }
 
@@ -1415,19 +1686,42 @@
                 groups[file.category].push(file);
             });
 
+            const fragment = document.createDocumentFragment();
+            const activePath = typeof currentFile !== 'undefined' && currentFile ? currentFile.path : '';
+
             for (const category in groups) {
+                const groupFiles = groups[category];
                 const titleDiv = document.createElement('div');
                 titleDiv.className = 'search-result-group-title';
-                titleDiv.textContent = category;
-                resultsDiv.appendChild(titleDiv);
+                titleDiv.textContent = `${category} (${groupFiles.length})`;
+                fragment.appendChild(titleDiv);
 
-                groups[category].forEach(file => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'search-result-item';
-                    itemDiv.textContent = file.title;
-                    itemDiv.onclick = () => {
-                        document.getElementById('file-search').value = file.title;
-                        resultsDiv.classList.add('hidden');
+                groupFiles.forEach(file => {
+                    const isActive = activePath && activePath === file.path;
+                    const itemBtn = document.createElement('button');
+                    itemBtn.type = 'button';
+                    itemBtn.className = isActive ? 'search-result-item selected' : 'search-result-item';
+                    if (isActive) {
+                        itemBtn.setAttribute('aria-current', 'true');
+                    }
+
+                    const labelSpan = document.createElement('span');
+                    labelSpan.textContent = file.title;
+                    itemBtn.appendChild(labelSpan);
+
+                    if (isActive) {
+                        const badgeSpan = document.createElement('span');
+                        badgeSpan.className = 'search-result-badge';
+                        badgeSpan.textContent = 'Editing';
+                        itemBtn.appendChild(badgeSpan);
+                    }
+
+                    itemBtn.onclick = () => {
+                        const searchInput = document.getElementById('file-search');
+                        const clearBtn = document.getElementById('file-search-clear');
+                        if (searchInput) searchInput.value = '';
+                        if (clearBtn) clearBtn.classList.add('hidden');
+                        setFileListOpen(false);
 
                         // Sync with image uploader project dropdown
                         syncImageUploader(file.path);
@@ -1435,9 +1729,11 @@
                         // Trigger file load
                         loadFile(file.path);
                     };
-                    resultsDiv.appendChild(itemDiv);
+                    fragment.appendChild(itemBtn);
                 });
             }
+
+            resultsDiv.replaceChildren(fragment);
         };
 
         window.syncImageUploader = function (filePath) {
@@ -1475,12 +1771,12 @@
             }
         };
 
-        // Close dropdown when clicking outside
+        // Close dropdowns when clicking outside (only auto-collapse file list once a file is open)
         document.addEventListener('click', (e) => {
-            const searchInput = document.getElementById('file-search');
-            const resultsDiv = document.getElementById('file-search-results');
-            if (searchInput && resultsDiv && !searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
-                resultsDiv.classList.add('hidden');
+            const selectorCard = document.querySelector('.file-selector-card');
+            const hasLoadedFile = typeof currentFile !== 'undefined' && currentFile && Boolean(currentFile.path);
+            if (hasLoadedFile && selectorCard && !selectorCard.contains(e.target)) {
+                setFileListOpen(false);
             }
 
             const tagInput = document.getElementById('new-project-tag-search');
@@ -1607,6 +1903,10 @@
                     document.getElementById('auth-view').classList.add('hidden');
                     document.getElementById('admin-view').classList.remove('hidden');
                     document.getElementById('logout-btn').classList.remove('hidden');
+
+                    if (window.syncProjectsForBranch) {
+                        window.syncProjectsForBranch(window.getSelectedBranch());
+                    }
                 } else {
                     const text = await res.text();
                     showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid password' : text}`, 'error');
@@ -1629,13 +1929,18 @@
                 return;
             }
             adminPasscode = '';
+            currentFile = { path: '', sha: '', originalContent: '' };
             document.getElementById('passcode-input').value = '';
             document.getElementById('auth-view').classList.remove('hidden');
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('logout-btn').classList.add('hidden');
             document.getElementById('editor-card').classList.add('hidden');
             document.getElementById('file-search').value = '';
+            const clearBtn = document.getElementById('file-search-clear');
+            if (clearBtn) clearBtn.classList.add('hidden');
             document.getElementById('active-file-label').textContent = '';
+            if (window.setFileListOpen) window.setFileListOpen(true);
+            if (window.filterSearchResults) window.filterSearchResults();
         }
 
         // Target Branch Helpers
@@ -1644,12 +1949,16 @@
             return select ? select.value : (localStorage.getItem('admin_selected_branch') || 'main');
         };
 
-        window.changeBranch = function() {
+        window.changeBranch = async function() {
             const select = document.getElementById('branch-select');
             if (!select) return;
             const branch = select.value;
             localStorage.setItem('admin_selected_branch', branch);
-            
+
+            if (window.syncProjectsForBranch) {
+                await window.syncProjectsForBranch(branch);
+            }
+
             // If there's an active file being edited, reload it from the new branch
             if (currentFile && currentFile.path) {
                 if (confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
@@ -1771,6 +2080,9 @@
             } finally {
                 textarea.setAttribute('contenteditable', 'true');
                 toggleWrapLines();
+                if (window.filterSearchResults) {
+                    window.filterSearchResults();
+                }
             }
         }
 
@@ -2514,17 +2826,16 @@
                 }
 
                 // Update dropdown list and load editor
+                if (window.applyProjectsList) {
+                    window.applyProjectsList(window.myProjects);
+                }
+                const searchInput = document.getElementById('file-search');
+                const clearBtn = document.getElementById('file-search-clear');
+                if (searchInput) searchInput.value = '';
+                if (clearBtn) clearBtn.classList.add('hidden');
+
                 if (hasExtendedContent) {
-                    window.searchFiles.push({
-                        path: targetPath,
-                        title: title,
-                        category: 'Projects'
-                    });
-
-                    // Re-render dropdown list
-                    renderSearchResults(window.searchFiles);
-
-                    document.getElementById('file-search').value = title;
+                    if (window.setFileListOpen) window.setFileListOpen(false);
 
                     // Sync with image uploader dropdown
                     syncImageUploader(targetPath);
@@ -2870,41 +3181,9 @@
 
         // Filter edit form tag results dropdown
         function filterEditTagSearchResults() {
-            const queryInput = document.getElementById('edit-project-tag-search');
-            const resultsDiv = document.getElementById('edit-project-tag-results');
-            if (!queryInput || !resultsDiv) return;
-
-            const query = queryInput.value.toLowerCase();
-            resultsDiv.innerHTML = '';
-
-            const filtered = window.allAvailableTags.filter(tag => {
-                const isSelected = window.editProjectSelectedTags.some(t => t.label === tag.label);
-                const matchesQuery = tag.label.toLowerCase().includes(query);
-                return !isSelected && matchesQuery;
-            });
-
-            if (filtered.length === 0) {
-                const item = document.createElement('div');
-                item.style.padding = '0.75rem';
-                item.style.color = 'var(--text-secondary)';
-                item.style.fontSize = '0.9rem';
-                item.textContent = 'No matching tags available';
-                resultsDiv.appendChild(item);
-                return;
+            if (window.renderTagDropdown) {
+                window.renderTagDropdown('edit-project-tag-search', 'edit-project-tag-results', window.editProjectSelectedTags, renderEditSelectedTags);
             }
-
-            filtered.forEach(tag => {
-                const item = document.createElement('div');
-                item.className = 'search-result-item';
-                item.textContent = tag.label;
-                item.onclick = () => {
-                    window.editProjectSelectedTags.push(tag);
-                    queryInput.value = '';
-                    resultsDiv.classList.add('hidden');
-                    renderEditSelectedTags();
-                };
-                resultsDiv.appendChild(item);
-            });
         }
         window.filterEditTagSearchResults = filterEditTagSearchResults;
 
@@ -2912,13 +3191,20 @@
         function populateUploadProjectDropdown() {
             const uploadProjectSelect = document.getElementById('upload-project');
             if (!uploadProjectSelect) return;
-            uploadProjectSelect.innerHTML = '<option value="assets/img">assets/img/ (Global Site Images)</option>';
-            window.myProjects.forEach(project => {
+            const previousValue = uploadProjectSelect.value;
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = 'assets/img';
+            defaultOpt.textContent = 'assets/img/ (Global Site Images)';
+            uploadProjectSelect.replaceChildren(defaultOpt);
+            (window.myProjects || []).forEach(project => {
                 const optUpload = document.createElement('option');
                 optUpload.value = `content/${project.id}/images`;
                 optUpload.textContent = `content/${project.id}/images/ (${project.title})`;
                 uploadProjectSelect.appendChild(optUpload);
             });
+            if (previousValue && Array.from(uploadProjectSelect.options).some(opt => opt.value === previousValue)) {
+                uploadProjectSelect.value = previousValue;
+            }
         }
         window.populateUploadProjectDropdown = populateUploadProjectDropdown;
 
@@ -3243,28 +3529,24 @@
 
                 // Update searchFiles list and dropdown selection
                 if (hasExtendedContent) {
-                    const searchIndex = window.searchFiles.findIndex(f => f.path === oldPath);
-                    if (searchIndex !== -1) {
-                        window.searchFiles[searchIndex].path = newPath;
-                        window.searchFiles[searchIndex].title = title;
-                    } else {
-                        window.searchFiles.push({
-                            path: newPath,
-                            title: title,
-                            category: 'Projects'
-                        });
-                    }
-                    renderSearchResults(window.searchFiles);
-                    document.getElementById('file-search').value = title;
                     document.getElementById('active-file-label').textContent = `Editing: ${newPath}`;
                     currentFile.path = newPath;
                 }
 
+                if (window.applyProjectsList) {
+                    window.applyProjectsList(window.myProjects);
+                }
+
+                const searchInput = document.getElementById('file-search');
+                const clearBtn = document.getElementById('file-search-clear');
+                if (searchInput) searchInput.value = '';
+                if (clearBtn) clearBtn.classList.add('hidden');
+                if (window.setFileListOpen) window.setFileListOpen(false);
+
                 // Update global state
                 window.editingProjectId = newId;
 
-                // Sync image uploader options
-                populateUploadProjectDropdown();
+                // Sync image uploader target
                 syncImageUploader(newPath);
 
                 // Show success alert
