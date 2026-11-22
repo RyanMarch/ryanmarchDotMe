@@ -1,7 +1,7 @@
 import { myProjects } from './public/assets/js/project-data.js';
 import { buildImageSrcset } from './public/assets/js/image-utils.js';
 import redirects from './config/redirects.json';
-import { handleAdminApi, isAdminRequest } from './admin-api.js';
+import { handleAdminApi, isAdminRequest, sameOrigin } from './admin-api.js';
 
 /**
  * Cloudflare Worker for Ryan March | Product & Technology
@@ -240,6 +240,9 @@ export default {
                 // Check authorization: CF Access (production) or Bearer password (local dev fallback)
                 if (!(await isAdminRequest(request, env))) {
                     return new Response('Unauthorized', { status: 401 });
+                }
+                if (request.method !== 'GET' && !sameOrigin(request, url)) {
+                    return new Response('Forbidden', { status: 403 });
                 }
 
                 let filePath = url.searchParams.get('path');

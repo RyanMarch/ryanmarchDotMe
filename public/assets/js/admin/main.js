@@ -3,6 +3,10 @@
 const VIEWS = {
     dashboard: { title: 'Dashboard', load: () => import('./dashboard.js') },
     analytics: { title: 'Analytics', load: () => import('./analytics.js') },
+    activity: { title: 'Activity', load: () => import('./activity.js') },
+    media: { title: 'Media', load: () => import('./media.js') },
+    embeds: { title: 'Embeds', load: () => import('./embeds.js') },
+    settings: { title: 'Settings', load: () => import('./settings.js') },
     health: { title: 'Content health', load: () => import('./health.js') },
     seo: { title: 'Redirects & SEO', load: () => import('./seo.js') },
     projects: { title: 'Projects', load: null } // markup + logic live in admin.html / editor.js

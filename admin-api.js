@@ -23,14 +23,10 @@ import {
     auditProjectHtml, auditProjectMeta, auditRedirects, auditSitemap, sortFindings, summarize
 } from './public/assets/js/admin/audit.js';
 
-const JSON_HEADERS = {
-    'Content-Type': 'application/json',
-    'Cache-Control': 'no-store'
-};
+import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
+import { handleActivity, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
-export function jsonResponse(body, status = 200) {
-    return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
-}
+export { jsonResponse };
 
 function base64UrlToBytes(str) {
     const pad = '='.repeat((4 - (str.length % 4)) % 4);
@@ -228,18 +224,6 @@ async function handleAnalytics(request, env, url, fetchImpl) {
     return jsonResponse(body, body.error ? 502 : 200);
 }
 
-async function ghJson(env, path, fetchImpl) {
-    const res = await fetchImpl(`https://api.github.com/repos/${env.GITHUB_REPO}/${path}`, {
-        headers: {
-            'Authorization': `token ${env.GITHUB_PAT}`,
-            'User-Agent': `${env.GITHUB_REPO.split('/').pop()}-Cloudflare-Worker`,
-            'Accept': 'application/vnd.github+json'
-        }
-    });
-    if (!res.ok) throw new Error(`GitHub ${res.status}`);
-    return res.json();
-}
-
 async function handleOverview(request, env, url, fetchImpl, projects) {
     const withWriteup = projects.filter(p => p.hasExtendedContent).length;
     const out = {
@@ -248,7 +232,7 @@ async function handleOverview(request, env, url, fetchImpl, projects) {
         pending: null
     };
     if (env.GITHUB_REPO && env.GITHUB_PAT) {
-        const branch = /^[\w./-]+$/.test(url.searchParams.get('branch') || '') ? url.searchParams.get('branch') : 'main';
+        const branch = safeBranch(url.searchParams.get('branch'));
         try {
             const commits = await ghJson(env, `commits?sha=${encodeURIComponent(branch)}&per_page=8`, fetchImpl);
             out.branch = branch;
@@ -334,16 +318,33 @@ async function handleHealth(request, env, url, fetchImpl, ctx) {
  * isn't one of ours.
  */
 export async function handleAdminApi(request, env, url, cleanPath, { projects = [], redirects = [], assetFetch, fetchImpl = fetch } = {}) {
-    const route = {
-        '/api/admin/analytics': handleAnalytics,
-        '/api/admin/overview': handleOverview,
-        '/api/admin/health': handleHealth
-    }[cleanPath];
-    if (!route) return null;
+    // path -> [handler, allowed methods]
+    const routes = {
+        '/api/admin/analytics': [handleAnalytics, ['GET']],
+        '/api/admin/overview': [handleOverview, ['GET']],
+        '/api/admin/health': [handleHealth, ['GET']],
+        '/api/admin/scan': [handleScan, ['GET']],
+        '/api/admin/media': [handleMedia, ['GET']],
+        '/api/admin/media/r2': [handleR2, ['PUT', 'DELETE']],
+        '/api/admin/activity': [handleActivity, ['GET']],
+        '/api/admin/status': [handleStatus, ['GET']]
+    };
+    const entry = routes[cleanPath];
+    if (!entry) return null;
 
     if (!(await isAdminRequest(request, env, fetchImpl))) return new Response('Unauthorized', { status: 401 });
-    if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
-    if (route === handleOverview) return route(request, env, url, fetchImpl, projects);
-    if (route === handleHealth) return route(request, env, url, fetchImpl, { projects, redirects, assetFetch });
-    return route(request, env, url, fetchImpl);
+    if (!entry[1].includes(request.method)) return new Response('Method Not Allowed', { status: 405 });
+    if (request.method !== 'GET' && !sameOrigin(request, url)) return new Response('Forbidden', { status: 403 });
+
+    const [handler] = entry;
+    if (handler === handleOverview) return handler(request, env, url, fetchImpl, projects);
+    if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
+    if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
+    return handler(request, env, url, fetchImpl);
+}
+
+/** State-changing requests must come from this site (cookies alone must not be enough). */
+export function sameOrigin(request, url) {
+    const origin = request.headers.get('Origin');
+    return !origin || origin === url.origin;
 }
