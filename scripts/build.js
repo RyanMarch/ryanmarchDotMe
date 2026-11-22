@@ -46,6 +46,20 @@ export function rewriteAssetRefs(content, webPath, hash) {
   return content.replace(pattern, `$1${webPath}?v=${hash}$2`);
 }
 
+// Admin modules import the immutable-cached shared files by absolute path.
+// Patch those specifiers with the content hash so a deploy busts the cache.
+// (The admin's own files are not served immutable, so they need no hashing.)
+export function rewriteModuleImports(content, hashes) {
+  let out = content;
+  for (const [filePath, hash] of Object.entries(hashes)) {
+    if (!filePath.startsWith('assets/js/')) continue;
+    const specifier = '/' + filePath;
+    const pattern = new RegExp(`(from\\s*['"])${escapeRegex(specifier)}(?:\\?v=[^'"]*)?(['"])`, 'g');
+    out = out.replace(pattern, `$1${specifier}?v=${hash}$2`);
+  }
+  return out;
+}
+
 async function generateSitemap() {
   console.log('🗺️ Generating sitemap.xml...');
   const sitemapPath = path.resolve(siteDir, 'sitemap.xml');
@@ -81,6 +95,16 @@ async function versionAssets() {
   }
   fs.writeFileSync(projectsPath, projectsContent, 'utf8');
   hashes['assets/js/projects.js'] = hashContent(projectsContent);
+
+  const adminJsDir = path.resolve(siteDir, 'assets/js/admin');
+  if (fs.existsSync(adminJsDir)) {
+    for (const name of fs.readdirSync(adminJsDir).filter((n) => n.endsWith('.js'))) {
+      const absolutePath = path.join(adminJsDir, name);
+      const before = fs.readFileSync(absolutePath, 'utf8');
+      const after = rewriteModuleImports(before, hashes);
+      if (after !== before) fs.writeFileSync(absolutePath, after, 'utf8');
+    }
+  }
 
   for (const htmlFile of htmlFilesToVersion) {
     const absolutePath = path.resolve(siteDir, htmlFile);

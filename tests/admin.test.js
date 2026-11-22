@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { myProjects } from '../public/assets/js/project-data.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
-import { filesToMinify, rewriteAssetRefs } from '../scripts/build.js';
+import { filesToMinify, rewriteAssetRefs, rewriteModuleImports } from '../scripts/build.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,21 +65,27 @@ describe('Admin Project Parser & Mobile Admin Invariants', () => {
         expect(() => parseProjectDataSource('export const myProjects = [{ id: "bad\nline" }];')).toThrow();
     });
 
-    it('versions admin.html assets in build.js including project-data.js and admin-project-parser.js', () => {
+    it('versions shared assets imported by the admin modules (admin.html, projects-list.js, build.js)', () => {
         const adminHtml = fs.readFileSync(path.join(publicDir, 'admin.html'), 'utf8');
+        const projectsList = fs.readFileSync(path.join(publicDir, 'assets/js/admin/projects-list.js'), 'utf8');
 
-        expect(adminHtml).toContain("from '/assets/js/project-data.js'");
-        expect(adminHtml).toContain("from '/assets/js/admin-project-parser.js'");
+        expect(projectsList).toContain("from '/assets/js/project-data.js'");
+        expect(projectsList).toContain("from '/assets/js/admin-project-parser.js'");
         expect(filesToMinify.some(f => f.path === 'assets/js/admin-project-parser.js')).toBe(true);
 
         let rewritten = adminHtml;
         rewritten = rewriteAssetRefs(rewritten, '/assets/css/style.css', 'csshash123');
-        rewritten = rewriteAssetRefs(rewritten, '/assets/js/project-data.js', 'datahash456');
-        rewritten = rewriteAssetRefs(rewritten, '/assets/js/admin-project-parser.js', 'parserhash789');
-
         expect(rewritten).toContain('/assets/css/style.css?v=csshash123');
-        expect(rewritten).toContain('/assets/js/project-data.js?v=datahash456');
-        expect(rewritten).toContain('/assets/js/admin-project-parser.js?v=parserhash789');
+
+        const patched = rewriteModuleImports(projectsList, {
+            'assets/js/project-data.js': 'datahash456',
+            'assets/js/admin-project-parser.js': 'parserhash789'
+        });
+        expect(patched).toContain("from '/assets/js/project-data.js?v=datahash456'");
+        expect(patched).toContain("from '/assets/js/admin-project-parser.js?v=parserhash789'");
+        // Re-running replaces the previous hash instead of stacking query strings.
+        expect(rewriteModuleImports(patched, { 'assets/js/project-data.js': 'new' }))
+            .toContain("from '/assets/js/project-data.js?v=new'");
     });
 
     it('configures no-store caching for /admin and /admin.html and immutable caching for admin-project-parser.js', () => {
@@ -90,16 +96,31 @@ describe('Admin Project Parser & Mobile Admin Invariants', () => {
         expect(headers).toMatch(/\/assets\/js\/admin-project-parser\.js\s+Cache-Control:\s*public,\s*max-age=31536000,\s*immutable/);
     });
 
-    it('preserves mobile safe-area padding, avoids card clipping, and uses in-flow file and tag lists in admin.html', () => {
+    it('keeps mobile safe-area padding, a drawer nav, and in-flow file and tag lists', () => {
         const adminHtml = fs.readFileSync(path.join(publicDir, 'admin.html'), 'utf8');
+        const css = fs.readFileSync(path.join(publicDir, 'assets/css/admin.css'), 'utf8');
+        const projectsList = fs.readFileSync(path.join(publicDir, 'assets/js/admin/projects-list.js'), 'utf8');
 
-        expect(adminHtml).toMatch(/body\.admin-body\s+\.card\s*\{[^}]*overflow:\s*visible;/s);
-        expect(adminHtml).toMatch(/\.pwa-standalone\s+\.admin-container\s+main\s*\{[^}]*padding:\s*0;/s);
-        expect(adminHtml).toMatch(/@media\s*\(max-width:\s*480px\)\s*\{[^}]*body\.admin-body\s*\{[^}]*env\(safe-area-inset-top/s);
+        expect(adminHtml).toContain('viewport-fit=cover');
+        expect(adminHtml).toContain('id="menu-btn"');
+        expect(adminHtml).toMatch(/id="menu-btn"[^>]*aria-expanded="false"/);
+        expect(css).toMatch(/\.card\s*\{[^}]*overflow:\s*visible;/s);
+        expect(css).toMatch(/@media\s*\(max-width:\s*900px\)\s*\{[\s\S]*env\(safe-area-inset-top/);
+        expect(css).toMatch(/@media\s*\(pointer:\s*coarse\)/);
         expect(adminHtml).toContain('id="file-search-results" class="file-search-results"');
         expect(adminHtml).toContain('id="new-project-tag-results" class="tag-search-results hidden"');
         expect(adminHtml).toContain('id="edit-project-tag-results" class="tag-search-results hidden"');
-        expect(adminHtml).toContain('syncProjectsForBranch');
-        expect(adminHtml).toContain('parseProjectDataSource');
+        expect(projectsList).toContain('syncProjectsForBranch');
+        expect(projectsList).toContain('parseProjectDataSource');
+    });
+
+    it('loads the admin scripts in an order that lets the editor globals exist first', () => {
+        const adminHtml = fs.readFileSync(path.join(publicDir, 'admin.html'), 'utf8');
+        const editor = adminHtml.indexOf('/assets/js/admin/editor.js');
+        const list = adminHtml.indexOf('/assets/js/admin/projects-list.js');
+        const main = adminHtml.indexOf('/assets/js/admin/main.js');
+        expect(editor).toBeGreaterThan(-1);
+        expect(editor).toBeLessThan(list);
+        expect(list).toBeLessThan(main);
     });
 });

@@ -30,6 +30,36 @@ export default [
         }
     },
     {
+        // The editor predates the module split: a classic script whose functions are
+        // called from inline onclick handlers and from projects-list.js. Its logic was
+        // moved verbatim, so only the cross-file/global rules are relaxed here.
+        files: ['public/assets/js/admin/editor.js'],
+        languageOptions: {
+            sourceType: 'script',
+            globals: { Prism: 'readonly', CodeJar: 'readonly', syncImageUploader: 'readonly' }
+        },
+        rules: {
+            'no-unused-vars': 'off',
+            'no-useless-escape': 'off',
+            'no-useless-assignment': 'off'
+        }
+    },
+    {
+        files: ['public/assets/js/admin/projects-list.js'],
+        languageOptions: {
+            globals: {
+                filterSearchResults: 'readonly',
+                renderSearchResults: 'readonly',
+                checkAuth: 'readonly',
+                currentFile: 'readonly',
+                syncImageUploader: 'readonly',
+                loadFile: 'readonly',
+                toggleUploader: 'readonly'
+            }
+        },
+        rules: { 'no-useless-escape': 'off' }
+    },
+    {
         files: ['worker.js'],
         languageOptions: {
             globals: {

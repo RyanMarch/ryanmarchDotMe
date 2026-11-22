@@ -1,6 +1,7 @@
 import { myProjects } from './public/assets/js/project-data.js';
 import { buildImageSrcset } from './public/assets/js/image-utils.js';
 import redirects from './config/redirects.json';
+import { handleAdminApi, isAdminRequest } from './admin-api.js';
 
 /**
  * Cloudflare Worker for Ryan March | Product & Technology
@@ -226,14 +227,14 @@ export default {
                 });
             }
 
-            // Handle API proxy for mobile admin
+            // Analytics + dashboard endpoints (see admin-api.js)
+            const adminApiResponse = await handleAdminApi(request, env, url, cleanPath, { projects: myProjects });
+            if (adminApiResponse) return adminApiResponse;
+
+            // Handle API proxy for the admin editor (GitHub contents API)
             if (cleanPath === '/api/admin/file') {
                 // Check authorization: CF Access (production) or Bearer password (local dev fallback)
-                const cfJwt = request.headers.get('cf-access-jwt-assertion') || request.headers.get('CF-Access-JWT-Assertion');
-                const cfEmail = request.headers.get('cf-access-authenticated-user-email') || request.headers.get('CF-Access-Authenticated-User-Email');
-                const authHeader = request.headers.get('Authorization');
-                const validPassword = env.ADMIN_PASSWORD && authHeader === `Bearer ${env.ADMIN_PASSWORD}`;
-                if (!cfJwt && !cfEmail && !validPassword) {
+                if (!(await isAdminRequest(request, env))) {
                     return new Response('Unauthorized', { status: 401 });
                 }
 
