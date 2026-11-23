@@ -28,7 +28,7 @@ export function buildSitemapXml(projects, today, lastModGetter = getGitLastMod) 
   xml += `  <url><loc>https://ryanmarch.me/</loc><lastmod>${homeLastMod}</lastmod><priority>1.0</priority></url>\n`;
 
   for (const project of projects) {
-    if (project.hasExtendedContent) {
+    if (project.hasExtendedContent && !project.unpublished) {
       const projectFile = `content/${project.id}/index.html`;
       const lastMod = lastModGetter(projectFile, today);
       xml += `  <url><loc>https://ryanmarch.me/project/${project.id}/</loc><lastmod>${lastMod}</lastmod><priority>0.8</priority></url>\n`;

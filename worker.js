@@ -368,7 +368,7 @@ export default {
             const projectNormalizeMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
             if (projectNormalizeMatch) {
                 const projectId = projectNormalizeMatch[1];
-                const project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
+                const project = myProjects.find(p => !p.unpublished && p.id.toLowerCase() === projectId.toLowerCase());
                 // If they visited a valid project path, force redirect to a clean trailing-slash format
                 if (project && !path.endsWith('/')) {
                     return Response.redirect(`${redirectOrigin}/project/${project.id}/${url.search}`, 301);
@@ -405,24 +405,27 @@ export default {
             let project = null;
             if (projectMatch) {
                 const projectId = projectMatch[1];
-                project = myProjects.find(p => p.id.toLowerCase() === projectId.toLowerCase());
+                project = myProjects.find(p => !p.unpublished && p.id.toLowerCase() === projectId.toLowerCase());
                 if (project) {
                     isValidProject = true;
                 }
             }
 
-            const isValidRoute = cleanPath === '/' || isStaticAsset || isValidProject;
+            // An unpublished project's write-up text must not be fetchable either (its images stay reachable).
+            const writeupOwner = cleanPath.match(/^\/content\/([^/]+)(?:\/index(?:\.html)?)?$/i)?.[1]?.toLowerCase();
+            const isHiddenWriteup = Boolean(writeupOwner) && myProjects.some(p => p.unpublished && p.id.toLowerCase() === writeupOwner);
+
+            const isValidRoute = !isHiddenWriteup && (cleanPath === '/' || isStaticAsset || isValidProject);
 
             if (!isValidRoute) {
                 // Fetch and return the custom 404 page directly from static assets (using extensionless '/404' to match Workers Assets clean URLs)
                 const response404 = await env.ASSETS.fetch(new Request(`${assetHost}/404`, request));
-                return new Response(response404.body, {
-                    status: 404,
-                    headers: {
-                        ...Object.fromEntries(response404.headers),
-                        'Content-Type': 'text/html; charset=utf-8'
-                    }
-                });
+                // The body is already decoded, so don't forward its encoding/length headers (they break the response).
+                const headers404 = new Headers(response404.headers);
+                headers404.delete('content-encoding');
+                headers404.delete('content-length');
+                headers404.set('Content-Type', 'text/html; charset=utf-8');
+                return new Response(response404.body, { status: 404, headers: headers404 });
             }
 
             // Fetch the asset — for valid project routes, explicitly serve index.html

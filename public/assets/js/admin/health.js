@@ -42,7 +42,7 @@ export function countsHtml(c, note = '') {
 }
 
 export async function render(root) {
-    const projects = globalThis.myProjects || [];
+    const projects = (globalThis.myProjects || []).filter(p => !p.unpublished);
     let findings = [];
     let filter = 'all';
     let mode = 'quick'; // quick = data only, full = reads deployed files

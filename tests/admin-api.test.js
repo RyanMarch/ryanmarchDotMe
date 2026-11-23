@@ -130,7 +130,7 @@ describe('/api/admin/overview', () => {
     it('counts projects without needing GitHub', async () => {
         const projects = [{ hasExtendedContent: true }, { hasExtendedContent: false }, { hasExtendedContent: true }];
         const body = await (await call('/api/admin/overview', baseEnv, { projects })).json();
-        expect(body.projects).toEqual({ total: 3, withWriteup: 2, linkOnly: 1 });
+        expect(body.projects).toEqual({ total: 3, withWriteup: 2, linkOnly: 1, unpublished: 0 });
         expect(body.commits).toBeNull();
     });
 

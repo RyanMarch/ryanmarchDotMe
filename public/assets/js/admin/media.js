@@ -14,7 +14,7 @@ export function sanitizeKey(name) {
 
 /* ───────────── Images (repo) ───────────── */
 
-function imagesTab(panel, media, projects) {
+function imagesTab(panel, media, projects, reload) {
     if (!media.repo) {
         panel.innerHTML = `<div class="notice"><strong>Images unavailable.</strong>${esc(media.repoError ? `GitHub: ${media.repoError}` : 'GitHub access is not configured for this environment.')}</div>`;
         return;
@@ -31,10 +31,11 @@ function imagesTab(panel, media, projects) {
         const unused = f => stems && f.path.startsWith('content/') && !stems.has(imageStem(f.path));
         shown = [...shown].sort((a, b) => (sort === 'size' ? b.size - a.size : a.path.localeCompare(b.path)));
         const list = panel.querySelector('#media-list');
-        list.innerHTML = shown.slice(0, 200).map(f => `<li class="mrow">
+        list.innerHTML = shown.slice(0, 200).map(f => `<li class="mrow mrow-img">
             <img class="thumb" loading="lazy" decoding="async" src="/${esc(f.path)}" alt="" width="48" height="48">
             <span class="label wrap">${esc(f.path.split('/').pop())}<span class="sub">${esc(f.path.split('/').slice(0, -1).join('/'))}</span></span>
-            <span class="value">${f.size > LARGE ? '<span class="sev sev-warning">Large</span> ' : ''}${unused(f) ? '<span class="sev sev-info">Possibly unused</span> ' : ''}${bytes(f.size)}</span></li>`).join('')
+            <span class="value">${f.size > LARGE ? '<span class="sev sev-warning">Large</span> ' : ''}${unused(f) ? '<span class="sev sev-info">Possibly unused</span> ' : ''}${bytes(f.size)}</span>
+            <button type="button" class="btn btn-secondary" data-delimg="${esc(f.path)}" aria-label="Delete ${esc(f.path)}">Delete</button></li>`).join('')
             || '<li class="empty muted">No files match.</li>';
         panel.querySelector('#media-count').textContent = `${shown.length > 200 ? '200 of ' : ''}${fmt(shown.length)} shown`;
     };
@@ -70,6 +71,33 @@ function imagesTab(panel, media, projects) {
         if (cached) return done(cached);
         st.textContent = 'Scanning write-ups…';
         done(await scanAll(projects, (n, t) => { st.textContent = `Scanning ${n} of ${t} write-ups…`; }));
+    });
+
+    panel.querySelector('#media-list').addEventListener('click', async e => {
+        const btn = e.target.closest('[data-delimg]');
+        if (!btn) return;
+        const path = btn.dataset.delimg;
+        const st = panel.querySelector('#media-status');
+        btn.disabled = true;
+        // Find out which write-ups use this image before asking.
+        let scan = cachedScan();
+        if (!scan) {
+            st.textContent = 'Checking where this image is used…';
+            scan = await scanAll(projects, (n, t) => { st.textContent = `Checking where this image is used (${n} of ${t})…`; });
+        }
+        const stem = imageStem(path);
+        const names = new Map(projects.map(p => [p.id, p.title]));
+        const by = scan.scans.filter(sc => (sc.images || []).some(img => imageStem(img) === stem)).map(sc => names.get(sc.project) || sc.project);
+        const warn = by.length ? `\n\nIt is used by: ${by.join(', ')}. Those images will break.` : '\n\nNo write-up uses it.';
+        if (!confirm(`Delete ${path} from ${branch()}?\n\nThis commits the deletion to GitHub. It can only be restored from git history, not from this admin.${warn}`)) {
+            btn.disabled = false; st.innerHTML = '<span id="media-count"></span>'; paint(); return;
+        }
+        const res = await fetch(`/api/admin/media/image?path=${encodeURIComponent(path)}&branch=${encodeURIComponent(branch())}`, { method: 'DELETE', headers: authHeaders() });
+        if (!res.ok) {
+            const msg = (await res.json().catch(() => ({}))).message || `Delete failed (${res.status}).`;
+            alert(msg); btn.disabled = false; st.innerHTML = '<span id="media-count"></span>'; paint(); return;
+        }
+        await reload();
     });
     paint();
 }
@@ -164,7 +192,7 @@ export async function render(root) {
         const fresh = root.querySelector('#media-panel').cloneNode(false);
         root.querySelector('#media-panel').replaceWith(fresh);
         fresh.setAttribute('aria-labelledby', `tab-${tab}`);
-        if (tab === 'images') imagesTab(fresh, media, projects);
+        if (tab === 'images') imagesTab(fresh, media, projects, async () => { await load(); show(); });
         else r2Tab(fresh, media, projects, async () => { await load(); show(); });
     };
     root.querySelector('.tabs').addEventListener('click', e => {

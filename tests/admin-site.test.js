@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleAdminApi, sameOrigin } from '../admin-api.js';
 import { imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
-import { findProjectBlocks, reorderProjects } from '../public/assets/js/admin/project-order.js';
+import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
 import { summarizeEmbeds } from '../public/assets/js/admin/embeds.js';
 import { bytes, sanitizeKey } from '../public/assets/js/admin/media.js';
@@ -210,4 +210,73 @@ describe('/api/admin/activity and /status', () => {
         expect(byKey.password).toMatchObject({ ok: false, invert: true }); // ADMIN_PASSWORD is set here
         expect(JSON.stringify(body)).not.toContain('secret-token');
     });
+});
+
+describe('/api/admin/media/image (delete)', () => {
+    const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 't' };
+    const projects = [{ id: 'demo', title: 'Demo', image: 'content/demo/images/card.avif', ogImage: 'content/demo/images/og.jpg' }];
+    const gh = (calls = []) => vi.fn(async (u, init = {}) => {
+        calls.push([String(u), init.method || 'GET']);
+        if ((init.method || 'GET') === 'GET') return new Response(JSON.stringify({ sha: 'abc123' }));
+        return new Response(JSON.stringify({ commit: {} }));
+    });
+    const del = (p, opts = {}) => call(`/api/admin/media/image?path=${encodeURIComponent(p)}&branch=develop`, env, { method: 'DELETE', projects, ...opts });
+
+    it('deletes an image on the chosen branch through GitHub', async () => {
+        const calls = [];
+        const res = await del('content/demo/images/extra.png', { fetchImpl: gh(calls) });
+        expect(res.status).toBe(200);
+        expect(await res.json()).toEqual({ deleted: 'content/demo/images/extra.png', branch: 'develop' });
+        expect(calls[0][0]).toContain('/contents/public/content/demo/images/extra.png?ref=develop');
+        expect(calls[1][1]).toBe('DELETE');
+    });
+    it.each([
+        'content/demo/index.html', 'assets/js/project-data.js', 'config/redirects.json', 'redirects.json',
+        'content/demo/images/../index.html', 'content/demo/images/sub/x.png', 'index.html', 'content/demo/images/notes.txt'
+    ])('refuses anything that is not a plain image: %s', async p => {
+        const fetchImpl = vi.fn();
+        expect((await del(p, { fetchImpl })).status).toBe(400);
+        expect(fetchImpl).not.toHaveBeenCalled();
+    });
+    it("refuses a project's card or share image, including its size variants", async () => {
+        for (const p of ['content/demo/images/card.avif', 'content/demo/images/card-640.avif', 'content/demo/images/card.png', 'content/demo/images/og.jpg']) {
+            const fetchImpl = vi.fn();
+            const res = await del(p, { fetchImpl });
+            expect(res.status, p).toBe(409);
+            expect(fetchImpl).not.toHaveBeenCalled();
+        }
+    });
+    it('reports a missing file, requires GitHub config, and needs a same-origin request', async () => {
+        expect((await del('content/demo/images/gone.png', { fetchImpl: vi.fn(async () => new Response('{}', { status: 404 })) })).status).toBe(404);
+        expect((await call('/api/admin/media/image?path=assets/img/a.png', env0, { method: 'DELETE', projects })).status).toBe(501);
+        expect((await del('content/demo/images/x.png', { headers: { Origin: 'https://evil.example' }, fetchImpl: gh() })).status).toBe(403);
+        expect((await call('/api/admin/media/image?path=assets/img/a.png', env, { method: 'GET', projects })).status).toBe(405);
+    });
+});
+
+describe('setUnpublished', () => {
+    const src = realSource;
+    const idOf = i => findProjectBlocks(src)[i].id;
+    it('adds the flag to one project without touching anything else', () => {
+        const id = idOf(2);
+        const next = setUnpublished(src, id, true);
+        const before = parseProjectDataSource(src), after = parseProjectDataSource(next);
+        expect(after.find(p => p.id === id).unpublished).toBe(true);
+        expect(after.filter(p => p.unpublished)).toHaveLength(1);
+        expect(after.map(p => ({ ...p, unpublished: undefined }))).toEqual(before.map(p => ({ ...p, unpublished: undefined })));
+        expect(next.length - src.length).toBeLessThan(40);
+    });
+    it('removes the flag again and restores the original text exactly', () => {
+        const id = idOf(5);
+        expect(setUnpublished(setUnpublished(src, id, true), id, false)).toBe(src);
+    });
+    it('is idempotent and survives reordering', () => {
+        const id = idOf(1);
+        const once = setUnpublished(src, id, true);
+        expect(setUnpublished(once, id, true)).toBe(once);
+        const order = findProjectBlocks(once).map(b => b.id).reverse();
+        const re = parseProjectDataSource(reorderProjects(once, order));
+        expect(re.find(p => p.id === id).unpublished).toBe(true);
+    });
+    it('rejects an unknown project', () => expect(() => setUnpublished(src, 'nope', true)).toThrow(/No project/));
 });

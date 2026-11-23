@@ -56,3 +56,27 @@ export function reorderProjects(source, order) {
     });
     return out + source.slice(cursor);
 }
+
+/**
+ * Returns the source with `unpublished: true` added to (or removed from) one project's block.
+ * Only that block's text changes; the caller verifies the result re-parses.
+ */
+export function setUnpublished(source, id, unpublished) {
+    const block = findProjectBlocks(source).find(b => b.id === id);
+    if (!block) throw new Error(`No project "${id}".`);
+    const text = source.slice(block.start, block.end);
+    const flag = /^([ \t]*)unpublished\s*:\s*(true|false)\s*,?[ \t]*\r?\n/m;
+    let next;
+    if (unpublished) {
+        if (flag.test(text)) next = text.replace(flag, (m, indent) => `${indent}unpublished: true,\n`);
+        else {
+            const idLine = text.match(/^([ \t]*)id\s*:\s*["'][^"']+["']\s*,?[ \t]*\r?\n/m);
+            if (!idLine) throw new Error(`Could not find the id line of "${id}".`);
+            const at = idLine.index + idLine[0].length;
+            next = `${text.slice(0, at)}${idLine[1]}unpublished: true,\n${text.slice(at)}`;
+        }
+    } else {
+        next = text.replace(flag, '');
+    }
+    return source.slice(0, block.start) + next + source.slice(block.end);
+}

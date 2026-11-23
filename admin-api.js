@@ -24,7 +24,7 @@ import {
 } from './public/assets/js/admin/audit.js';
 
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
-import { handleActivity, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
+import { handleActivity, handleImageDelete, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
 export { jsonResponse };
 
@@ -236,9 +236,11 @@ async function handleAnalytics(request, env, url, fetchImpl) {
 }
 
 async function handleOverview(request, env, url, fetchImpl, projects) {
+    const unpublished = projects.filter(p => p.unpublished).length;
+    projects = projects.filter(p => !p.unpublished);
     const withWriteup = projects.filter(p => p.hasExtendedContent).length;
     const out = {
-        projects: { total: projects.length, withWriteup, linkOnly: projects.length - withWriteup },
+        projects: { total: projects.length, withWriteup, linkOnly: projects.length - withWriteup, unpublished },
         commits: null,
         pending: null
     };
@@ -277,7 +279,9 @@ async function assetExists(assetFetch, path) {
 }
 
 async function handleHealth(request, env, url, fetchImpl, ctx) {
-    const { projects, redirects = [], assetFetch } = ctx;
+    // Unpublished projects are hidden from the site, so they are not audited (and a redirect to one is a broken target).
+    const projects = ctx.projects.filter(p => !p.unpublished);
+    const { redirects = [], assetFetch } = ctx;
     const scope = url.searchParams.get('scope');
     const projectId = url.searchParams.get('project');
     const withMeta = list => list.flatMap(p => auditProjectMeta(p));
@@ -337,6 +341,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
         '/api/admin/scan': [handleScan, ['GET']],
         '/api/admin/media': [handleMedia, ['GET']],
         '/api/admin/media/r2': [handleR2, ['PUT', 'DELETE']],
+        '/api/admin/media/image': [handleImageDelete, ['DELETE']],
         '/api/admin/activity': [handleActivity, ['GET']],
         '/api/admin/status': [handleStatus, ['GET']]
     };
@@ -351,6 +356,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     if (handler === handleOverview) return handler(request, env, url, fetchImpl, projects);
     if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
     if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
+    if (handler === handleImageDelete) return handler(request, env, url, fetchImpl, { projects });
     return handler(request, env, url, fetchImpl);
 }
 

@@ -275,7 +275,7 @@ function applyProjectsList(projects) {
         if (project && project.hasExtendedContent) {
             nextFiles.push({
                 path: `content/${project.id}/index.html`,
-                title: project.title,
+                title: project.unpublished ? `${project.title} (unpublished)` : project.title,
                 category: 'Projects'
             });
         }

@@ -4,7 +4,7 @@
  * configuration status page. Routed from admin-api.js.
  */
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
-import { r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
+import { imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
 
 const ID_PATTERN = /^[a-z0-9_-]+$/i;
 const IMAGE_EXT = /\.(avif|webp|png|jpe?g|gif|svg|ico)$/i;
@@ -82,6 +82,46 @@ export async function handleMedia(request, env, url, fetchImpl) {
         try { out.r2.objects = await listR2(env.MEDIA); } catch (err) { out.r2.error = err.message; }
     }
     return jsonResponse(out);
+}
+
+/* ───────────── DELETE /media/image?path= (repo images only) ───────────── */
+
+// Only image files in a project's images folder or the global image folder. Never HTML, data or config.
+export const DELETABLE_IMAGE = /^(?:assets\/img|content\/[a-z0-9_-]+\/images)\/[A-Za-z0-9._-]+\.(?:avif|webp|png|jpe?g|gif|svg)$/i;
+
+export async function handleImageDelete(request, env, url, fetchImpl, ctx = {}) {
+    if (!env.GITHUB_REPO || !env.GITHUB_PAT) return jsonResponse({ error: 'not_configured', message: 'GitHub access is not configured.' }, 501);
+    const path = url.searchParams.get('path') || '';
+    const branch = safeBranch(url.searchParams.get('branch'));
+    if (!DELETABLE_IMAGE.test(path) || path.includes('..')) {
+        return jsonResponse({ error: 'bad_path', message: 'Only image files in a project images folder or assets/img can be deleted here.' }, 400);
+    }
+
+    // A project's card and share images must be changed on the project first, or its page breaks.
+    const stem = imageStem(path);
+    const owner = (ctx.projects || []).find(p => [p.image, p.ogImage].some(img => img && imageStem(img) === stem));
+    if (owner) {
+        return jsonResponse({ error: 'in_use', message: `This is the card or share image for ${owner.title}. Change that project's image first.` }, 409);
+    }
+
+    const headers = {
+        'Authorization': `token ${env.GITHUB_PAT}`,
+        'User-Agent': `${env.GITHUB_REPO.split('/').pop()}-Cloudflare-Worker`,
+        'Accept': 'application/vnd.github+json'
+    };
+    const api = `https://api.github.com/repos/${env.GITHUB_REPO}/contents/public/${path}`;
+    const found = await fetchImpl(`${api}?ref=${encodeURIComponent(branch)}`, { headers });
+    if (found.status === 404) return jsonResponse({ error: 'not_found', message: `${path} does not exist on ${branch}.` }, 404);
+    if (!found.ok) return jsonResponse({ error: 'github_error', message: `GitHub returned ${found.status}.` }, 502);
+    const { sha } = await found.json();
+
+    const res = await fetchImpl(api, {
+        method: 'DELETE',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `admin: delete image ${path}`, sha, branch })
+    });
+    if (!res.ok) return jsonResponse({ error: 'github_error', message: `GitHub returned ${res.status}.` }, res.status === 403 ? 403 : 502);
+    return jsonResponse({ deleted: path, branch });
 }
 
 const R2_TYPES = { mp3: 'audio/mpeg', m4a: 'audio/mp4', zip: 'application/zip', aup3: 'application/octet-stream' };

@@ -31,7 +31,7 @@ export async function render(root) {
     parts.push(`<div class="stats">
         ${statBox('Page views', a ? fmt(cur.views) : '–', a ? deltaHtml(cur.views, prev.views, 7) : '<span class="delta">unavailable</span>', series ? sparkSvg(series, 'views') : '')}
         ${statBox('Visits', a ? fmt(cur.visits) : '–', a ? deltaHtml(cur.visits, prev.visits, 7) : '<span class="delta">unavailable</span>', series && cur.visits !== null ? sparkSvg(series, 'visits') : '')}
-        ${statBox('Projects', o ? fmt(o.projects.total) : fmt(window.myProjects?.length), `<span class="delta">${o ? `${fmt(o.projects.withWriteup)} with write-ups` : '&nbsp;'}</span>`)}
+        ${statBox('Projects', o ? fmt(o.projects.total) : fmt((window.myProjects || []).filter(p => !p.unpublished).length), `<span class="delta">${o ? `${fmt(o.projects.withWriteup)} with write-ups${o.projects.unpublished ? ` · ${fmt(o.projects.unpublished)} unpublished` : ''}` : '&nbsp;'}</span>`)}
         ${statBox('Unreleased', pending ? fmt(pending.ahead) : '–', `<span class="delta">${pending ? (pending.ahead ? 'commits on develop not in main' : 'develop matches main') : 'branch status unavailable'}</span>`)}
     </div>`);
 

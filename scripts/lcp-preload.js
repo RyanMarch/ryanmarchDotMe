@@ -9,9 +9,9 @@ import { buildImageSrcset } from '../public/assets/js/image-utils.js';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../public');
 
 // projects.js appends cards in array order and diverts "Archive" projects to a separate grid,
-// so the first card in the main grid is the first non-archived project.
+// so the first card in the main grid is the first non-archived, published project.
 export function findLcpProject(projects) {
-    return projects.find(p => !p.tags?.some(t => t.label.toLowerCase() === 'archive')) || null;
+    return projects.find(p => !p.unpublished && !p.tags?.some(t => t.label.toLowerCase() === 'archive')) || null;
 }
 
 export function buildPreloadTag(project) {

@@ -1,5 +1,5 @@
 import { api, esc } from './util.js';
-import { reorderProjects } from './project-order.js';
+import { reorderProjects, setUnpublished } from './project-order.js';
 import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
 import { b64ToText, textToB64 } from './seo.js';
 
@@ -25,26 +25,29 @@ async function statusPanel(el) {
 }
 
 async function orderPanel(el) {
-    el.innerHTML = '<div class="loading">Loading project order…</div>';
+    el.innerHTML = '<div class="loading">Loading projects…</div>';
     const res = await api(`/api/admin/file?path=assets/js/project-data.js&branch=${encodeURIComponent(branch())}`);
     if (!res.ok) { el.innerHTML = '<div class="panel-body muted">Project order needs GitHub access, which is not configured for this environment.</div>'; return; }
     let source = b64ToText(res.body.content);
     let sha = res.body.sha;
     let projects;
-    try { projects = parseProjectDataSource(source).map(p => ({ id: p.id, title: p.title })); } catch { el.innerHTML = '<div class="panel-body muted">project-data.js could not be parsed.</div>'; return; }
-    let original = projects.map(p => p.id).join(',');
+    try { projects = parseProjectDataSource(source).map(p => ({ id: p.id, title: p.title, unpublished: p.unpublished === true })); } catch { el.innerHTML = '<div class="panel-body muted">project-data.js could not be parsed.</div>'; return; }
+    const signature = () => projects.map(p => p.id + (p.unpublished ? '!' : '')).join(',');
+    let saved = projects.map(p => ({ ...p })); // what GitHub has right now
+    let original = signature();
     let moved = null;
 
     const draw = () => {
-        const dirty = projects.map(p => p.id).join(',') !== original;
+        const dirty = signature() !== original;
         el.innerHTML = `
-            <p class="muted tab-intro">The order here is the order of the homepage grid (top = first). Changes commit to <strong>${esc(branch())}</strong>.</p>
-            <ol class="orderlist">${projects.map((p, i) => `<li class="${moved === p.id ? 'moved' : ''}">
-                <span class="pos num">${i + 1}</span><span class="label">${esc(p.title)}</span>
+            <p class="muted tab-intro">The order here is the order of the homepage grid (top = first). Unpublishing hides a project from the homepage, its page, and the sitemap; nothing is deleted, and you can publish it again at any time. Changes commit to <strong>${esc(branch())}</strong>.</p>
+            <ol class="orderlist">${projects.map((p, i) => `<li class="${moved === p.id ? 'moved' : ''}${p.unpublished ? ' is-off' : ''}">
+                <span class="pos num">${i + 1}</span><span class="label">${esc(p.title)}${p.unpublished ? ' <span class="sev sev-info">Unpublished</span>' : ''}</span>
                 <span class="order-btns">
                     <button type="button" class="btn btn-secondary" data-act="top" data-i="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(p.title)} to the top">Top</button>
                     <button type="button" class="btn btn-secondary" data-act="up" data-i="${i}" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(p.title)} up">Up</button>
                     <button type="button" class="btn btn-secondary" data-act="down" data-i="${i}" ${i === projects.length - 1 ? 'disabled' : ''} aria-label="Move ${esc(p.title)} down">Down</button>
+                    <button type="button" class="btn btn-secondary" data-act="toggle" data-i="${i}" aria-label="${p.unpublished ? 'Publish' : 'Unpublish'} ${esc(p.title)}">${p.unpublished ? 'Publish' : 'Unpublish'}</button>
                 </span></li>`).join('')}</ol>
             <div class="actions"><button type="button" class="btn" id="save-order" ${dirty ? '' : 'disabled'}>Save to ${esc(branch())}</button>
                 <button type="button" class="btn btn-secondary" id="reset-order" ${dirty ? '' : 'disabled'}>Reset</button>
@@ -56,6 +59,13 @@ async function orderPanel(el) {
         const b = e.target.closest('[data-act]');
         if (b) {
             const i = Number(b.dataset.i);
+            if (b.dataset.act === 'toggle') {
+                projects[i].unpublished = !projects[i].unpublished;
+                moved = projects[i].id;
+                draw();
+                el.querySelector(`li.moved [data-act="toggle"]`)?.focus();
+                return;
+            }
             const [item] = projects.splice(i, 1);
             const to = b.dataset.act === 'top' ? 0 : b.dataset.act === 'up' ? i - 1 : i + 1;
             projects.splice(to, 0, item);
@@ -65,29 +75,44 @@ async function orderPanel(el) {
             return;
         }
         if (e.target.closest('#reset-order')) {
-            projects.sort((a, c) => original.split(',').indexOf(a.id) - original.split(',').indexOf(c.id));
+            projects = saved.map(p => ({ ...p }));
             moved = null; draw(); return;
         }
         const save = e.target.closest('#save-order');
         if (save && !save.disabled) {
             const status = el.querySelector('#order-status');
+            const nowOff = projects.filter(p => p.unpublished && !saved.find(s => s.id === p.id)?.unpublished);
+            if (nowOff.length && !confirm(`Unpublish ${nowOff.map(p => p.title).join(', ')}?\n\nAfter the next deploy it disappears from the homepage and its page returns a 404. Nothing is deleted; you can publish it again here.`)) return;
             save.disabled = true;
             status.textContent = 'Saving…';
             try {
                 const order = projects.map(p => p.id);
-                const next = reorderProjects(source, order);
-                // Safety net: the rewritten file must still parse to the same projects in the new order.
-                const check = parseProjectDataSource(next).map(p => p.id);
-                if (check.join(',') !== order.join(',')) throw new Error('The rewritten file did not match the requested order; nothing was saved.');
+                let next = reorderProjects(source, order);
+                for (const p of projects) {
+                    if (p.unpublished !== saved.find(s => s.id === p.id).unpublished) next = setUnpublished(next, p.id, p.unpublished);
+                }
+                // Safety net: the rewritten file must still parse to the same projects, order and visibility.
+                const check = parseProjectDataSource(next);
+                if (check.map(p => p.id).join(',') !== order.join(',') || check.some((p, i) => (p.unpublished === true) !== projects[i].unpublished)) {
+                    throw new Error('The rewritten file did not match the requested changes; nothing was saved.');
+                }
+                const nowOn = projects.filter(p => !p.unpublished && saved.find(s => s.id === p.id)?.unpublished);
+                const reordered = order.join(',') !== saved.map(p => p.id).join(',');
+                const parts = [
+                    nowOff.length && `unpublish ${nowOff.map(p => p.id).join(', ')}`,
+                    nowOn.length && `publish ${nowOn.map(p => p.id).join(', ')}`,
+                    reordered && 'reorder homepage projects'
+                ].filter(Boolean);
                 const r = await fetch('/api/admin/file', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...authHeaders() },
-                    body: JSON.stringify({ path: 'assets/js/project-data.js', branch: branch(), sha, content: textToB64(next), message: 'admin: reorder homepage projects' })
+                    body: JSON.stringify({ path: 'assets/js/project-data.js', branch: branch(), sha, content: textToB64(next), message: `admin: ${parts.join('; ')}` })
                 });
                 if (!r.ok) throw new Error(r.status === 409 ? 'The file changed on GitHub; reload and try again.' : `GitHub returned ${r.status}.`);
                 sha = (await r.json()).sha;
                 source = next;
-                original = order.join(',');
+                saved = projects.map(p => ({ ...p }));
+                original = signature();
                 moved = null;
                 draw();
                 el.querySelector('#order-status').textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
@@ -102,9 +127,9 @@ async function orderPanel(el) {
 
 export async function render(root) {
     root.innerHTML = `
-        <div class="view-head"><div><h1>Settings</h1><p>What this admin is connected to, the homepage order, and the site's core files.</p></div></div>
+        <div class="view-head"><div><h1>Settings</h1><p>What this admin is connected to, which projects are published and in what order, and the site's core files.</p></div></div>
         <section class="panel"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
-        <section class="panel"><header><h2>Homepage order</h2></header><div id="order-panel" class="panel-body"></div></section>
+        <section class="panel"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
         <section class="panel"><header><h2>Site files</h2></header>
             <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section>`;
 
