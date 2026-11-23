@@ -1,7 +1,7 @@
 {
   "id": "/admin",
-  "name": "Ryan March Admin",
-  "short_name": "Admin",
+  "name": "ryanmarch.me Admin",
+  "short_name": "RM Admin",
   "start_url": "/admin",
   "scope": "/admin",
   "display": "standalone",
@@ -9,8 +9,8 @@
   "theme_color": "#0a0b0b",
   "background_color": "#0a0b0b",
   "icons": [
-    { "src": "/assets/favicon/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
-    { "src": "/assets/favicon/web-app-manifest-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
-    { "src": "/assets/favicon/web-app-manifest-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "/assets/favicon/admin-apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/favicon/admin-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/favicon/admin-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
