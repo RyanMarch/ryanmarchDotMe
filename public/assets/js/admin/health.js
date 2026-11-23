@@ -48,6 +48,7 @@ export async function render(root) {
     let filter = 'all';
     let mode = 'quick'; // quick = data only, full = reads deployed files
     let running = false;
+    let audit = null; // { at, total, failed } once the full audit has run
 
     root.innerHTML = /*html*/ `
         <div class="view-head">
@@ -70,8 +71,13 @@ export async function render(root) {
     const runBtn = root.querySelector('#run-audit');
     const exportBtn = root.querySelector('#export-report');
 
+    const modeBar = () => (mode === 'full'
+        ? `<div class="modebar"><span class="sev sev-ok">Full audit</span><span class="muted">Checked ${audit.total - audit.failed} of ${plural(audit.total, 'project')}, including write-ups and images, at ${esc(audit.at)}.${audit.failed ? ` ${audit.failed} could not be read.` : ''} Run it again to refresh.</span></div>`
+        : `<div class="modebar"><span class="sev sev-info">Quick check</span><span class="muted">Project data, SEO text and redirects only. Write-up, alt text and image checks are not included, so this list is shorter than a full audit.</span><button type="button" class="linklike" data-run-full>Run full audit</button></div>`);
+
     const paint = () => {
-        body.innerHTML = countsHtml(summarize(findings), mode === 'quick' ? 'quick check' : 'full audit')
+        body.innerHTML = modeBar()
+            + countsHtml(summarize(findings), mode === 'quick' ? 'quick check only' : 'full audit')
             + findingsHtml(findings, projects, filter);
     };
 
@@ -79,7 +85,6 @@ export async function render(root) {
     const quick = await api('/api/admin/health?scope=summary');
     if (!quick.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't run the check.</strong>${esc(apiProblem(quick))}</div>`; return; }
     findings = quick.body.findings;
-    status.textContent = 'Quick check done. Run the full audit to also read each write-up and image.';
     paint();
 
     // Reads every write-up and image on top of the quick data checks. Resolves when the findings are updated.
@@ -107,7 +112,8 @@ export async function render(root) {
             await Promise.all([worker(), worker(), worker(), worker()]);
             findings = sortFindings(all);
             mode = 'full';
-            status.textContent = `Audited ${total - failed} of ${plural(total, 'project')}${failed ? `; ${failed} could not be read` : ''}.`;
+            audit = { at: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), total, failed };
+            status.textContent = '';
             paint();
             return true;
         } finally {
@@ -145,6 +151,7 @@ export async function render(root) {
     });
 
     body.addEventListener('click', e => {
+        if (e.target.closest('[data-run-full]')) { runFull(); return; }
         const open = e.target.closest('[data-open]');
         if (open) openInEditor(open.dataset.open);
     });
