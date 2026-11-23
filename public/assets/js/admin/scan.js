@@ -96,3 +96,35 @@ export function audioSignature(b) {
     if (b[0] === 0x66 && b[1] === 0x4C && b[2] === 0x61 && b[3] === 0x43) return 'flac'; // "fLaC"
     return null;
 }
+
+// This site and its media host. Your other apps on ryanmarch.me subdomains (filenamer., iconstudio. ...) are checked like any outside link.
+const OWN_HOSTS = /^(www\.|media\.)?ryanmarch\.me$/i;
+const PRIVATE_HOST = /^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.0\.0\.0|\[::1\]|.*\.(local|internal|localhost)$)/i;
+
+/** The distinct outside web links in a write-up (not this site, not mailto/tel/#, nothing private), in order. */
+export function externalLinks(rawHtml, limit = 40) {
+    const html = stripComments(rawHtml);
+    const seen = new Set();
+    const out = [];
+    for (const m of html.matchAll(/<a\b[^>]*>/gi)) {
+        const href = attrOf(m[0], 'href');
+        if (!href || !/^https?:\/\//i.test(href.trim())) continue;
+        let url;
+        try { url = new URL(decode(href.trim())); } catch { continue; }
+        if (OWN_HOSTS.test(url.hostname) || PRIVATE_HOST.test(url.hostname)) continue;
+        url.hash = '';
+        const key = url.toString();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        out.push(key);
+        if (out.length >= limit) break;
+    }
+    return out;
+}
+
+/** How a link answered: ok, broken (gone or unreachable), or unverified (the site refuses automated checks). */
+export function classifyLink(status) {
+    if (status >= 200 && status < 400) return 'ok';
+    if (status === 404 || status === 410 || status === 0) return 'broken';
+    return 'unverified';
+}

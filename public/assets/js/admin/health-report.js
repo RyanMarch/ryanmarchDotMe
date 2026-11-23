@@ -14,6 +14,7 @@ const FIX = {
     'heading': p => `In \`public/content/${p}/index.html\`, change the \`<h1>\` to \`<h2>\`; the page template already renders the only h1.`,
     'thin-content': p => `Informational. \`public/content/${p}/index.html\` is short; expand it only if there is more worth saying.`,
     'writeup-missing': p => `\`public/content/${p}/index.html\` is missing or unreadable. Create it, or set \`hasExtendedContent: false\` on the project if it is link-only.`,
+    'link-broken': p => `In \`public/content/${p}/index.html\`, update the link to where the page lives now, point it at an archived copy, or remove it. The address answers 404/410 or does not resolve.`,
     'redirect-incomplete': () => 'In `config/redirects.json`, give the entry both a `source` and a `destination`, or remove it.',
     'redirect-source': () => 'In `config/redirects.json`, start the `source` with "/".',
     'redirect-duplicate': () => 'In `config/redirects.json`, remove the duplicate; only the first matching entry is used.',

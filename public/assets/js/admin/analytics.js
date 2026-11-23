@@ -1,4 +1,4 @@
-import { apiProblem, dataTable, esc, fmt, hasCached, setupNotice, swr } from './util.js';
+import { apiProblem, countUp, dataTable, esc, fmt, hasCached, setupNotice, swr } from './util.js';
 import { go, href, onPop, parse } from './router.js';
 
 const RANGES = [7, 30, 90];
@@ -96,7 +96,7 @@ export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}
     const xl = series.map((s, i) => (i % every === 0 || i === series.length - 1) && (series.length - 1 - i >= every || i === series.length - 1)
         ? `<text x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle'}">${dayLabel(s.date, { month: 'short', day: 'numeric' })}</text>` : '').join('');
     const hits = series.map((s, i) => `<rect class="hit" data-i="${i}" x="${(L + i * step).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${H - T - B}"/>`).join('');
-    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}<path class="area" d="${area}"/>${prevLine}<polyline class="line" points="${line.join(' ')}"/><line class="cursor" y1="${T}" y2="${H - B}" x1="-10" x2="-10"/><circle class="dot" r="4" cx="-10" cy="-10"/>${xl}${hits}</svg>`;
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}<path class="area" d="${area}"/>${prevLine}<polyline class="line" pathLength="1" points="${line.join(' ')}"/><line class="cursor" y1="${T}" y2="${H - B}" x1="-10" x2="-10"/><circle class="dot" r="4" cx="-10" cy="-10"/>${xl}${hits}</svg>`;
 }
 
 export function sparkSvg(series, metric) {
@@ -312,7 +312,7 @@ export async function render(root, route = parse()) {
         controller = new AbortController();
         const path = `/api/admin/analytics?days=${days}${hideTor ? '&tor=exclude' : ''}`;
         if (!hasCached(path)) body.innerHTML = '<div class="loading">Loading analytics…</div>';
-        await swr([path], ([result]) => showResult(result), { signal: controller.signal });
+        await swr([path], ([result], meta) => { showResult(result); if (!meta.stale) countUp(body); }, { signal: controller.signal });
     }
 
     root.querySelector('#hide-tor').addEventListener('change', e => {

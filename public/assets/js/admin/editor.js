@@ -65,10 +65,10 @@ document.addEventListener('admin:logout', () => {
     if (window.setFileListOpen) window.setFileListOpen(true);
     if (window.filterSearchResults) window.filterSearchResults();
 });
-document.addEventListener('admin:branch-changed', e => {
+document.addEventListener('admin:branch-changed', async e => {
     const branch = e.detail.branch;
     if (currentFile && currentFile.path
-        && confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
+        && await window.adminConfirm(`Reload ${currentFile.path} from ${branch}? Unsaved changes will be lost.`, { title: `Switched to ${branch}`, confirmLabel: 'Reload file', cancelLabel: 'Keep what I have' })) {
         localStorage.removeItem(`draft_${currentFile.path}`);
         loadFile(currentFile.path);
     }
@@ -82,6 +82,31 @@ function b64DecodeUnicode(str) {
 // Utility: UTF-8 safe base64 encoding
 function b64EncodeUnicode(str) {
     return btoa(Array.from(new TextEncoder().encode(str), b => String.fromCharCode(b)).join(''));
+}
+
+// File history: pick an earlier version of the open file and load it into the editor (nothing is saved until you Save).
+async function showFileHistory() {
+    if (!currentFile.path) return;
+    const branch = window.getSelectedBranch();
+    const res = await fetch(`/api/admin/history?path=${encodeURIComponent(currentFile.path)}&branch=${encodeURIComponent(branch)}`, { headers: getAuthHeaders(), cache: 'no-store' });
+    if (!res.ok) { window.adminAlert('Could not load the history for this file.', { title: 'History' }); return; }
+    const { commits } = await res.json();
+    if (!commits.length) { window.adminAlert('No earlier versions were found.', { title: 'History' }); return; }
+    const when = iso => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const sha = await window.adminChoose({
+        title: `History of ${currentFile.path}`,
+        message: `Branch ${branch}. Pick a version to load into the editor. It only changes the file when you Save.`,
+        items: commits.map((c, i) => ({ value: c.sha, label: c.message || '(no message)', sub: `${when(c.date)} · ${c.by || c.author}${i === 0 ? ' · latest' : ''}` })),
+        confirmLabel: 'Load this version'
+    });
+    if (!sha) return;
+    const unsaved = jar && jar.toString() !== currentFile.originalContent;
+    if (unsaved && !(await window.adminConfirm('The editor has changes you have not saved. Loading an old version replaces them.', { title: 'Replace unsaved changes?', confirmLabel: 'Replace' }))) return;
+    const old = await fetch(`/api/admin/file?path=${encodeURIComponent(currentFile.path)}&branch=${encodeURIComponent(sha)}`, { headers: getAuthHeaders(), cache: 'no-store' });
+    if (!old.ok) { window.adminAlert('Could not load that version.', { title: 'History' }); return; }
+    const data = await old.json();
+    jar.updateCode(b64DecodeUnicode((data.content || '').replace(/\s/g, '')));
+    window.adminToast?.('Loaded that version. Review it, then Save to commit it as a new change.', { type: 'success', duration: 9000 });
 }
 
 // File Loader
@@ -601,7 +626,11 @@ async function saveFile() {
         localStorage.removeItem(`draft_${currentFile.path}`);
 
         updateDraftStatus('Synced');
-        showAlert(alertEl, 'Changes saved successfully! Deploying to live site (takes ~1 min)...', 'success');
+        showAlert(alertEl, 'Changes saved. Checking the build…', 'success');
+        window.adminTrackDeploy?.({ branch: window.getSelectedBranch(), commit: data.commit }, s => {
+            const link = s.url ? ` <a href="${s.url}" target="_blank" rel="noopener">See why</a>` : '';
+            showAlert(alertEl, `${s.text}${link}`, s.state === 'failed' ? 'error' : 'success');
+        });
     } catch (err) {
         showAlert(alertEl, `Error saving changes: ${err.message}`, 'error');
     } finally {
@@ -687,12 +716,12 @@ async function createNewProject() {
     const placement = placementSelect.value;
 
     if (!title) {
-        alert('Please enter a project title/name.');
+        window.adminAlert('Please enter a project title/name.');
         return;
     }
 
     if (!id) {
-        alert('Please enter a valid lowercase project ID/slug.');
+        window.adminAlert('Please enter a valid lowercase project ID/slug.');
         return;
     }
 
@@ -700,7 +729,7 @@ async function createNewProject() {
 
     // Check if project already exists locally
     if (window.myProjects && window.myProjects.some(p => p.id === id)) {
-        alert('Project ID already exists in the database.');
+        window.adminAlert('Project ID already exists in the database.');
         return;
     }
 
@@ -714,7 +743,7 @@ async function createNewProject() {
         imageFile = imageFileInput.files[0];
         imageName = imageNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
         if (!imageName) {
-            alert('Please enter a valid target filename for the preview image.');
+            window.adminAlert('Please enter a valid target filename for the preview image.');
             return;
         }
     }
@@ -934,11 +963,11 @@ hasExtendedContent: ${hasExtendedContent}
             document.getElementById('editor-card').classList.add('hidden');
             document.getElementById('active-file-label').textContent = '';
 
-            alert(`Successfully created link-only project database entry: ${title}!`);
+            window.adminAlert(`Successfully created link-only project database entry: ${title}!`);
         }
 
     } catch (err) {
-        alert(`Error creating project: ${err.message}`);
+        window.adminAlert(`Error creating project: ${err.message}`);
     } finally {
         createBtn.disabled = false;
         createBtn.textContent = 'Create & Edit Template';
@@ -1385,12 +1414,12 @@ async function saveProjectData() {
     let imagePath = imagePathInput.value.trim();
 
     if (!title) {
-        alert('Please enter a project title/name.');
+        window.adminAlert('Please enter a project title/name.');
         return;
     }
 
     if (!newId) {
-        alert('Please enter a valid lowercase project ID/slug.');
+        window.adminAlert('Please enter a valid lowercase project ID/slug.');
         return;
     }
 
@@ -1399,7 +1428,7 @@ async function saveProjectData() {
     // Check if slug already exists (excluding the current editing project)
     if (newId !== window.editingProjectId) {
         if (window.myProjects && window.myProjects.some(p => p.id === newId)) {
-            alert('Project ID already exists in the database.');
+            window.adminAlert('Project ID already exists in the database.');
             return;
         }
     }

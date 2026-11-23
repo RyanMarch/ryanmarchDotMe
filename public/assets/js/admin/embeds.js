@@ -58,20 +58,24 @@ export async function render(root, route = parse()) {
         const rows = data.scans.filter(s => (s.audio?.length || s.videos?.length)).map(s => {
             const audio = (s.audio || []).filter(a => !onlyProblems || audioState(a)[0] !== 'ok');
             const videos = (s.videos || []).filter(v => !onlyProblems || videoState(v.status)[0] !== 'ok');
-            if (!audio.length && !videos.length) return '';
-            return `<section class="panel"><header><h2>${esc(names.get(s.project) || s.project)}</h2></header>
-                <ul class="rows">
-                    ${audio.map(a => `<li><span class="label wrap"><strong>${esc(a.title || a.key || 'Audio')}</strong>${a.subtitle ? ` <span class="muted">· ${esc(a.subtitle)}</span>` : ''}<span class="sub">Audio · ${esc(a.key || a.src)}${audioDetail(a) ? ` · ${esc(audioDetail(a))}` : ''}</span></span><span class="value">${chip(audioState(a))}</span></li>`).join('')}
-                    ${videos.map(v => `<li><span class="label wrap"><strong>${esc(v.title || 'YouTube video')}</strong><span class="sub">YouTube · ${esc(v.id)}</span></span><span class="value">${chip(videoState(v.status))}</span></li>`).join('')}
-                </ul>
-                <div class="panel-foot"><button type="button" class="linklike" data-open="${esc(s.project)}">Open write-up in editor</button></div>
-            </section>`;
+            const lines = [
+                ...audio.map(a => ({ kind: 'Audio', title: a.title || a.key || 'Audio', sub: a.subtitle || '', source: [a.key || a.src, audioDetail(a)].filter(Boolean).join(' · '), state: audioState(a) })),
+                ...videos.map(v => ({ kind: 'YouTube', title: v.title || 'YouTube video', sub: '', source: v.id, state: videoState(v.status) }))
+            ];
+            return lines.map((l, i) => `<tr class="${i === 0 ? 'grp-first' : ''}">
+                <td data-label="Project" class="et-project">${i === 0 ? `<strong>${esc(names.get(s.project) || s.project)}</strong><button type="button" class="linklike" data-open="${esc(s.project)}">Open write-up</button>` : ''}</td>
+                <td data-label="Type" class="et-kind">${l.kind}</td>
+                <td data-label="Title"><strong>${esc(l.title)}</strong>${l.sub ? `<span class="sub">${esc(l.sub)}</span>` : ''}</td>
+                <td data-label="Source" class="et-source">${esc(l.source)}</td>
+                <td data-label="Status" class="et-status">${chip(l.state)}</td></tr>`).join('');
         }).join('');
         body.innerHTML = `<dl class="stats stats-3">
             <div class="stat"><dt>Audio players</dt><dd>${c.audio}<span class="delta">&nbsp;</span></dd></div>
             <div class="stat"><dt>YouTube videos</dt><dd>${c.videos}<span class="delta">&nbsp;</span></dd></div>
             <div class="stat"><dt>Problems</dt><dd>${c.problems}<span class="delta">${c.problems ? 'need attention' : 'all good'}</span></dd></div></dl>
-            ${rows ? `<div class="panel-grid">${rows}</div>` : '<div class="panel"><div class="panel-body muted">Nothing to show.</div></div>'}`;
+            ${rows ? `<div class="table-wrap"><table class="dt et">
+                <thead><tr><th scope="col">Project</th><th scope="col">Type</th><th scope="col">Title</th><th scope="col">Source</th><th scope="col" class="n">Status</th></tr></thead>
+                <tbody>${rows}</tbody></table></div>` : '<div class="panel"><div class="panel-body muted">Nothing to show.</div></div>'}`;
     };
 
     const run = async () => {

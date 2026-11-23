@@ -3,6 +3,9 @@ import { api, esc } from './util.js';
 import { auditProjectMeta, auditRedirects, SEO_DESCRIPTION, SEO_TITLE, summarize } from './audit.js';
 import { openInEditor } from './health.js';
 import { go, href, onPop, parse } from './router.js';
+import { confirmDialog } from './ui.js';
+import { suggestDestination } from './notfound-suggest.js';
+import { relativeTime } from './util.js';
 
 const branch = () => (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 const authHeaders = () => (typeof window.getAuthHeaders === 'function' ? window.getAuthHeaders() : {});
@@ -21,17 +24,19 @@ const SEV = { error: 'Error', warning: 'Warning', info: 'Note' };
 
 /* ───────────── Redirects tab ───────────── */
 
+const noteItems = notes => notes.map(n => `<li><span class="sev sev-${n.severity}">${SEV[n.severity]}</span> ${esc(n.message)}</li>`).join('');
+const noteRow = notes => `<tr class="row-notes-row"><td colspan="4"><ul class="row-notes">${noteItems(notes)}</ul></td></tr>`;
+
 function redirectRow(r, i, notes) {
-    return `<li class="rrow" data-i="${i}">
-        <div class="field"><label for="rs-${i}">Source</label><input id="rs-${i}" data-f="source" value="${esc(r.source)}" placeholder="/old-path" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-        <div class="field"><label for="rd-${i}">Destination</label><input id="rd-${i}" data-f="destination" value="${esc(r.destination)}" placeholder="/new-path or https://…" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-        <div class="field field-check"><label><input type="checkbox" data-f="permanent" ${r.permanent !== false ? 'checked' : ''}> Permanent (301)</label></div>
-        <div class="field field-end"><button type="button" class="btn btn-secondary" data-del="${i}" aria-label="Delete redirect from ${esc(r.source || 'new row')}">Delete</button></div>
-        ${notes.length ? `<ul class="row-notes">${notes.map(n => `<li><span class="sev sev-${n.severity}">${SEV[n.severity]}</span> ${esc(n.message)}</li>`).join('')}</ul>` : ''}
-    </li>`;
+    return `<tr class="rrow" data-i="${i}">
+        <td data-label="Source"><input id="rs-${i}" data-f="source" aria-label="Source" value="${esc(r.source)}" placeholder="/old-path" autocapitalize="none" autocorrect="off" spellcheck="false"></td>
+        <td data-label="Destination"><input id="rd-${i}" data-f="destination" aria-label="Destination" value="${esc(r.destination)}" placeholder="/new-path or https://…" autocapitalize="none" autocorrect="off" spellcheck="false"></td>
+        <td data-label="Type" class="rt-type"><label class="check-line inline"><input type="checkbox" data-f="permanent" ${r.permanent !== false ? 'checked' : ''}> Permanent (301)</label></td>
+        <td class="rt-act"><button type="button" class="btn btn-secondary" data-del="${i}" aria-label="Delete redirect from ${esc(r.source || 'new row')}">Delete</button></td>
+    </tr>${notes.length ? noteRow(notes) : ''}`;
 }
 
-async function renderRedirects(panel) {
+async function renderRedirects(panel, add = '') {
     panel.innerHTML = '<div class="loading">Loading redirects…</div>';
     const res = await api(`/api/admin/file?path=redirects.json&branch=${encodeURIComponent(branch())}`);
     if (!res.ok) {
@@ -59,7 +64,10 @@ async function renderRedirects(panel) {
         const dirty = JSON.stringify(list) !== baseline;
         panel.innerHTML = `
             <p class="muted tab-intro">Redirects run before everything else on the site. Query strings are carried through. Changes commit to <strong>${esc(branch())}</strong>.</p>
-            <ul class="rrows">${list.map((r, i) => redirectRow(r, i, by.get(r.source) || [])).join('') || '<li class="empty muted">No redirects yet.</li>'}</ul>
+            <div class="table-wrap"><table class="dt rt">
+                <thead><tr><th scope="col">Source</th><th scope="col">Destination</th><th scope="col">Type</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+                <tbody>${list.map((r, i) => redirectRow(r, i, by.get(r.source) || [])).join('') || '<tr><td colspan="4" class="empty-note">No redirects yet.</td></tr>'}</tbody>
+            </table></div>
             <div class="actions">
                 <button type="button" class="btn btn-secondary" id="add-redirect">Add redirect</button>
                 <button type="button" class="btn" id="save-redirects" ${!dirty || c.error ? 'disabled' : ''}>Save to ${esc(branch())}</button>
@@ -77,12 +85,12 @@ async function renderRedirects(panel) {
         const { all, by } = notesFor();
         const c = summarize(all);
         panel.querySelectorAll('.rrow').forEach((el, idx) => {
-            let ul = el.querySelector('.row-notes');
+            const next = el.nextElementSibling;
+            const existing = next?.classList.contains('row-notes-row') ? next : null;
             const notes = by.get(list[idx].source) || [];
-            const html = notes.map(n => `<li><span class="sev sev-${n.severity}">${SEV[n.severity]}</span> ${esc(n.message)}</li>`).join('');
-            if (!notes.length) { ul?.remove(); return; }
-            if (!ul) { ul = document.createElement('ul'); ul.className = 'row-notes'; el.appendChild(ul); }
-            ul.innerHTML = html;
+            if (!notes.length) { existing?.remove(); return; }
+            if (existing) existing.querySelector('.row-notes').innerHTML = noteItems(notes);
+            else el.insertAdjacentHTML('afterend', noteRow(notes));
         });
         const dirty = JSON.stringify(list) !== baseline;
         panel.querySelector('#save-redirects').disabled = !dirty || c.error > 0;
@@ -99,7 +107,7 @@ async function renderRedirects(panel) {
         const del = e.target.closest('[data-del]');
         if (del) {
             const i = Number(del.dataset.del);
-            if (list[i].source && !confirm(`Delete the redirect from ${list[i].source}?`)) return;
+            if (list[i].source && !(await confirmDialog({ title: 'Remove this redirect?', message: `${list[i].source}\n\nIt is only removed once you save.`, confirmLabel: 'Remove', danger: true }))) return;
             list.splice(i, 1);
             draw();
             return;
@@ -117,10 +125,13 @@ async function renderRedirects(panel) {
                     body: JSON.stringify({ path: 'redirects.json', branch: branch(), sha, content: textToB64(text), message: 'admin: update redirects' })
                 });
                 if (!r.ok) throw new Error(r.status === 409 ? 'The file changed on GitHub; reload and try again.' : `GitHub returned ${r.status}.`);
-                sha = (await r.json()).sha;
+                const saved = await r.json();
+                sha = saved.sha;
                 baseline = JSON.stringify(list);
                 draw();
-                panel.querySelector('#redirect-status').textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
+                const statusEl = panel.querySelector('#redirect-status');
+                statusEl.textContent = `Saved to ${branch()}. Checking the build…`;
+                window.adminTrackDeploy?.({ branch: branch(), commit: saved.commit }, s => { if (statusEl.isConnected) statusEl.textContent = s.text; });
                 return;
             } catch (err) {
                 status.textContent = `Save failed: ${err.message}`;
@@ -130,6 +141,46 @@ async function renderRedirects(panel) {
     });
 
     draw();
+
+    // Arrived from the 404 list with an address to redirect: add a row for it and put the cursor on the destination.
+    if (add && !list.some(r => r.source.toLowerCase() === add.toLowerCase())) {
+        list.push({ source: add, destination: suggestDestination(add, projects()), permanent: true });
+        draw();
+        const row = panel.querySelector(`#rd-${list.length - 1}`) || panel.querySelector(`#rs-${list.length - 1}`);
+        (panel.querySelector(`#rd-${list.length - 1}`) || row)?.focus();
+    }
+}
+
+/** Addresses people asked for that don't exist, with a button to redirect each. */
+async function renderNotFound(panel) {
+    panel.innerHTML = '<div class="loading">Loading…</div>';
+    const res = await api('/api/admin/notfound');
+    if (!res.ok) { panel.innerHTML = '<div class="notice"><strong>Couldn\'t load the list.</strong>Try again in a moment.</div>'; return; }
+    if (!res.body.available) { panel.innerHTML = '<div class="notice"><strong>Not recording yet.</strong>This needs the <code>ADMIN_KV</code> binding, which is set in <code>wrangler.jsonc</code> and applied on deploy.</div>'; return; }
+    const items = res.body.items;
+    const since = res.body.since ? new Date(res.body.since).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    if (!items.length) {
+        panel.innerHTML = `<p class="muted tab-intro">Nobody has landed on a missing page${since ? ` since ${esc(since)}` : ' yet'}. Scanner traffic and missing images are left out.</p>`;
+        return;
+    }
+    panel.innerHTML = `
+        <p class="muted tab-intro">Pages people asked for that don't exist${since ? `, since ${esc(since)}` : ''}. Scanner traffic and missing images are left out. A redirect sends them somewhere useful instead of the 404 page.</p>
+        <ul class="rows panel-list nf-list">${items.map(i => {
+            const guess = suggestDestination(i.path, globalThis.myProjects || []);
+            return `<li class="nf-row">
+                <span class="label wrap"><code>${esc(i.path)}</code><span class="sub">${i.count} visit${i.count === 1 ? '' : 's'} · last ${esc(relativeTime(new Date(i.last).toISOString()))}${i.referrer ? ` · from ${esc(i.referrer)}` : ''}${guess ? ` · looks like ${esc(guess)}` : ''}</span></span>
+                <span class="nf-actions">
+                    <a class="btn btn-secondary" href="${esc(href('seo', [], { add: i.path }))}">Redirect</a>
+                    <button type="button" class="linklike" data-ignore="${esc(i.path)}">Ignore</button>
+                </span></li>`;
+        }).join('')}</ul>`;
+    panel.addEventListener('click', async e => {
+        const b = e.target.closest('[data-ignore]');
+        if (!b) return;
+        b.disabled = true;
+        const r = await fetch(`/api/admin/notfound?path=${encodeURIComponent(b.dataset.ignore)}`, { method: 'DELETE', headers: window.getAuthHeaders?.() || {} });
+        if (r.ok) b.closest('li').remove(); else b.disabled = false;
+    });
 }
 
 /* ───────────── SEO tab ───────────── */
@@ -165,12 +216,15 @@ function renderSeo(panel, onlyIssues) {
 /* ───────────── View shell ───────────── */
 
 export async function render(root, route = parse()) {
-    let tab = route.query.get('tab') === 'seo' ? 'seo' : 'redirects';
+    const tabFrom = r => (r.query.get('add') ? 'redirects' : ['seo', '404'].includes(r.query.get('tab')) ? r.query.get('tab') : 'redirects');
+    let tab = tabFrom(route);
+    let addPath = route.query.get('add') || '';
     root.innerHTML = `
         <div class="view-head"><div><h1>Redirects &amp; SEO</h1><p>Edit redirects and review the text search engines and link previews use.</p></div></div>
         <div class="tabs" role="tablist" aria-label="Redirects and SEO">
             <button role="tab" type="button" id="tab-redirects" data-tab="redirects" aria-selected="${tab === 'redirects'}" aria-controls="seo-panel">Redirects</button>
             <button role="tab" type="button" id="tab-seo" data-tab="seo" aria-selected="${tab === 'seo'}" aria-controls="seo-panel">SEO</button>
+            <button role="tab" type="button" id="tab-404" data-tab="404" aria-selected="${tab === '404'}" aria-controls="seo-panel">404s people hit</button>
         </div>
         <div id="seo-panel" role="tabpanel" class="panel-body tabpanel"></div>`;
 
@@ -180,18 +234,21 @@ export async function render(root, route = parse()) {
         const fresh = root.querySelector('#seo-panel').cloneNode(false);
         root.querySelector('#seo-panel').replaceWith(fresh);
         fresh.setAttribute('aria-labelledby', `tab-${tab}`);
-        if (tab === 'redirects') await renderRedirects(fresh); else renderSeo(fresh, false);
+        if (tab === 'redirects') { const add = addPath; addPath = ''; await renderRedirects(fresh, add); }
+        else if (tab === '404') await renderNotFound(fresh);
+        else renderSeo(fresh, false);
     };
     root.querySelector('.tabs').addEventListener('click', e => {
         const t = e.target.closest('[data-tab]');
         if (!t || t.dataset.tab === tab) return;
         tab = t.dataset.tab;
-        go(href('seo', [], { tab: tab === 'seo' ? 'seo' : '' }), { quiet: true });
+        go(href('seo', [], { tab: tab === 'redirects' ? '' : tab }), { quiet: true });
         show();
     });
     onPop(r => {
-        const want = r.query.get('tab') === 'seo' ? 'seo' : 'redirects';
-        if (want !== tab) { tab = want; show(); }
+        const want = tabFrom(r);
+        addPath = r.query.get('add') || '';
+        if (want !== tab || addPath) { tab = want; show(); }
     });
     await show();
 }

@@ -16,6 +16,10 @@
     {
       "binding": "MEDIA",
       "bucket_name": "ryanmarchdotme-media"
+    },
+    {
+      "binding": "MEDIA_TRASH",
+      "bucket_name": "ryanmarchdotme-media-trash"
     }
   ],
   "kv_namespaces": [

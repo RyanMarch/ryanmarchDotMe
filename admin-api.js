@@ -12,6 +12,7 @@
  *   CF_API_TOKEN, CF_ACCOUNT_ID   Account Analytics:Read, for /analytics
  *   CF_ANALYTICS_HOST             hostname to query (default ryanmarch.me)
  *   GITHUB_REPO, GITHUB_PAT       for /overview
+ *   GSC_SERVICE_ACCOUNT, GSC_SITE Search Console read access, for /search
  *   ADMIN_KV                      KV namespace, caches analytics responses
  *
  * /health audits the *deployed* site: the bundled project data and redirects,
@@ -23,8 +24,9 @@ import {
     auditProjectHtml, auditProjectMeta, auditRedirects, auditSitemap, sortFindings, summarize
 } from './public/assets/js/admin/audit.js';
 
+import { fetchSearchData } from './search-console.js';
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
-import { handleActivity, handleImageDelete, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
+import { handleActivity, handleBuild, handleHistory, handleImageDelete, handleLinks, handleNotFound, handleTrash, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
 export { jsonResponse };
 
@@ -341,6 +343,20 @@ async function handleHealth(request, env, url, fetchImpl, ctx) {
     return jsonResponse({ findings, counts: summarize(findings), projects: projects.length });
 }
 
+export async function handleSearch(request, env, url, fetchImpl) {
+    const days = [7, 28, 90].includes(Number(url.searchParams.get('days'))) ? Number(url.searchParams.get('days')) : 28;
+    if (!env.GSC_SERVICE_ACCOUNT) {
+        return jsonResponse({ configured: false, message: 'Set GSC_SERVICE_ACCOUNT (and GSC_SITE) as Worker secrets to enable Search Console.' }, 501);
+    }
+    try {
+        const body = await cached(env, `search:${env.GSC_SITE || 'default'}:${days}`, 6 * 3600, () => fetchSearchData(env, days, fetchImpl));
+        if (!body.configured) return jsonResponse({ ...body, message: 'GSC_SERVICE_ACCOUNT is not valid JSON with client_email and private_key.' }, 501);
+        return jsonResponse(body);
+    } catch (e) {
+        return jsonResponse({ error: e.message }, 502);
+    }
+}
+
 /**
  * Returns a Response for /api/admin/{analytics,overview,health}, or null if the path
  * isn't one of ours.
@@ -349,13 +365,19 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     // path -> [handler, allowed methods]
     const routes = {
         '/api/admin/analytics': [handleAnalytics, ['GET']],
+        '/api/admin/search': [handleSearch, ['GET']],
         '/api/admin/overview': [handleOverview, ['GET']],
         '/api/admin/health': [handleHealth, ['GET']],
         '/api/admin/scan': [handleScan, ['GET']],
         '/api/admin/media': [handleMedia, ['GET']],
         '/api/admin/media/r2': [handleR2, ['PUT', 'DELETE']],
         '/api/admin/media/image': [handleImageDelete, ['DELETE']],
+        '/api/admin/media/trash': [handleTrash, ['GET', 'POST', 'DELETE']],
         '/api/admin/activity': [handleActivity, ['GET']],
+        '/api/admin/build': [handleBuild, ['GET']],
+        '/api/admin/links': [handleLinks, ['GET']],
+        '/api/admin/history': [handleHistory, ['GET']],
+        '/api/admin/notfound': [handleNotFound, ['GET', 'DELETE']],
         '/api/admin/status': [handleStatus, ['GET']]
     };
     const entry = routes[cleanPath];
@@ -370,6 +392,8 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
     if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
     if (handler === handleImageDelete) return handler(request, env, url, fetchImpl, { projects });
+    if (handler === handleLinks) return handler(request, env, url, fetchImpl, { projects, assetFetch });
+    if (handler === handleNotFound) return handler(request, env, url, fetchImpl, { projects, redirects });
     return handler(request, env, url, fetchImpl);
 }
 

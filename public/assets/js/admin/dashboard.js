@@ -1,4 +1,5 @@
-import { apiProblem, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
+import { apiProblem, countUp, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
+import { todayHtml, todayItems } from './today.js';
 import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
 function statBox(label, value, sub, spark = '') {
@@ -12,9 +13,9 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary'];
+    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound', '/api/admin/search?days=28'];
 
-    const paint = ([overview, analytics, health]) => {
+    const paint = ([overview, analytics, health, notfound, search]) => {
         const parts = [];
         const a = analytics.ok ? analytics.body : null;
         const o = overview.ok ? overview.body : null;
@@ -37,6 +38,11 @@ export async function render(root) {
             ? `<ul class="rows">${commits.map(c => `<li><span class="label"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}</span></span><span class="value">${esc(relativeTime(c.date))}</span></li>`).join('')}</ul>`
             : `<ul class="rows"><li class="empty">${esc(o?.commitsError ? `GitHub: ${o.commitsError}` : 'GitHub access is not configured for this environment.')}</li></ul>`;
 
+        parts.push(todayHtml(todayItems({
+            overview: overview.ok ? overview.body : null, health: health.ok ? health.body : null,
+            notfound: notfound?.ok ? notfound.body : null, search: search?.ok ? search.body : null, analytics: a
+        })));
+
         const hc = health.ok ? health.body.counts : null;
         const top = health.ok ? health.body.findings.filter(f => f.severity !== 'info').slice(0, 5) : [];
         parts.push( /*html*/`<div class="dash-grid"><section class="panel dash-health"><header><h2>Content Health</h2><a href="/admin/health" class="meta">Full audit</a></header>
@@ -46,7 +52,12 @@ export async function render(root) {
                 : `<p class="panel-body muted">${esc(apiProblem(health))}</p>`}
         </section>`);
 
-        parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="/admin/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
+        const nf = notfound?.ok && notfound.body.available ? notfound.body.items.slice(0, 5) : null;
+    parts.push(/*html*/`<section class="panel"><header><h2>Broken links people hit</h2><a href="/admin/seo?tab=404" class="meta">${nf && nf.length ? 'Fix them' : 'All'}</a></header>
+        ${nf === null ? '<p class="empty-note">Not recording yet.</p>' : nf.length ? `<ul class="rows">${nf.map(i => `<li><span class="label"><code>${esc(i.path)}</code></span><span class="value">${i.count}</span></li>`).join('')}</ul>` : '<p class="empty-note">Nobody has hit a missing page lately.</p>'}
+    </section>`);
+
+    parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="/admin/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
             <section class="panel"><header><h2>Recent commits</h2><span class="meta">${esc(o?.branch || branch)}</span></header>${commitList}</section>
         <section class="panel dash-quick"><header><h2>Quick actions</h2></header>
             <div class="quick">
@@ -77,5 +88,5 @@ export async function render(root) {
         });
     };
 
-    await swr(paths, paint);
+    await swr(paths, (results, meta) => { paint(results); if (!meta.stale) countUp(body); });
 }

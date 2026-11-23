@@ -2,6 +2,8 @@ import { myProjects } from './public/assets/js/project-data.js';
 import { buildImageSrcset } from './public/assets/js/image-utils.js';
 import redirects from './config/redirects.json';
 import { handleAdminApi, isAdminRequest, sameOrigin } from './admin-api.js';
+import { adminEmail, withEditor } from './admin-http.js';
+import { recordNotFound } from './not-found.js';
 
 /**
  * Cloudflare Worker for Ryan March | Product & Technology
@@ -192,7 +194,7 @@ class PreloadRewriter {
 
 
 export default {
-    async fetch(request, env) {
+    async fetch(request, env, ctx) {
         try {
             const url = new URL(request.url);
 
@@ -326,7 +328,7 @@ export default {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: body.message || `admin: update ${filePath}`,
+                            message: withEditor(body.message || `admin: update ${filePath}`, adminEmail(request)),
                             content: body.content, // base64 encoded content
                             sha: body.sha, // required if updating existing file
                             branch: branch
@@ -338,7 +340,8 @@ export default {
                     const data = await ghRes.json();
                     return new Response(JSON.stringify({
                         success: true,
-                        sha: data.content.sha
+                        sha: data.content.sha,
+                        commit: data.commit?.sha || null
                     }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' }
@@ -424,6 +427,7 @@ export default {
             const isValidRoute = !isHiddenWriteup && (cleanPath === '/' || isStaticAsset || isValidProject);
 
             if (!isValidRoute) {
+                recordNotFound(env, ctx, request);
                 // Fetch and return the custom 404 page directly from static assets (using extensionless '/404' to match Workers Assets clean URLs)
                 const response404 = await env.ASSETS.fetch(new Request(`${assetHost}/404`, request));
                 // The body is already decoded, so don't forward its encoding/length headers (they break the response).
@@ -445,6 +449,13 @@ export default {
                 env.ASSETS.fetch(assetRequest),
                 shouldFetchWriteup ? env.ASSETS.fetch(new Request(`${assetHost}/content/${project.id}/`)) : Promise.resolve(null)
             ]);
+
+            // A missing image or script must be a real 404. Workers Assets falls back to index.html (a 200) for unknown paths,
+            // which would look like a page that exists. Only asset-like paths are affected; pages and .html files are not.
+            if (isStaticAsset && /\.[a-z0-9]{2,5}$/i.test(cleanPath) && !/\.html?$/i.test(cleanPath)
+                && (response.headers.get('content-type') || '').includes('text/html')) {
+                return new Response('Not found', { status: 404, headers: { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store' } });
+            }
 
             // If it's a valid project route and the response is HTML, rewrite the meta tags and drop homepage blocks
             if (isValidProject && project && response.headers.get('content-type')?.includes('text/html')) {
