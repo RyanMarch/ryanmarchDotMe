@@ -24,7 +24,7 @@ import {
 } from './public/assets/js/admin/audit.js';
 
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
-import { handleActivity, handleBuild, handleImageDelete, handleNotFound, handleTrash, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
+import { handleActivity, handleBuild, handleImageDelete, handleLinks, handleNotFound, handleTrash, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
 export { jsonResponse };
 
@@ -358,6 +358,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
         '/api/admin/media/trash': [handleTrash, ['GET', 'POST', 'DELETE']],
         '/api/admin/activity': [handleActivity, ['GET']],
         '/api/admin/build': [handleBuild, ['GET']],
+        '/api/admin/links': [handleLinks, ['GET']],
         '/api/admin/notfound': [handleNotFound, ['GET', 'DELETE']],
         '/api/admin/status': [handleStatus, ['GET']]
     };
@@ -373,6 +374,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
     if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
     if (handler === handleImageDelete) return handler(request, env, url, fetchImpl, { projects });
+    if (handler === handleLinks) return handler(request, env, url, fetchImpl, { projects, assetFetch });
     if (handler === handleNotFound) return handler(request, env, url, fetchImpl, { projects, redirects });
     return handler(request, env, url, fetchImpl);
 }

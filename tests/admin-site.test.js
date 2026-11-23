@@ -6,7 +6,7 @@ import { handleAdminApi, sameOrigin } from '../admin-api.js';
 import { normalizeCheck, normalizeRestCheck, probeAudio } from '../admin-site.js';
 import { adminEmail, withEditor } from '../admin-http.js';
 import { checksState, flag } from '../public/assets/js/admin/activity.js';
-import { audioSignature, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
+import { audioSignature, classifyLink, externalLinks, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
 import { audioState, summarizeEmbeds, videoState } from '../public/assets/js/admin/embeds.js';
@@ -486,5 +486,60 @@ describe('R2 trash', () => {
         expect((await api('/api/admin/media/trash?key=7-b.mp3', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(200);
         expect(MEDIA_TRASH.m.size).toBe(0);
         expect((await (await api('/api/admin/media/trash', env0)).json()).available).toBe(false);
+    });
+});
+
+describe('externalLinks / classifyLink', () => {
+    const html = `
+        <!-- <a href="https://commented.example/x">no</a> -->
+        <a href="https://example.com/a#top">one</a> <a href="https://example.com/a">same page</a>
+        <a href='http://other.example/b?x=1&amp;y=2'>two</a>
+        <a href="https://ryanmarch.me/about">ours</a> <a href="https://media.ryanmarch.me/x.mp3">ours too</a>
+        <a href="https://filenamer.ryanmarch.me/docs/">another of my apps</a>
+        <a href="mailto:me@example.com">mail</a> <a href="/project/x/">local</a> <a href="#frag">frag</a>
+        <a href="http://localhost:8787/x">private</a> <a href="http://192.168.1.5/">private</a> <a>no href</a>`;
+    it('keeps distinct outside http(s) links and ignores everything else', () => {
+        expect(externalLinks(html)).toEqual(['https://example.com/a', 'http://other.example/b?x=1&y=2', 'https://filenamer.ryanmarch.me/docs/']);
+    });
+    it('stops at the limit', () => {
+        const many = Array.from({ length: 10 }, (_, i) => `<a href="https://e${i}.example/">x</a>`).join('');
+        expect(externalLinks(many, 3)).toHaveLength(3);
+    });
+    it('calls a link ok, broken or unverified', () => {
+        expect([200, 301, 302].map(classifyLink)).toEqual(['ok', 'ok', 'ok']);
+        expect([404, 410, 0].map(classifyLink)).toEqual(['broken', 'broken', 'broken']);
+        expect([401, 403, 429, 999, 500, 503].map(classifyLink)).toEqual(Array(6).fill('unverified'));
+    });
+});
+
+describe('/api/admin/links', () => {
+    const projects = [{ id: 'demo', hasExtendedContent: true }, { id: 'link', hasExtendedContent: false }];
+    const page = '<a href="https://good.example/">g</a><a href="https://gone.example/">x</a><a href="https://picky.example/">p</a><a href="https://down.example/">d</a>';
+    const assetFetch = vi.fn(async () => new Response(page));
+    const fetchImpl = vi.fn(async (u, init = {}) => {
+        const host = new URL(String(u)).hostname;
+        if (host === 'down.example') throw new Error('dns');
+        if (host === 'gone.example') return new Response('', { status: 404 });
+        if (host === 'picky.example') return new Response('', { status: init.method === 'HEAD' ? 405 : 403 }); // refuses HEAD, then refuses the ranged GET
+        return new Response('', { status: 200 });
+    });
+    it('checks each outside link and sorts them into ok, broken and unverified', async () => {
+        const body = await (await call('/api/admin/links?project=demo', env0, { projects, assetFetch, fetchImpl })).json();
+        const by = Object.fromEntries(body.links.map(l => [new URL(l.url).hostname, l]));
+        expect(by['good.example']).toMatchObject({ status: 200, state: 'ok' });
+        expect(by['gone.example']).toMatchObject({ status: 404, state: 'broken' });
+        expect(by['down.example']).toMatchObject({ status: 0, state: 'broken' });
+        expect(by['picky.example']).toMatchObject({ status: 403, state: 'unverified' });
+    });
+    it('falls back to a one-byte GET when a site refuses HEAD', async () => {
+        const seen = [];
+        const f = vi.fn(async (u, init = {}) => { seen.push(init.method); return new Response('', { status: init.method === 'HEAD' ? 405 : 206 }); });
+        const body = await (await call('/api/admin/links?project=demo', env0, { projects, assetFetch: vi.fn(async () => new Response('<a href="https://x.example/">x</a>')), fetchImpl: f })).json();
+        expect(seen).toEqual(['HEAD', 'GET']);
+        expect(body.links[0]).toMatchObject({ status: 206, state: 'ok' });
+    });
+    it('returns nothing for a link-only project and 404s an unknown one', async () => {
+        expect((await (await call('/api/admin/links?project=link', env0, { projects, assetFetch, fetchImpl })).json()).links).toEqual([]);
+        expect((await call('/api/admin/links?project=zzz', env0, { projects, assetFetch, fetchImpl })).status).toBe(404);
     });
 });

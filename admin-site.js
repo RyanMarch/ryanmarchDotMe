@@ -5,7 +5,7 @@
  */
 import { KEY as NOT_FOUND_KEY, normalizeNotFound } from './not-found.js';
 import { adminEmail, ghJson, jsonResponse, safeBranch, withEditor } from './admin-http.js';
-import { audioSignature, imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
+import { audioSignature, classifyLink, externalLinks, imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
 
 const ID_PATTERN = /^[a-z0-9_-]+$/i;
 const IMAGE_EXT = /\.(avif|webp|png|jpe?g|gif|svg|ico)$/i;
@@ -212,6 +212,43 @@ export async function handleTrash(request, env, url) {
     await env.MEDIA.put(original, obj.body, { httpMetadata: obj.httpMetadata });
     await env.MEDIA_TRASH.delete(key);
     return jsonResponse({ restored: original });
+}
+
+/* ───────────── /links?project= (do the outside links in a write-up still work?) ───────────── */
+
+async function linkStatus(fetchImpl, link) {
+    const attempt = async init => {
+        const res = await fetchImpl(link, { redirect: 'follow', signal: AbortSignal.timeout(6000), headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ryanmarch.me link check)', ...init.headers }, method: init.method });
+        await res.body?.cancel?.();
+        return res.status;
+    };
+    try {
+        let status = await attempt({ method: 'HEAD' });
+        // Plenty of sites answer HEAD with an error; ask for a single byte instead.
+        if ([400, 403, 405, 501].includes(status)) status = await attempt({ method: 'GET', headers: { Range: 'bytes=0-0' } });
+        return status;
+    } catch {
+        return 0; // no answer: unreachable, or the name does not resolve
+    }
+}
+
+export async function handleLinks(request, env, url, fetchImpl, ctx = {}) {
+    const id = url.searchParams.get('project');
+    const project = ID_PATTERN.test(id || '') && (ctx.projects || []).find(p => p.id === id);
+    if (!project) return jsonResponse({ error: 'not_found', message: `No project "${id}".` }, 404);
+    if (!project.hasExtendedContent || !ctx.assetFetch) return jsonResponse({ project: id, links: [] });
+    const res = await ctx.assetFetch(`/content/${id}/`);
+    if (!res.ok) return jsonResponse({ project: id, links: [] });
+    const links = externalLinks(await res.text());
+    const results = [];
+    // A few at a time, so one slow site doesn't hold up the rest.
+    for (let i = 0; i < links.length; i += 5) {
+        results.push(...await Promise.all(links.slice(i, i + 5).map(async link => {
+            const status = await linkStatus(fetchImpl, link);
+            return { url: link, status, state: classifyLink(status) };
+        })));
+    }
+    return jsonResponse({ project: id, links: results });
 }
 
 /* ───────────── /notfound (addresses people asked for that don't exist) ───────────── */

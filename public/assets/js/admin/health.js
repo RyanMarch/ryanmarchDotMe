@@ -61,6 +61,7 @@ export async function render(root, route = parse()) {
                     <button type="button" data-filter="warning" aria-pressed="${filter === 'warning'}">Warnings</button>
                 </div>
                 <button type="button" class="btn btn-secondary" id="export-report" title="Runs the full audit if needed, then downloads a Markdown report you can hand to an agent">Export report</button>
+                <button type="button" class="btn btn-secondary" id="check-links" title="Visits every outside link in the write-ups and reports the ones that no longer work">Check links</button>
                 <button type="button" class="btn" id="run-audit">Run full audit</button>
             </div>
         </div>
@@ -71,6 +72,7 @@ export async function render(root, route = parse()) {
     const status = root.querySelector('#health-status');
     const runBtn = root.querySelector('#run-audit');
     const exportBtn = root.querySelector('#export-report');
+    const linksBtn = root.querySelector('#check-links');
 
     const modeBar = () => (mode === 'full'
         ? `<div class="modebar"><span class="sev sev-ok">Full audit</span><span class="muted">Checked ${audit.total - audit.failed} of ${plural(audit.total, 'project')}, including write-ups and images, at ${esc(audit.at)}.${audit.failed ? ` ${audit.failed} could not be read.` : ''} Run it again to refresh.</span></div>`
@@ -136,6 +138,43 @@ export async function render(root, route = parse()) {
     };
 
     runBtn.addEventListener('click', runFull);
+
+    // Visit the outside links in each write-up and add the dead ones to the list.
+    const runLinks = async () => {
+        if (running) return;
+        running = true;
+        [runBtn, exportBtn, linksBtn].forEach(b => { b.disabled = true; });
+        try {
+            const queue = projects.filter(p => p.hasExtendedContent).map(p => p.id);
+            const total = queue.length;
+            const broken = [];
+            let checked = 0, unverified = 0, done = 0, failed = 0;
+            const worker = async () => {
+                while (queue.length) {
+                    const id = queue.shift();
+                    const res = await api(`/api/admin/links?project=${encodeURIComponent(id)}`);
+                    if (res.ok) {
+                        for (const l of res.body.links) {
+                            checked += 1;
+                            if (l.state === 'broken') broken.push({ severity: 'error', check: 'link-broken', id, message: `Link is broken (${l.status ? `HTTP ${l.status}` : 'no answer'}): ${l.url}` });
+                            else if (l.state === 'unverified') unverified += 1;
+                        }
+                    } else failed += 1;
+                    done += 1;
+                    status.textContent = `Checking links in write-up ${done} of ${total}…`;
+                }
+            };
+            await Promise.all([worker(), worker(), worker(), worker()]);
+            findings = sortFindings([...findings.filter(f => f.check !== 'link-broken'), ...broken]);
+            paint();
+            status.textContent = `Checked ${checked} outside link${checked === 1 ? '' : 's'} in ${total - failed} write-ups: ${broken.length} broken${unverified ? `, ${unverified} could not be verified (those sites refuse automated checks)` : ''}${failed ? `; ${failed} write-ups could not be read` : ''}.`;
+            if (audit) { try { sessionStorage.setItem(FULL_KEY, JSON.stringify({ when: Date.now(), findings, audit })); } catch { /* storage full or blocked */ } }
+        } finally {
+            [runBtn, exportBtn, linksBtn].forEach(b => { b.disabled = false; });
+            running = false;
+        }
+    };
+    linksBtn.addEventListener('click', runLinks);
 
     exportBtn.addEventListener('click', async () => {
         // A report should match what the full audit finds, so run it first if only the quick check has run.
