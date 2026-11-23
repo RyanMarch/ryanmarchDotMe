@@ -176,30 +176,77 @@ export async function handleR2(request, env, url) {
 
 /* ───────────── /activity ───────────── */
 
+const HISTORY_QUERY = `query($owner: String!, $name: String!, $ref: String!) {
+  repository(owner: $owner, name: $name) {
+    ref(qualifiedName: $ref) {
+      target { ... on Commit { history(first: 30) { nodes {
+        oid message committedDate url author { name }
+        statusCheckRollup { state contexts(first: 12) { nodes {
+          __typename
+          ... on CheckRun { name status conclusion detailsUrl checkSuite { app { name } } }
+          ... on StatusContext { context state targetUrl }
+        } } }
+      } } } }
+    }
+  }
+}`;
+
+const FAILED = new Set(['FAILURE', 'TIMED_OUT', 'CANCELLED', 'ACTION_REQUIRED', 'STARTUP_FAILURE', 'ERROR']);
+const OK = new Set(['SUCCESS', 'NEUTRAL', 'SKIPPED']);
+
+/** One check or status → { name, state: 'ok' | 'failed' | 'pending', url }. */
+export function normalizeCheck(node) {
+    if (node.__typename === 'StatusContext') {
+        return { name: node.context, state: node.state === 'SUCCESS' ? 'ok' : FAILED.has(node.state) ? 'failed' : 'pending', url: node.targetUrl || '' };
+    }
+    const label = /workers builds/i.test(node.name) || /cloudflare/i.test(node.checkSuite?.app?.name || '') ? 'Build' : node.checkSuite?.app?.name === 'GitHub Actions' ? 'Tests' : node.name;
+    const state = node.status !== 'COMPLETED' ? 'pending' : OK.has(node.conclusion) ? 'ok' : FAILED.has(node.conclusion) ? 'failed' : 'ok';
+    return { name: label, state, url: node.detailsUrl || '' };
+}
+
+async function historyWithChecks(env, branch, fetchImpl) {
+    const [owner, name] = env.GITHUB_REPO.split('/');
+    const res = await fetchImpl('https://api.github.com/graphql', {
+        method: 'POST',
+        headers: { 'Authorization': `bearer ${env.GITHUB_PAT}`, 'User-Agent': `${name}-Cloudflare-Worker`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: HISTORY_QUERY, variables: { owner, name, ref: `refs/heads/${branch}` } })
+    });
+    if (!res.ok) throw new Error(`GitHub ${res.status}`);
+    const data = await res.json();
+    const nodes = data?.data?.repository?.ref?.target?.history?.nodes;
+    if (!nodes) throw new Error(data?.errors?.[0]?.message || 'no history');
+    return nodes.map(n => ({
+        sha: n.oid.slice(0, 7),
+        message: (n.message || '').split('\n')[0],
+        author: n.author?.name || '',
+        date: n.committedDate,
+        url: n.url,
+        checks: n.statusCheckRollup ? n.statusCheckRollup.contexts.nodes.map(normalizeCheck) : null
+    }));
+}
+
 export async function handleActivity(request, env, url, fetchImpl) {
-    const out = { commits: null, runs: null, checks: null, deploys: null };
+    const out = { branch: null, commits: null, checksAvailable: false, pending: null, deploys: null };
     const branch = safeBranch(url.searchParams.get('branch'));
     out.branch = branch;
 
     if (env.GITHUB_REPO && env.GITHUB_PAT) {
-        const settle = async (key, path, map) => {
-            try { out[key] = map(await ghJson(env, path, fetchImpl)); } catch (err) { out[`${key}Error`] = err.message; }
-        };
-        await Promise.all([
-            settle('commits', `commits?sha=${encodeURIComponent(branch)}&per_page=30`, list => list.map(c => ({
-                sha: c.sha.slice(0, 7),
-                message: (c.commit.message || '').split('\n')[0],
-                author: c.commit.author?.name || '',
-                date: c.commit.author?.date,
-                url: c.html_url
-            }))),
-            settle('runs', `actions/runs?branch=${encodeURIComponent(branch)}&per_page=6`, d => (d.workflow_runs || []).map(r => ({
-                name: r.name, status: r.status, conclusion: r.conclusion, date: r.created_at, url: r.html_url, sha: (r.head_sha || '').slice(0, 7)
-            }))),
-            settle('checks', `commits/${encodeURIComponent(branch)}/check-runs?per_page=10`, d => (d.check_runs || []).map(c => ({
-                name: c.name, app: c.app?.name || '', status: c.status, conclusion: c.conclusion, url: c.html_url
-            })))
-        ]);
+        try {
+            out.commits = await historyWithChecks(env, branch, fetchImpl);
+        } catch {
+            // GraphQL unavailable for this token: fall back to plain commits (no per-commit check status).
+            try {
+                const list = await ghJson(env, `commits?sha=${encodeURIComponent(branch)}&per_page=30`, fetchImpl);
+                out.commits = list.map(c => ({ sha: c.sha.slice(0, 7), message: (c.commit.message || '').split('\n')[0], author: c.commit.author?.name || '', date: c.commit.author?.date, url: c.html_url, checks: null }));
+            } catch (err) { out.commitsError = err.message; }
+        }
+        out.checksAvailable = Boolean(out.commits?.some(c => c.checks));
+        if (branch === 'main') {
+            try {
+                const cmp = await ghJson(env, 'compare/main...develop', fetchImpl);
+                out.pending = { ahead: cmp.ahead_by || 0 };
+            } catch { /* no develop branch, or no access */ }
+        }
     }
 
     if (env.CF_API_TOKEN && env.CF_ACCOUNT_ID) {

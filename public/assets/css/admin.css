@@ -243,6 +243,14 @@ table.dt .track span { display: block; height: 100%; background: var(--accent-co
 .notice code, code.cmd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; background: var(--frame); padding: 0.1rem 0.35rem; border-radius: 3px; }
 .notice pre { margin: 0.5rem 0 0; padding: 0.6rem 0.75rem; background: var(--bg-color); border: 1px solid var(--rule); border-radius: var(--radius); overflow-x: auto; font-size: 0.82rem; }
 
+/* Activity: day groups in the commit timeline */
+.rows.timeline .value { white-space: nowrap; }
+.rows.timeline .commit-msg { white-space: normal; overflow-wrap: anywhere; }
+.rows.timeline li.day { display: block; padding: 0.4rem 1rem; font-size: 0.72rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); background: rgba(var(--accent-rgb), 0.04); min-height: 0; }
+.rows.timeline li.day:first-child { border-top: 0; }
+.stat .delta.clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.small { font-size: 0.82rem; margin: 0 0 1rem; }
+
 /* Content health: which kind of result is on screen */
 .modebar { display: flex; align-items: baseline; gap: 0.75rem 1rem; flex-wrap: wrap; padding: 0.65rem 1rem; margin-bottom: 1rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); font-size: 0.88rem; }
 .modebar .sev { font-size: 0.85rem; }
