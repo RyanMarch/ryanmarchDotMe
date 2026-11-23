@@ -84,3 +84,41 @@ describe('toast', () => {
         vi.useRealTimers();
     });
 });
+
+import { countUp } from '../public/assets/js/admin/util.js';
+
+describe('countUp', () => {
+    const setup = html => {
+        document.body.innerHTML = html;
+        window.matchMedia = q => ({ matches: false, media: q });
+        let now = 0;
+        vi.spyOn(performance, 'now').mockImplementation(() => now);
+        const frames = [];
+        window.requestAnimationFrame = cb => { frames.push(cb); return frames.length; };
+        return { run: ms => { now = ms; const cb = frames.shift(); cb?.(now); } };
+    };
+
+    it('starts a big number at 0, rises, and lands on the exact text', () => {
+        const { run } = setup('<div id="s"><div class="stat"><span class="v">1,280</span></div></div>');
+        const v = document.querySelector('.v');
+        countUp(document.getElementById('s'), 400);
+        expect(v.textContent).toBe('0');
+        run(200);
+        const mid = Number(v.textContent.replace(/,/g, ''));
+        expect(mid).toBeGreaterThan(0);
+        expect(mid).toBeLessThan(1280);
+        run(400);
+        expect(v.textContent).toBe('1,280');
+    });
+    it('leaves words, decimals, dashes and tiny numbers alone', () => {
+        setup('<div id="s"><div class="stat"><span class="v">577 ms</span><span class="v">1.00</span><span class="v">–</span><span class="v">1</span></div></div>');
+        countUp(document.getElementById('s'));
+        expect([...document.querySelectorAll('.v')].map(n => n.textContent)).toEqual(['577 ms', '1.00', '–', '1']);
+    });
+    it('does nothing when the person prefers reduced motion', () => {
+        setup('<div id="s"><div class="stat"><span class="v">900</span></div></div>');
+        window.matchMedia = q => ({ matches: true, media: q });
+        countUp(document.getElementById('s'));
+        expect(document.querySelector('.v').textContent).toBe('900');
+    });
+});

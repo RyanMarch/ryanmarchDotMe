@@ -137,3 +137,26 @@ export async function swr(paths, render, { signal } = {}) {
     if (signal?.aborted) return;
     render(results, { stale: false });
 }
+
+/**
+ * Counts the big numbers in `.stat .v` up from zero over about a third of a second. Only plain whole numbers
+ * (with thousands separators) are touched. Off for reduced motion, and the final text is always the exact value.
+ */
+export function countUp(scope, ms = 380) {
+    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    for (const node of scope.querySelectorAll('.stat .v')) {
+        const text = node.textContent.trim();
+        if (!/^\d{1,3}(,\d{3})*$/.test(text)) continue;
+        const target = Number(text.replace(/,/g, ''));
+        if (target < 2) continue;
+        const start = performance.now();
+        const step = now => {
+            const t = Math.min(1, (now - start) / ms);
+            node.textContent = t === 1 ? text : fmt(Math.round(target * (1 - (1 - t) ** 3)));
+            if (t < 1 && node.isConnected) requestAnimationFrame(step);
+            else node.textContent = text;
+        };
+        node.textContent = '0';
+        requestAnimationFrame(step);
+    }
+}

@@ -1,4 +1,4 @@
-import { apiProblem, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
+import { apiProblem, countUp, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
 import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
 function statBox(label, value, sub, spark = '') {
@@ -82,5 +82,5 @@ export async function render(root) {
         });
     };
 
-    await swr(paths, paint);
+    await swr(paths, (results, meta) => { paint(results); if (!meta.stale) countUp(body); });
 }
