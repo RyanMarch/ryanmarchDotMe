@@ -50,6 +50,7 @@ async function route(r = parse(), kind = 'push', quiet = false) {
 
     // Same view, new in-view state (a Media folder, a filter): the view repaints itself on Back/forward.
     if (name === shown) {
+        renderToken++; // cancels a pending move to another view (a quick Back while it was still loading)
         if (kind === 'pop') restoreScroll();
         if (!quiet) {
             notifyViews(r);
@@ -65,11 +66,12 @@ async function route(r = parse(), kind = 'push', quiet = false) {
     const mod = view.load ? await view.load() : null;
     if (token !== renderToken) return;
 
-    shown = name;
-    clearViewHandlers();
-
     let rendering = null;
     const swap = () => {
+        // A newer navigation started while this one waited (a quick Back, a second click): it owns the page now.
+        if (token !== renderToken) return;
+        shown = name;
+        clearViewHandlers();
         document.querySelectorAll('[data-nav]').forEach(a => {
             if (a.dataset.nav === name) a.setAttribute('aria-current', 'page');
             else a.removeAttribute('aria-current');
@@ -88,6 +90,7 @@ async function route(r = parse(), kind = 'push', quiet = false) {
     const animate = !firstRender && typeof document.startViewTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (animate) await document.startViewTransition(swap).updateCallbackDone.catch(() => {});
     else swap();
+    if (token !== renderToken) return;
 
     if (rendering) await rendering;
     else if (name === 'projects') {
