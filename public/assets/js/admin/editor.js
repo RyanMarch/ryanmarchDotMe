@@ -985,40 +985,7 @@ hasExtendedContent: ${hasExtendedContent}
             throw new Error(`Failed to save project database: ${await dbUpdateRes.text()}`);
         }
 
-        // Auto-update sitemap.xml
-        if (hasExtendedContent) {
-            try {
-                const sitemapRes = await fetch(`/api/admin/file?path=sitemap.xml&branch=${window.getSelectedBranch()}`, {
-                    headers: {
-                        ...getAuthHeaders()
-                    }
-                });
-                if (sitemapRes.ok) {
-                    const sitemapData = await sitemapRes.json();
-                    const sitemapXml = b64DecodeUnicode(sitemapData.content.replace(/\s/g, ''));
-
-                    const updatedSitemap = updateSitemapContent(sitemapXml, id, hasExtendedContent);
-                    const b64Sitemap = b64EncodeUnicode(updatedSitemap);
-
-                    await fetch('/api/admin/file', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            ...getAuthHeaders()
-                        },
-                        body: JSON.stringify({
-                            path: 'sitemap.xml',
-                            content: b64Sitemap,
-                            sha: sitemapData.sha,
-                            message: `admin: update sitemap for new project ${id}`,
-                            branch: window.getSelectedBranch()
-                        })
-                    });
-                }
-            } catch (e) {
-                console.error('Failed to auto-update sitemap:', e);
-            }
-        }
+        // sitemap.xml is generated from project-data.js at build time (scripts/sitemap-generator.js), so there is nothing to update here.
 
         // 4. Mutate local array state to sync frontend
         const localProjectObj = {
@@ -1671,39 +1638,6 @@ async function saveProjectData() {
         // 4. Update local state
         const oldId = window.editingProjectId;
 
-        // Auto-update sitemap.xml
-        try {
-            const sitemapRes = await fetch(`/api/admin/file?path=sitemap.xml&branch=${window.getSelectedBranch()}`, {
-                headers: {
-                    ...getAuthHeaders()
-                }
-            });
-            if (sitemapRes.ok) {
-                const sitemapData = await sitemapRes.json();
-                const sitemapXml = b64DecodeUnicode(sitemapData.content.replace(/\s/g, ''));
-
-                const updatedSitemap = updateSitemapContent(sitemapXml, newId, hasExtendedContent, oldId);
-                const b64Sitemap = b64EncodeUnicode(updatedSitemap);
-
-                await fetch('/api/admin/file', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...getAuthHeaders()
-                    },
-                    body: JSON.stringify({
-                        path: 'sitemap.xml',
-                        content: b64Sitemap,
-                        sha: sitemapData.sha,
-                        message: `admin: update sitemap for project ${newId}`,
-                        branch: window.getSelectedBranch()
-                    })
-                });
-            }
-        } catch (e) {
-            console.error('Failed to auto-update sitemap:', e);
-        }
-
         // Auto-update redirects.json if slug changed
         if (newId !== oldId) {
             try {
@@ -1777,48 +1711,6 @@ async function saveProjectData() {
     }
 }
 window.saveProjectData = saveProjectData;
-// Update sitemap content
-function updateSitemapContent(sitemapXml, slug, hasExtendedContent, oldSlug = null) {
-    const today = new Date().toISOString().split('T')[0];
-
-    // 1. Update homepage lastmod
-    sitemapXml = sitemapXml.replace(
-        /<loc>https:\/\/ryanmarch\.me\/<\/loc><lastmod>[^<]+<\/lastmod>/,
-        `<loc>https://ryanmarch.me/</loc><lastmod>${today}</lastmod>`
-    );
-
-    const oldUrlPattern = new RegExp(`\\s*<url><loc>https:\\/\\/ryanmarch\\.me\\/project\\/${oldSlug || slug}\\/<\\/loc>.*?<\\/url>`);
-    const newUrlBlock = `\n  <url><loc>https://ryanmarch.me/project/${slug}/</loc><lastmod>${today}</lastmod><priority>0.8</priority></url>`;
-
-    if (oldSlug && oldSlug !== slug) {
-        // Changing slug
-        if (hasExtendedContent) {
-            if (sitemapXml.match(oldUrlPattern)) {
-                sitemapXml = sitemapXml.replace(oldUrlPattern, newUrlBlock);
-            } else {
-                sitemapXml = sitemapXml.replace('</urlset>', `  ${newUrlBlock.trim()}\n</urlset>`);
-            }
-        } else {
-            sitemapXml = sitemapXml.replace(oldUrlPattern, '');
-        }
-    } else {
-        // Same slug or new project
-        if (hasExtendedContent) {
-            const currentUrlPattern = new RegExp(`\\s*<url><loc>https:\\/\\/ryanmarch\\.me\\/project\\/${slug}\\/<\\/loc>.*?<\\/url>`);
-            if (sitemapXml.match(currentUrlPattern)) {
-                sitemapXml = sitemapXml.replace(currentUrlPattern, newUrlBlock);
-            } else {
-                sitemapXml = sitemapXml.replace('</urlset>', `  ${newUrlBlock.trim()}\n</urlset>`);
-            }
-        } else {
-            sitemapXml = sitemapXml.replace(oldUrlPattern, '');
-        }
-    }
-
-    sitemapXml = sitemapXml.replace(/\n\s*\n/g, '\n');
-    return sitemapXml;
-}
-window.updateSitemapContent = updateSitemapContent;
 
 // Update redirects content
 function updateRedirectsContent(redirectsJsonStr, oldSlug, newSlug) {
