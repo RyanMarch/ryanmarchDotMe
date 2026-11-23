@@ -1169,7 +1169,7 @@ kbd { font: inherit; font-size: 0.8rem; padding: 0.05rem 0.4rem; border: 1px sol
 .choose-sub { font-size: 0.8rem; color: var(--text-muted); }
 
 /* ── Table pages (Embeds, Redirects): one wide table in a centred column, easy to read straight down ── */
-#view-embeds, #view-seo, #view-activity { max-width: 1180px; margin-inline: auto; }
+#view-embeds, #view-seo, #view-activity, #view-health { max-width: 1180px; margin-inline: auto; }
 .table-wrap { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); margin-bottom: 1.25rem; overflow: hidden; }
 .table-wrap table.dt { table-layout: fixed; }
 .table-wrap table.dt th { background: rgba(var(--accent-rgb), 0.04); }
@@ -1240,4 +1240,24 @@ table.at tbody tr.day-row:hover { background: none; }
     table.at td { display: block; border: 0 !important; padding: 0 !important; width: auto; }
     table.at .at-msg { order: -1; width: 100% !important; }
     table.at .at-flag:empty { display: none; }
+}
+
+/* Content Health: one table, findings grouped under their project */
+table.ht th:nth-child(1) { width: 22%; } table.ht th:nth-child(2) { width: 10%; }
+table.ht td { vertical-align: top; font-size: 0.9rem; }
+table.ht .ht-project strong { display: block; font-weight: 600; }
+table.ht .ht-project .linklike { font-size: 0.8rem; }
+table.ht .ht-msg { overflow-wrap: anywhere; }
+table.ht tr.first td { border-top: 1px solid var(--rule); }
+table.ht tbody tr:first-child td { border-top: 0; }
+@media (max-width: 720px) {
+    table.ht thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    table.ht, table.ht tbody { display: block; width: 100%; }
+    table.ht tr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.2rem 0.75rem; padding: 0.5rem 1rem; }
+    table.ht tr.first { border-top: 1px solid var(--rule); }
+    table.ht td { display: block; border: 0 !important; padding: 0 !important; width: auto; }
+    table.ht td::before { content: none; }
+    table.ht .ht-project { width: 100% !important; }
+    table.ht .ht-project:empty { display: none; }
+    table.ht .ht-msg { flex: 1 1 14rem; }
 }

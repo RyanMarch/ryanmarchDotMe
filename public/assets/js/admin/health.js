@@ -21,15 +21,16 @@ export function findingsHtml(findings, projects, filter = 'all') {
         if (!groups.has(f.id)) groups.set(f.id, []);
         groups.get(f.id).push(f);
     }
-    return `<div class="panel-grid">${[...groups].map(([id, items]) => {
-        const counts = summarize(items);
-        const meta = [counts.error && plural(counts.error, 'error'), counts.warning && plural(counts.warning, 'warning'), counts.info && plural(counts.info, 'note')].filter(Boolean).join(' · ');
-        return `<section class="panel">
-            <header><h2>${esc(names.get(id) || id)}</h2><span class="meta">${esc(meta)}</span></header>
-            <ul class="rows">${items.map(f => `<li><span class="label wrap"><span class="sev sev-${f.severity}">${SEV_LABEL[f.severity]}</span> ${esc(f.message)}</span></li>`).join('')}</ul>
-            ${names.has(id) ? `<div class="panel-foot"><button type="button" class="linklike" data-open="${esc(id)}">Open write-up in editor</button></div>` : ''}
-        </section>`;
-    }).join('')}</div>`;
+    const rows = [...groups].map(([id, items]) => {
+        const open = names.has(id) ? `<button type="button" class="linklike" data-open="${esc(id)}">Open write-up</button>` : '';
+        return items.map((f, i) => `<tr${i === 0 ? ' class="first"' : ''}>
+            <td data-label="Project" class="ht-project">${i === 0 ? `<strong>${esc(names.get(id) || id)}</strong>${open}` : ''}</td>
+            <td data-label="Severity" class="ht-sev"><span class="sev sev-${f.severity}">${SEV_LABEL[f.severity]}</span></td>
+            <td data-label="Finding" class="ht-msg">${esc(f.message)}</td></tr>`).join('');
+    }).join('');
+    return `<div class="table-wrap"><table class="dt ht">
+        <thead><tr><th scope="col">Project</th><th scope="col">Severity</th><th scope="col">Finding</th></tr></thead>
+        <tbody>${rows}</tbody></table></div>`;
 }
 
 export function countsHtml(c, note = '') {
