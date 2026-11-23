@@ -26,6 +26,48 @@ async function statusPanel(el) {
     }).join('')}</ul>`;
 }
 
+async function send(path, method, payload) {
+    const res = await fetch(path, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(window.getAuthHeaders?.() || {}) }, body: payload ? JSON.stringify(payload) : undefined });
+    return { ok: res.ok, body: await res.json().catch(() => ({})) };
+}
+
+const WHEN = iso => new Date(iso).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+/** Publish or unpublish a project at a set time. The Worker applies it on main from a cron that runs every 15 minutes. */
+async function schedulePanel(el) {
+    const res = await api('/api/admin/schedule');
+    if (!res.ok || !res.body.available) { el.innerHTML = `<div class="panel-body muted">${esc(res.body?.message || 'Scheduling is not available here.')}</div>`; return; }
+    const titles = new Map((globalThis.myProjects || []).map(p => [p.id, p.title]));
+    const name = id => titles.get(id) || id;
+    const draw = state => {
+        const projects = (globalThis.myProjects || []).slice().sort((a, b) => a.title.localeCompare(b.title));
+        el.innerHTML = `<p class="muted tab-intro">Pick a time and a project; it publishes or unpublishes itself on <strong>main</strong>, within 15 minutes of then. Times are in your local time zone.</p>
+            ${state.items.length ? `<ul class="rows">${state.items.map(i => `<li><span class="label">${esc(name(i.id))}<span class="sub">${i.action === 'publish' ? 'Publish' : 'Unpublish'} · ${esc(WHEN(i.at))}</span></span><span class="value"><button type="button" class="linklike danger" data-cancel="${esc(i.id)}">Cancel</button></span></li>`).join('')}</ul>` : '<p class="empty-note">Nothing scheduled.</p>'}
+            <form class="sched-form" id="sched-form">
+                <label>Project<select name="project" required>${projects.map(p => `<option value="${esc(p.id)}">${esc(p.title)}${p.unpublished ? ' (unpublished)' : ''}</option>`).join('')}</select></label>
+                <label>Action<select name="action"><option value="unpublish">Unpublish</option><option value="publish">Publish</option></select></label>
+                <label>When<input type="datetime-local" name="at" required></label>
+                <button type="submit" class="btn">Schedule</button>
+            </form>
+            ${(state.log || []).length ? `<h3 class="sec-title">Recent</h3><ul class="rows">${state.log.slice(0, 5).map(l => `<li><span class="label wrap">${esc(name(l.id))}<span class="sub">${l.action === 'publish' ? 'Publish' : 'Unpublish'} · ${esc(WHEN(l.at))}${l.note ? ` · ${esc(l.note)}` : ''}</span></span><span class="value"><span class="sev sev-${l.ok ? 'info' : 'error'}">${l.ok ? 'Done' : 'Failed'}</span></span></li>`).join('')}</ul>` : ''}`;
+    };
+    draw(res.body);
+    el.addEventListener('submit', async e => {
+        e.preventDefault();
+        const f = new FormData(e.target);
+        const out = await send('/api/admin/schedule', 'POST', { project: f.get('project'), action: f.get('action'), at: new Date(f.get('at')).toISOString() });
+        if (!out.ok) { window.adminAlert(out.body?.message || 'Could not schedule that.', { title: 'Schedule' }); return; }
+        draw(out.body);
+        window.adminToast?.('Scheduled.', { type: 'success' });
+    });
+    el.addEventListener('click', async e => {
+        const c = e.target.closest('[data-cancel]');
+        if (!c) return;
+        const out = await send(`/api/admin/schedule?project=${encodeURIComponent(c.dataset.cancel)}`, 'DELETE');
+        if (out.ok) draw(out.body);
+    });
+}
+
 async function orderPanel(el) {
     el.innerHTML = '<div class="loading">Loading projects…</div>';
     const res = await api(`/api/admin/file?path=assets/js/project-data.js&branch=${encodeURIComponent(branch())}`);
@@ -164,10 +206,13 @@ export async function render(root) {
         <section class="panel s-conn"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
         <section class="panel s-files"><header><h2>Site files</h2></header>
             <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section></div>
-        <section class="panel s-order"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section></div>`;
+        <div class="settings-main">
+        <section class="panel s-order"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
+        <section class="panel s-sched"><header><h2>Scheduled changes</h2></header><div id="sched-panel" class="panel-body"><div class="loading">Loading…</div></div></section></div></div>`;
 
     statusPanel(root.querySelector('#status-panel'));
     orderPanel(root.querySelector('#order-panel'));
+    schedulePanel(root.querySelector('#sched-panel'));
     root.addEventListener('click', e => {
         const f = e.target.closest('[data-file]');
         if (!f) return;

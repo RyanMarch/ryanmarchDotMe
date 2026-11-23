@@ -120,6 +120,47 @@ export function infoDialog({ title, rows }) {
     });
 }
 
+/** Shows write-up HTML the way the site draws it, in a sandboxed frame (no scripts run), at phone or desktop width. */
+export function previewDialog({ title, html }) {
+    return new Promise(resolve => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        const doc = `<!doctype html><html${theme ? ` data-theme="${theme}"` : ''}><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><base href="${location.origin}/"><link rel="stylesheet" href="/assets/css/style.css"><style>body{margin:0;padding:1.25rem}</style></head><body><div id="project-detail-area"><div class="project-detail-content">${html}</div></div></body></html>`;
+        const dlg = el('dialog', 'dlg dlg-preview');
+        dlg.setAttribute('aria-labelledby', 'dlg-title');
+        const form = el('form', 'dlg-body');
+        form.method = 'dialog';
+        const h = el('h2', 'dlg-title', title);
+        h.id = 'dlg-title';
+        const widths = el('div', 'seg');
+        const frame = el('iframe', 'preview-frame');
+        frame.setAttribute('sandbox', '');
+        frame.title = 'Preview';
+        frame.srcdoc = doc;
+        for (const [label, w] of [['Desktop', ''], ['Phone', '390px']]) {
+            const b = el('button', '', label);
+            b.type = 'button';
+            b.setAttribute('aria-pressed', String(!w));
+            b.addEventListener('click', () => {
+                frame.style.width = w || '100%';
+                widths.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+            });
+            widths.append(b);
+        }
+        const note = el('p', 'dlg-message', "Shows your unsaved text. Images added since the last deploy won't appear yet.");
+        const actions = el('div', 'dlg-actions');
+        const ok = el('button', 'btn', 'Close');
+        ok.type = 'submit';
+        actions.append(ok);
+        form.append(h, widths, frame, note, actions);
+        dlg.append(form);
+        dlg.addEventListener('close', () => { dlg.remove(); resolve(); });
+        dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+        document.body.append(dlg);
+        dlg.showModal();
+        ok.focus();
+    });
+}
+
 function toastHost() {
     let host = document.getElementById('toasts');
     if (!host) {
@@ -167,4 +208,5 @@ if (typeof window !== 'undefined') {
     window.adminAlert = (message, opts) => alertDialog(message, opts);
     window.adminToast = toast;
     window.adminChoose = chooseDialog;
+    window.adminPreview = previewDialog;
 }

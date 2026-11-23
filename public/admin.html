@@ -108,6 +108,11 @@
                             aria-hidden="true">
                             <path d="M4 20V10M10 20V4M16 20v-7M21 20H3" />
                         </svg><span>Analytics</span></a>
+                    <a class="nav-link" href="/admin/performance" data-nav="performance"><svg class="ico" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path d="M4 17l5-5 4 3 7-8" />
+                            <path d="M15 7h5v5" />
+                        </svg><span>Performance</span></a>
                     <a class="nav-link" href="/admin/search" data-nav="search"><svg class="ico" viewBox="0 0 24 24"
                             aria-hidden="true">
                             <circle cx="10.5" cy="10.5" r="6" />
@@ -172,6 +177,7 @@
             <section id="view-analytics" data-view="analytics" hidden></section>
             <section id="view-health" data-view="health" hidden></section>
             <section id="view-seo" data-view="seo" hidden></section>
+            <section id="view-performance" data-view="performance" hidden></section>
             <section id="view-search" data-view="search" hidden></section>
             <section id="view-activity" data-view="activity" hidden></section>
             <section id="view-media" data-view="media" hidden></section>
@@ -328,6 +334,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <h2 id="editor-title">File Editor</h2>
                         <div style="display: flex; align-items: center; gap: 0.75rem;">
+                            <button type="button" id="preview-btn" class="btn btn-secondary" style="min-height: 30px; padding: 0 0.7rem; font-size: 0.8rem;" onclick="showPreview()">Preview</button>
                             <button type="button" id="history-btn" class="btn btn-secondary" style="min-height: 30px; padding: 0 0.7rem; font-size: 0.8rem;" onclick="showFileHistory()">History</button>
                             <label
                                 style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem; cursor: pointer; user-select: none; margin: 0;">

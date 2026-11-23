@@ -238,9 +238,74 @@ test.describe('search and suggestions', () => {
     test('the dashboard lists what is worth doing', async ({ page }) => {
         await mockAdminApi(page);
         await signIn(page);
-        const list = page.locator('.dash-today');
+        const list = page.locator('.dash-today', { hasText: 'Worth doing' });
         await expect(list).toContainText('/project/ledgr was hit 3 times');
         await expect(list).toContainText('wordpress rent plugin');
         await expect(list).toContainText('1 project has no write-up');
+    });
+});
+
+test.describe('search per project', () => {
+    test('projects list their search numbers, check indexing, and open a detail view', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/search');
+        const row = page.locator('#view-search tr:has([data-idx="ledger"])');
+        await expect(row).toContainText('300');
+        await page.click('#inspect-all');
+        await expect(page.locator('[data-idx="ledger"]')).toContainText('Indexed');
+        await row.getByRole('link').click();
+        await expect(page).toHaveURL(/project=ledger/);
+        await expect(page.locator('#view-search')).toContainText('ledger app');
+        await expect(page.locator('#view-search')).toContainText('Submitted and indexed');
+        await page.getByRole('link', { name: '← All projects' }).click();
+        await expect(page).not.toHaveURL(/project=/);
+    });
+});
+
+test.describe('performance, schedule, preview', () => {
+    test('Performance lists each project with its numbers and notes', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/performance');
+        const row = page.locator('#view-performance tr', { hasText: 'Ledger' }).first();
+        await expect(row).toContainText('30');
+        await expect(row).toContainText('Not edited in');
+    });
+
+    test('Search shows sitemap status', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/search');
+        await expect(page.locator('#view-search')).toContainText('/sitemap.xml');
+        await expect(page.locator('#view-search')).toContainText('12');
+    });
+
+    test('a change can be scheduled and cancelled from Settings', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/settings');
+        await expect(page.locator('#sched-panel')).toContainText('Nothing scheduled');
+        const when = new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 16);
+        await page.locator('#sched-form select[name=project]').selectOption({ index: 0 });
+        await page.locator('#sched-form input[name=at]').fill(when);
+        await page.getByRole('button', { name: 'Schedule' }).click();
+        await expect(page.locator('#sched-panel')).toContainText('Unpublish');
+        await page.getByRole('button', { name: 'Cancel' }).click();
+        await expect(page.locator('#sched-panel')).toContainText('Nothing scheduled');
+    });
+
+    test('Preview shows the unsaved write-up in a sandboxed frame', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/projects?file=content%2Fledger%2Findex.html');
+        await expect(page.locator('#active-file-label')).toContainText('content/ledger/index.html');
+        await page.click('#preview-btn');
+        const dlg = page.locator('dialog.dlg-preview');
+        await expect(dlg).toContainText('Preview of content/ledger/index.html');
+        await expect(dlg.locator('iframe')).toHaveAttribute('sandbox', '');
+        await dlg.getByRole('button', { name: 'Phone' }).click();
+        await expect(dlg.locator('iframe')).toHaveCSS('width', '390px');
+    });
+
+    test('the dashboard has a weekly summary', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page);
+        await expect(page.locator('.dash-today', { hasText: 'This week' })).toContainText('page views');
     });
 });

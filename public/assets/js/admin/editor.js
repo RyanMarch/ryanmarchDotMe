@@ -85,6 +85,14 @@ function b64EncodeUnicode(str) {
 }
 
 // File history: pick an earlier version of the open file and load it into the editor (nothing is saved until you Save).
+function showPreview() {
+    if (!currentFile.path) return;
+    const html = jar ? jar.toString() : document.getElementById('editor-textarea').textContent;
+    if (!/\.html?$/i.test(currentFile.path)) { window.adminAlert('Preview works for HTML files, like a project write-up.', { title: 'Preview' }); return; }
+    window.adminPreview({ title: `Preview of ${currentFile.path}`, html });
+}
+window.showPreview = showPreview;
+
 async function showFileHistory() {
     if (!currentFile.path) return;
     const branch = window.getSelectedBranch();
