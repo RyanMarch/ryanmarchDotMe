@@ -42,7 +42,7 @@ async function renderRedirects(panel) {
     let list;
     try { list = JSON.parse(original); } catch { panel.innerHTML = '<div class="notice"><strong>redirects.json is not valid JSON.</strong>Fix it in the editor first.</div>'; return; }
     const trailingNewline = original.endsWith('\n');
-    const baseline = JSON.stringify(list);
+    let baseline = JSON.stringify(list);
 
     const projects = () => globalThis.myProjects || [];
     const notesFor = () => {
@@ -117,9 +117,10 @@ async function renderRedirects(panel) {
                 });
                 if (!r.ok) throw new Error(r.status === 409 ? 'The file changed on GitHub; reload and try again.' : `GitHub returned ${r.status}.`);
                 sha = (await r.json()).sha;
-                status.textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
-                // Reload from GitHub so the baseline and sha are authoritative.
-                return renderRedirectsAfterSave(panel);
+                baseline = JSON.stringify(list);
+                draw();
+                panel.querySelector('#redirect-status').textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
+                return;
             } catch (err) {
                 status.textContent = `Save failed: ${err.message}`;
                 save.disabled = false;
@@ -128,15 +129,6 @@ async function renderRedirects(panel) {
     });
 
     draw();
-}
-
-async function renderRedirectsAfterSave(panel) {
-    const msg = 'Saved. It goes live with the next deploy.';
-    const fresh = panel.cloneNode(false);
-    panel.replaceWith(fresh);
-    await renderRedirects(fresh);
-    const s = fresh.querySelector('#redirect-status');
-    if (s) s.textContent = msg;
 }
 
 /* ───────────── SEO tab ───────────── */
