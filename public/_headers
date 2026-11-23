@@ -55,6 +55,10 @@
   Cache-Control: no-cache
 /assets/css/admin.css
   Cache-Control: no-cache
+# Built files (hashed names, produced by scripts/build.js): cache forever.
+/assets/js/admin/dist/*
+  ! Cache-Control
+  Cache-Control: public, max-age=31536000, immutable
 
 # ── Favicons: reasonably long cache
 /assets/favicon/*
