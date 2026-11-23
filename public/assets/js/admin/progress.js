@@ -30,7 +30,9 @@ export async function render(root) {
 
         const missingRows = comp.rows.filter(r => r.missing.length).map(r => `<tr><td data-label="Project"><strong>${esc(r.title)}</strong></td><td data-label="Missing" class="pf-notes">${r.missing.map(m => `<span>${esc(m)}</span>`).join('')}</td></tr>`).join('');
         const topics = topicIdeas(s?.pairs || []).map(t => `<tr><td data-label="Search phrase"><strong>${esc(t.query)}</strong></td><td data-label="Impressions" class="num">${fmt(t.impressions)}</td><td data-label="Clicks" class="num">${fmt(t.clicks)}</td><td data-label="Landed on">${esc(t.page)}</td></tr>`).join('');
-        const months = journalMonths(commits).map(m => `<li><span class="label wrap"><strong>${esc(m.label)}</strong><span class="sub">${esc(m.highlights.join(' · '))}</span></span><span class="value">${fmt(m.count)} edit${m.count === 1 ? '' : 's'}</span></li>`).join('');
+        const titleOf = id => projects.find(p => p.id === id)?.title || id;
+        const day = iso => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const months = journalMonths(commits, titleOf).map(m => `<li class="journal-month"><strong>${esc(m.label)}</strong><span class="value">${fmt(m.count)} change${m.count === 1 ? '' : 's'}</span></li>${m.entries.slice(0, 8).map(e => `<li><span class="label">${esc(e.text)}</span><span class="value">${esc(day(e.date))}</span></li>`).join('')}${m.entries.length > 8 ? `<li class="empty">and ${m.entries.length - 8} more</li>` : ''}`).join('');
 
         body.innerHTML = `
             <div class="stats">
@@ -49,8 +51,8 @@ export async function render(root) {
             ${table(['Project', 'Missing'], missingRows, 'Every project has the basics.')}
             <h2 class="sec-title">People searched for these</h2><p class="muted small">Phrases that brought people to your homepage or another page, not a project. Each is a possible new write-up.</p>
             ${s ? table(['Search phrase', 'Impressions', 'Clicks', 'Landed on'], topics, 'No such phrases yet.') : '<p class="muted small">Connect Search Console to see these.</p>'}
-            <h2 class="sec-title">Journal</h2>
-            ${months ? `<ul class="rows">${months}</ul>` : `<p class="muted small">${esc(journal.ok ? 'No commits found.' : apiProblem(journal))}</p>`}`;
+            <h2 class="sec-title">Journal</h2><p class="muted small">Changes to your project pages and images, newest first.</p>
+            ${months ? `<ul class="rows">${months}</ul>` : `<p class="muted small">${esc(journal.ok ? 'No content changes found yet.' : apiProblem(journal))}</p>`}`;
 
         // Looking at the page counts as having seen what's new.
         const next = readSeen();

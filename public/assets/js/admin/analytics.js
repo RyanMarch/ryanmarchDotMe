@@ -196,12 +196,12 @@ function vitalsHtml(v) {
         ['CLS', 'Cumulative layout shift', 'cls', v.cls, v.cls ?? '–'],
         ['FCP', 'First contentful paint', 'fcp_ms', v.fcp_ms, ms(v.fcp_ms)]
     ];
-    return `<div class="vitals">${items.map(([short, long, key, val, text]) => {
+    return /*html*/`<div class="vitals">${items.map(([short, long, key, val, text]) => {
         const r = rate(key, val);
         const [good, poor] = THRESHOLDS[key];
         const top = poor * 1.5;
         const pos = val === null || val === undefined ? null : Math.min(100, (val / top) * 100);
-        return `<div class="vital">
+        return /*html*/`<div class="vital">
             <div class="k"><abbr title="${long}">${short}</abbr></div>
             <div class="v">${text}</div>
             <div class="gauge" role="img" aria-label="${long}: ${r.text}">
@@ -214,12 +214,14 @@ function vitalsHtml(v) {
 }
 
 function sourcesHtml(d) {
-    const tabs = [['referrers', 'Referrers', 'Source'], ['countries', 'Countries', 'Country'], ['devices', 'Devices', 'Device']];
-    return `<section class="panel a-src">
-        <header><div class="tabs-inline" role="tablist" aria-label="Traffic breakdown">${tabs.map(([k, label], i) =>
-            `<button type="button" role="tab" id="src-tab-${k}" data-src="${k}" aria-selected="${i === 0}" aria-controls="src-panel" tabindex="${i === 0 ? 0 : -1}">${label}</button>`).join('')}</div></header>
-        <div id="src-panel" role="tabpanel" aria-labelledby="src-tab-referrers">${dataTable(d.referrers, { head: tabs[0][2], total: d.totals.current.views, render: i => esc(referrerLabel(i.label, d.host)) })}</div>
-    </section>`;
+    const panels = [
+        ['Referrers', d.referrers, { head: 'Source', total: d.totals.current.views, render: i => esc(referrerLabel(i.label, d.host)) }],
+        ['Countries', d.countries, { head: 'Country', total: d.totals.current.views, render: i => esc(countryLabel(i.label)) }],
+        ['Devices', d.devices, { head: 'Device', total: d.totals.current.views }]
+    ];
+    return panels.map(([title, rows, opts]) =>
+        `<section class="panel a-src"><header><h2>${title}</h2></header>${dataTable(rows, opts)}</section>`
+    ).join('');
 }
 
 /** Plays and outbound clicks per project, counted by the site itself (the visitor is never identified). */
@@ -243,9 +245,9 @@ export async function render(root, route = parse()) {
     let hideTor = route.query.get('tor') === 'hide';
     const record = () => go(href('analytics', [], { days: days === 30 ? '' : days, tor: hideTor ? 'hide' : '' }), { quiet: true });
 
-    root.innerHTML = `
+    root.innerHTML = /*html*/`
         <div class="view-head">
-            <div><h1>Analytics</h1><p>Cloudflare Web Analytics for ryanmarch.me. Privacy-friendly: no cookies, no personal data.</p></div>
+            <div><h1>Analytics</h1><p>Cloudflare Web Analytics for ryanmarch.me.</p></div>
             <div class="head-actions">
                 <label class="check-line inline"><input type="checkbox" id="hide-tor" ${hideTor ? 'checked' : ''}> Hide Tor traffic</label>
                 <div class="seg" role="group" aria-label="Date range">
@@ -284,8 +286,8 @@ export async function render(root, route = parse()) {
                 <p class="chart-note">These are estimates. Cloudflare samples page loads on a site this size, so counts come in steps of about 10 and a single day can shift between refreshes. Trust the totals and the trend over any one day.</p>
             </section>
             <section class="panel a-top"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
-            ${sourcesHtml(d)}
             <section class="panel a-goals"><header><h2>Goals</h2><span class="meta" id="goals-meta">plays and clicks out</span></header><div id="goals-host"><p class="empty-note">Loading…</p></div></section>
+            ${sourcesHtml(d)}
             <section class="panel a-vitals">
                 <header><h2>Core Web Vitals</h2><span class="meta">${fmt(d.vitals.samples)} samples · averages, ${d.days} days</span></header>
                 ${vitalsHtml(d.vitals)}
@@ -301,24 +303,6 @@ export async function render(root, route = parse()) {
             body.querySelectorAll('.stat-pick').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
             body.querySelector('#chart-title').textContent = state.metric === 'visits' ? 'Visits per day' : 'Page views per day';
             state.redraw();
-        });
-
-        const srcTabs = body.querySelector('.tabs-inline');
-        const showSource = btn => {
-            const k = btn.dataset.src;
-            srcTabs.querySelectorAll('button').forEach(b => { b.setAttribute('aria-selected', String(b === btn)); b.tabIndex = b === btn ? 0 : -1; });
-            const panel = body.querySelector('#src-panel');
-            panel.setAttribute('aria-labelledby', btn.id);
-            const head = { referrers: 'Source', countries: 'Country', devices: 'Device' }[k];
-            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views, ...(k === 'countries' ? { render: i => esc(countryLabel(i.label)) } : {}), ...(k === 'referrers' ? { render: i => esc(referrerLabel(i.label, d.host)) } : {}) });
-        };
-        srcTabs.addEventListener('click', e => { const b = e.target.closest('button[data-src]'); if (b) showSource(b); });
-        srcTabs.addEventListener('keydown', e => {
-            const btns = [...srcTabs.querySelectorAll('button')];
-            const i = btns.indexOf(document.activeElement);
-            if (i < 0 || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
-            const next = btns[(i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length];
-            next.focus(); showSource(next); e.preventDefault();
         });
     }
 

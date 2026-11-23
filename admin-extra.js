@@ -195,17 +195,17 @@ export async function handleIdeas(request, env, url) {
     return save([{ id: crypto.randomUUID().slice(0, 8), text, created: new Date().toISOString(), done: false }, ...ideas]);
 }
 
-/* ───────────── journal: the last 100 commits on main ───────────── */
+/* ───────────── journal: the last 100 commits that touched site content ───────────── */
 
 export async function handleJournal(request, env, url, fetchImpl) {
     if (!env.GITHUB_REPO || !env.GITHUB_PAT) return jsonResponse({ available: false, commits: [], message: 'GitHub access is not configured.' });
-    const key = 'journal:v1';
+    const key = 'journal:v2';
     if (env.ADMIN_KV) {
         const hit = await env.ADMIN_KV.get(key, 'json').catch(() => null);
         if (hit) return jsonResponse({ ...hit, cached: true });
     }
     try {
-        const list = await ghJson(env, 'commits?sha=main&per_page=100', fetchImpl);
+        const list = await ghJson(env, 'commits?sha=main&path=public%2Fcontent&per_page=100', fetchImpl);
         const out = { available: true, commits: list.map(c => ({ date: c.commit.author.date, message: (c.commit.message || '').split('\n')[0], author: c.commit.author.name || '' })) };
         if (env.ADMIN_KV) await env.ADMIN_KV.put(key, JSON.stringify(out), { expirationTtl: 3600 }).catch(() => {});
         return jsonResponse(out);
