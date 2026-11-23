@@ -23,6 +23,7 @@ export const myProjects = [
     },
     {
         id: "spindex",
+        unpublished: true,
         title: "Spindex",
         subtitle: "Browse your record collection like flipping through a real crate.",
         seoTitle: "Spindex - 3D Vinyl Record Crate & Collection Browser",
