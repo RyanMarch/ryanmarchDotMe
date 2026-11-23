@@ -76,3 +76,64 @@ export function dataTable(items, { render = item => esc(item.label), head = 'Ite
         return `<tr><td class="lbl"><div class="lbl-text">${render(item)}</div><div class="track"><span style="width:${Math.max(1, Math.round((item.count / max) * 100))}%"></span></div></td><td class="n">${fmt(item.count)}</td><td class="n share-col">${pct < 1 ? '<1' : Math.round(pct)}%</td></tr>`;
     }).join('')}</tbody></table>`;
 }
+
+/* ───────────── Instant revisits: show the last answer now, refresh it in the background ───────────── */
+
+const CACHE = new Map(); // path -> { at, result }
+const INFLIGHT = new Map(); // path -> Promise
+const KEEP_MS = 30 * 60 * 1000;
+
+// Any change made through the admin API (save, upload, delete, publish) makes every cached answer suspect.
+if (typeof window !== 'undefined' && !window.__adminFetchPatched) {
+    window.__adminFetchPatched = true;
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+        const method = String(init?.method || (typeof input !== 'string' && input?.method) || 'GET').toUpperCase();
+        const url = typeof input === 'string' ? input : input?.url || '';
+        if (method !== 'GET' && url.includes('/api/admin/')) CACHE.clear();
+        return nativeFetch(input, init);
+    };
+}
+
+export const hasCached = path => { const e = CACHE.get(path); return Boolean(e && Date.now() - e.at < KEEP_MS); };
+export const clearApiCache = () => CACHE.clear();
+
+function fetchAndStore(path) {
+    if (INFLIGHT.has(path)) return INFLIGHT.get(path);
+    const p = api(path).then(result => {
+        if (result.ok) CACHE.set(path, { at: Date.now(), result });
+        return result;
+    }).finally(() => INFLIGHT.delete(path));
+    INFLIGHT.set(path, p);
+    return p;
+}
+
+/** Start loading a path ahead of time (for a hover or focus on a link). Does nothing if it is fresh. */
+export function warm(path) {
+    const e = CACHE.get(path);
+    if (e && Date.now() - e.at < 20000) return;
+    fetchAndStore(path).catch(() => {});
+}
+
+/**
+ * Loads one or more API paths and calls render(results). If every path was loaded before, render runs
+ * straight away with the old answers and this call returns; the refresh then runs in the background and
+ * calls render again only if the fresh answers differ.
+ * `signal.aborted` (a newer request replaced this one) silences any late render.
+ */
+export async function swr(paths, render, { signal } = {}) {
+    const cached = paths.map(p => { const e = CACHE.get(p); return e && Date.now() - e.at < KEEP_MS ? e.result : null; });
+    if (cached.every(Boolean)) {
+        render(cached, { stale: true });
+        // Refresh in the background; this call has already returned the old answer.
+        Promise.all(paths.map(fetchAndStore)).then(fresh => {
+            if (signal?.aborted || !fresh.every(r => r.ok)) return;
+            if (JSON.stringify(fresh.map(r => r.body)) !== JSON.stringify(cached.map(r => r.body))) render(fresh, { stale: false });
+        }).catch(() => {});
+        return;
+    }
+    let results;
+    try { results = await Promise.all(paths.map(fetchAndStore)); } catch { return; }
+    if (signal?.aborted) return;
+    render(results, { stale: false });
+}

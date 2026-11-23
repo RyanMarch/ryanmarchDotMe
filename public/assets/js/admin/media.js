@@ -1,7 +1,8 @@
-import { api, esc, fmt } from './util.js';
+import { esc, fmt, swr } from './util.js';
 import { cachedScan, scanAll } from './scan-client.js';
 import { imageStem, referencedStems } from './scan.js';
-import { buildFolders, folderTitle, groupSets } from './media-sets.js';
+import { buildFolders, dirFromSlug, folderSlug, folderTitle, groupSets } from './media-sets.js';
+import { go, href, onPop, parse } from './router.js';
 
 const authHeaders = () => (typeof window.getAuthHeaders === 'function' ? window.getAuthHeaders() : {});
 const branch = () => (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
@@ -23,7 +24,7 @@ const STATUS = {
     'avif-only': ['info', 'AVIF only, no fallback']
 };
 
-function imagesTab(panel, media, projects, reload) {
+function imagesTab(panel, media, projects, reload, route) {
     if (!media.repo) {
         panel.innerHTML = `<div class="notice"><strong>Images unavailable.</strong>${esc(media.repoError ? `GitHub: ${media.repoError}` : 'GitHub access is not configured for this environment.')}</div>`;
         return;
@@ -34,17 +35,17 @@ function imagesTab(panel, media, projects, reload) {
     const byDir = new Map();
     for (const set of allSets) { if (!byDir.has(set.dir)) byDir.set(set.dir, []); byDir.get(set.dir).push(set); }
 
-    let folder = '';
-    try { folder = sessionStorage.getItem('admin_media_folder') || ''; } catch { /* private mode */ }
-    if (folder && !byDir.has(folder)) folder = '';
-    let query = '';
-    let only = 'all'; // all | missing | large
+    let folder = dirFromSlug(route.rest, [...byDir.keys()]);
+    let query = route.query.get('q') || '';
+    let only = ['missing', 'large'].includes(route.query.get('show')) ? route.query.get('show') : 'all'; // all | missing | large
     let stems = null; // set after a usage scan
     const LIMIT = 150;
 
     const total = files.reduce((n, f) => n + f.size, 0);
     const missingTotal = allSets.filter(s => s.status === 'missing-avif').length;
-    const remember = () => { try { sessionStorage.setItem('admin_media_folder', folder); } catch { /* private mode */ } };
+    // The folder, search and filter live in the URL, so Back and swipe-back step through them.
+    const here = () => href('media', folder ? folderSlug(folder) : [], { q: query.trim(), show: only === 'all' ? '' : only });
+    const record = (replace = false) => go(here(), { replace, quiet: true });
 
     const statusLabel = set => {
         const st = STATUS[set.status];
@@ -78,9 +79,10 @@ function imagesTab(panel, media, projects, reload) {
             // Top level: the folders.
             crumbs.innerHTML = '<span class="crumb-here">All folders</span>';
             tools.hidden = true;
+            list.className = 'rows panel-list is-grid cells-folder';
             list.innerHTML = folders.map(f => `<li class="frow"><button type="button" class="folder-btn" data-folder="${esc(f.dir)}">
                 ${FOLDER_ICON}<span class="fname-col"><strong>${esc(f.title)}</strong><span class="sub">${esc(f.dir)}</span></span>
-                <span class="fmeta">${f.missingAvif ? `<span class="sev sev-warning">${f.missingAvif} missing AVIF</span>` : ''}<span class="num">${fmt(f.images)} image${f.images === 1 ? '' : 's'} · ${bytes(f.bytes)}</span></span></button></li>`).join('');
+                <span class="fissue">${f.missingAvif ? `<span class="sev sev-warning">${f.missingAvif} missing AVIF</span>` : ''}</span><span class="fcount num">${fmt(f.images)} image${f.images === 1 ? '' : 's'}</span><span class="fsize num">${bytes(f.bytes)}</span></button></li>`).join('');
             count.textContent = `${fmt(folders.length)} folders`;
             return;
         }
@@ -95,6 +97,7 @@ function imagesTab(panel, media, projects, reload) {
             ? '<button type="button" class="linklike" data-up>All folders</button><span class="crumb-sep" aria-hidden="true">/</span><span class="crumb-here">Search results</span>'
             : `<button type="button" class="linklike" data-up>All folders</button><span class="crumb-sep" aria-hidden="true">/</span><span class="crumb-here">${esc(folderTitle(folder, projects))}</span><span class="sub crumb-path">${esc(folder)}</span>`;
         tools.hidden = false;
+        list.className = 'rows panel-list is-grid cells-set';
         list.innerHTML = sets.slice(0, LIMIT).map(s => setRow(s, Boolean(q))).join('') || '<li class="empty muted">Nothing matches.</li>';
         count.textContent = `${sets.length > LIMIT ? `${LIMIT} of ` : ''}${fmt(sets.length)} picture${sets.length === 1 ? '' : 's'}`;
     };
@@ -118,20 +121,21 @@ function imagesTab(panel, media, projects, reload) {
         <div class="status-line" id="media-status" aria-live="polite"><span id="media-count"></span></div>
         <ul class="rows panel-list" id="media-list"></ul>`;
 
-    panel.querySelector('#media-q').addEventListener('input', e => { query = e.target.value; paint(); });
+    panel.querySelector('#media-q').addEventListener('input', e => { query = e.target.value; paint(); record(true); });
     panel.querySelector('#folder-tools').addEventListener('click', e => {
         const b = e.target.closest('[data-only]');
         if (!b) return;
         only = b.dataset.only;
         panel.querySelectorAll('#folder-tools button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
         paint();
+        record(true);
     });
     panel.querySelector('#media-crumbs').addEventListener('click', e => {
         if (!e.target.closest('[data-up]')) return;
         folder = ''; query = ''; only = 'all';
         panel.querySelector('#media-q').value = '';
         panel.querySelectorAll('#folder-tools button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.only === 'all')));
-        remember(); paint();
+        paint(); record(); window.scrollTo(0, 0);
     });
     panel.querySelector('#check-usage').addEventListener('click', async e => {
         e.target.disabled = true;
@@ -145,7 +149,7 @@ function imagesTab(panel, media, projects, reload) {
 
     panel.querySelector('#media-list').addEventListener('click', async e => {
         const open = e.target.closest('[data-folder]');
-        if (open) { folder = open.dataset.folder; only = 'all'; remember(); paint(); window.scrollTo(0, 0); return; }
+        if (open) { folder = open.dataset.folder; only = 'all'; query = ''; panel.querySelector('#media-q').value = ''; panel.querySelectorAll('#folder-tools button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.only === 'all'))); paint(); record(); window.scrollTo(0, 0); return; }
 
         const btn = e.target.closest('[data-delimg]');
         if (!btn) return;
@@ -173,6 +177,18 @@ function imagesTab(panel, media, projects, reload) {
         await reload();
     });
     paint();
+
+    // Back/forward inside this tab: take the folder, search and filter from the URL and repaint (no reload).
+    return {
+        apply(r) {
+            folder = dirFromSlug(r.rest, [...byDir.keys()]);
+            query = r.query.get('q') || '';
+            only = ['missing', 'large'].includes(r.query.get('show')) ? r.query.get('show') : 'all';
+            panel.querySelector('#media-q').value = query;
+            panel.querySelectorAll('#folder-tools button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.only === only)));
+            paint();
+        }
+    };
 }
 
 /* ───────────── Audio & files (R2) ───────────── */
@@ -244,9 +260,10 @@ function r2Tab(panel, media, projects, reload) {
 
 /* ───────────── View ───────────── */
 
-export async function render(root) {
+export async function render(root, route = parse()) {
     const projects = globalThis.myProjects || [];
-    let tab = sessionStorage.getItem('admin_media_tab') === 'r2' ? 'r2' : 'images';
+    let tab = route.query.get('tab') === 'audio' ? 'r2' : 'images';
+    let imagesApi = null;
     root.innerHTML = `
         <div class="view-head"><div><h1>Media</h1><p>Site images from the repository, and audio files in the R2 bucket.</p></div></div>
         <div class="tabs" role="tablist" aria-label="Media">
@@ -256,25 +273,37 @@ export async function render(root) {
         <div id="media-panel" role="tabpanel" class="tabpanel"><div class="loading">Loading…</div></div>`;
 
     let media = null;
-    const load = async () => {
-        const res = await api(`/api/admin/media?branch=${encodeURIComponent(branch())}`);
-        media = res.ok ? res.body : { repo: null, repoError: `request failed (${res.status})`, r2: { available: false, objects: [] } };
+    const toMedia = res => (res.ok ? res.body : { repo: null, repoError: `request failed (${res.status})`, r2: { available: false, objects: [] } });
+    const mediaPath = () => `/api/admin/media?branch=${encodeURIComponent(branch())}`;
+    // Loads the data. With an earlier answer on hand it resolves at once and calls `onFresh` if the refresh differs.
+    const load = async onFresh => {
+        let first = true;
+        await swr([mediaPath()], ([res]) => {
+            media = toMedia(res);
+            if (!first) onFresh?.();
+            first = false;
+        });
     };
     const show = () => {
         root.querySelectorAll('[role=tab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
         const fresh = root.querySelector('#media-panel').cloneNode(false);
         root.querySelector('#media-panel').replaceWith(fresh);
         fresh.setAttribute('aria-labelledby', `tab-${tab}`);
-        if (tab === 'images') imagesTab(fresh, media, projects, async () => { await load(); show(); });
+        imagesApi = null;
+        if (tab === 'images') imagesApi = imagesTab(fresh, media, projects, async () => { await load(); show(); }, parse());
         else r2Tab(fresh, media, projects, async () => { await load(); show(); });
     };
     root.querySelector('.tabs').addEventListener('click', e => {
         const t = e.target.closest('[data-tab]');
         if (!t || t.dataset.tab === tab) return;
         tab = t.dataset.tab;
-        try { sessionStorage.setItem('admin_media_tab', tab); } catch { /* private mode */ }
+        go(href('media', [], { tab: tab === 'r2' ? 'audio' : '' }), { quiet: true });
         show();
     });
-    await load();
+    onPop(r => {
+        const want = r.query.get('tab') === 'audio' ? 'r2' : 'images';
+        if (want !== tab) { tab = want; show(); } else imagesApi?.apply(r);
+    });
+    await load(() => show());
     show();
 }

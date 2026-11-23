@@ -40,7 +40,17 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
                 fetch: vi.fn().mockImplementation((req) => {
                     const url = new URL(req.url);
                     if (url.pathname === '/' || url.pathname === '/index.html') {
-                        return Promise.resolve(new Response('<html><head><title>Home</title></head><body><div class="top-row"></div><div id="projects-grid"></div></body></html>', {
+                        return Promise.resolve(new Response('<html><head><title>Home</title></head><body><div class="top-row"></div><div id="projects-grid"></div><div id="archive-divider"></div><div id="archive-projects-grid"></div><div id="project-detail-area" style="display: none;"></div></body></html>', {
+                            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                        }));
+                    }
+                    if (url.pathname === '/content/icon-studio/') {
+                        return Promise.resolve(new Response('<h2 class="project-title">Icon Studio</h2><p>Icon Studio write-up.</p>', {
+                            headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                        }));
+                    }
+                    if (url.pathname === '/content/breaking-winter/') {
+                        return Promise.resolve(new Response('<h2 class="project-title">Breaking Winter</h2><audio src="content/breaking-winter/audio/ryanMarchBreakingWinter.mp3"></audio>', {
                             headers: { 'Content-Type': 'text/html; charset=utf-8' }
                         }));
                     }
@@ -134,20 +144,33 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         expect(res.headers.get('Location')).toBe('https://ryanmarch.me/project/icon-studio/');
     });
 
-    it('should redirect /admin and /admin/ to /admin.html with noindex headers', async () => {
-        const req = new Request('https://ryanmarch.me/admin');
-        const res = await worker.fetch(req, mockEnv);
-        expect(res.status).toBe(301);
-        expect(res.headers.get('Location')).toBe('https://ryanmarch.me/admin.html');
-        expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
-    });
-
-    it('should serve /admin.html with X-Robots-Tag noindex header', async () => {
-        const req = new Request('https://ryanmarch.me/admin.html');
-        const res = await worker.fetch(req, mockEnv);
+    it('should serve the admin at /admin with noindex and no-store headers', async () => {
+        const res = await worker.fetch(new Request('https://ryanmarch.me/admin'), mockEnv);
         expect(res.status).toBe(200);
+        expect(await res.text()).toBe('Admin HTML');
         expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
         expect(res.headers.get('Cache-Control')).toBe('no-store');
+    });
+
+    it('should redirect /admin.html and /admin/ to /admin, keeping the query string', async () => {
+        for (const from of ['https://ryanmarch.me/admin.html', 'https://ryanmarch.me/admin/', 'https://ryanmarch.me/admin.html?x=1']) {
+            const res = await worker.fetch(new Request(from), mockEnv);
+            expect(res.status, from).toBe(301);
+            expect(res.headers.get('Location'), from).toBe(`https://ryanmarch.me/admin${from.includes('?') ? '?x=1' : ''}`);
+            expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+        }
+    });
+
+    it('should serve the admin shell for every /admin/... path and drop trailing slashes', async () => {
+        for (const p of ['/admin/media', '/admin/media/ledger', '/admin/analytics?days=7']) {
+            const res = await worker.fetch(new Request(`https://ryanmarch.me${p}`), mockEnv);
+            expect(res.status, p).toBe(200);
+            expect(await res.text()).toBe('Admin HTML');
+            expect(res.headers.get('Cache-Control')).toBe('no-store');
+        }
+        const slash = await worker.fetch(new Request('https://ryanmarch.me/admin/media/'), mockEnv);
+        expect(slash.status).toBe(301);
+        expect(slash.headers.get('Location')).toBe('https://ryanmarch.me/admin/media');
     });
 
     it('should route invalid paths to the custom 404 page', async () => {
@@ -187,5 +210,79 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         handlerFor('link#lcp-preload').element(link);
         expect(preload.href).toBe(`/${spindex.image}`);
         expect(preload.imagesrcset).toContain(`${spindex.imageWidths[0]}w`);
+    });
+
+    it('should inline write-up HTML and rewrite R2 media URLs for projects with extended content', async () => {
+        const res = await worker.fetch(new Request('https://ryanmarch.me/project/breaking-winter/'), mockEnv);
+        expect(res.status).toBe(200);
+
+        const selectors = res.htmlRewriterHandlers.map(h => h.selector);
+        expect(selectors).toContain('#archive-divider');
+        expect(selectors).toContain('#archive-projects-grid');
+        expect(selectors).toContain('body');
+        expect(selectors).toContain('#project-detail-area');
+
+        const handlerFor = (selector) => res.htmlRewriterHandlers.find(h => h.selector === selector).handler;
+
+        const bodyAttrs = {};
+        handlerFor('body').element({
+            getAttribute: () => null,
+            setAttribute: (k, v) => { bodyAttrs[k] = v; }
+        });
+        expect(bodyAttrs.class).toBe('standalone-page');
+
+        const existingBodyAttrs = { class: 'custom-theme' };
+        handlerFor('body').element({
+            getAttribute: (k) => existingBodyAttrs[k],
+            setAttribute: (k, v) => { existingBodyAttrs[k] = v; }
+        });
+        expect(existingBodyAttrs.class).toBe('custom-theme standalone-page');
+
+        const detailAttrs = {};
+        const removed = [];
+        let injected = null;
+        handlerFor('#project-detail-area').element({
+            setAttribute: (k, v) => { detailAttrs[k] = v; },
+            removeAttribute: (k) => { removed.push(k); },
+            setInnerContent: (html, opts) => { injected = { html, opts }; }
+        });
+        expect(detailAttrs['data-ssr-project']).toBe('breaking-winter');
+        expect(removed).toContain('style');
+        expect(injected.opts).toEqual({ html: true });
+        expect(injected.html).toContain('https://media.ryanmarch.me/ryanMarchBreakingWinter.mp3');
+    });
+
+    it('should not fetch or inline write-up HTML for projects without extended content', async () => {
+        const res = await worker.fetch(new Request('https://ryanmarch.me/project/bowserstack/'), mockEnv);
+        expect(res.status).toBe(200);
+
+        const fetchedPaths = mockEnv.ASSETS.fetch.mock.calls.map(([req]) => new URL(req.url).pathname);
+        expect(fetchedPaths).not.toContain('/content/bowserstack/');
+
+        const selectors = res.htmlRewriterHandlers.map(h => h.selector);
+        expect(selectors).toContain('#archive-divider');
+        expect(selectors).toContain('#archive-projects-grid');
+        expect(selectors).not.toContain('body');
+        expect(selectors).not.toContain('#project-detail-area');
+    });
+
+    it('should skip SSR write-up injection when the fragment is 404 or returns a full HTML document', async () => {
+        const res404 = await worker.fetch(new Request('https://ryanmarch.me/project/ledger/'), mockEnv);
+        expect(res404.status).toBe(200);
+        expect(res404.htmlRewriterHandlers.map(h => h.selector)).not.toContain('#project-detail-area');
+
+        const baseFetch = mockEnv.ASSETS.fetch.getMockImplementation();
+        mockEnv.ASSETS.fetch.mockImplementation((req) => {
+            if (new URL(req.url).pathname === '/content/ledger/') {
+                return Promise.resolve(new Response('<!DOCTYPE html><html><body>Fallback</body></html>', {
+                    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+                }));
+            }
+            return baseFetch(req);
+        });
+
+        const resFallback = await worker.fetch(new Request('https://ryanmarch.me/project/ledger/'), mockEnv);
+        expect(resFallback.status).toBe(200);
+        expect(resFallback.htmlRewriterHandlers.map(h => h.selector)).not.toContain('#project-detail-area');
     });
 });

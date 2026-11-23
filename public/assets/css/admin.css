@@ -144,7 +144,7 @@ dl.stats { margin: 0 0 1.25rem; }
 .rows li { position: relative; display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 1rem; border-top: 1px solid var(--rule); font-size: 0.9rem; min-height: 38px; align-items: center; }
 .rows li:first-child { border-top: 0; }
 .rows .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
-.rows .value { font-variant-numeric: tabular-nums; color: var(--text-secondary); position: relative; }
+.rows .value { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-secondary); position: relative; }
 .rows .bar { position: absolute; inset: 3px auto 3px 0; background: rgba(var(--accent-rgb), 0.13); pointer-events: none; }
 .rows a { color: inherit; text-decoration: none; }
 .rows a:hover { text-decoration: underline; }
@@ -206,6 +206,7 @@ button.stat-pick:focus-visible { outline: 2px solid var(--accent-color); outline
 .tip[hidden] { display: none; }
 .tip-date { font-weight: 650; margin-bottom: 0.1rem; }
 .chart-foot { display: flex; justify-content: space-between; gap: 1rem; padding: 0.25rem 1rem 0.75rem; font-size: 0.8rem; color: var(--text-muted); }
+.chart-note { margin: 0; padding: 0.6rem 1rem 0.8rem; border-top: 1px solid var(--rule); font-size: 0.8rem; color: var(--text-muted); }
 .chart-readout { min-height: 1.4em; color: var(--text-secondary); }
 
 .split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 0 1.25rem; align-items: start; }
@@ -242,6 +243,18 @@ table.dt .track span { display: block; height: 100%; background: var(--accent-co
 .notice strong { display: block; margin-bottom: 0.2rem; }
 .notice code, code.cmd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; background: var(--frame); padding: 0.1rem 0.35rem; border-radius: 3px; }
 .notice pre { margin: 0.5rem 0 0; padding: 0.6rem 0.75rem; background: var(--bg-color); border: 1px solid var(--rule); border-radius: var(--radius); overflow-x: auto; font-size: 0.82rem; }
+
+/* Activity: day groups in the commit timeline */
+.rows.timeline .value { white-space: nowrap; }
+.rows.timeline .commit-msg { white-space: normal; overflow-wrap: anywhere; }
+.rows.timeline li.day { display: block; padding: 0.4rem 1rem; font-size: 0.72rem; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); background: rgba(var(--accent-rgb), 0.04); min-height: 0; }
+.rows.timeline li.day:first-child { border-top: 0; }
+.stat .delta.clip { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.small { font-size: 0.82rem; margin: 0 0 1rem; }
+
+/* Content health: which kind of result is on screen */
+.modebar { display: flex; align-items: baseline; gap: 0.75rem 1rem; flex-wrap: wrap; padding: 0.65rem 1rem; margin-bottom: 1rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); font-size: 0.88rem; }
+.modebar .sev { font-size: 0.85rem; }
 
 /* Loading placeholder: the text stays for screen readers, sighted users see blocks where content will land. */
 .loading { font-size: 0; line-height: 0; padding: 0; color: transparent; }
@@ -858,7 +871,6 @@ input[type="file"] { padding: 0.35rem; }
 .folder-btn .ico { width: 20px; height: 20px; color: var(--text-muted); }
 .folder-btn .fname-col { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .folder-btn .sub { font-size: 0.78rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.folder-btn .fmeta { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
 .rows li.mset { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 0.85rem; align-items: start; padding: 0.75rem 1rem; }
 .mset-head { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
 .mset-name { font-weight: 650; overflow-wrap: anywhere; }
@@ -916,6 +928,8 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     .main .panel, .main .stats, .main section > .card { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
     .loading::before, .loading::after { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
     .loading::before { margin-bottom: 1.25rem; }
+    /* Panels inside layout grids bleed to the edges through their grid instead of their own margins. */
+    .main .a-grid, .main .dash-grid, .main .settings-grid, .main .panel-grid { margin-left: -1rem; margin-right: -1rem; }
     .main .panel > header, .main .stat { padding-left: calc(1rem + env(safe-area-inset-left, 0px)); }
     .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -930,8 +944,6 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     .clip { white-space: normal; }
     .tabs button { flex: 1; }
     .upload-form { grid-template-columns: minmax(0, 1fr); }
-    .folder-btn .fmeta { flex-direction: column; align-items: flex-end; gap: 0.15rem; font-size: 0.8rem; }
-    .rows ul.mfiles li { grid-template-columns: 3.4rem minmax(0, 1fr) auto auto; gap: 0.5rem; align-items: center; }
     .rows ul.mfiles li .linklike { min-height: var(--tap); padding: 0 0.35rem; }
     #check-usage { flex: none; white-space: nowrap; }
     .rows li.mset { padding-left: calc(1rem + env(safe-area-inset-left, 0px)); }
@@ -965,4 +977,127 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
 
 @media (prefers-reduced-motion: reduce) {
     .sidebar { transition: none; }
+}
+
+/* ── Wide displays ─────────────────────────────────────────
+   The content area is a size container, so layouts react to the room the page
+   actually has (the sidebar included), not to the window width. */
+.main { max-width: 2200px; margin: 0 auto; container-type: inline-size; container-name: main; }
+.view-head p { max-width: 90ch; }
+
+.a-grid, .dash-grid, .settings-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.a-grid > .panel, .dash-grid > .panel, .settings-grid > .panel, .panel-grid > .panel { margin: 0; }
+.panel-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); align-items: start; }
+
+/* Hairline-divided grids of rows (media folders and pictures). */
+.rows.is-grid { display: grid; gap: 1px; background: var(--rule); overflow: hidden; }
+.rows.is-grid > li { background: var(--surface); border: 0; }
+.rows.is-grid > li.empty { grid-column: 1 / -1; }
+.rows.is-grid.cells-folder { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+.rows.is-grid.cells-set { grid-template-columns: repeat(auto-fill, minmax(min(100%, 620px), 1fr)); }
+
+@container main (min-width: 1100px) {
+    .a-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .a-chart, .a-vitals { grid-column: 1 / -1; }
+    .a-top { grid-column: span 7; }
+    .a-src { grid-column: span 5; }
+    .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dash-health, .dash-quick { grid-column: 1 / -1; }
+    .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .s-conn, .s-files { grid-column: 1; }
+    .s-order { grid-column: 2; grid-row: 1 / span 2; }
+}
+
+@container main (min-width: 1500px) {
+    /* The editor gets the wide column; the file picker and tools sit beside it. */
+    #view-projects { display: grid; grid-template-columns: minmax(380px, 440px) minmax(0, 1fr); column-gap: 1.25rem; align-items: start; }
+    #view-projects > .view-head { grid-column: 1 / -1; }
+    #view-projects > .card { grid-column: 1; }
+    #view-projects > #editor-card { grid-column: 2; grid-row: 2 / span 8; margin-bottom: 0; }
+    #view-projects:not(:has(#editor-card:not(.hidden)))::after { content: "Choose a file on the left to edit it here."; grid-column: 2; grid-row: 2 / span 3; display: grid; place-items: center; min-height: 360px; border: 1px dashed var(--rule-strong); border-radius: var(--radius); color: var(--text-muted); }
+}
+
+@container main (min-width: 1700px) {
+    .a-chart { grid-column: 1 / 9; grid-row: 1; }
+    .a-vitals { grid-column: 9 / -1; grid-row: 1; }
+    .a-top { grid-column: 1 / 9; grid-row: 2; }
+    .a-src { grid-column: 9 / -1; grid-row: 2; }
+    .a-vitals .vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .a-vitals .vital:nth-child(odd) { border-left: 0; }
+    .a-vitals .vital:nth-child(n + 3) { border-top: 1px solid var(--rule); }
+    .dash-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .dash-health { grid-column: auto; }
+    .rows.timeline { column-count: 2; column-gap: 0; }
+    .rows.timeline > li { break-inside: avoid; }
+    .rows.timeline > li.day { break-after: avoid; }
+    ul.rrows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; }
+}
+
+/* ── Consistent data columns ───────────────────────────────
+   Rows that line up in columns use fixed, right-aligned numeric columns,
+   so a longer number or label in one row never shifts the rest. */
+.folder-btn { display: grid; grid-template-columns: 20px minmax(0, 1fr) 9.5rem 6.5rem 5.5rem; align-items: center; column-gap: 0.85rem; }
+.folder-btn .fissue { justify-self: start; }
+.folder-btn .fcount, .folder-btn .fsize { text-align: right; white-space: nowrap; font-size: 0.85rem; color: var(--text-secondary); }
+.rows ul.mfiles li { grid-template-columns: 5.5rem minmax(0, 1fr) 6.5rem 4.5rem; }
+.mfiles .fsize { text-align: right; }
+.mfiles .linklike { justify-self: end; }
+.rows li.mrow-r2 { grid-template-columns: minmax(0, 1fr) 6.5rem 5.5rem; }
+.rows li.mrow-r2 .value { text-align: right; }
+.rows li.mrow-r2 .btn { justify-self: end; }
+/* Severity words ("Error", "Warning", "Note") get one width so the messages after them start in the same place. */
+.rows .label > .sev:first-child, .row-notes .sev:first-child { min-width: 5.6rem; }
+/* The order buttons keep one width each, so Publish and Unpublish don't push the others around. */
+.order-btns { display: grid; grid-template-columns: repeat(3, 3.6rem) 6.4rem; gap: 0.35rem; }
+.order-btns .btn { padding: 0; width: 100%; }
+@container main (max-width: 600px) {
+    .order-btns { grid-template-columns: repeat(4, 1fr); width: 100%; }
+}
+
+/* Phone overrides for the fixed-column rows above (they must come after those rules). */
+@media (max-width: 720px) {
+    .folder-btn { grid-template-columns: 20px minmax(0, 1fr) auto; row-gap: 0.15rem; }
+    .folder-btn > .ico { grid-column: 1; grid-row: 1 / span 2; }
+    .folder-btn .fname-col { grid-column: 2; grid-row: 1; }
+    .folder-btn .fissue { grid-column: 2; grid-row: 2; }
+    .folder-btn .fcount { grid-column: 3; grid-row: 1; }
+    .folder-btn .fsize { grid-column: 3; grid-row: 2; }
+    .rows ul.mfiles li { grid-template-columns: 3.4rem minmax(0, 1fr) 4.6rem 3.6rem; gap: 0.5rem; align-items: center; }
+    .rows li.mrow-r2 { grid-template-columns: minmax(0, 1fr) auto; }
+    .rows li.mrow-r2 .value { text-align: left; }
+    .rows li.mrow-r2 .btn { grid-column: 1 / -1; justify-self: stretch; }
+}
+
+/* Media folders: each card lays itself out by its own width, so narrow grid cells use the compact two-line form. */
+.rows li.frow { container: frow / inline-size; }
+@container frow (max-width: 640px) {
+    .folder-btn { grid-template-columns: 20px minmax(0, 1fr) auto; row-gap: 0.15rem; }
+    .folder-btn > .ico { grid-column: 1; grid-row: 1 / span 2; }
+    .folder-btn .fname-col { grid-column: 2; grid-row: 1; }
+    .folder-btn .fissue { grid-column: 2; grid-row: 2; }
+    .folder-btn .fcount { grid-column: 3; grid-row: 1; }
+    .folder-btn .fsize { grid-column: 3; grid-row: 2; }
+}
+/* A search box doesn't need the whole width of a big monitor. */
+#media-q { max-width: 560px; }
+
+/* Upload forms keep a sensible width on big monitors. */
+.upload-form { max-width: 1000px; }
+
+/* ── Motion ────────────────────────────────────────────────
+   Page changes crossfade the content area only (the sidebar and header stay put), and panels ease in.
+   All of it is off for people who ask for reduced motion. */
+.main { view-transition-name: admin-content; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+::view-transition-old(admin-content) { animation: vt-out 0.12s ease both; }
+::view-transition-new(admin-content) { animation: vt-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) 0.04s both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-4px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+
+.main .panel, .main .stats, .main .modebar, .main .notice { animation: rise 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+    .main .panel, .main .stats, .main .modebar, .main .notice { animation: none; }
 }

@@ -533,11 +533,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const homeEls = [topRow, filterContainer, projectsGrid, archiveProjectsGrid, homeArchiveDivider].filter(Boolean);
         homeEls.forEach(el => { el.style.transition = 'opacity 0.1s ease'; el.style.opacity = '0'; });
 
+        const isSsr = Boolean(projectDetailArea && projectDetailArea.dataset.ssrProject === projectId);
+
         try {
-            // 1. Fetch content
-            const response = await fetch(`/content/${projectId}/`);
-            if (!response.ok) throw new Error("Content missing");
-            let htmlContent = await response.text();
+            // 1. Reuse Worker-inlined HTML when hydrating an SSR project route, otherwise fetch it
+            let htmlContent;
+            if (isSsr) {
+                htmlContent = projectDetailArea.innerHTML;
+                delete projectDetailArea.dataset.ssrProject;
+            } else {
+                const response = await fetch(`/content/${projectId}/`);
+                if (!response.ok) throw new Error("Content missing");
+                htmlContent = await response.text();
+            }
 
             // 2. Rewrite Media & File URLs to R2
             htmlContent = htmlContent.replace(/(src|href)="(?:\.\/)?content\/[^/]+\/(?:audio|downloads|files)?\/?([^"]+\.(?:mp3|m4a|zip|aup3))"/g, '$1="https://media.ryanmarch.me/$2"');
@@ -626,19 +634,21 @@ document.addEventListener('DOMContentLoaded', () => {
             homeEls.forEach(el => { el.style.display = 'none'; el.style.opacity = ''; el.style.transition = ''; });
             document.body.classList.add('standalone-page');
 
-            // Fade in project detail
-            projectDetailArea.style.opacity = '0';
             projectDetailArea.style.display = 'block';
             performScrollRestorationOrScrollToTop();
-            requestAnimationFrame(() => {
+            if (!isSsr) {
+                // Fade in project detail on client-side SPA navigations
+                projectDetailArea.style.opacity = '0';
                 requestAnimationFrame(() => {
-                    projectDetailArea.style.transition = 'opacity 0.15s ease';
-                    projectDetailArea.style.opacity = '1';
-                    setTimeout(() => { projectDetailArea.style.transition = ''; }, 180);
+                    requestAnimationFrame(() => {
+                        projectDetailArea.style.transition = 'opacity 0.15s ease';
+                        projectDetailArea.style.opacity = '1';
+                        setTimeout(() => { projectDetailArea.style.transition = ''; }, 180);
+                    });
                 });
-            });
+            }
 
-            document.title = `${project.title} | Ryan March`;
+            document.title = `${project.seoTitle || project.title} | Ryan March`;
 
             // Update canonical URL
             let canonicalLink = document.querySelector('link[rel="canonical"]');

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { handleAdminApi, isAdminRequest, shapeAnalytics, verifyAccessJwt } from '../admin-api.js';
-import { fillDays, chartSvg, pageLabel } from '../public/assets/js/admin/analytics.js';
+import { analyticsQuery, handleAdminApi, isAdminRequest, shapeAnalytics, verifyAccessJwt } from '../admin-api.js';
+import { fillDays, chartSvg, pageLabel, countryLabel, trafficNote } from '../public/assets/js/admin/analytics.js';
 import { esc, deltaText } from '../public/assets/js/admin/util.js';
 import { myProjects } from '../public/assets/js/project-data.js';
 
@@ -175,5 +175,34 @@ describe('admin frontend helpers', () => {
     });
     it('shapeAnalytics tolerates an empty account', () => {
         expect(shapeAnalytics({}, { days: 7, host: 'h' }).rows).toEqual([]);
+    });
+});
+
+describe('analytics traffic filters', () => {
+    it('excludes bots by default and can also hide Tor, on every dataset including the previous period', () => {
+        const dflt = analyticsQuery(true);
+        expect(dflt).toContain('bot: 0');
+        expect(dflt).not.toContain('countryName_neq');
+        const noTor = analyticsQuery(true, ', bot: 0, countryName_neq: "T1"');
+        expect((noTor.match(/countryName_neq: "T1"/g) || []).length).toBeGreaterThanOrEqual(2); // current-range filter and previous period
+        expect(analyticsQuery(true, '')).not.toContain('requestHost: $host, bot: 0, countryName_neq');
+    });
+    it('reports what was filtered out', () => {
+        const d = shapeAnalytics({ botLoads: [{ count: 80 }], torLoads: [{ count: 180 }], current: [{ count: 200, sum: { visits: 200 } }] }, { days: 30, host: 'h' });
+        expect(d).toMatchObject({ botLoads: 80, torLoads: 180, filters: { botsExcluded: true, torHidden: false } });
+        expect(shapeAnalytics({}, { days: 7, host: 'h', includeBots: true, hideTor: true }).filters).toEqual({ botsExcluded: false, torHidden: true });
+    });
+    it('names the odd country codes', () => {
+        expect(countryLabel('T1')).toBe('Tor network');
+        expect(countryLabel('XX')).toBe('Unknown');
+        expect(countryLabel('DE')).toBe('Germany');
+        expect(countryLabel('ZZZZ')).toBe('ZZZZ');
+    });
+    it('explains the filters in one line, and warns when Tor dominates', () => {
+        const base = { totals: { current: { views: 200 } }, filters: { botsExcluded: true, torHidden: false }, botLoads: 80, torLoads: 180 };
+        expect(trafficNote(base)).toContain('80 flagged loads');
+        expect(trafficNote(base)).toContain('180 of 200 views (90%) come from the Tor network');
+        expect(trafficNote({ ...base, torLoads: 10 })).not.toContain('Tor network');
+        expect(trafficNote({ ...base, filters: { botsExcluded: true, torHidden: true } })).toContain('Tor traffic is hidden');
     });
 });

@@ -72,3 +72,18 @@ export function buildFolders(files, projects = []) {
         };
     }).sort((a, b) => (a.dir === 'assets/img' ? -1 : b.dir === 'assets/img' ? 1 : a.title.localeCompare(b.title)));
 }
+
+/** URL segments for a folder: assets/img → ["site-images"], content/ledger/images → ["ledger"], .../images/sub → ["ledger","sub"]. */
+export function folderSlug(dir) {
+    if (dir === 'assets/img') return ['site-images'];
+    const m = dir.match(/^content\/([^/]+)\/images(?:\/(.+))?$/);
+    if (m) return [m[1], ...(m[2] ? m[2].split('/') : [])];
+    return ['dir', dir];
+}
+
+/** The folder a URL points at, or '' when it matches none of `dirs`. */
+export function dirFromSlug(rest, dirs) {
+    if (!rest.length) return '';
+    const key = rest.join('/');
+    return dirs.find(d => folderSlug(d).join('/') === key) || '';
+}

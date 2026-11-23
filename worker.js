@@ -9,6 +9,11 @@ import { handleAdminApi, isAdminRequest, sameOrigin } from './admin-api.js';
  * manages URL redirects, and serves a proper 404 page.
  */
 
+const R2_MEDIA_RE = /(src|href)="(?:\.\/)?content\/[^/]+\/(?:audio|downloads|files)?\/?([^"]+\.(?:mp3|m4a|zip|aup3))"/g;
+function rewriteMediaUrls(html) {
+    return html.replace(R2_MEDIA_RE, '$1="https://media.ryanmarch.me/$2"');
+}
+
 class MetaRewriter {
     constructor(project) {
         this.project = project;
@@ -216,12 +221,14 @@ export default {
 
             const cleanPath = normalizePath(path);
 
-            // Redirect /admin or /admin/ to /admin.html
-            if (cleanPath === '/admin') {
+            // The admin is a single-page app under /admin (/admin/media, /admin/media/ledger, ...).
+            // The old /admin.html form redirects to it, and so does a trailing slash.
+            const isAdminPath = cleanPath === '/admin' || cleanPath.startsWith('/admin/');
+            if (cleanPath === '/admin.html' || (isAdminPath && path !== cleanPath)) {
                 return new Response(null, {
                     status: 301,
                     headers: {
-                        'Location': `${redirectOrigin}/admin.html${url.search}`,
+                        'Location': `${redirectOrigin}${cleanPath === '/admin.html' ? '/admin' : cleanPath}${url.search}`,
                         'X-Robots-Tag': 'noindex, nofollow'
                     }
                 });
@@ -396,9 +403,8 @@ export default {
                     '/favicon.ico',
                     '/404.html',
                     '/404',
-                    '/index.html',
-                    '/admin.html'
-                ].includes(cleanPath.toLowerCase());
+                    '/index.html'
+                ].includes(cleanPath.toLowerCase()) || isAdminPath;
 
             const projectMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
             let isValidProject = false;
@@ -434,11 +440,24 @@ export default {
             const assetRequest = isValidProject
                 ? new Request(`${assetHost}/`, request)
                 : new Request(assetUrl.toString(), request);
-            const response = await env.ASSETS.fetch(assetRequest);
+            const shouldFetchWriteup = isValidProject && project?.hasExtendedContent && request.method !== 'HEAD';
+            const [response, writeupRes] = await Promise.all([
+                env.ASSETS.fetch(assetRequest),
+                shouldFetchWriteup ? env.ASSETS.fetch(new Request(`${assetHost}/content/${project.id}/`)) : Promise.resolve(null)
+            ]);
 
             // If it's a valid project route and the response is HTML, rewrite the meta tags and drop homepage blocks
             if (isValidProject && project && response.headers.get('content-type')?.includes('text/html')) {
-                return new HTMLRewriter()
+                let ssrWriteup = null;
+                if (writeupRes && writeupRes.ok && writeupRes.headers.get('content-type')?.includes('text/html')) {
+                    const raw = await writeupRes.text();
+                    // Guard against SPA fallback returning index.html for a missing fragment
+                    if (raw.trim() && !/^\s*<!doctype\b|<html\b/i.test(raw)) {
+                        ssrWriteup = rewriteMediaUrls(raw);
+                    }
+                }
+
+                const rewriter = new HTMLRewriter()
                     .on('title', new MetaRewriter(project))
                     .on('meta[property="og:title"]', new MetaRewriter(project))
                     .on('meta[property="og:description"]', new MetaRewriter(project))
@@ -451,11 +470,35 @@ export default {
                     .on('.top-row', { element(el) { el.remove(); } })
                     .on('.filter-container', { element(el) { el.remove(); } })
                     .on('#projects-grid', { element(el) { el.remove(); } })
-                    .transform(response);
+                    .on('#archive-divider', { element(el) { el.remove(); } })
+                    .on('#archive-projects-grid', { element(el) { el.remove(); } });
+
+                if (ssrWriteup) {
+                    rewriter
+                        .on('body', {
+                            element(el) {
+                                const existing = el.getAttribute('class');
+                                if (!existing) {
+                                    el.setAttribute('class', 'standalone-page');
+                                } else if (!existing.split(/\s+/).includes('standalone-page')) {
+                                    el.setAttribute('class', `${existing} standalone-page`);
+                                }
+                            }
+                        })
+                        .on('#project-detail-area', {
+                            element(el) {
+                                el.setAttribute('data-ssr-project', project.id);
+                                el.removeAttribute('style');
+                                el.setInnerContent(ssrWriteup, { html: true });
+                            }
+                        });
+                }
+
+                return rewriter.transform(response);
             }
 
-            if (cleanPath === '/admin.html') {
-                // Fetch the asset using '/admin' internally to bypass Workers Assets' clean URL redirect (.html -> extensionless)
+            if (isAdminPath) {
+                // Every /admin/... path gets the admin shell (Workers Assets maps /admin to admin.html); the page routes itself.
                 // We use the hostname inside assetHost to prevent recursion loops
                 const rewrittenRequest = new Request(`${assetHost}/admin`, request);
                 const assetResponse = await env.ASSETS.fetch(rewrittenRequest);
