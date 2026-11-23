@@ -12,9 +12,8 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "python3 dev/serve.py",
-    "dev:worker": "wrangler dev --persist-to /tmp/wrangler-persist",
-    "dev:admin": "env -i PATH=$PATH HOME=$HOME CF_API_TOKEN=$CF_API_TOKEN CF_ACCOUNT_ID=$CF_ACCOUNT_ID CF_ANALYTICS_HOST=ryanmarch.me GITHUB_REPO=${GITHUB_REPO:-RyanMarch/ryanmarchDotMe} GITHUB_PAT=$GITHUB_PAT ADMIN_PASSWORD= CLOUDFLARE_INCLUDE_PROCESS_ENV=true npx wrangler dev --port 8787",
+    "dev": "wrangler dev --port 8787",
+    "dev:static": "python3 dev/serve.py",
     "build": "npm run test && node scripts/build.js",
     "create-project": "node dev/create-project.js",
     "image-variants": "node dev/make-image-variants.mjs",

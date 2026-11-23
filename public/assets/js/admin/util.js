@@ -48,7 +48,7 @@ export async function api(path, { signal } = {}) {
 export function apiProblem(result) {
     const { status, body } = result;
     if (status === 401) return 'Not authorized. Sign in again.';
-    if (status === 404) return 'This endpoint is not available here. The local Python server only serves the editor; run npm run dev:worker to see analytics and dashboard data.';
+    if (status === 404) return 'This endpoint is not available here. The local Python server only serves the editor; run npm run dev to see analytics and dashboard data.';
     if (body && body.message) return body.message;
     if (body && body.error === 'cloudflare_api_error') return 'Cloudflare returned an error for the analytics query. Check the API token scope (Account Analytics: Read).';
     return `Request failed (${status || 'network'}).`;

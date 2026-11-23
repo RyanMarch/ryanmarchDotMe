@@ -1,6 +1,7 @@
-# Local secrets for `npm run dev:worker` (wrangler loads .dev.vars automatically).
-# Copy to .dev.vars (gitignored) and fill in. Never commit real values.
-# Slinky users: skip this file and run `npm run dev:admin` through `slinky run` instead.
+# Local secrets for `npm run dev` (wrangler loads .dev.vars automatically).
+# Same pattern as your other projects: put these in the ryanmarchDotMe Slinky project
+# and export them to .dev.vars, or copy this file to .dev.vars and fill it in.
+# .dev.vars is gitignored. Never commit real values.
 
 # Local sign-in password for /admin on localhost
 ADMIN_PASSWORD=
