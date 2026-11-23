@@ -16,6 +16,25 @@ function rate(key, value) {
 }
 const ms = v => (v === null || v === undefined ? '–' : v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${v} ms`);
 
+/** Country code → readable name. Cloudflare uses T1 for the Tor network and XX when it can't tell. */
+export function countryLabel(code) {
+    if (code === 'T1') return 'Tor network';
+    if (!code || code === 'XX' || code === 'Unknown') return 'Unknown';
+    try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(code) || code; } catch { return code; }
+}
+
+/** One plain sentence about what the numbers exclude, plus a heads-up when most traffic is Tor. */
+export function trafficNote(d) {
+    const parts = [];
+    if (d.filters?.botsExcluded) parts.push(`Bots are excluded${d.botLoads ? ` (${fmt(d.botLoads)} flagged loads in this range)` : ''}, the same as Cloudflare's own dashboard.`);
+    if (d.filters?.torHidden) parts.push('Tor traffic is hidden.');
+    else if (d.torLoads && d.totals.current.views) {
+        const pct = Math.round((d.torLoads / d.totals.current.views) * 100);
+        if (pct >= 20) parts.push(`${fmt(d.torLoads)} of ${fmt(d.totals.current.views)} views (${pct}%) come from the Tor network, which is mostly automated traffic. Hide it to see the rest.`);
+    }
+    return parts.join(' ');
+}
+
 export function pageLabel(path) {
     const m = path.match(/^\/project\/([^/]+)\/?$/i);
     const title = m && titleFor(m[1].toLowerCase());
@@ -197,12 +216,17 @@ export async function render(root) {
     let days = Number(sessionStorage.getItem('admin_range')) || 30;
     if (!RANGES.includes(days)) days = 30;
     let controller;
+    let hideTor = false;
+    try { hideTor = sessionStorage.getItem('admin_hide_tor') === '1'; } catch { /* private mode */ }
 
     root.innerHTML = `
         <div class="view-head">
             <div><h1>Analytics</h1><p>Cloudflare Web Analytics for ryanmarch.me. Privacy-friendly: no cookies, no personal data.</p></div>
-            <div class="seg" role="group" aria-label="Date range">
-                ${RANGES.map(r => `<button type="button" data-days="${r}" aria-pressed="${r === days}">${r} days</button>`).join('')}
+            <div class="head-actions">
+                <label class="check-line inline"><input type="checkbox" id="hide-tor" ${hideTor ? 'checked' : ''}> Hide Tor traffic</label>
+                <div class="seg" role="group" aria-label="Date range">
+                    ${RANGES.map(r => `<button type="button" data-days="${r}" aria-pressed="${r === days}">${r} days</button>`).join('')}
+                </div>
             </div>
         </div>
         <div id="analytics-body" aria-live="polite"><div class="loading">Loading analytics…</div></div>`;
@@ -215,7 +239,7 @@ export async function render(root) {
         body.innerHTML = '<div class="loading">Loading analytics…</div>';
         let result;
         try {
-            result = await api(`/api/admin/analytics?days=${days}`, { signal: controller.signal });
+            result = await api(`/api/admin/analytics?days=${days}${hideTor ? '&tor=exclude' : ''}`, { signal: controller.signal });
         } catch { return; /* superseded by a newer request */ }
 
         if (result.status === 501) { body.innerHTML = setupNotice(); return; }
@@ -230,6 +254,7 @@ export async function render(root) {
 
         body.innerHTML = `
             <div id="stats-host">${statsHtml(d, series, state.metric)}</div>
+            ${trafficNote(d) ? `<div class="modebar"><span class="muted">${esc(trafficNote(d))}</span></div>` : ''}
             <section class="panel" aria-label="Traffic over time">
                 <header>
                     <h2 id="chart-title">Page views per day</h2>
@@ -267,7 +292,7 @@ export async function render(root) {
             const panel = body.querySelector('#src-panel');
             panel.setAttribute('aria-labelledby', btn.id);
             const head = { referrers: 'Source', countries: 'Country', devices: 'Device' }[k];
-            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views });
+            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views, ...(k === 'countries' ? { render: i => esc(countryLabel(i.label)) } : {}) });
         };
         srcTabs.addEventListener('click', e => { const b = e.target.closest('button[data-src]'); if (b) showSource(b); });
         srcTabs.addEventListener('keydown', e => {
@@ -278,6 +303,12 @@ export async function render(root) {
             next.focus(); showSource(next); e.preventDefault();
         });
     }
+
+    root.querySelector('#hide-tor').addEventListener('change', e => {
+        hideTor = e.target.checked;
+        try { sessionStorage.setItem('admin_hide_tor', hideTor ? '1' : '0'); } catch { /* private mode */ }
+        load();
+    });
 
     root.querySelector('.seg').addEventListener('click', e => {
         const btn = e.target.closest('button[data-days]');
