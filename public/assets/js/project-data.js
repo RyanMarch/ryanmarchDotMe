@@ -1,5 +1,18 @@
 export const myProjects = [
     {
+id: "admin-save-test",
+title: "Admin Save Test",
+subtitle: "Temporary test project",
+tags: [],
+featured: false,
+size: "medium",
+image: "",
+actionText: "View Project",
+actionUrl: "",
+sourceUrl: "",
+hasExtendedContent: true
+    },
+    {
         id: "ledger",
         title: "Ledger",
         subtitle: "Private, local-first personal finance tracker for one person or a couple.",
