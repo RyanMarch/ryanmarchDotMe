@@ -206,6 +206,7 @@ button.stat-pick:focus-visible { outline: 2px solid var(--accent-color); outline
 .tip[hidden] { display: none; }
 .tip-date { font-weight: 650; margin-bottom: 0.1rem; }
 .chart-foot { display: flex; justify-content: space-between; gap: 1rem; padding: 0.25rem 1rem 0.75rem; font-size: 0.8rem; color: var(--text-muted); }
+.chart-note { margin: 0; padding: 0.6rem 1rem 0.8rem; border-top: 1px solid var(--rule); font-size: 0.8rem; color: var(--text-muted); }
 .chart-readout { min-height: 1.4em; color: var(--text-secondary); }
 
 .split { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 0 1.25rem; align-items: start; }

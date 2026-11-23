@@ -239,6 +239,7 @@ export async function render(root) {
                     <div class="svg-host"></div><div class="tip" hidden></div>
                 </div>
                 <div class="chart-foot"><span class="chart-readout" aria-live="polite">Hover or tap the chart for a day's count.</span><span class="meta">${esc(d.host)}${d.cached ? ' · cached' : ''}</span></div>
+                <p class="chart-note">These are estimates. Cloudflare samples page loads on a site this size, so counts come in steps of about 10 and a single day can shift between refreshes. Trust the totals and the trend over any one day.</p>
             </section>
             <div class="split">
                 <section class="panel"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
