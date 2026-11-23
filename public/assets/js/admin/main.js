@@ -6,6 +6,7 @@ import { warm } from './util.js';
 const VIEWS = {
     dashboard: { group: 'Site', title: 'Dashboard', load: () => import('./dashboard.js') },
     analytics: { group: 'Site', title: 'Analytics', load: () => import('./analytics.js') },
+    search: { group: 'Site', title: 'Search', load: () => import('./search.js') },
     activity: { group: 'Site', title: 'Activity', load: () => import('./activity.js') },
     media: { group: 'Content', title: 'Media', load: () => import('./media.js') },
     embeds: { group: 'Content', title: 'Embeds', load: () => import('./embeds.js') },
@@ -157,6 +158,7 @@ const branchNow = () => encodeURIComponent((typeof window.getSelectedBranch === 
 const WARM = {
     dashboard: () => [`/api/admin/overview?branch=${branchNow()}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound'],
     analytics: () => ['/api/admin/analytics?days=30'],
+    search: () => ['/api/admin/search?days=28'],
     activity: () => ['/api/admin/activity?branch=main'],
     media: () => [`/api/admin/media?branch=${branchNow()}`]
 };

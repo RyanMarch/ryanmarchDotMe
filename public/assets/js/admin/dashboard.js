@@ -1,4 +1,5 @@
 import { apiProblem, countUp, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
+import { todayHtml, todayItems } from './today.js';
 import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
 function statBox(label, value, sub, spark = '') {
@@ -12,9 +13,9 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound'];
+    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound', '/api/admin/search?days=28'];
 
-    const paint = ([overview, analytics, health, notfound]) => {
+    const paint = ([overview, analytics, health, notfound, search]) => {
         const parts = [];
         const a = analytics.ok ? analytics.body : null;
         const o = overview.ok ? overview.body : null;
@@ -36,6 +37,11 @@ export async function render(root) {
         const commitList = commits
             ? `<ul class="rows">${commits.map(c => `<li><span class="label"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}</span></span><span class="value">${esc(relativeTime(c.date))}</span></li>`).join('')}</ul>`
             : `<ul class="rows"><li class="empty">${esc(o?.commitsError ? `GitHub: ${o.commitsError}` : 'GitHub access is not configured for this environment.')}</li></ul>`;
+
+        parts.push(todayHtml(todayItems({
+            overview: overview.ok ? overview.body : null, health: health.ok ? health.body : null,
+            notfound: notfound?.ok ? notfound.body : null, search: search?.ok ? search.body : null, analytics: a
+        })));
 
         const hc = health.ok ? health.body.counts : null;
         const top = health.ok ? health.body.findings.filter(f => f.severity !== 'info').slice(0, 5) : [];

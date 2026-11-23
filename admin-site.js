@@ -447,6 +447,7 @@ export async function handleStatus(request, env) {
     return jsonResponse({
         items: [
             { key: 'analytics', label: 'Cloudflare analytics', ok: has('CF_API_TOKEN', 'CF_ACCOUNT_ID'), detail: 'CF_API_TOKEN, CF_ACCOUNT_ID', host: env.CF_ANALYTICS_HOST || 'ryanmarch.me' },
+            { key: 'search', label: 'Google Search Console', ok: has('GSC_SERVICE_ACCOUNT'), detail: 'GSC_SERVICE_ACCOUNT, GSC_SITE (optional)', optional: true },
             { key: 'github', label: 'GitHub access (editor, commits)', ok: has('GITHUB_REPO', 'GITHUB_PAT'), detail: 'GITHUB_REPO, GITHUB_PAT' },
             { key: 'r2', label: 'R2 media bucket', ok: Boolean(env.MEDIA), detail: 'MEDIA binding (ryanmarchdotme-media)' },
             { key: 'trash', label: 'R2 trash bucket', ok: Boolean(env.MEDIA_TRASH), detail: 'MEDIA_TRASH binding (deleted files kept 30 days)', optional: true },

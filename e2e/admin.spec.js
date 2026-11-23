@@ -224,3 +224,23 @@ test.describe('file history', () => {
         expect(posts).toHaveLength(0); // nothing was committed
     });
 });
+
+test.describe('search and suggestions', () => {
+    test('Search shows Search Console numbers and easy wins', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/search');
+        await expect(page.locator('#view-search h1')).toHaveText('Search');
+        await expect(page.locator('#view-search .stat').first()).toContainText('12');
+        await expect(page.locator('#view-search')).toContainText('wordpress rent plugin');
+        await expect(page.locator('#view-search')).toContainText('2026-11-01 to 2026-11-21');
+    });
+
+    test('the dashboard lists what is worth doing', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page);
+        const list = page.locator('.dash-today');
+        await expect(list).toContainText('/project/ledgr was hit 3 times');
+        await expect(list).toContainText('wordpress rent plugin');
+        await expect(list).toContainText('1 project has no write-up');
+    });
+});
