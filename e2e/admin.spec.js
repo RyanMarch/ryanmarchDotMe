@@ -217,8 +217,8 @@ test.describe('file history', () => {
         await expect(dialog.locator('.choose-row').first()).toContainText('latest');
         await dialog.locator('.choose-row', { hasText: 'Older edit' }).click();
         await dialog.getByRole('button', { name: 'Load this version' }).click();
-        const replace = page.locator('dialog.dlg').getByRole('button', { name: 'Replace' });
-        if (await replace.count()) await replace.click(); // the stand-in editor always looks "changed"
+        // The stand-in editor always looks "changed", so the page asks before replacing it.
+        await page.locator('dialog.dlg').getByRole('button', { name: 'Replace' }).click();
         await expect(page.locator('.toast')).toContainText('Loaded that version');
         expect(fetched.some(u => u.searchParams.get('branch') === 'b'.repeat(40))).toBe(true); // asked for that exact commit
         expect(posts).toHaveLength(0); // nothing was committed
