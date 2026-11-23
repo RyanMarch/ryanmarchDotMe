@@ -1,4 +1,5 @@
 import { api, apiProblem, dataTable, esc, fmt, setupNotice } from './util.js';
+import { go, href, onPop, parse } from './router.js';
 
 const RANGES = [7, 30, 90];
 // Project titles come from window.myProjects (set by projects-list.js and
@@ -221,12 +222,13 @@ function sourcesHtml(d) {
     </section>`;
 }
 
-export async function render(root) {
-    let days = Number(sessionStorage.getItem('admin_range')) || 30;
-    if (!RANGES.includes(days)) days = 30;
+export async function render(root, route = parse()) {
+    // The range and the Tor filter live in the URL (?days=7&tor=hide), so Back steps through them.
+    const daysFrom = r => (RANGES.includes(Number(r.query.get('days'))) ? Number(r.query.get('days')) : 30);
+    let days = daysFrom(route);
     let controller;
-    let hideTor = false;
-    try { hideTor = sessionStorage.getItem('admin_hide_tor') === '1'; } catch { /* private mode */ }
+    let hideTor = route.query.get('tor') === 'hide';
+    const record = () => go(href('analytics', [], { days: days === 30 ? '' : days, tor: hideTor ? 'hide' : '' }), { quiet: true });
 
     root.innerHTML = `
         <div class="view-head">
@@ -315,7 +317,7 @@ export async function render(root) {
 
     root.querySelector('#hide-tor').addEventListener('change', e => {
         hideTor = e.target.checked;
-        try { sessionStorage.setItem('admin_hide_tor', hideTor ? '1' : '0'); } catch { /* private mode */ }
+        record();
         load();
     });
 
@@ -323,8 +325,16 @@ export async function render(root) {
         const btn = e.target.closest('button[data-days]');
         if (!btn) return;
         days = Number(btn.dataset.days);
-        try { sessionStorage.setItem('admin_range', String(days)); } catch { /* private mode */ }
         root.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        record();
+        load();
+    });
+
+    onPop(r => {
+        days = daysFrom(r);
+        hideTor = r.query.get('tor') === 'hide';
+        root.querySelector('#hide-tor').checked = hideTor;
+        root.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
         load();
     });
 

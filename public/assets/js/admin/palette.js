@@ -1,5 +1,6 @@
 // Command palette: Cmd/Ctrl+K (or "/") to jump to any section or project.
 import { esc } from './util.js';
+import { go, href, parse } from './router.js';
 
 export function initPalette(nav) {
     const dlg = document.createElement('dialog');
@@ -15,9 +16,9 @@ export function initPalette(nav) {
     let sel = 0;
 
     const entries = () => [
-        ...nav.map(n => ({ label: n.title, hint: n.group, go: () => { location.hash = `#/${n.id}`; } })),
+        ...nav.map(n => ({ label: n.title, hint: n.group, go: () => { go(href(n.id)); } })),
         { label: 'New project', hint: 'Action', go: () => {
-            location.hash = '#/projects';
+            go(href('projects'));
             setTimeout(() => {
                 const form = document.getElementById('new-project-form');
                 if (form?.classList.contains('hidden') && typeof window.toggleNewProjectForm === 'function') window.toggleNewProjectForm();
@@ -26,8 +27,9 @@ export function initPalette(nav) {
         } },
         { label: 'View site', hint: 'Action', go: () => window.open('/', '_blank', 'noopener') },
         ...(globalThis.myProjects || []).map(p => ({ label: p.title, hint: `Edit · ${p.id}`, go: () => {
-            location.hash = '#/projects';
-            setTimeout(() => { if (typeof window.loadFile === 'function') window.loadFile(`content/${p.id}/index.html`); }, 80);
+            const file = `content/${p.id}/index.html`;
+            if (parse().view === 'projects' && typeof window.loadFile === 'function') window.loadFile(file);
+            else go(href('projects', [], { file }));
         } }))
     ];
 

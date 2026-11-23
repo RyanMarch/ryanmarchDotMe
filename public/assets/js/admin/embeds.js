@@ -1,6 +1,7 @@
 import { esc } from './util.js';
 import { cachedScan, scanAll } from './scan-client.js';
 import { openInEditor } from './health.js';
+import { go, href, onPop, parse } from './router.js';
 
 /** Verdict for one audio file from a scan result: ['ok' | 'warning' | 'error', label]. */
 export function audioState(a) {
@@ -32,17 +33,17 @@ export function summarizeEmbeds(scans) {
     return { audio, videos, problems };
 }
 
-export async function render(root) {
+export async function render(root, route = parse()) {
     const projects = globalThis.myProjects || [];
     const names = new Map(projects.map(p => [p.id, p.title]));
-    let onlyProblems = false;
+    let onlyProblems = route.query.get('show') === 'problems';
     let data = cachedScan();
 
     root.innerHTML = `
         <div class="view-head">
             <div><h1>Embeds</h1><p>Every audio player and YouTube video in your write-ups, checked against its live source.</p></div>
             <div class="head-actions">
-                <label class="check-line inline"><input type="checkbox" id="only-problems"> Only problems</label>
+                <label class="check-line inline"><input type="checkbox" id="only-problems" ${onlyProblems ? 'checked' : ''}> Only problems</label>
                 <button type="button" class="btn" id="scan-btn">Rescan</button>
             </div>
         </div>
@@ -81,7 +82,8 @@ export async function render(root) {
         paint();
     };
 
-    root.querySelector('#only-problems').addEventListener('change', e => { onlyProblems = e.target.checked; if (data) paint(); });
+    root.querySelector('#only-problems').addEventListener('change', e => { onlyProblems = e.target.checked; if (data) paint(); go(href('embeds', [], { show: onlyProblems ? 'problems' : '' }), { quiet: true }); });
+    onPop(r => { onlyProblems = r.query.get('show') === 'problems'; root.querySelector('#only-problems').checked = onlyProblems; if (data) paint(); });
     btn.addEventListener('click', run);
     body.addEventListener('click', e => { const o = e.target.closest('[data-open]'); if (o) openInEditor(o.dataset.open); });
 

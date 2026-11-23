@@ -161,6 +161,18 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         }
     });
 
+    it('should serve the admin shell for every /admin/... path and drop trailing slashes', async () => {
+        for (const p of ['/admin/media', '/admin/media/ledger', '/admin/analytics?days=7']) {
+            const res = await worker.fetch(new Request(`https://ryanmarch.me${p}`), mockEnv);
+            expect(res.status, p).toBe(200);
+            expect(await res.text()).toBe('Admin HTML');
+            expect(res.headers.get('Cache-Control')).toBe('no-store');
+        }
+        const slash = await worker.fetch(new Request('https://ryanmarch.me/admin/media/'), mockEnv);
+        expect(slash.status).toBe(301);
+        expect(slash.headers.get('Location')).toBe('https://ryanmarch.me/admin/media');
+    });
+
     it('should route invalid paths to the custom 404 page', async () => {
         const req = new Request('https://ryanmarch.me/random-non-existent-page');
         const res = await worker.fetch(req, mockEnv);

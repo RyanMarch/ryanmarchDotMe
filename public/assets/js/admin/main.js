@@ -1,4 +1,5 @@
-// Admin shell: hash routing, mobile drawer, lazy-loaded views.
+// Admin shell: path routing (see router.js), mobile drawer, lazy-loaded views.
+import { clearViewHandlers, fromHash, go, href, notifyViews, parse, start } from './router.js';
 
 const VIEWS = {
     dashboard: { group: 'Site', title: 'Dashboard', load: () => import('./dashboard.js') },
@@ -20,11 +21,6 @@ const scrim = document.getElementById('scrim');
 const main = document.getElementById('main');
 const mobile = window.matchMedia('(max-width: 900px)');
 
-function currentView() {
-    const name = location.hash.replace(/^#\/?/, '').split(/[/?]/)[0];
-    return VIEWS[name] ? name : DEFAULT_VIEW;
-}
-
 function setDrawer(open) {
     app.classList.toggle('nav-open', open);
     menuBtn.setAttribute('aria-expanded', String(open));
@@ -41,12 +37,27 @@ mobile.addEventListener('change', () => setDrawer(false));
 
 let renderToken = 0;
 let firstRender = true;
+let shown = ''; // the view currently on screen
 
-async function route() {
+async function route(r = parse(), kind = 'push', quiet = false) {
     if (app.classList.contains('hidden')) return; // not signed in yet
-    const name = currentView();
+    const name = VIEWS[r.view] ? r.view : DEFAULT_VIEW;
     const view = VIEWS[name];
+
+    // Same view, new in-view state (a Media folder, a filter): the view repaints itself on Back/forward.
+    if (name === shown) {
+        if (kind === 'pop') restoreScroll();
+        if (!quiet) {
+            notifyViews(r);
+            if (kind !== 'pop') window.scrollTo(0, 0);
+            if (name === 'projects') openProjectFile(r);
+        }
+        return;
+    }
+
     const token = ++renderToken;
+    shown = name;
+    clearViewHandlers();
 
     document.querySelectorAll('[data-nav]').forEach(a => {
         if (a.dataset.nav === name) a.setAttribute('aria-current', 'page');
@@ -63,26 +74,74 @@ async function route() {
         const root = document.getElementById(`view-${name}`);
         const mod = await view.load();
         if (token !== renderToken) return;
-        await mod.render(root);
+        await mod.render(root, r);
+    } else if (name === 'projects') {
+        openProjectFile(r);
     }
 
-    if (!firstRender) {
+    if (kind === 'pop') restoreScroll();
+    else if (!firstRender) {
         window.scrollTo(0, 0);
         main.focus({ preventScroll: true });
     }
     firstRender = false;
 }
 
-window.addEventListener('hashchange', route);
+function restoreScroll() {
+    const y = history.state?.scroll;
+    requestAnimationFrame(() => window.scrollTo(0, typeof y === 'number' ? y : 0));
+}
+
+// ── Projects: the open file lives in the URL (?file=content/ledger/index.html) ──
+let applyingRoute = false;
+function openProjectFile(r) {
+    const file = r.query.get('file');
+    if (!file) return;
+    applyingRoute = true;
+    setTimeout(async () => {
+        try { if (typeof window.loadFile === 'function') await window.loadFile(file); } finally { applyingRoute = false; }
+    }, 80);
+}
+if (typeof window.loadFile === 'function') {
+    const originalLoad = window.loadFile;
+    window.loadFile = async function (path, ...rest) {
+        const result = await originalLoad.call(this, path, ...rest);
+        if (!applyingRoute && shown === 'projects' && parse().query.get('file') !== path) go(href('projects', [], { file: path }), { quiet: true });
+        return result;
+    };
+}
+
+start(route);
+
+// Links to admin pages navigate without a page load.
+document.addEventListener('click', e => {
+    const a = e.target.closest('a[href]');
+    if (!a || a.target || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin || !/^\/admin(\/|$|\?)/.test(url.pathname + url.search)) return;
+    e.preventDefault();
+    go(url.pathname + url.search);
+});
+
+// Older links and code that set location.hash (#/media) are rewritten to the real path.
+const fixHash = () => {
+    const target = fromHash(location.hash);
+    if (target) { history.replaceState({}, '', target); route(parse(), 'push'); }
+};
+window.addEventListener('hashchange', fixHash);
+fixHash();
+history.scrollRestoration = 'manual';
 
 // The editor script reveals #admin-view after sign-in (production reveals it on load).
 let wasHidden = app.classList.contains('hidden');
 new MutationObserver(() => {
     const hidden = app.classList.contains('hidden');
-    if (wasHidden && !hidden) route();
+    if (wasHidden && !hidden) route(parse(), 'push');
     wasHidden = hidden;
 }).observe(app, { attributes: true, attributeFilter: ['class'] });
 route();
+window.adminGo = go;
+window.adminHref = href;
 
 // Environment label: local dev vs the deployed site.
 const local = ['localhost', '127.0.0.1'].includes(location.hostname);

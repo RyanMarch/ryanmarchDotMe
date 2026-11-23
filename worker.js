@@ -221,12 +221,14 @@ export default {
 
             const cleanPath = normalizePath(path);
 
-            // The admin lives at /admin. The old /admin.html and /admin/ forms redirect to it.
-            if (cleanPath === '/admin.html' || (cleanPath === '/admin' && path !== '/admin')) {
+            // The admin is a single-page app under /admin (/admin/media, /admin/media/ledger, ...).
+            // The old /admin.html form redirects to it, and so does a trailing slash.
+            const isAdminPath = cleanPath === '/admin' || cleanPath.startsWith('/admin/');
+            if (cleanPath === '/admin.html' || (isAdminPath && path !== cleanPath)) {
                 return new Response(null, {
                     status: 301,
                     headers: {
-                        'Location': `${redirectOrigin}/admin${url.search}`,
+                        'Location': `${redirectOrigin}${cleanPath === '/admin.html' ? '/admin' : cleanPath}${url.search}`,
                         'X-Robots-Tag': 'noindex, nofollow'
                     }
                 });
@@ -401,9 +403,8 @@ export default {
                     '/favicon.ico',
                     '/404.html',
                     '/404',
-                    '/index.html',
-                    '/admin'
-                ].includes(cleanPath.toLowerCase());
+                    '/index.html'
+                ].includes(cleanPath.toLowerCase()) || isAdminPath;
 
             const projectMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
             let isValidProject = false;
@@ -496,8 +497,8 @@ export default {
                 return rewriter.transform(response);
             }
 
-            if (cleanPath === '/admin') {
-                // Serve admin.html at the clean /admin path (Workers Assets maps /admin to admin.html).
+            if (isAdminPath) {
+                // Every /admin/... path gets the admin shell (Workers Assets maps /admin to admin.html); the page routes itself.
                 // We use the hostname inside assetHost to prevent recursion loops
                 const rewrittenRequest = new Request(`${assetHost}/admin`, request);
                 const assetResponse = await env.ASSETS.fetch(rewrittenRequest);

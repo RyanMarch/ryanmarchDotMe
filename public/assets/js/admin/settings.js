@@ -1,4 +1,5 @@
 import { api, esc } from './util.js';
+import { go, href } from './router.js';
 import { reorderProjects, setUnpublished } from './project-order.js';
 import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
 import { b64ToText, textToB64 } from './seo.js';
@@ -139,7 +140,6 @@ export async function render(root) {
     root.addEventListener('click', e => {
         const f = e.target.closest('[data-file]');
         if (!f) return;
-        location.hash = '#/projects';
-        setTimeout(() => { if (typeof window.loadFile === 'function') window.loadFile(f.dataset.file); }, 60);
+        go(href('projects', [], { file: f.dataset.file }));
     });
 }

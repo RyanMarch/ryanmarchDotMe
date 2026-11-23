@@ -2,6 +2,7 @@
 import { api, esc } from './util.js';
 import { auditProjectMeta, auditRedirects, SEO_DESCRIPTION, SEO_TITLE, summarize } from './audit.js';
 import { openInEditor } from './health.js';
+import { go, href, onPop, parse } from './router.js';
 
 const branch = () => (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 const authHeaders = () => (typeof window.getAuthHeaders === 'function' ? window.getAuthHeaders() : {});
@@ -163,8 +164,8 @@ function renderSeo(panel, onlyIssues) {
 
 /* ───────────── View shell ───────────── */
 
-export async function render(root) {
-    let tab = sessionStorage.getItem('admin_seo_tab') === 'seo' ? 'seo' : 'redirects';
+export async function render(root, route = parse()) {
+    let tab = route.query.get('tab') === 'seo' ? 'seo' : 'redirects';
     root.innerHTML = `
         <div class="view-head"><div><h1>Redirects &amp; SEO</h1><p>Edit redirects and review the text search engines and link previews use.</p></div></div>
         <div class="tabs" role="tablist" aria-label="Redirects and SEO">
@@ -185,8 +186,12 @@ export async function render(root) {
         const t = e.target.closest('[data-tab]');
         if (!t || t.dataset.tab === tab) return;
         tab = t.dataset.tab;
-        try { sessionStorage.setItem('admin_seo_tab', tab); } catch { /* private mode */ }
+        go(href('seo', [], { tab: tab === 'seo' ? 'seo' : '' }), { quiet: true });
         show();
+    });
+    onPop(r => {
+        const want = r.query.get('tab') === 'seo' ? 'seo' : 'redirects';
+        if (want !== tab) { tab = want; show(); }
     });
     await show();
 }

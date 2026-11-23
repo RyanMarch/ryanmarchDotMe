@@ -42,19 +42,19 @@ export async function render(root) {
 
     const hc = health.ok ? health.body.counts : null;
     const top = health.ok ? health.body.findings.filter(f => f.severity !== 'info').slice(0, 5) : [];
-    parts.push( /*html*/`<div class="dash-grid"><section class="panel dash-health"><header><h2>Content Health</h2><a href="#/health" class="meta">Full audit</a></header>
+    parts.push( /*html*/`<div class="dash-grid"><section class="panel dash-health"><header><h2>Content Health</h2><a href="/admin/health" class="meta">Full audit</a></header>
         ${hc
             ? `<p class="panel-body health-line">${hc.error ? `<strong>${hc.error} error${hc.error === 1 ? '' : 's'}</strong>` : 'No errors'}, ${hc.warning} warning${hc.warning === 1 ? '' : 's'}, ${hc.info} note${hc.info === 1 ? '' : 's'} <span class="muted">(quick check; the full audit also reads write-ups and images)</span></p>
                ${top.length ? `<ul class="rows">${top.map(f => `<li><span class="label wrap"><span class="sev sev-${f.severity}">${f.severity === 'error' ? 'Error' : 'Warning'}</span> <strong>${esc(f.id)}</strong>: ${esc(f.message)}</span></li>`).join('')}</ul>` : ''}`
             : `<p class="panel-body muted">${esc(apiProblem(health))}</p>`}
     </section>`);
 
-    parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="#/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
+    parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="/admin/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
         <section class="panel"><header><h2>Recent commits</h2><span class="meta">${esc(o?.branch || branch)}</span></header>${commitList}</section>
     <section class="panel dash-quick"><header><h2>Quick actions</h2></header>
         <div class="quick">
-            <a class="btn" href="#/projects" data-action="new-project">New project</a>
-            <a class="btn btn-secondary" href="#/projects" data-action="upload-image">Upload image</a>
+            <a class="btn" href="/admin/projects" data-action="new-project">New project</a>
+            <a class="btn btn-secondary" href="/admin/projects" data-action="upload-image">Upload image</a>
             <a class="btn btn-secondary" href="/" target="_blank" rel="noopener">View site</a>
         </div>
     </section></div>`);

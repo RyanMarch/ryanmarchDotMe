@@ -1,4 +1,5 @@
 import { api, apiProblem, esc, relativeTime } from './util.js';
+import { go, href, onPop, parse } from './router.js';
 
 const MERGE = /^Merge (pull request|branch|remote-tracking)/i;
 const ADMIN = /^admin( test cleanup)?:/i;
@@ -39,11 +40,14 @@ function summaryCell(label, checks, name) {
     return `<div class="stat"><span class="k">${label}</span><span class="v">${word}</span><span class="delta ${cls}">on the latest commit</span></div>`;
 }
 
-export async function render(root) {
-    let branch = 'main';
-    try { const saved = sessionStorage.getItem('admin_activity_branch'); if (BRANCHES.includes(saved)) branch = saved; } catch { /* private mode */ }
-    let filter = 'all'; // all | admin | nomerge
+export async function render(root, route = parse()) {
+    // Branch and filter live in the URL (?branch=develop&show=admin).
+    const branchFrom = r => (BRANCHES.includes(r.query.get('branch')) ? r.query.get('branch') : 'main');
+    const filterFrom = r => (['admin', 'nomerge'].includes(r.query.get('show')) ? r.query.get('show') : 'all');
+    let branch = branchFrom(route);
+    let filter = filterFrom(route); // all | admin | nomerge
     let data = null;
+    const record = () => go(href('activity', [], { branch: branch === 'main' ? '' : branch, show: filter === 'all' ? '' : filter }), { quiet: true });
 
     root.innerHTML = `
         <div class="view-head">
@@ -51,9 +55,9 @@ export async function render(root) {
             <div class="head-actions">
                 <div class="seg" id="branch-seg" role="group" aria-label="Branch">${BRANCHES.map(b => `<button type="button" data-branch="${b}" aria-pressed="${b === branch}">${b}</button>`).join('')}</div>
                 <div class="seg" id="filter-seg" role="group" aria-label="Show">
-                    <button type="button" data-filter="all" aria-pressed="true">All</button>
-                    <button type="button" data-filter="nomerge" aria-pressed="false">Skip merges</button>
-                    <button type="button" data-filter="admin" aria-pressed="false">Admin edits</button>
+                    <button type="button" data-filter="all" aria-pressed="${filter === 'all'}">All</button>
+                    <button type="button" data-filter="nomerge" aria-pressed="${filter === 'nomerge'}">Skip merges</button>
+                    <button type="button" data-filter="admin" aria-pressed="${filter === 'admin'}">Admin edits</button>
                 </div>
             </div>
         </div>
@@ -110,8 +114,8 @@ export async function render(root) {
         const b = e.target.closest('[data-branch]');
         if (!b || b.dataset.branch === branch) return;
         branch = b.dataset.branch;
-        try { sessionStorage.setItem('admin_activity_branch', branch); } catch { /* private mode */ }
         root.querySelectorAll('#branch-seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        record();
         load();
     });
     root.querySelector('#filter-seg').addEventListener('click', e => {
@@ -119,7 +123,15 @@ export async function render(root) {
         if (!b || !data) return;
         filter = b.dataset.filter;
         root.querySelectorAll('#filter-seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        record();
         paint();
+    });
+    onPop(r => {
+        const nextBranch = branchFrom(r);
+        filter = filterFrom(r);
+        root.querySelectorAll('#filter-seg button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.filter === filter)));
+        root.querySelectorAll('#branch-seg button').forEach(x => x.setAttribute('aria-pressed', String(x.dataset.branch === nextBranch)));
+        if (nextBranch !== branch) { branch = nextBranch; load(); } else if (data) paint();
     });
     await load();
 }

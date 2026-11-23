@@ -1,15 +1,13 @@
 import { buildReport, reportFilename } from './health-report.js';
 import { api, apiProblem, esc } from './util.js';
+import { go, href, onPop, parse } from './router.js';
 import { sortFindings, summarize } from './audit.js';
 
 const SEV_LABEL = { error: 'Error', warning: 'Warning', info: 'Note' };
 const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
 export function openInEditor(id) {
-    location.hash = '#/projects';
-    setTimeout(() => {
-        if (typeof window.loadFile === 'function') window.loadFile(`content/${id}/index.html`);
-    }, 60);
+    go(href('projects', [], { file: `content/${id}/index.html` }));
 }
 
 /** Findings grouped by subject, as panels. `projects` supplies display names. */
@@ -42,10 +40,13 @@ export function countsHtml(c, note = '') {
     </dl>`;
 }
 
-export async function render(root) {
+const FULL_KEY = 'admin_health_full';
+
+export async function render(root, route = parse()) {
     const projects = (globalThis.myProjects || []).filter(p => !p.unpublished);
+    const filterFrom = r => (['error', 'warning'].includes(r.query.get('show')) ? r.query.get('show') : 'all');
     let findings = [];
-    let filter = 'all';
+    let filter = filterFrom(route);
     let mode = 'quick'; // quick = data only, full = reads deployed files
     let running = false;
     let audit = null; // { at, total, failed } once the full audit has run
@@ -55,9 +56,9 @@ export async function render(root) {
             <div><h1>Content Health</h1><p>Checks the deployed site: SEO text, images, alt text, redirects and the sitemap.</p></div>
             <div class="head-actions">
                 <div class="seg" role="group" aria-label="Show">
-                    <button type="button" data-filter="all" aria-pressed="true">All</button>
-                    <button type="button" data-filter="error" aria-pressed="false">Errors</button>
-                    <button type="button" data-filter="warning" aria-pressed="false">Warnings</button>
+                    <button type="button" data-filter="all" aria-pressed="${filter === 'all'}">All</button>
+                    <button type="button" data-filter="error" aria-pressed="${filter === 'error'}">Errors</button>
+                    <button type="button" data-filter="warning" aria-pressed="${filter === 'warning'}">Warnings</button>
                 </div>
                 <button type="button" class="btn btn-secondary" id="export-report" title="Runs the full audit if needed, then downloads a Markdown report you can hand to an agent">Export report</button>
                 <button type="button" class="btn" id="run-audit">Run full audit</button>
@@ -81,11 +82,21 @@ export async function render(root) {
             + findingsHtml(findings, projects, filter);
     };
 
-    // Fast pass: bundled data only, no file reads.
-    const quick = await api('/api/admin/health?scope=summary');
-    if (!quick.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't run the check.</strong>${esc(apiProblem(quick))}</div>`; return; }
-    findings = quick.body.findings;
-    paint();
+    // Coming back to this page (Back, or the sidebar) within a few minutes: show the last full audit instead of starting over.
+    let restored = null;
+    try { restored = JSON.parse(sessionStorage.getItem(FULL_KEY) || 'null'); } catch { /* ignore */ }
+    if (restored && Date.now() - restored.when < 10 * 60 * 1000) {
+        findings = restored.findings;
+        mode = 'full';
+        audit = restored.audit;
+        paint();
+    } else {
+        // Fast pass: bundled data only, no file reads.
+        const quick = await api('/api/admin/health?scope=summary');
+        if (!quick.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't run the check.</strong>${esc(apiProblem(quick))}</div>`; return; }
+        findings = quick.body.findings;
+        paint();
+    }
 
     // Reads every write-up and image on top of the quick data checks. Resolves when the findings are updated.
     const runFull = async () => {
@@ -115,6 +126,7 @@ export async function render(root) {
             audit = { at: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), total, failed };
             status.textContent = '';
             paint();
+            try { sessionStorage.setItem(FULL_KEY, JSON.stringify({ when: Date.now(), findings, audit })); } catch { /* storage full or blocked */ }
             return true;
         } finally {
             runBtn.disabled = false;
@@ -148,11 +160,18 @@ export async function render(root) {
         filter = btn.dataset.filter;
         root.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
         paint();
+        go(href('health', [], { show: filter === 'all' ? '' : filter }), { quiet: true });
     });
 
     body.addEventListener('click', e => {
         if (e.target.closest('[data-run-full]')) { runFull(); return; }
         const open = e.target.closest('[data-open]');
         if (open) openInEditor(open.dataset.open);
+    });
+
+    onPop(r => {
+        filter = filterFrom(r);
+        root.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.filter === filter)));
+        paint();
     });
 }
