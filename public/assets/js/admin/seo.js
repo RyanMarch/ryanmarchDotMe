@@ -24,14 +24,16 @@ const SEV = { error: 'Error', warning: 'Warning', info: 'Note' };
 
 /* ───────────── Redirects tab ───────────── */
 
+const noteItems = notes => notes.map(n => `<li><span class="sev sev-${n.severity}">${SEV[n.severity]}</span> ${esc(n.message)}</li>`).join('');
+const noteRow = notes => `<tr class="row-notes-row"><td colspan="4"><ul class="row-notes">${noteItems(notes)}</ul></td></tr>`;
+
 function redirectRow(r, i, notes) {
-    return `<li class="rrow" data-i="${i}">
-        <div class="field"><label for="rs-${i}">Source</label><input id="rs-${i}" data-f="source" value="${esc(r.source)}" placeholder="/old-path" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-        <div class="field"><label for="rd-${i}">Destination</label><input id="rd-${i}" data-f="destination" value="${esc(r.destination)}" placeholder="/new-path or https://…" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-        <div class="field field-check"><label><input type="checkbox" data-f="permanent" ${r.permanent !== false ? 'checked' : ''}> Permanent (301)</label></div>
-        <div class="field field-end"><button type="button" class="btn btn-secondary" data-del="${i}" aria-label="Delete redirect from ${esc(r.source || 'new row')}">Delete</button></div>
-        ${notes.length ? `<ul class="row-notes">${notes.map(n => `<li><span class="sev sev-${n.severity}">${SEV[n.severity]}</span> ${esc(n.message)}</li>`).join('')}</ul>` : ''}
-    </li>`;
+    return `<tr class="rrow" data-i="${i}">
+        <td data-label="Source"><input id="rs-${i}" data-f="source" aria-label="Source" value="${esc(r.source)}" placeholder="/old-path" autocapitalize="none" autocorrect="off" spellcheck="false"></td>
+        <td data-label="Destination"><input id="rd-${i}" data-f="destination" aria-label="Destination" value="${esc(r.destination)}" placeholder="/new-path or https://…" autocapitalize="none" autocorrect="off" spellcheck="false"></td>
+        <td data-label="Type" class="rt-type"><label class="check-line inline"><input type="checkbox" data-f="permanent" ${r.permanent !== false ? 'checked' : ''}> Permanent (301)</label></td>
+        <td class="rt-act"><button type="button" class="btn btn-secondary" data-del="${i}" aria-label="Delete redirect from ${esc(r.source || 'new row')}">Delete</button></td>
+    </tr>${notes.length ? noteRow(notes) : ''}`;
 }
 
 async function renderRedirects(panel, add = '') {
@@ -62,7 +64,10 @@ async function renderRedirects(panel, add = '') {
         const dirty = JSON.stringify(list) !== baseline;
         panel.innerHTML = `
             <p class="muted tab-intro">Redirects run before everything else on the site. Query strings are carried through. Changes commit to <strong>${esc(branch())}</strong>.</p>
-            <ul class="rrows">${list.map((r, i) => redirectRow(r, i, by.get(r.source) || [])).join('') || '<li class="empty muted">No redirects yet.</li>'}</ul>
+            <div class="table-wrap"><table class="dt rt">
+                <thead><tr><th scope="col">Source</th><th scope="col">Destination</th><th scope="col">Type</th><th scope="col"><span class="sr-only">Actions</span></th></tr></thead>
+                <tbody>${list.map((r, i) => redirectRow(r, i, by.get(r.source) || [])).join('') || '<tr><td colspan="4" class="empty-note">No redirects yet.</td></tr>'}</tbody>
+            </table></div>
             <div class="actions">
                 <button type="button" class="btn btn-secondary" id="add-redirect">Add redirect</button>
                 <button type="button" class="btn" id="save-redirects" ${!dirty || c.error ? 'disabled' : ''}>Save to ${esc(branch())}</button>
@@ -80,12 +85,12 @@ async function renderRedirects(panel, add = '') {
         const { all, by } = notesFor();
         const c = summarize(all);
         panel.querySelectorAll('.rrow').forEach((el, idx) => {
-            let ul = el.querySelector('.row-notes');
+            const next = el.nextElementSibling;
+            const existing = next?.classList.contains('row-notes-row') ? next : null;
             const notes = by.get(list[idx].source) || [];
-            const html = notes.map(n => `<li><span class="sev sev-${n.severity}">${SEV[n.severity]}</span> ${esc(n.message)}</li>`).join('');
-            if (!notes.length) { ul?.remove(); return; }
-            if (!ul) { ul = document.createElement('ul'); ul.className = 'row-notes'; el.appendChild(ul); }
-            ul.innerHTML = html;
+            if (!notes.length) { existing?.remove(); return; }
+            if (existing) existing.querySelector('.row-notes').innerHTML = noteItems(notes);
+            else el.insertAdjacentHTML('afterend', noteRow(notes));
         });
         const dirty = JSON.stringify(list) !== baseline;
         panel.querySelector('#save-redirects').disabled = !dirty || c.error > 0;

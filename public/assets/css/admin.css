@@ -1171,3 +1171,49 @@ kbd { font: inherit; font-size: 0.8rem; padding: 0.05rem 0.4rem; border: 1px sol
 .choose-text { display: flex; flex-direction: column; min-width: 0; }
 .choose-label { overflow-wrap: anywhere; }
 .choose-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ── Table pages (Embeds, Redirects): one wide table in a centred column, easy to read straight down ── */
+#view-embeds, #view-seo { max-width: 1180px; margin-inline: auto; }
+.table-wrap { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); margin-bottom: 1.25rem; overflow: hidden; }
+.table-wrap table.dt { table-layout: fixed; }
+.table-wrap table.dt th { background: rgba(var(--accent-rgb), 0.04); }
+.table-wrap table.dt tbody tr:hover { background: rgba(var(--accent-rgb), 0.04); }
+.table-wrap table.dt td { vertical-align: middle; }
+
+table.et th:nth-child(1) { width: 19%; } table.et th:nth-child(2) { width: 9%; } table.et th:nth-child(3) { width: 30%; } table.et th:nth-child(4) { width: 28%; } table.et th:nth-child(5) { width: 14%; }
+table.et td { font-size: 0.9rem; }
+table.et tr.grp-first td { border-top: 1px solid var(--rule-strong); }
+table.et tbody tr:first-child td { border-top: 0; }
+table.et .et-project strong { display: block; overflow-wrap: anywhere; }
+table.et .et-project .linklike { font-size: 0.8rem; padding: 0.1rem 0; }
+table.et .et-kind { color: var(--text-muted); white-space: nowrap; }
+table.et .et-source { color: var(--text-secondary); font-size: 0.82rem; overflow-wrap: anywhere; }
+table.et td .sub { display: block; font-size: 0.8rem; color: var(--text-muted); overflow-wrap: anywhere; }
+table.et .et-status { text-align: right; white-space: nowrap; }
+
+table.rt th:nth-child(1) { width: 30%; } table.rt th:nth-child(2) { width: 38%; } table.rt th:nth-child(3) { width: 18%; } table.rt th:nth-child(4) { width: 14%; }
+/* The old card-style row rules must not turn a table row into a grid. */
+table.rt tr.rrow { display: table-row; padding: 0; border: 0; }
+table.rt td { padding-top: 0.4rem; padding-bottom: 0.4rem; }
+table.rt tr.rrow td { border-top: 1px solid var(--rule); }
+table.rt tbody tr:first-child td { border-top: 0; }
+table.rt input[type="text"], table.rt input:not([type]), table.rt input[data-f="source"], table.rt input[data-f="destination"] { width: 100%; min-height: 36px; }
+table.rt .rt-type { white-space: nowrap; }
+table.rt .rt-act { text-align: right; }
+table.rt tr.row-notes-row td { border-top: 0; padding-top: 0; padding-bottom: 0.55rem; }
+table.rt tr.row-notes-row:hover { background: none; }
+
+@media (max-width: 720px) {
+    .table-wrap { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
+    table.et thead, table.rt thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    table.et, table.et tbody, table.et tr, table.et td, table.rt, table.rt tbody, table.rt tr, table.rt td { display: block; width: 100%; }
+    table.rt tr.rrow { display: block; }
+    table.et tr, table.rt tr.rrow { padding: 0.6rem 1rem; border-top: 1px solid var(--rule-strong); }
+    table.et tr.grp-first { border-top: 1px solid var(--rule-strong); }
+    table.et td, table.rt td { border: 0 !important; padding: 0.15rem 0 !important; text-align: left !important; }
+    table.et td:empty { display: none; }
+    table.et td[data-label]::before, table.rt td[data-label]::before { content: attr(data-label); display: block; font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-muted); }
+    table.et .et-project::before { display: none !important; }
+    table.rt tr.row-notes-row { padding: 0 1rem 0.6rem; border: 0; }
+    table.rt .rt-act { padding-top: 0.4rem !important; }
+}
