@@ -9,6 +9,11 @@ import { handleAdminApi, isAdminRequest, sameOrigin } from './admin-api.js';
  * manages URL redirects, and serves a proper 404 page.
  */
 
+const R2_MEDIA_RE = /(src|href)="(?:\.\/)?content\/[^/]+\/(?:audio|downloads|files)?\/?([^"]+\.(?:mp3|m4a|zip|aup3))"/g;
+function rewriteMediaUrls(html) {
+    return html.replace(R2_MEDIA_RE, '$1="https://media.ryanmarch.me/$2"');
+}
+
 class MetaRewriter {
     constructor(project) {
         this.project = project;
@@ -434,11 +439,24 @@ export default {
             const assetRequest = isValidProject
                 ? new Request(`${assetHost}/`, request)
                 : new Request(assetUrl.toString(), request);
-            const response = await env.ASSETS.fetch(assetRequest);
+            const shouldFetchWriteup = isValidProject && project?.hasExtendedContent && request.method !== 'HEAD';
+            const [response, writeupRes] = await Promise.all([
+                env.ASSETS.fetch(assetRequest),
+                shouldFetchWriteup ? env.ASSETS.fetch(new Request(`${assetHost}/content/${project.id}/`)) : Promise.resolve(null)
+            ]);
 
             // If it's a valid project route and the response is HTML, rewrite the meta tags and drop homepage blocks
             if (isValidProject && project && response.headers.get('content-type')?.includes('text/html')) {
-                return new HTMLRewriter()
+                let ssrWriteup = null;
+                if (writeupRes && writeupRes.ok && writeupRes.headers.get('content-type')?.includes('text/html')) {
+                    const raw = await writeupRes.text();
+                    // Guard against SPA fallback returning index.html for a missing fragment
+                    if (raw.trim() && !/^\s*<!doctype\b|<html\b/i.test(raw)) {
+                        ssrWriteup = rewriteMediaUrls(raw);
+                    }
+                }
+
+                const rewriter = new HTMLRewriter()
                     .on('title', new MetaRewriter(project))
                     .on('meta[property="og:title"]', new MetaRewriter(project))
                     .on('meta[property="og:description"]', new MetaRewriter(project))
@@ -451,7 +469,31 @@ export default {
                     .on('.top-row', { element(el) { el.remove(); } })
                     .on('.filter-container', { element(el) { el.remove(); } })
                     .on('#projects-grid', { element(el) { el.remove(); } })
-                    .transform(response);
+                    .on('#archive-divider', { element(el) { el.remove(); } })
+                    .on('#archive-projects-grid', { element(el) { el.remove(); } });
+
+                if (ssrWriteup) {
+                    rewriter
+                        .on('body', {
+                            element(el) {
+                                const existing = el.getAttribute('class');
+                                if (!existing) {
+                                    el.setAttribute('class', 'standalone-page');
+                                } else if (!existing.split(/\s+/).includes('standalone-page')) {
+                                    el.setAttribute('class', `${existing} standalone-page`);
+                                }
+                            }
+                        })
+                        .on('#project-detail-area', {
+                            element(el) {
+                                el.setAttribute('data-ssr-project', project.id);
+                                el.removeAttribute('style');
+                                el.setInnerContent(ssrWriteup, { html: true });
+                            }
+                        });
+                }
+
+                return rewriter.transform(response);
             }
 
             if (cleanPath === '/admin.html') {

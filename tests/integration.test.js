@@ -7,112 +7,115 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-describe('RyanMarchDotMe Full Page Integration Tests', () => {
-    let htmlContent;
-    let beforeunloadHandler = null;
+let beforeunloadHandler = null;
 
-    beforeEach(async () => {
-        beforeunloadHandler = null;
-        // Clear body and set up mocks
-        document.body.innerHTML = '';
-        window.scrollTo = vi.fn();
+async function initIntegrationPage({ route = '/', ssrProjectId = null } = {}) {
+    beforeunloadHandler = null;
+    document.body.innerHTML = /*html*/ '';
+    document.body.className = '';
+    window.scrollTo = vi.fn();
 
-        const originalAddEventListener = window.addEventListener.bind(window);
-        vi.spyOn(window, 'addEventListener').mockImplementation((event, handler, options) => {
-            if (event === 'beforeunload') {
-                beforeunloadHandler = handler;
-            }
-            return originalAddEventListener(event, handler, options);
-        });
-        
-        // Reset location to root before initializing scripts
-        window.history.replaceState(null, '', '/');
+    const originalAddEventListener = window.addEventListener.bind(window);
+    vi.spyOn(window, 'addEventListener').mockImplementation((event, handler, options) => {
+        if (event === 'beforeunload') {
+            beforeunloadHandler = handler;
+        }
+        return originalAddEventListener(event, handler, options);
+    });
 
-        // Mock sessionStorage to avoid JSDOM origin/security restrictions
-        const mockSessionStorage = {
-            getItem: vi.fn(),
-            setItem: vi.fn(),
-            removeItem: vi.fn(),
-            clear: vi.fn()
-        };
-        Object.defineProperty(window, 'sessionStorage', {
-            value: mockSessionStorage,
-            writable: true,
-            configurable: true
-        });
-        
-        // Mock IntersectionObserver
-        global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-            observe: vi.fn(),
-            unobserve: vi.fn(),
-            disconnect: vi.fn()
-        }));
+    window.history.replaceState(null, '', route);
 
-        // Mock matchMedia
-        window.matchMedia = vi.fn().mockImplementation(query => ({
-            matches: false,
-            media: query,
-            onchange: null,
-            addListener: vi.fn(),
-            removeListener: vi.fn(),
-            addEventListener: vi.fn(),
-            removeEventListener: vi.fn(),
-            dispatchEvent: vi.fn(),
-        }));
+    const mockSessionStorage = {
+        getItem: vi.fn(),
+        setItem: vi.fn(),
+        removeItem: vi.fn(),
+        clear: vi.fn()
+    };
+    Object.defineProperty(window, 'sessionStorage', {
+        value: mockSessionStorage,
+        writable: true,
+        configurable: true
+    });
 
-        // Mock HTMLMediaElement play/pause for the audio player inside projects
-        window.HTMLMediaElement.prototype.play = vi.fn().mockImplementation(() => Promise.resolve());
-        window.HTMLMediaElement.prototype.pause = vi.fn();
+    global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+        observe: vi.fn(),
+        unobserve: vi.fn(),
+        disconnect: vi.fn()
+    }));
 
-        // Spy on History API
-        vi.spyOn(window.history, 'pushState');
-        vi.spyOn(window.history, 'replaceState');
+    window.matchMedia = vi.fn().mockImplementation(query => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+    }));
 
-        // Read index.html contents
-        const indexPath = path.resolve(__dirname, '../public/index.html');
-        htmlContent = fs.readFileSync(indexPath, 'utf8');
+    window.HTMLMediaElement.prototype.play = vi.fn().mockImplementation(() => Promise.resolve());
+    window.HTMLMediaElement.prototype.pause = vi.fn();
 
-        // Extract body element content
-        const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-        const bodyHTML = bodyMatch ? bodyMatch[1] : htmlContent;
-        document.body.innerHTML = bodyHTML;
+    vi.spyOn(window.history, 'pushState');
+    vi.spyOn(window.history, 'replaceState');
 
-        // Mock fetch to load actual HTML fragments from the local content folder on disk
-        global.fetch = vi.fn().mockImplementation((url) => {
-            const cleanUrl = url.split('?')[0]; // strip version/cache query parameters
-            const relativePath = cleanUrl.replace(/^\//, ''); // remove leading slash
-            const absolutePath = path.resolve(__dirname, '../public', relativePath, 'index.html');
+    const indexPath = path.resolve(__dirname, '../public/index.html');
+    const htmlContent = fs.readFileSync(indexPath, 'utf8');
 
-            if (fs.existsSync(absolutePath)) {
-                const fileData = fs.readFileSync(absolutePath, 'utf8');
-                return Promise.resolve({
-                    ok: true,
-                    text: () => Promise.resolve(fileData)
-                });
-            }
+    const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+    const bodyHTML = bodyMatch ? bodyMatch[1] : htmlContent;
+    document.body.innerHTML = /*html*/ bodyHTML;
+
+    if (ssrProjectId) {
+        ['.top-row', '.filter-container', '#projects-grid', '#archive-divider', '#archive-projects-grid']
+            .forEach(sel => document.querySelector(sel)?.remove());
+        document.body.classList.add('standalone-page');
+        const detailArea = document.getElementById('project-detail-area');
+        detailArea.setAttribute('data-ssr-project', ssrProjectId);
+        detailArea.removeAttribute('style');
+        const fragPath = path.resolve(__dirname, '../public/content', ssrProjectId, 'index.html');
+        detailArea.innerHTML = /*html*/ fs.readFileSync(fragPath, 'utf8');
+    }
+
+    global.fetch = vi.fn().mockImplementation((url) => {
+        const cleanUrl = url.split('?')[0];
+        const relativePath = cleanUrl.replace(/^\//, '');
+        const absolutePath = path.resolve(__dirname, '../public', relativePath, 'index.html');
+
+        if (fs.existsSync(absolutePath)) {
+            const fileData = fs.readFileSync(absolutePath, 'utf8');
             return Promise.resolve({
-                ok: false,
-                status: 404,
-                statusText: 'Not Found'
+                ok: true,
+                text: () => Promise.resolve(fileData)
             });
+        }
+        return Promise.resolve({
+            ok: false,
+            status: 404,
+            statusText: 'Not Found'
         });
-
-        // Dynamically import projects.js to trigger DOMContentLoaded event binding
-        // Clean cache to allow re-importing in each test case
-        const modulePath = '../public/assets/js/projects.js';
-        await import(`${modulePath}?t=${Date.now()}`);
-
-        // Fire DOMContentLoaded to trigger projects.js initialization
-        document.dispatchEvent(new Event('DOMContentLoaded'));
-
-        // Wait for initial routing timeouts to settle
-        await new Promise(resolve => setTimeout(resolve, 200));
     });
 
-    afterEach(() => {
-        vi.restoreAllMocks();
-        document.body.innerHTML = '';
+    const modulePath = '../public/assets/js/projects.js';
+    await import(`${modulePath}?t=${Date.now()}`);
+
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+    await new Promise(resolve => setTimeout(resolve, 200));
+}
+
+function resetIntegrationDom() {
+    vi.restoreAllMocks();
+    document.body.innerHTML = /*html*/ '';
+    document.body.className = '';
+}
+
+describe('RyanMarchDotMe Full Page Integration Tests', () => {
+    beforeEach(async () => {
+        await initIntegrationPage();
     });
+
+    afterEach(resetIntegrationDom);
 
     it('should render the homepage projects grid and category filters from project-data.js', () => {
         const grid = document.getElementById('projects-grid');
@@ -214,5 +217,26 @@ describe('RyanMarchDotMe Full Page Integration Tests', () => {
         beforeunloadHandler();
         expect(window.sessionStorage.setItem).toHaveBeenCalledWith('live_reload_scroll_x', expect.any(Number));
         expect(window.sessionStorage.setItem).toHaveBeenCalledWith('live_reload_scroll_y', expect.any(Number));
+    });
+});
+
+describe('Worker SSR Project Hydration Tests', () => {
+    afterEach(resetIntegrationDom);
+
+    it('should hydrate a Worker-SSR project page without re-fetching or blinking', async () => {
+        await initIntegrationPage({ route: '/project/ledger/', ssrProjectId: 'ledger' });
+
+        expect(global.fetch).not.toHaveBeenCalled();
+
+        const detailArea = document.getElementById('project-detail-area');
+        expect(detailArea.dataset.ssrProject).toBeUndefined();
+        expect(detailArea.style.display).toBe('block');
+        expect(detailArea.style.opacity).not.toBe('0');
+        expect(detailArea.querySelector('.project-nav')).not.toBeNull();
+        expect(detailArea.querySelector('.project-detail-tags')).not.toBeNull();
+        expect(detailArea.querySelector('.project-detail-footer-actions')).not.toBeNull();
+        expect(document.body.classList.contains('standalone-page')).toBe(true);
+        expect(document.title).toContain('Ledger - Private, Local-First Personal Finance Tracker');
+        expect(document.title).toContain('Ryan March');
     });
 });

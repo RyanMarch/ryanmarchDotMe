@@ -3,8 +3,8 @@ export const myProjects = [
         id: "ledger",
         title: "Ledger",
         subtitle: "Private, local-first personal finance tracker for one person or a couple.",
-        seoTitle: "Ledger - Private Personal Finance Tracker for Individuals & Couples",
-        seoDescription: "Track net worth, spending pace, budgets, investments, and retirement plans in an encrypted browser vault. Pull in bank transactions automatically and view household finances together.",
+        seoTitle: "Ledger - Private, Local-First Personal Finance Tracker",
+        seoDescription: "Track net worth, spending, budgets, investments, and retirement in an encrypted browser vault. Sync bank transactions and view household finances together.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Finance", color: "purple" },
@@ -26,7 +26,7 @@ export const myProjects = [
         title: "Spindex",
         subtitle: "Browse your record collection like flipping through a real crate.",
         seoTitle: "Spindex - 3D Vinyl Record Crate & Collection Browser",
-        seoDescription: "Browse your vinyl record collection like flipping through a real crate. Tactile 3D crate browsing, gatefold album inspector, barcode scanning, collection insights, and ambient turntable screensaver.",
+        seoDescription: "Flip through your vinyl record collection in a 3D crate with gatefold album inspection, barcode scanning, collection insights, and a turntable screensaver.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Music", color: "purple" },
@@ -51,7 +51,7 @@ export const myProjects = [
         title: "TripDeck",
         subtitle: "A privacy-first travel itinerary dashboard with maps, weather, and smart packing lists.",
         seoTitle: "TripDeck - Private Travel Itinerary Dashboard",
-        seoDescription: "Turn flight confirmations and hotel bookings into one visual, offline-capable itinerary. End-to-end encrypted, passkey sign-in, live maps and weather, zero-knowledge sharing.",
+        seoDescription: "Turn flight and hotel bookings into a visual, offline itinerary. End-to-end encrypted with passkey sign-in, live maps, weather, and zero-knowledge sharing.",
         tags: [
             { label: "Recently Updated", color: "gold" },
             { label: "Travel", color: "purple" },
@@ -76,7 +76,7 @@ export const myProjects = [
         title: "Speakeasy",
         subtitle: "Craft cocktail companion and recipe library. Visualize and understand your drinks.",
         seoTitle: "Speakeasy - Craft Cocktail Companion & Recipe Library",
-        seoDescription: "Browse hundreds of curated cocktail recipes with interactive glassware visuals, track your home bar inventory, and find out what you can mix right now. No accounts, paywalls, or ads required.",
+        seoDescription: "Browse curated cocktail recipes with interactive glassware visuals, track home bar inventory, and see what you can mix now. No accounts, paywalls, or ads.",
         tags: [
             { label: "Web App", color: "teal" },
             { label: "Product", color: "gray" },
@@ -100,7 +100,7 @@ export const myProjects = [
         title: "FileNamer",
         subtitle: "Easy, drag-and-drop tool for defining naming templates and batch renaming files.",
         seoTitle: "FileNamer - File Renaming Utility",
-        seoDescription: "FileNamer is an intuitive, browser-based utility for defining and applying consistent file naming templates. Drag and drop files, configure presets, preview results in real time, and export renamed files instantly.",
+        seoDescription: "FileNamer is a browser-based utility for file naming templates. Drag and drop files, set presets, preview results in real time, and export renamed files.",
         tags: [
             { label: "Project", color: "gray" },
             { label: "Web App", color: "teal" },
@@ -176,7 +176,7 @@ export const myProjects = [
         title: "Help Center",
         subtitle: "A portable documentation system with automatically generated search and navigation.",
         seoTitle: "Help Center - Portable Documentation System",
-        seoDescription: "A self-contained, zero-build-step documentation system built with native Web Components. Client-side search, auto-generated navigation, and a scaffolding CLI, drop it into any project.",
+        seoDescription: "Self-contained, zero-build documentation built with native Web Components. Includes client-side search, auto-generated navigation, and a scaffolding CLI.",
         tags: [
             { label: "Dev Tooling", color: "purple" },
             { label: "Project", color: "gray" },
@@ -274,8 +274,8 @@ export const myProjects = [
         id: "delhi-historical-society",
         title: "Delhi Historical Society",
         subtitle: "Analytics, website audit, and digital workspace setup for a local nonprofit.",
-        seoTitle: "Delhi Historical Society - Analytics & Google Workspace - Case Study",
-        seoDescription: "A case study on website auditing, Google Analytics 4 setup, Google Search Console configuration, and Google Workspace migration for a local nonprofit historical society.",
+        seoTitle: "Delhi Historical Society - Analytics & Google Workspace",
+        seoDescription: "Case study on website auditing, Google Analytics 4, Google Search Console, and Google Workspace migration for a local nonprofit historical society.",
         tags: [
             { label: "Analytics", color: "purple" },
             { label: "Non-Profit", color: "teal" },
@@ -439,7 +439,7 @@ export const myProjects = [
         title: "Replay In The Dark",
         subtitle: "This mashup brings Iyaz and Hoobastank together, against better judgement.",
         seoTitle: "Replay In The Dark - Iyaz vs. Hoobastank Mashup",
-        seoDescription: "A mashup of Iyaz's 'Replay' and Hoobastank's 'Crawling In The Dark'.",
+        seoDescription: "An audio mashup of Iyaz's 'Replay' and Hoobastank's 'Crawling In The Dark', paired by matching key and tempo.",
         tags: [
             { label: "Audio Production", color: "indigo" },
             { label: "Archive", color: "gray", priority: "low" },
@@ -667,9 +667,9 @@ export const myProjects = [
     {
         id: "making-of-a-masterpiece",
         title: "Making of A Masterpiece",
-        subtitle: "A mockumentary short film produced in 24 hours.",
-        seoTitle: "Making of a Masterpiece - 24-Hour Film",
-        seoDescription: "An award-winning mockumentary short film written, shot, and edited within a 24-hour time constraint.",
+        subtitle: "A mockumentary short film produced in 48 hours.",
+        seoTitle: "Making of a Masterpiece - 48-Hour Film",
+        seoDescription: "An award-winning mockumentary short film written, shot, and edited within a 48-hour time constraint.",
         tags: [
             { label: "Video Production", color: "rose" },
             { label: "Award-Winning", color: "gold" },
