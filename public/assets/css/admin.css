@@ -1282,3 +1282,11 @@ table.st td a { color: inherit; overflow-wrap: anywhere; }
 .dash-today { margin-bottom: 1.25rem; }
 .rows.today li { align-items: baseline; }
 .rows.today .value { white-space: nowrap; font-size: 0.85rem; }
+
+.sec-row { display: flex; align-items: baseline; gap: 1rem; margin-top: 1.75rem; }
+.sec-row .sec-title { margin: 0; margin-right: auto; }
+.proj-title { margin: 0.25rem 0 0.15rem; font-size: 1.25rem; font-weight: 650; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 0.5rem 1.5rem; margin: 0; font-size: 0.9rem; }
+.kv dt { color: var(--text-muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+.kv .sub, table.st td .sub { margin-left: 0.5rem; }

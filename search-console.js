@@ -59,6 +59,23 @@ export function windows(days, now = Date.now()) {
     return { start: iso(start), end: iso(end), prevStart: iso(prevEnd - (days - 1) * DAY), prevEnd: iso(prevEnd) };
 }
 
+/** Google reports http://, www and https:// variants of one page separately; fold them into one path. */
+export function pathOf(url) {
+    try { const u = new URL(url); return u.pathname || '/'; } catch { return url; }
+}
+
+/** Merge rows that share a key, summing clicks and impressions and averaging position by impressions. */
+export function mergeRows(rows, keyOf) {
+    const by = new Map();
+    for (const r of rows) {
+        const k = keyOf(r);
+        const m = by.get(k) || { ...r, clicks: 0, impressions: 0, weighted: 0 };
+        m.clicks += r.clicks; m.impressions += r.impressions; m.weighted += r.position * r.impressions;
+        by.set(k, m);
+    }
+    return [...by.values()].map(({ weighted, ...m }) => ({ ...m, ctr: m.impressions ? m.clicks / m.impressions : 0, position: m.impressions ? weighted / m.impressions : 0 }));
+}
+
 const row = r => ({ keys: r.keys, clicks: r.clicks || 0, impressions: r.impressions || 0, ctr: r.ctr || 0, position: r.position || 0 });
 
 /**
@@ -110,8 +127,44 @@ export async function fetchSearchData(env, days, fetchImpl = fetch) {
         totals: { current: total(daily), previous: total(prev) },
         daily: daily.map(r => ({ date: r.keys[0], clicks: r.clicks, impressions: r.impressions })),
         queries: queries.map(r => ({ query: r.keys[0], clicks: r.clicks, impressions: r.impressions, ctr: r.ctr, position: r.position })),
-        pages: pages.map(r => ({ page: r.keys[0], clicks: r.clicks, impressions: r.impressions, ctr: r.ctr, position: r.position })),
-        pairs: pairs.map(r => ({ query: r.keys[0], page: r.keys[1], clicks: r.clicks, impressions: r.impressions, position: r.position })),
-        nearMisses: nearMisses(pairs)
+        pages: mergeRows(pages.map(r => ({ page: pathOf(r.keys[0]), clicks: r.clicks, impressions: r.impressions, position: r.position })), r => r.page)
+            .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions),
+        pairs: mergeRows(pairs.map(r => ({ query: r.keys[0], page: pathOf(r.keys[1]), clicks: r.clicks, impressions: r.impressions, position: r.position })), r => `${r.query}\n${r.page}`),
+        nearMisses: nearMisses(mergeRows(pairs.map(r => ({ keys: [r.keys[0], pathOf(r.keys[1])], clicks: r.clicks, impressions: r.impressions, position: r.position })), r => r.keys.join('\n')))
+    };
+}
+
+/**
+ * Asks Google whether one address is indexed (URL Inspection API; about 2,000 a day).
+ * Returns { state: 'indexed' | 'not-indexed' | 'unknown', ... } with the details worth showing.
+ */
+export async function inspectUrl(env, pageUrl, fetchImpl = fetch) {
+    const key = parseServiceAccount(env.GSC_SERVICE_ACCOUNT);
+    if (!key) return { configured: false };
+    const token = await accessToken(key, fetchImpl);
+    const res = await fetchImpl('https://searchconsole.googleapis.com/v1/urlInspection/index:inspect', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inspectionUrl: pageUrl, siteUrl: env.GSC_SITE || 'sc-domain:ryanmarch.me' })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error?.message || `HTTP ${res.status}`);
+    return summarizeInspection(pageUrl, body.inspectionResult);
+}
+
+export function summarizeInspection(url, r = {}) {
+    const ix = r.indexStatusResult || {};
+    const state = ix.verdict === 'PASS' ? 'indexed' : ix.verdict === 'FAIL' || ix.verdict === 'NEUTRAL' ? 'not-indexed' : 'unknown';
+    return {
+        url, state, checked: Date.now(),
+        coverage: ix.coverageState || '',
+        lastCrawl: ix.lastCrawlTime || null,
+        crawledAs: ix.crawledAs || null,
+        googleCanonical: ix.googleCanonical || null,
+        userCanonical: ix.userCanonical || null,
+        canonicalMismatch: Boolean(ix.googleCanonical && ix.userCanonical && ix.googleCanonical !== ix.userCanonical),
+        robots: ix.robotsTxtState || null,
+        pageFetch: ix.pageFetchState || null,
+        mobile: r.mobileUsabilityResult?.verdict || null
     };
 }

@@ -244,3 +244,20 @@ test.describe('search and suggestions', () => {
         await expect(list).toContainText('1 project has no write-up');
     });
 });
+
+test.describe('search per project', () => {
+    test('projects list their search numbers, check indexing, and open a detail view', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/search');
+        const row = page.locator('#view-search tr:has([data-idx="ledger"])');
+        await expect(row).toContainText('300');
+        await page.click('#inspect-all');
+        await expect(page.locator('[data-idx="ledger"]')).toContainText('Indexed');
+        await row.getByRole('link').click();
+        await expect(page).toHaveURL(/project=ledger/);
+        await expect(page.locator('#view-search')).toContainText('ledger app');
+        await expect(page.locator('#view-search')).toContainText('Submitted and indexed');
+        await page.getByRole('link', { name: '← All projects' }).click();
+        await expect(page).not.toHaveURL(/project=/);
+    });
+});

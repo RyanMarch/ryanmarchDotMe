@@ -24,7 +24,7 @@ import {
     auditProjectHtml, auditProjectMeta, auditRedirects, auditSitemap, sortFindings, summarize
 } from './public/assets/js/admin/audit.js';
 
-import { fetchSearchData } from './search-console.js';
+import { fetchSearchData, inspectUrl } from './search-console.js';
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
 import { handleActivity, handleBuild, handleHistory, handleImageDelete, handleLinks, handleNotFound, handleTrash, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
@@ -349,11 +349,36 @@ export async function handleSearch(request, env, url, fetchImpl) {
         return jsonResponse({ configured: false, message: 'Set GSC_SERVICE_ACCOUNT (and GSC_SITE) as Worker secrets to enable Search Console.' }, 501);
     }
     try {
-        const body = await cached(env, `search:${env.GSC_SITE || 'default'}:${days}`, 6 * 3600, () => fetchSearchData(env, days, fetchImpl));
+        const body = await cached(env, `search:v2:${env.GSC_SITE || 'default'}:${days}`, 6 * 3600, () => fetchSearchData(env, days, fetchImpl));
         if (!body.configured) return jsonResponse({ ...body, message: 'GSC_SERVICE_ACCOUNT is not valid JSON with client_email and private_key.' }, 501);
         return jsonResponse(body);
     } catch (e) {
         return jsonResponse({ error: e.message }, 502);
+    }
+}
+
+const INSPECT_KEY = 'inspect:v1';
+
+/**
+ * Indexing status per project. With no query it returns what was saved from earlier checks; with ?project=id
+ * it asks Google about that project's page (one call each, so the page runs them one at a time) and saves the answer.
+ */
+export async function handleSearchIndex(request, env, url, fetchImpl, { projects = [] } = {}) {
+    if (!env.GSC_SERVICE_ACCOUNT) return jsonResponse({ configured: false, message: 'Set GSC_SERVICE_ACCOUNT to enable Search Console.' }, 501);
+    const saved = (env.ADMIN_KV && await env.ADMIN_KV.get(INSPECT_KEY, 'json').catch(() => null)) || {};
+    const id = url.searchParams.get('project');
+    if (!id) return jsonResponse({ results: saved, persistent: Boolean(env.ADMIN_KV) });
+
+    const project = projects.find(p => p.id === id && !p.unpublished && p.hasExtendedContent);
+    if (!project) return jsonResponse({ error: 'unknown_project', message: 'That project has no public page to check.' }, 404);
+    try {
+        const result = await inspectUrl(env, `https://${env.CF_ANALYTICS_HOST || 'ryanmarch.me'}/project/${project.id}/`, fetchImpl);
+        if (env.ADMIN_KV) {
+            await env.ADMIN_KV.put(INSPECT_KEY, JSON.stringify({ ...saved, [id]: result }), { expirationTtl: 60 * 60 * 24 * 90 }).catch(() => {});
+        }
+        return jsonResponse({ id, result });
+    } catch (e) {
+        return jsonResponse({ error: 'inspect_failed', message: e.message }, 502);
     }
 }
 
@@ -366,6 +391,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     const routes = {
         '/api/admin/analytics': [handleAnalytics, ['GET']],
         '/api/admin/search': [handleSearch, ['GET']],
+        '/api/admin/search/index': [handleSearchIndex, ['GET']],
         '/api/admin/overview': [handleOverview, ['GET']],
         '/api/admin/health': [handleHealth, ['GET']],
         '/api/admin/scan': [handleScan, ['GET']],
@@ -390,6 +416,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     const [handler] = entry;
     if (handler === handleOverview) return handler(request, env, url, fetchImpl, projects);
     if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
+    if (handler === handleSearchIndex) return handler(request, env, url, fetchImpl, { projects });
     if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
     if (handler === handleImageDelete) return handler(request, env, url, fetchImpl, { projects });
     if (handler === handleLinks) return handler(request, env, url, fetchImpl, { projects, assetFetch });

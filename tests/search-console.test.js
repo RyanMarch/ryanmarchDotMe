@@ -76,3 +76,47 @@ describe('todayItems', () => {
     });
     it('escapes text', () => expect(todayHtml([{ level: 'info', text: '<b>x</b>', href: '/a', action: 'Go' }])).not.toContain('<b>x'));
 });
+
+import { mergeRows, pathOf, summarizeInspection } from '../search-console.js';
+import { indexCell, projectRows } from '../public/assets/js/admin/search.js';
+
+describe('page variants and per-project rows', () => {
+    it('folds http, www and https into one path', () => {
+        expect(pathOf('https://www.ryanmarch.me/project/a/')).toBe('/project/a/');
+        const rows = ['http://ryanmarch.me/', 'https://ryanmarch.me/', 'https://www.ryanmarch.me/'].map((u, i) => ({ page: pathOf(u), clicks: i, impressions: 10, position: 10 * (i + 1) }));
+        const [one, ...rest] = mergeRows(rows, r => r.page);
+        expect(rest).toEqual([]);
+        expect(one).toMatchObject({ page: '/', clicks: 3, impressions: 30, position: 20 });
+    });
+    it('rows list only published projects with a page, best first', () => {
+        const rows = projectRows(
+            [{ id: 'a', title: 'A', hasExtendedContent: true }, { id: 'b', title: 'B', hasExtendedContent: true }, { id: 'c', title: 'C', hasExtendedContent: false }, { id: 'd', title: 'D', hasExtendedContent: true, unpublished: true }],
+            [{ page: '/project/b/', clicks: 5, impressions: 50, ctr: 0.1, position: 4 }]);
+        expect(rows.map(r => r.id)).toEqual(['b', 'a']);
+        expect(rows[0]).toMatchObject({ clicks: 5, position: 4 });
+    });
+    it('summarizes an inspection', () => {
+        const r = summarizeInspection('u', { indexStatusResult: { verdict: 'PASS', coverageState: 'Submitted and indexed', googleCanonical: 'g', userCanonical: 'u2' } });
+        expect(r).toMatchObject({ state: 'indexed', canonicalMismatch: true });
+        expect(summarizeInspection('u', { indexStatusResult: { verdict: 'NEUTRAL' } }).state).toBe('not-indexed');
+        expect(summarizeInspection('u', {}).state).toBe('unknown');
+        expect(indexCell(undefined)).toContain('Not checked');
+    });
+});
+
+describe('/api/admin/search/index', () => {
+    const projects = [{ id: 'ok', hasExtendedContent: true }, { id: 'hidden', hasExtendedContent: true, unpublished: true }];
+    const call = (qs, env = {}) => {
+        const url = new URL(`https://ryanmarch.me/api/admin/search/index${qs}`);
+        return handleAdminApi(new Request(url, { headers: { Authorization: 'Bearer pw' } }), { ADMIN_PASSWORD: 'pw', GSC_SERVICE_ACCOUNT: '{"client_email":"a@b","private_key":"k"}', ...env }, url, url.pathname, { projects });
+    };
+    it('501 without a key, saved results without a project', async () => {
+        expect((await call('', { GSC_SERVICE_ACCOUNT: '' })).status).toBe(501);
+        const kv = { get: async () => ({ ok: { state: 'indexed' } }) };
+        expect(await (await call('', { ADMIN_KV: kv })).json()).toEqual({ results: { ok: { state: 'indexed' } }, persistent: true });
+    });
+    it('refuses unknown and unpublished projects', async () => {
+        expect((await call('?project=nope')).status).toBe(404);
+        expect((await call('?project=hidden')).status).toBe(404);
+    });
+});
