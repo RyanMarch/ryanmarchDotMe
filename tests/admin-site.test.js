@@ -148,7 +148,7 @@ describe('/api/admin/media', () => {
 });
 
 describe('/api/admin/media/r2', () => {
-    const bucket = () => ({ head: vi.fn(async () => null), put: vi.fn(), delete: vi.fn() });
+    const bucket = () => ({ head: vi.fn(async () => null), get: vi.fn(async () => null), put: vi.fn(), delete: vi.fn() });
     const put = (qs, env, extra = {}) => call(`/api/admin/media/r2?${qs}`, env, { method: 'PUT', body: 'abc', headers: { 'content-length': '3' }, ...extra });
 
     it('uploads allowed types, refusing to overwrite unless asked', async () => {
@@ -166,11 +166,12 @@ describe('/api/admin/media/r2', () => {
         expect((await put('key=a.mp3', { ...env0, MEDIA }, { headers: { 'content-length': String(200 * 1024 * 1024) } })).status).toBe(413);
         expect(MEDIA.put).not.toHaveBeenCalled();
     });
-    it('deletes existing objects and 404s on missing ones', async () => {
+    it('deletes existing objects and 404s on missing ones (no trash bucket: gone for good)', async () => {
         const MEDIA = bucket();
         expect((await call('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA }, { method: 'DELETE' })).status).toBe(404);
-        MEDIA.head.mockResolvedValue({});
-        expect((await call('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA }, { method: 'DELETE' })).status).toBe(200);
+        MEDIA.get.mockResolvedValue({ body: null });
+        const res = await call('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA }, { method: 'DELETE' });
+        expect(await res.json()).toEqual({ deleted: 'a.mp3', trashed: false });
         expect(MEDIA.delete).toHaveBeenCalledWith('a.mp3');
     });
     it('is unavailable without the binding, and blocks cross-origin writes', async () => {
@@ -430,5 +431,60 @@ describe('/api/admin/build', () => {
     it('maps REST check runs like GraphQL ones', () => {
         expect(normalizeRestCheck(run('test', 'completed', 'cancelled')).state).toBe('failed');
         expect(normalizeRestCheck(run('test', 'queued', null)).state).toBe('pending');
+    });
+});
+
+describe('R2 trash', () => {
+    const store = (initial = {}) => {
+        const m = new Map(Object.entries(initial));
+        return {
+            m,
+            head: vi.fn(async k => (m.has(k) ? { key: k } : null)),
+            get: vi.fn(async k => (m.has(k) ? { body: m.get(k).body, httpMetadata: m.get(k).httpMetadata, customMetadata: m.get(k).customMetadata } : null)),
+            put: vi.fn(async (k, body, opts = {}) => { m.set(k, { body, ...opts }); }),
+            delete: vi.fn(async k => { m.delete(k); }),
+            list: vi.fn(async () => ({ objects: [...m].map(([key, v]) => ({ key, size: 3, uploaded: '2026-01-01', customMetadata: v.customMetadata })) }))
+        };
+    };
+    const api = (p, env, method = 'GET', headers = {}) => call(p, env, { method, headers });
+
+    it('moves a deleted file to the trash bucket with who and when, instead of destroying it', async () => {
+        const MEDIA = store({ 'a.mp3': { body: 'DATA', httpMetadata: { contentType: 'audio/mpeg' } } });
+        const MEDIA_TRASH = store();
+        const res = await api('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA, MEDIA_TRASH }, 'DELETE', { 'cf-access-authenticated-user-email': 'me@example.com' });
+        const body = await res.json();
+        expect(body).toMatchObject({ deleted: 'a.mp3', trashed: true });
+        expect(MEDIA.m.has('a.mp3')).toBe(false);
+        const kept = MEDIA_TRASH.m.get(body.trashKey);
+        expect(kept.body).toBe('DATA');
+        expect(kept.customMetadata).toMatchObject({ originalKey: 'a.mp3', deletedBy: 'me@example.com' });
+    });
+    it('lists the trash, newest first', async () => {
+        const MEDIA_TRASH = store({ '1-old.mp3': { customMetadata: { originalKey: 'old.mp3', deletedAt: '2026-01-01T00:00:00Z' } }, '2-new.mp3': { customMetadata: { originalKey: 'new.mp3', deletedAt: '2026-02-01T00:00:00Z' } } });
+        const body = await (await api('/api/admin/media/trash', { ...env0, MEDIA_TRASH })).json();
+        expect(body.objects.map(o => o.key)).toEqual(['new.mp3', 'old.mp3']);
+        expect(body.objects[0].trashKey).toBe('2-new.mp3');
+    });
+    it('restores a file under its original name, and will not overwrite one that exists', async () => {
+        const MEDIA = store();
+        const MEDIA_TRASH = store({ '5-a.mp3': { body: 'DATA', customMetadata: { originalKey: 'a.mp3' } } });
+        expect((await (await api('/api/admin/media/trash?key=5-a.mp3', { ...env0, MEDIA, MEDIA_TRASH }, 'POST')).json())).toEqual({ restored: 'a.mp3' });
+        expect(MEDIA.m.get('a.mp3').body).toBe('DATA');
+        expect(MEDIA_TRASH.m.has('5-a.mp3')).toBe(false);
+
+        const taken = store({ 'a.mp3': { body: 'NEW' } });
+        const trash2 = store({ '6-a.mp3': { body: 'OLD', customMetadata: { originalKey: 'a.mp3' } } });
+        const res = await api('/api/admin/media/trash?key=6-a.mp3', { ...env0, MEDIA: taken, MEDIA_TRASH: trash2 }, 'POST');
+        expect(res.status).toBe(409);
+        expect(trash2.m.has('6-a.mp3')).toBe(true);
+        expect(taken.m.get('a.mp3').body).toBe('NEW');
+    });
+    it('deletes for good only on request, rejects odd keys, and is optional', async () => {
+        const MEDIA_TRASH = store({ '7-b.mp3': { body: 'X' } });
+        expect((await api('/api/admin/media/trash?key=../x', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(400);
+        expect((await api('/api/admin/media/trash?key=9-missing.mp3', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(404);
+        expect((await api('/api/admin/media/trash?key=7-b.mp3', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(200);
+        expect(MEDIA_TRASH.m.size).toBe(0);
+        expect((await (await api('/api/admin/media/trash', env0)).json()).available).toBe(false);
     });
 });

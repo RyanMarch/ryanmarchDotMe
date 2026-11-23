@@ -1107,3 +1107,16 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
 .nf-row code { font-size: 0.9rem; overflow-wrap: anywhere; }
 .nf-actions { display: flex; align-items: center; gap: 0.9rem; white-space: nowrap; }
 .nf-actions .btn { min-height: 34px; padding: 0 0.85rem; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; }
+
+/* R2 trash */
+details.trash { margin: 0 0 1.25rem; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); }
+details.trash > summary { cursor: pointer; padding: 0.75rem 1rem; font-weight: 650; }
+details.trash .trash-body { padding: 0 1rem 1rem; }
+details.trash .panel-list { margin-bottom: 0; }
+.rows li.mrow-trash { grid-template-columns: minmax(0, 1fr) 6.5rem auto; }
+.rows li.mrow-trash .value { text-align: right; }
+.trash-actions { display: flex; align-items: center; gap: 0.9rem; justify-content: flex-end; white-space: nowrap; }
+@media (max-width: 720px) {
+    .rows li.mrow-trash { grid-template-columns: minmax(0, 1fr) auto; }
+    .rows li.mrow-trash .trash-actions { grid-column: 1 / -1; justify-content: flex-start; }
+}

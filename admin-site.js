@@ -85,7 +85,7 @@ async function listR2(bucket) {
 }
 
 export async function handleMedia(request, env, url, fetchImpl) {
-    const out = { repo: null, r2: { available: Boolean(env.MEDIA), objects: [] } };
+    const out = { repo: null, r2: { available: Boolean(env.MEDIA), trash: Boolean(env.MEDIA_TRASH), objects: [] } };
 
     if (env.GITHUB_REPO && env.GITHUB_PAT) {
         const branch = safeBranch(url.searchParams.get('branch'));
@@ -174,6 +174,46 @@ export async function handleBuild(request, env, url, fetchImpl) {
     }
 }
 
+/* ───────────── /media/trash (deleted audio and files, kept for 30 days) ───────────── */
+
+export async function handleTrash(request, env, url) {
+    if (!env.MEDIA_TRASH) return jsonResponse({ available: false, objects: [] });
+    const key = url.searchParams.get('key') || '';
+
+    if (request.method === 'GET') {
+        const listed = await env.MEDIA_TRASH.list({ limit: 200, include: ['customMetadata'] });
+        const objects = (listed.objects || []).map(o => ({
+            trashKey: o.key,
+            key: o.customMetadata?.originalKey || o.key.replace(/^\d+-/, ''),
+            size: o.size,
+            deletedAt: o.customMetadata?.deletedAt || o.uploaded,
+            deletedBy: o.customMetadata?.deletedBy || ''
+        })).sort((a, b) => String(b.deletedAt).localeCompare(String(a.deletedAt)));
+        return jsonResponse({ available: true, objects });
+    }
+
+    if (!/^\d+-[A-Za-z0-9][A-Za-z0-9._-]{0,119}$/.test(key)) return jsonResponse({ error: 'bad_key', message: 'That is not a trashed file.' }, 400);
+    const obj = await env.MEDIA_TRASH.get(key);
+    if (!obj) return jsonResponse({ error: 'not_found', message: 'That file is no longer in the trash.' }, 404);
+
+    if (request.method === 'DELETE') {
+        await obj.body?.cancel?.();
+        await env.MEDIA_TRASH.delete(key);
+        return jsonResponse({ purged: key });
+    }
+
+    // POST = restore
+    const original = obj.customMetadata?.originalKey || key.replace(/^\d+-/, '');
+    if (!env.MEDIA) return jsonResponse({ error: 'not_configured', message: 'The MEDIA R2 binding is not configured.' }, 501);
+    if (await env.MEDIA.head(original)) {
+        await obj.body?.cancel?.();
+        return jsonResponse({ error: 'exists', message: `${original} already exists in the bucket. Rename or delete that one first.` }, 409);
+    }
+    await env.MEDIA.put(original, obj.body, { httpMetadata: obj.httpMetadata });
+    await env.MEDIA_TRASH.delete(key);
+    return jsonResponse({ restored: original });
+}
+
 /* ───────────── /notfound (addresses people asked for that don't exist) ───────────── */
 
 export async function handleNotFound(request, env, url, fetchImpl, ctx = {}) {
@@ -209,10 +249,21 @@ export async function handleR2(request, env, url) {
     if (!R2_KEY.test(key)) return jsonResponse({ error: 'bad_key', message: 'Use letters, numbers, dots, dashes and underscores (max 120 characters).' }, 400);
 
     if (request.method === 'DELETE') {
-        const existing = await env.MEDIA.head(key);
+        const existing = await env.MEDIA.get(key);
         if (!existing) return jsonResponse({ error: 'not_found', message: `${key} does not exist.` }, 404);
+        if (!env.MEDIA_TRASH) {
+            await existing.body?.cancel?.();
+            await env.MEDIA.delete(key);
+            return jsonResponse({ deleted: key, trashed: false });
+        }
+        // Move to the private trash bucket first (kept 30 days), so a mistaken delete can be undone.
+        const trashKey = `${Date.now()}-${key}`;
+        await env.MEDIA_TRASH.put(trashKey, existing.body, {
+            httpMetadata: existing.httpMetadata,
+            customMetadata: { originalKey: key, deletedAt: new Date().toISOString(), deletedBy: adminEmail(request) || 'local' }
+        });
         await env.MEDIA.delete(key);
-        return jsonResponse({ deleted: key });
+        return jsonResponse({ deleted: key, trashed: true, trashKey });
     }
 
     // PUT: upload
@@ -336,6 +387,7 @@ export async function handleStatus(request, env) {
             { key: 'analytics', label: 'Cloudflare analytics', ok: has('CF_API_TOKEN', 'CF_ACCOUNT_ID'), detail: 'CF_API_TOKEN, CF_ACCOUNT_ID', host: env.CF_ANALYTICS_HOST || 'ryanmarch.me' },
             { key: 'github', label: 'GitHub access (editor, commits)', ok: has('GITHUB_REPO', 'GITHUB_PAT'), detail: 'GITHUB_REPO, GITHUB_PAT' },
             { key: 'r2', label: 'R2 media bucket', ok: Boolean(env.MEDIA), detail: 'MEDIA binding (ryanmarchdotme-media)' },
+            { key: 'trash', label: 'R2 trash bucket', ok: Boolean(env.MEDIA_TRASH), detail: 'MEDIA_TRASH binding (deleted files kept 30 days)', optional: true },
             { key: 'kv', label: 'KV cache for analytics', ok: Boolean(env.ADMIN_KV), detail: 'ADMIN_KV binding (optional)', optional: true },
             { key: 'access', label: 'Access sign-in verification', ok: has('CF_ACCESS_TEAM_DOMAIN', 'CF_ACCESS_AUD'), detail: 'CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD (recommended)', optional: true },
             { key: 'password', label: 'Admin password fallback', ok: !has('ADMIN_PASSWORD'), invert: true, detail: has('ADMIN_PASSWORD') ? 'ADMIN_PASSWORD is set; remove it in production' : 'Not set (good)', optional: false }
