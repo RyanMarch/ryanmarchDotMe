@@ -1,0 +1,72 @@
+import fs from 'fs';
+import path from 'path';
+
+const b64 = text => Buffer.from(text, 'utf8').toString('base64');
+const projectData = fs.readFileSync(path.join(import.meta.dirname, '../public/assets/js/project-data.js'), 'utf8');
+export const PASSWORD = 'e2e-pass';
+
+const day = n => new Date(Date.UTC(2026, 10, 23 - n)).toISOString().slice(0, 10);
+const analytics = () => ({
+    days: 30, host: 'ryanmarch.me', filters: { botsExcluded: true, torHidden: false }, botLoads: 0, torLoads: 0,
+    totals: { current: { views: 120, visits: 100 }, previous: { views: 90, visits: 80 } },
+    rows: Array.from({ length: 30 }, (_, i) => ({ date: day(i), views: (i % 5) * 4, visits: (i % 5) * 3 })),
+    prevRows: [],
+    paths: [{ label: '/', count: 60 }, { label: '/project/ledger/', count: 30 }],
+    referrers: [{ label: 'Direct / none', count: 100 }], countries: [{ label: 'US', count: 100 }], devices: [{ label: 'desktop', count: 100 }],
+    vitals: { samples: 10, lcp_ms: 900, cls: 0.01, inp_ms: 120, fcp_ms: 700, load_ms: 1500 }
+});
+
+const mediaFiles = [
+    'content/ledger/images/card.avif', 'content/ledger/images/card.png', 'content/ledger/images/card-640.avif',
+    'content/spindex/images/card.png', 'assets/img/logo.webp', 'assets/img/logo.avif'
+].map(p => ({ path: p, size: 40000 }));
+
+/**
+ * Answers every /api/admin call. Returns { posts } — the bodies of any saves — so tests can assert on them.
+ * Pass `overrides` to change a response: { notfound: { items: [...] } }.
+ */
+export async function mockAdminApi(page, overrides = {}) {
+    const posts = [];
+    await page.route('**/api/admin/**', async route => {
+        const req = route.request();
+        const url = new URL(req.url());
+        const reply = (body, status = 200) => route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+        const name = url.pathname.replace('/api/admin/', '');
+        if (overrides[name]) return reply(overrides[name]);
+
+        if (name === 'file') {
+            if (req.method() === 'POST') { posts.push(JSON.parse(req.postData())); return reply({ success: true, sha: `sha-${posts.length}`, commit: 'abc1234' }); }
+            if (req.headers().authorization && req.headers().authorization !== `Bearer ${PASSWORD}`) return route.fulfill({ status: 401, body: 'Unauthorized' });
+            const file = url.searchParams.get('path');
+            if (file === 'assets/js/project-data.js') return reply({ content: b64(projectData), sha: 'pd-sha' });
+            if (file === 'redirects.json') return reply({ content: b64('[]'), sha: 'rd-sha' });
+            return reply({ content: b64('ok'), sha: 'x' });
+        }
+        if (name === 'analytics') return reply(analytics());
+        if (name === 'overview') return reply({ projects: { total: 34, withWriteup: 33, linkOnly: 1, unpublished: 0 }, commits: [{ sha: 'abc1234', message: 'Update things', author: 'Ryan', date: new Date().toISOString(), url: 'https://example.com/c' }], pending: { ahead: 0 }, branch: 'main' });
+        if (name === 'health') return reply({ findings: [], counts: { error: 0, warning: 0, info: 0 }, projects: 34 });
+        if (name === 'media') return reply({ repo: { branch: 'main', files: mediaFiles, truncated: false }, r2: { available: true, trash: false, objects: [] } });
+        if (name === 'activity') return reply({ branch: url.searchParams.get('branch') || 'main', commits: [{ sha: 'abc1234', message: 'Update things', author: 'Ryan', date: new Date().toISOString(), url: 'https://example.com/c', checks: [{ name: 'Tests', state: 'ok' }] }], checksAvailable: true, pending: { ahead: 0 }, deploys: null });
+        if (name === 'notfound') return reply({ available: true, since: Date.now() - 86400000, items: [{ path: '/project/ledgr', count: 3, first: Date.now() - 1000, last: Date.now() - 1000, referrer: '' }] });
+        if (name === 'build') return reply({ sha: 'abc1234', state: 'ok', checks: [{ name: 'Tests', state: 'ok' }, { name: 'Build', state: 'ok' }] });
+        if (name === 'status') return reply({ items: [] });
+        if (name === 'scan') return reply({ project: url.searchParams.get('project'), images: [], audio: [], videos: [] });
+        return reply({});
+    });
+
+    // The editor's highlighter and code editor come from CDNs; give the page harmless stand-ins.
+    await page.route(/cdnjs\.cloudflare\.com|cdn\.jsdelivr\.net/, route => {
+        const url = route.request().url();
+        if (url.includes('codejar')) return route.fulfill({ contentType: 'text/javascript', body: 'export const CodeJar = () => ({ onUpdate() {}, updateCode() {}, toString() { return ""; }, destroy() {} });' });
+        return route.fulfill({ contentType: 'text/javascript', body: 'window.Prism = window.Prism || { highlightElement() {} };' });
+    });
+    return { posts };
+}
+
+/** Signs in through the local password gate. */
+export async function signIn(page, path = '/admin') {
+    await page.goto(path);
+    await page.fill('#passcode-input', PASSWORD);
+    await page.click('#login-btn');
+    await page.locator('#admin-view:not(.hidden)').waitFor();
+}
