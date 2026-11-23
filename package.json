@@ -12,8 +12,7 @@
   },
   "type": "module",
   "scripts": {
-    "dev": "python3 dev/serve.py",
-    "dev:worker": "wrangler dev --persist-to /tmp/wrangler-persist",
+    "dev": "wrangler dev --port 8787",
     "build": "npm run test && node scripts/build.js",
     "create-project": "node dev/create-project.js",
     "image-variants": "node dev/make-image-variants.mjs",

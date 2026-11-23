@@ -48,6 +48,14 @@
 /assets/js/*
   Cache-Control: public, max-age=3600, must-revalidate
 
+# ── Admin UI: always revalidate (cheap 304 via ETag). These files aren't
+# ── content-hashed, so a long cache would serve a stale admin after a deploy.
+/assets/js/admin/*
+  ! Cache-Control
+  Cache-Control: no-cache
+/assets/css/admin.css
+  Cache-Control: no-cache
+
 # ── Favicons: reasonably long cache
 /assets/favicon/*
   Cache-Control: public, max-age=604800

@@ -1,4 +1,7 @@
-import { myProjects } from './project-data.js?v=2';
+import { myProjects as allProjects } from './project-data.js?v=2';
+
+// A project with `unpublished: true` stays in the data file but is hidden from the site.
+const myProjects = allProjects.filter(p => !p.unpublished);
 import { buildImageSrcset } from './image-utils.js';
 import { initializeCustomAudioPlayers } from './audio-player.js?v=2';
 import { initializeLightbox, setupContentClicks } from './lightbox.js?v=1';
