@@ -21,6 +21,18 @@ export async function ghJson(env, path, fetchImpl = fetch) {
     return res.json();
 }
 
+/**
+ * Where a file the admin may touch lives in the repo, or null if the admin may not touch it.
+ * Mirrors the allow-list on the /api/admin/file route.
+ */
+export function adminRepoPath(filePath) {
+    const allowed = typeof filePath === 'string'
+        && !filePath.includes('..')
+        && (filePath.startsWith('content/') || ['index.html', 'assets/js/project-data.js', 'sitemap.xml', 'redirects.json', 'robots.txt'].includes(filePath));
+    if (!allowed) return null;
+    return filePath === 'redirects.json' ? 'config/redirects.json' : `public/${filePath}`;
+}
+
 export const safeBranch = value => (/^[\w./-]+$/.test(value || '') ? value : 'main');
 
 const b64urlJson = part => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(part.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0))));

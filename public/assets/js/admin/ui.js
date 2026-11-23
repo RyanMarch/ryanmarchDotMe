@@ -45,6 +45,52 @@ export function alertDialog(message, { title = 'Heads up' } = {}) {
     return openDialog({ title, message, buttons: [{ id: 'ok', label: 'OK', value: true, primary: true }], focus: 'ok' });
 }
 
+/**
+ * Pick one item from a list. items: [{ value, label, sub }]. Resolves to the chosen value, or null if cancelled.
+ */
+export function chooseDialog({ title, message = '', items, confirmLabel = 'Choose', cancelLabel = 'Cancel' }) {
+    return new Promise(resolve => {
+        const dlg = el('dialog', 'dlg dlg-wide');
+        dlg.setAttribute('aria-labelledby', 'dlg-title');
+        const form = el('form', 'dlg-body');
+        form.method = 'dialog';
+        const h = el('h2', 'dlg-title', title);
+        h.id = 'dlg-title';
+        form.append(h);
+        if (message) form.append(el('p', 'dlg-message', message));
+        const list = el('div', 'choose-list');
+        list.setAttribute('role', 'radiogroup');
+        items.forEach((it, i) => {
+            const row = el('label', 'choose-row');
+            const radio = el('input');
+            radio.type = 'radio';
+            radio.name = 'choice';
+            radio.value = String(i);
+            if (i === 0) radio.checked = true;
+            const text = el('span', 'choose-text');
+            text.append(el('span', 'choose-label', it.label));
+            if (it.sub) text.append(el('span', 'choose-sub', it.sub));
+            row.append(radio, text);
+            list.append(row);
+        });
+        const actions = el('div', 'dlg-actions');
+        let answer = null;
+        const cancel = el('button', 'btn btn-secondary', cancelLabel);
+        cancel.type = 'submit';
+        const ok = el('button', 'btn', confirmLabel);
+        ok.type = 'submit';
+        ok.addEventListener('click', () => { const picked = form.querySelector('input[name=choice]:checked'); answer = picked ? items[Number(picked.value)].value : null; });
+        actions.append(cancel, ok);
+        form.append(list, actions);
+        dlg.append(form);
+        dlg.addEventListener('close', () => { dlg.remove(); resolve(answer); });
+        dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+        document.body.append(dlg);
+        dlg.showModal();
+        (list.querySelector('input:checked') || ok).focus();
+    });
+}
+
 /** A read-only list of key/description pairs (the shortcuts cheat sheet). */
 export function infoDialog({ title, rows }) {
     return new Promise(resolve => {
@@ -120,4 +166,5 @@ if (typeof window !== 'undefined') {
     window.adminConfirm = (message, opts = {}) => confirmDialog({ message, ...opts });
     window.adminAlert = (message, opts) => alertDialog(message, opts);
     window.adminToast = toast;
+    window.adminChoose = chooseDialog;
 }

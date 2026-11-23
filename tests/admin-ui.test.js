@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { alertDialog, confirmDialog, toast } from '../public/assets/js/admin/ui.js';
+import { alertDialog, chooseDialog, confirmDialog, infoDialog, toast } from '../public/assets/js/admin/ui.js';
 
 // jsdom has no real <dialog> modal behaviour; give it the part the module needs.
 beforeEach(() => {
@@ -120,5 +120,36 @@ describe('countUp', () => {
         window.matchMedia = q => ({ matches: true, media: q });
         countUp(document.getElementById('s'));
         expect(document.querySelector('.v').textContent).toBe('900');
+    });
+});
+
+describe('chooseDialog', () => {
+    const items = [{ value: 'a1', label: 'Newest', sub: 'today' }, { value: 'b2', label: 'Older', sub: 'last week' }];
+    it('resolves the picked value, with the first item selected by default', async () => {
+        let p = chooseDialog({ title: 'History', items, confirmLabel: 'Load' });
+        expect(document.querySelectorAll('.choose-row')).toHaveLength(2);
+        expect(document.querySelector('input[name=choice]:checked').value).toBe('0');
+        click('Load');
+        expect(await p).toBe('a1');
+        p = chooseDialog({ title: 'History', items, confirmLabel: 'Load' });
+        document.querySelectorAll('input[name=choice]')[1].checked = true;
+        click('Load');
+        expect(await p).toBe('b2');
+    });
+    it('resolves null on cancel or Esc, and shows labels as text', async () => {
+        const p = chooseDialog({ title: 'H', items: [{ value: 'x', label: '<b>bold</b>' }] });
+        expect(document.querySelector('.choose-label b')).toBeNull();
+        click('Cancel');
+        expect(await p).toBeNull();
+    });
+});
+
+describe('infoDialog', () => {
+    it('lists keys and descriptions, with "then" between a sequence', async () => {
+        const p = infoDialog({ title: 'Shortcuts', rows: [['g a', 'Analytics'], ['?', 'Help']] });
+        expect(document.querySelector('dt').textContent).toBe('g then a');
+        expect(document.querySelectorAll('kbd')).toHaveLength(3);
+        click('Close');
+        await p;
     });
 });

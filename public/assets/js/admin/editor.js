@@ -84,6 +84,31 @@ function b64EncodeUnicode(str) {
     return btoa(Array.from(new TextEncoder().encode(str), b => String.fromCharCode(b)).join(''));
 }
 
+// File history: pick an earlier version of the open file and load it into the editor (nothing is saved until you Save).
+async function showFileHistory() {
+    if (!currentFile.path) return;
+    const branch = window.getSelectedBranch();
+    const res = await fetch(`/api/admin/history?path=${encodeURIComponent(currentFile.path)}&branch=${encodeURIComponent(branch)}`, { headers: getAuthHeaders(), cache: 'no-store' });
+    if (!res.ok) { window.adminAlert('Could not load the history for this file.', { title: 'History' }); return; }
+    const { commits } = await res.json();
+    if (!commits.length) { window.adminAlert('No earlier versions were found.', { title: 'History' }); return; }
+    const when = iso => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const sha = await window.adminChoose({
+        title: `History of ${currentFile.path}`,
+        message: `Branch ${branch}. Pick a version to load into the editor. It only changes the file when you Save.`,
+        items: commits.map((c, i) => ({ value: c.sha, label: c.message || '(no message)', sub: `${when(c.date)} · ${c.by || c.author}${i === 0 ? ' · latest' : ''}` })),
+        confirmLabel: 'Load this version'
+    });
+    if (!sha) return;
+    const unsaved = jar && jar.toString() !== currentFile.originalContent;
+    if (unsaved && !(await window.adminConfirm('The editor has changes you have not saved. Loading an old version replaces them.', { title: 'Replace unsaved changes?', confirmLabel: 'Replace' }))) return;
+    const old = await fetch(`/api/admin/file?path=${encodeURIComponent(currentFile.path)}&branch=${encodeURIComponent(sha)}`, { headers: getAuthHeaders(), cache: 'no-store' });
+    if (!old.ok) { window.adminAlert('Could not load that version.', { title: 'History' }); return; }
+    const data = await old.json();
+    jar.updateCode(b64DecodeUnicode((data.content || '').replace(/\s/g, '')));
+    window.adminToast?.('Loaded that version. Review it, then Save to commit it as a new change.', { type: 'success', duration: 9000 });
+}
+
 // File Loader
 async function loadFile(filePath) {
     // Fallback to active file if not specified

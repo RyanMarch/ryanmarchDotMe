@@ -4,7 +4,7 @@
  * configuration status page. Routed from admin-api.js.
  */
 import { KEY as NOT_FOUND_KEY, normalizeNotFound } from './not-found.js';
-import { adminEmail, ghJson, jsonResponse, safeBranch, withEditor } from './admin-http.js';
+import { adminEmail, adminRepoPath, ghJson, jsonResponse, safeBranch, withEditor } from './admin-http.js';
 import { audioSignature, classifyLink, externalLinks, imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
 
 const ID_PATTERN = /^[a-z0-9_-]+$/i;
@@ -212,6 +212,31 @@ export async function handleTrash(request, env, url) {
     await env.MEDIA.put(original, obj.body, { httpMetadata: obj.httpMetadata });
     await env.MEDIA_TRASH.delete(key);
     return jsonResponse({ restored: original });
+}
+
+/* ───────────── /history?path= (the commits that changed one file) ───────────── */
+
+export async function handleHistory(request, env, url, fetchImpl) {
+    if (!env.GITHUB_REPO || !env.GITHUB_PAT) return jsonResponse({ error: 'not_configured', message: 'GitHub access is not configured.' }, 501);
+    const repoPath = adminRepoPath(url.searchParams.get('path') || '');
+    if (!repoPath) return jsonResponse({ error: 'bad_path', message: 'That file is not one the admin edits.' }, 400);
+    const branch = safeBranch(url.searchParams.get('branch'));
+    try {
+        const list = await ghJson(env, `commits?path=${encodeURIComponent(repoPath)}&sha=${encodeURIComponent(branch)}&per_page=20`, fetchImpl);
+        return jsonResponse({
+            commits: list.map(c => ({
+                sha: c.sha,
+                short: c.sha.slice(0, 7),
+                message: (c.commit.message || '').split('\n')[0],
+                author: c.commit.author?.name || '',
+                by: (c.commit.message || '').match(/^Edited-by:\s*(\S+)\s*$/m)?.[1] || '',
+                date: c.commit.author?.date,
+                url: c.html_url
+            }))
+        });
+    } catch (err) {
+        return jsonResponse({ error: 'github_error', message: err.message }, 502);
+    }
 }
 
 /* ───────────── /links?project= (do the outside links in a write-up still work?) ───────────── */

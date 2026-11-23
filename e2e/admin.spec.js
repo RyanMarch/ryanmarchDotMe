@@ -202,3 +202,25 @@ test.describe('shell extras', () => {
         await expect(page.locator('.skip-link')).toHaveAttribute('href', '#main');
     });
 });
+
+test.describe('file history', () => {
+    test('History lists earlier versions and loads the one you pick, without saving anything', async ({ page }) => {
+        const { posts } = await mockAdminApi(page);
+        const fetched = [];
+        page.on('request', r => { if (/api\/admin\/file\?/.test(r.url())) fetched.push(new URL(r.url())); });
+        await signIn(page, '/admin/projects?file=content%2Fledger%2Findex.html');
+        await expect(page.locator('#active-file-label')).toContainText('content/ledger/index.html');
+        await page.click('#history-btn');
+        const dialog = page.locator('dialog.dlg');
+        await expect(dialog).toContainText('History of content/ledger/index.html');
+        await expect(dialog.locator('.choose-row')).toHaveCount(2);
+        await expect(dialog.locator('.choose-row').first()).toContainText('latest');
+        await dialog.locator('.choose-row', { hasText: 'Older edit' }).click();
+        await dialog.getByRole('button', { name: 'Load this version' }).click();
+        const replace = page.locator('dialog.dlg').getByRole('button', { name: 'Replace' });
+        if (await replace.count()) await replace.click(); // the stand-in editor always looks "changed"
+        await expect(page.locator('.toast')).toContainText('Loaded that version');
+        expect(fetched.some(u => u.searchParams.get('branch') === 'b'.repeat(40))).toBe(true); // asked for that exact commit
+        expect(posts).toHaveLength(0); // nothing was committed
+    });
+});

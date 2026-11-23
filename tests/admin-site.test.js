@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleAdminApi, sameOrigin } from '../admin-api.js';
 import { normalizeCheck, normalizeRestCheck, probeAudio } from '../admin-site.js';
-import { adminEmail, withEditor } from '../admin-http.js';
+import { adminEmail, adminRepoPath, withEditor } from '../admin-http.js';
 import { checksState, flag } from '../public/assets/js/admin/activity.js';
 import { audioSignature, classifyLink, externalLinks, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
@@ -541,5 +541,37 @@ describe('/api/admin/links', () => {
     it('returns nothing for a link-only project and 404s an unknown one', async () => {
         expect((await (await call('/api/admin/links?project=link', env0, { projects, assetFetch, fetchImpl })).json()).links).toEqual([]);
         expect((await call('/api/admin/links?project=zzz', env0, { projects, assetFetch, fetchImpl })).status).toBe(404);
+    });
+});
+
+describe('adminRepoPath', () => {
+    it('maps editable files to their place in the repo', () => {
+        expect(adminRepoPath('content/ledger/index.html')).toBe('public/content/ledger/index.html');
+        expect(adminRepoPath('assets/js/project-data.js')).toBe('public/assets/js/project-data.js');
+        expect(adminRepoPath('redirects.json')).toBe('config/redirects.json');
+    });
+    it('refuses anything else', () => {
+        for (const p of ['worker.js', '../secrets', 'content/../worker.js', 'package.json', '', null, undefined]) expect(adminRepoPath(p), String(p)).toBeNull();
+    });
+});
+
+describe('/api/admin/history', () => {
+    const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 't' };
+    const commit = (sha, msg, name = 'Ryan') => ({ sha, html_url: `https://g/${sha}`, commit: { message: msg, author: { name, date: '2026-01-02T03:04:05Z' } } });
+    it('lists the commits that changed one file, newest first, with who made admin edits', async () => {
+        const calls = [];
+        const fetchImpl = vi.fn(async u => { calls.push(String(u)); return new Response(JSON.stringify([commit('a'.repeat(40), 'admin: update content/x/index.html\n\nEdited-by: me@example.com'), commit('b'.repeat(40), 'Fix typo')])); });
+        const body = await (await call('/api/admin/history?path=content/x/index.html&branch=develop', env, { fetchImpl })).json();
+        expect(body.commits.map(c => c.short)).toEqual(['aaaaaaa', 'bbbbbbb']);
+        expect(body.commits[0]).toMatchObject({ message: 'admin: update content/x/index.html', by: 'me@example.com', author: 'Ryan' });
+        expect(body.commits[1].by).toBe('');
+        expect(calls[0]).toContain('path=public%2Fcontent%2Fx%2Findex.html');
+        expect(calls[0]).toContain('sha=develop');
+    });
+    it('only answers for files the admin edits, and needs GitHub configured', async () => {
+        const fetchImpl = vi.fn();
+        expect((await call('/api/admin/history?path=worker.js', env, { fetchImpl })).status).toBe(400);
+        expect(fetchImpl).not.toHaveBeenCalled();
+        expect((await call('/api/admin/history?path=content/x/index.html', env0, { fetchImpl })).status).toBe(501);
     });
 });

@@ -49,6 +49,7 @@ export async function mockAdminApi(page, overrides = {}) {
         if (name === 'activity') return reply({ branch: url.searchParams.get('branch') || 'main', commits: [{ sha: 'abc1234', message: 'Update things', author: 'Ryan', date: new Date().toISOString(), url: 'https://example.com/c', checks: [{ name: 'Tests', state: 'ok' }] }], checksAvailable: true, pending: { ahead: 0 }, deploys: null });
         if (name === 'notfound') return reply({ available: true, since: Date.now() - 86400000, items: [{ path: '/project/ledgr', count: 3, first: Date.now() - 1000, last: Date.now() - 1000, referrer: '' }] });
         if (name === 'build') return reply({ sha: 'abc1234', state: 'ok', checks: [{ name: 'Tests', state: 'ok' }, { name: 'Build', state: 'ok' }] });
+        if (name === 'history') return reply({ commits: [{ sha: 'a'.repeat(40), short: 'aaaaaaa', message: 'Newest edit', author: 'Ryan', by: '', date: '2026-11-22T12:00:00Z', url: 'https://g/a' }, { sha: 'b'.repeat(40), short: 'bbbbbbb', message: 'Older edit', author: 'Ryan', by: 'me@example.com', date: '2026-11-21T12:00:00Z', url: 'https://g/b' }] });
         if (name === 'status') return reply({ items: [] });
         if (name === 'scan') return reply({ project: url.searchParams.get('project'), images: [], audio: [], videos: [] });
         return reply({});
