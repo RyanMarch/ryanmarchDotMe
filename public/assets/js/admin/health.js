@@ -1,3 +1,4 @@
+import { buildReport, reportFilename } from './health-report.js';
 import { api, apiProblem, esc } from './util.js';
 import { sortFindings, summarize } from './audit.js';
 
@@ -57,6 +58,7 @@ export async function render(root) {
                     <button type="button" data-filter="error" aria-pressed="false">Errors</button>
                     <button type="button" data-filter="warning" aria-pressed="false">Warnings</button>
                 </div>
+                <button type="button" class="btn btn-secondary" id="export-report" title="A Markdown report you can hand to an agent to fix the issues">Export report</button>
                 <button type="button" class="btn" id="run-audit">Run full audit</button>
             </div>
         </div>
@@ -105,6 +107,21 @@ export async function render(root) {
         paint();
         runBtn.disabled = false;
         running = false;
+    });
+
+    root.querySelector('#export-report').addEventListener('click', async () => {
+        const text = buildReport({ findings, projects, mode, filter });
+        const blob = new Blob([text], { type: 'text/markdown' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = reportFilename();
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+        let copied = false;
+        try { await navigator.clipboard.writeText(text); copied = true; } catch { /* clipboard blocked */ }
+        status.textContent = `Report downloaded${copied ? ' and copied to the clipboard' : ''}. ${mode === 'quick' ? 'It is from the quick check; run the full audit first for a complete one.' : ''}`.trim();
     });
 
     root.querySelector('.seg').addEventListener('click', e => {
