@@ -994,7 +994,7 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
 .rows.is-grid > li { background: var(--surface); border: 0; }
 .rows.is-grid > li.empty { grid-column: 1 / -1; }
 .rows.is-grid.cells-folder { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
-.rows.is-grid.cells-set { grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); }
+.rows.is-grid.cells-set { grid-template-columns: repeat(auto-fill, minmax(min(100%, 620px), 1fr)); }
 
 @container main (min-width: 1100px) {
     .a-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
@@ -1067,3 +1067,19 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     .rows li.mrow-r2 .value { text-align: left; }
     .rows li.mrow-r2 .btn { grid-column: 1 / -1; justify-self: stretch; }
 }
+
+/* Media folders: each card lays itself out by its own width, so narrow grid cells use the compact two-line form. */
+.rows li.frow { container: frow / inline-size; }
+@container frow (max-width: 640px) {
+    .folder-btn { grid-template-columns: 20px minmax(0, 1fr) auto; row-gap: 0.15rem; }
+    .folder-btn > .ico { grid-column: 1; grid-row: 1 / span 2; }
+    .folder-btn .fname-col { grid-column: 2; grid-row: 1; }
+    .folder-btn .fissue { grid-column: 2; grid-row: 2; }
+    .folder-btn .fcount { grid-column: 3; grid-row: 1; }
+    .folder-btn .fsize { grid-column: 3; grid-row: 2; }
+}
+/* A search box doesn't need the whole width of a big monitor. */
+#media-q { max-width: 560px; }
+
+/* Upload forms keep a sensible width on big monitors. */
+.upload-form { max-width: 1000px; }
