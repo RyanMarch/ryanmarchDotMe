@@ -1,4 +1,4 @@
-import { apiProblem, countUp, dataTable, esc, fmt, hasCached, setupNotice, swr } from './util.js';
+import { api, apiProblem, countUp, dataTable, esc, fmt, hasCached, setupNotice, swr } from './util.js';
 import { go, href, onPop, parse } from './router.js';
 
 const RANGES = [7, 30, 90];
@@ -222,6 +222,19 @@ function sourcesHtml(d) {
     </section>`;
 }
 
+/** Plays and outbound clicks per project, counted by the site itself (the visitor is never identified). */
+async function fillGoals(host, meta, days) {
+    const res = await api(`/api/admin/events?days=${[7, 30, 90].includes(days) ? days : 30}`);
+    if (!host.isConnected) return;
+    if (!res.ok || !res.body.available) { host.innerHTML = `<p class="empty-note">${esc(res.body?.message || 'Not available.')}</p>`; return; }
+    const rows = obj => Object.entries(obj || {}).map(([id, count]) => ({ label: id, count })).sort((a, b) => b.count - a.count).slice(0, 8);
+    const render = i => esc(titleFor(i.label) || i.label);
+    const plays = rows(res.body.play), outs = rows(res.body.out);
+    if (!plays.length && !outs.length) { host.innerHTML = '<p class="empty-note">Nothing recorded yet. Plays and clicks on project pages are counted from the day this was deployed.</p>'; return; }
+    meta.textContent = res.body.since ? `counted since ${res.body.since}` : 'plays and clicks out';
+    host.innerHTML = `${dataTable(plays, { head: 'Played', unit: 'Plays', render })}${dataTable(outs, { head: 'Clicked out to live project or source', unit: 'Clicks', render })}`;
+}
+
 export async function render(root, route = parse()) {
     // The range and the Tor filter live in the URL (?days=7&tor=hide), so Back steps through them.
     const daysFrom = r => (RANGES.includes(Number(r.query.get('days'))) ? Number(r.query.get('days')) : 30);
@@ -272,12 +285,14 @@ export async function render(root, route = parse()) {
             </section>
             <section class="panel a-top"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
             ${sourcesHtml(d)}
+            <section class="panel a-goals"><header><h2>Goals</h2><span class="meta" id="goals-meta">plays and clicks out</span></header><div id="goals-host"><p class="empty-note">Loading…</p></div></section>
             <section class="panel a-vitals">
                 <header><h2>Core Web Vitals</h2><span class="meta">${fmt(d.vitals.samples)} samples · averages, ${d.days} days</span></header>
                 ${vitalsHtml(d.vitals)}
             </section>
             </div>`;
         attachChart(body, state);
+        fillGoals(body.querySelector('#goals-host'), body.querySelector('#goals-meta'), d.days);
 
         body.querySelector('#stats-host').addEventListener('click', e => {
             const btn = e.target.closest('button[data-metric]');

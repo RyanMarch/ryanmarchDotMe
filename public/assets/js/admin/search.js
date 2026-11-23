@@ -40,6 +40,18 @@ export function indexCell(r) {
     return `<span class="sev ${cls}">${label}</span>${r.checked ? `<span class="sub">checked ${esc(relativeTime(new Date(r.checked).toISOString()))}</span>` : ''}`;
 }
 
+/** Sitemap status: when Google last read it and how many of the submitted addresses it indexed. */
+export function sitemapsHtml(list) {
+    if (!list) return '';
+    if (!list.length) return '<p class="muted small">Google has no sitemap on record for this property. Submit <code>/sitemap.xml</code> in Search Console.</p>';
+    return table(['Sitemap', 'Last read', 'Submitted', 'Indexed', 'Problems'], list.map(m => `<tr>
+        <td data-label="Sitemap">${esc(m.path.replace(/^https?:\/\/[^/]+/, ''))}</td>
+        <td data-label="Last read" class="num">${m.lastDownloaded ? esc(relativeTime(m.lastDownloaded)) : 'Never'}${m.pending ? ' (pending)' : ''}</td>
+        <td data-label="Submitted" class="num">${fmt(m.submitted)}</td>
+        <td data-label="Indexed" class="num">${fmt(m.indexed)}</td>
+        <td data-label="Problems" class="num">${m.errors || m.warnings ? `<span class="sev ${m.errors ? 'sev-error' : 'sev-warning'}">${fmt(m.errors)} errors, ${fmt(m.warnings)} warnings</span>` : 'None'}</td></tr>`).join(''), '');
+}
+
 const table = (head, rows, empty) => `<div class="table-wrap"><table class="dt st">
     <thead><tr>${head.map((h, i) => `<th scope="col"${i ? ' class="num"' : ''}>${h}</th>`).join('')}</tr></thead>
     <tbody>${rows || `<tr><td colspan="${head.length}" class="empty-note">${empty}</td></tr>`}</tbody></table></div>`;
@@ -57,6 +69,7 @@ export async function render(root, route = parse()) {
     let project = projectFrom(route);
     let data = null;
     let index = {};
+    let sitemaps = null;
     const record = () => go(href('search', [], { days: days === 28 ? '' : days, project }), { quiet: true });
 
     root.innerHTML = `
@@ -144,6 +157,7 @@ export async function render(root, route = parse()) {
         body.innerHTML = `${strip}
             <h2 class="sec-title">Easy wins</h2><p class="muted small">Phrases that already show on the first two pages of Google but get few clicks.</p>${wins}
             <div class="sec-row"><h2 class="sec-title">Projects</h2><span class="muted small" id="inspect-progress"></span><button type="button" class="btn btn-secondary" id="inspect-all">Check indexing</button></div>${projects}
+            ${sitemaps ? `<h2 class="sec-title">Sitemap</h2>${sitemapsHtml(sitemaps)}` : ''}
             <h2 class="sec-title">Search phrases</h2>${queries}
             <h2 class="sec-title">Everything else</h2>${pages}
             <p class="muted small">${esc(d.range.start)} to ${esc(d.range.end)} · property ${esc(d.site)}</p>`;
@@ -157,10 +171,11 @@ export async function render(root, route = parse()) {
         controller = new AbortController();
         const path = `/api/admin/search?days=${days}`;
         if (!hasCached(path)) body.innerHTML = '<div class="loading">Loading…</div>';
-        await swr([path, '/api/admin/search/index'], ([res, saved]) => {
+        await swr([path, '/api/admin/search/index', '/api/admin/search/sitemaps'], ([res, saved, maps]) => {
             if (res.status === 501) { body.innerHTML = setupHtml(); return; }
             if (!res.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't load Search Console.</strong>${esc(res.body?.error || apiProblem(res))}</div>`; return; }
             data = res.body;
+            sitemaps = maps?.ok ? maps.body.sitemaps : null;
             index = { ...(saved.ok ? saved.body.results : {}), ...index };
             paint();
         }, { signal: controller.signal });
@@ -175,7 +190,7 @@ export async function render(root, route = parse()) {
         const one = e.target.closest('#inspect-one');
         if (one) {
             one.disabled = true; one.textContent = 'Checking…';
-            try { await inspect(project); } catch (err) { window.adminToast?.(`Couldn't check: ${err.message}`, { kind: 'error' }); }
+            try { await inspect(project); } catch (err) { window.adminToast?.(`Couldn't check: ${err.message}`, { type: 'error' }); }
             paint();
             return;
         }

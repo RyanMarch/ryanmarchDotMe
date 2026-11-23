@@ -27,6 +27,7 @@ const mediaFiles = [
  */
 export async function mockAdminApi(page, overrides = {}) {
     const posts = [];
+    const schedule = { items: [], log: [] };
     await page.route('**/api/admin/**', async route => {
         const req = route.request();
         const url = new URL(req.url());
@@ -48,6 +49,14 @@ export async function mockAdminApi(page, overrides = {}) {
         if (name === 'media') return reply({ repo: { branch: 'main', files: mediaFiles, truncated: false }, r2: { available: true, trash: false, objects: [] } });
         if (name === 'activity') return reply({ branch: url.searchParams.get('branch') || 'main', commits: [{ sha: 'abc1234', message: 'Update things', author: 'Ryan', date: new Date().toISOString(), url: 'https://example.com/c', checks: [{ name: 'Tests', state: 'ok' }] }], checksAvailable: true, pending: { ahead: 0 }, deploys: null });
         if (name === 'notfound') return reply({ available: true, since: Date.now() - 86400000, items: [{ path: '/project/ledgr', count: 3, first: Date.now() - 1000, last: Date.now() - 1000, referrer: '' }] });
+        if (name === 'freshness') return reply({ available: true, branch: 'main', edited: { ledger: '2024-01-01T00:00:00Z' } });
+        if (name === 'events') return reply({ available: true, days: 30, since: '2026-11-01', play: { ledger: 4 }, out: { ledger: 2 } });
+        if (name === 'schedule') {
+            if (req.method() === 'POST') { const b = JSON.parse(req.postData()); schedule.items = [{ id: b.project, action: b.action, at: b.at, by: '', created: new Date().toISOString() }]; }
+            if (req.method() === 'DELETE') schedule.items = [];
+            return reply({ available: true, ...schedule });
+        }
+        if (name === 'search/sitemaps') return reply({ sitemaps: [{ path: 'https://ryanmarch.me/sitemap.xml', lastDownloaded: new Date().toISOString(), pending: false, errors: 0, warnings: 0, submitted: 30, indexed: 12 }] });
         if (name === 'search/index') return url.searchParams.get('project')
             ? reply({ id: 'ledger', result: { url: 'https://ryanmarch.me/project/ledger/', state: 'indexed', checked: Date.now(), coverage: 'Submitted and indexed', lastCrawl: new Date().toISOString(), googleCanonical: 'https://ryanmarch.me/project/ledger/', userCanonical: 'https://ryanmarch.me/project/ledger/' } })
             : reply({ results: {}, persistent: true });

@@ -70,7 +70,7 @@ describe('todayItems', () => {
             analytics: { totals: { current: { views: 10 }, previous: { views: 100 } } }
         });
         expect(items[0].level).toBe('error');
-        expect(items).toHaveLength(6);
+        expect(items).toHaveLength(8);
         expect(items.some(i => i.text.includes('/rare'))).toBe(false);
         expect(items.filter(i => i.level === 'warning').length).toBeGreaterThan(0);
     });

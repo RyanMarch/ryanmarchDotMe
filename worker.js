@@ -4,6 +4,7 @@ import redirects from './config/redirects.json';
 import { handleAdminApi, isAdminRequest, sameOrigin } from './admin-api.js';
 import { adminEmail, withEditor } from './admin-http.js';
 import { recordNotFound } from './not-found.js';
+import { recordEvent, runDueSchedules } from './admin-extra.js';
 
 /**
  * Cloudflare Worker for Ryan March | Product & Technology
@@ -194,6 +195,9 @@ class PreloadRewriter {
 
 
 export default {
+    async scheduled(event, env, ctx) {
+        ctx.waitUntil(runDueSchedules(env));
+    },
     async fetch(request, env, ctx) {
         try {
             const url = new URL(request.url);
@@ -222,6 +226,9 @@ export default {
             };
 
             const cleanPath = normalizePath(path);
+
+            // Anonymous counters for plays and outbound clicks on project pages (see events.js).
+            if (cleanPath === '/api/e') return recordEvent(request, env, myProjects);
 
             // The admin is a single-page app under /admin (/admin/media, /admin/media/ledger, ...).
             // The old /admin.html form redirects to it, and so does a trailing slash.

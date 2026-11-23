@@ -25,6 +25,7 @@ import {
 } from './public/assets/js/admin/audit.js';
 
 import { fetchSearchData, inspectUrl } from './search-console.js';
+import { handleEvents, handleFreshness, handleSchedule, handleSitemaps } from './admin-extra.js';
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
 import { handleActivity, handleBuild, handleHistory, handleImageDelete, handleLinks, handleNotFound, handleTrash, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
@@ -102,11 +103,11 @@ async function cached(env, key, ttl, producer) {
 const toMs = v => (v === undefined || v === null || v < 0 ? null : Math.round(v > 1000 ? v / 1000 : v));
 
 // `extra` narrows every dataset: by default bots are excluded (as in Cloudflare's own dashboard), and Tor (country code T1) can be hidden too.
-export function analyticsQuery(withVisits, extra = ', bot: 0') {
+export function analyticsQuery(withVisits, extra = ', bot: 0', pathLimit = 10) {
     const sum = withVisits ? 'sum { visits }' : '';
     const f = `datetime_geq: $since, datetime_leq: $until, requestHost: $host${extra}`;
-    const top = (alias, dim) => `
-        ${alias}: rumPageloadEventsAdaptiveGroups(limit: 10, filter: { ${f} }, orderBy: [count_DESC]) {
+    const top = (alias, dim, limit = 10) => `
+        ${alias}: rumPageloadEventsAdaptiveGroups(limit: ${limit}, filter: { ${f} }, orderBy: [count_DESC]) {
             count
             dimensions { ${dim} }
         }`;
@@ -138,7 +139,7 @@ export function analyticsQuery(withVisits, extra = ', bot: 0') {
                     count
                     ${sum}
                 }
-                ${top('paths', 'requestPath')}
+                ${top('paths', 'requestPath', pathLimit)}
                 ${top('referrers', 'refererHost')}
                 ${top('countries', 'countryName')}
                 ${top('devices', 'deviceType')}
@@ -222,9 +223,10 @@ async function handleAnalytics(request, env, url, fetchImpl) {
     const host = env.CF_ANALYTICS_HOST || 'ryanmarch.me';
     const includeBots = url.searchParams.get('bots') === 'include';
     const hideTor = url.searchParams.get('tor') === 'exclude';
+    const pathLimit = url.searchParams.get('paths') === 'all' ? 100 : 10;
     const extra = `${includeBots ? '' : ', bot: 0'}${hideTor ? ', countryName_neq: "T1"' : ''}`;
 
-    const body = await cached(env, `analytics:${host}:${days}:${includeBots ? 'bots' : 'nobots'}:${hideTor ? 'notor' : 'tor'}`, 300, async () => {
+    const body = await cached(env, `analytics:${host}:${days}:${includeBots ? 'bots' : 'nobots'}:${hideTor ? 'notor' : 'tor'}:${pathLimit}`, 300, async () => {
         const now = Date.now();
         const day = 86400 * 1000;
         const vars = {
@@ -235,10 +237,10 @@ async function handleAnalytics(request, env, url, fetchImpl) {
             prevSince: new Date(now - 2 * days * day).toISOString()
         };
         try {
-            let result = await runGraphql(env, analyticsQuery(true, extra), vars, fetchImpl);
+            let result = await runGraphql(env, analyticsQuery(true, extra, pathLimit), vars, fetchImpl);
             // `visits` isn't available on every plan/dataset version; retry without it.
             if (!result.ok && /visits/i.test(JSON.stringify(result.data.errors || ''))) {
-                result = await runGraphql(env, analyticsQuery(false, extra), vars, fetchImpl);
+                result = await runGraphql(env, analyticsQuery(false, extra, pathLimit), vars, fetchImpl);
             }
             if (!result.ok) return { error: 'cloudflare_api_error', details: result.data.errors || result.data };
             const account = result.data?.data?.viewer?.accounts?.[0] || {};
@@ -392,6 +394,10 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
         '/api/admin/analytics': [handleAnalytics, ['GET']],
         '/api/admin/search': [handleSearch, ['GET']],
         '/api/admin/search/index': [handleSearchIndex, ['GET']],
+        '/api/admin/search/sitemaps': [handleSitemaps, ['GET']],
+        '/api/admin/freshness': [handleFreshness, ['GET']],
+        '/api/admin/schedule': [handleSchedule, ['GET', 'POST', 'DELETE']],
+        '/api/admin/events': [handleEvents, ['GET']],
         '/api/admin/overview': [handleOverview, ['GET']],
         '/api/admin/health': [handleHealth, ['GET']],
         '/api/admin/scan': [handleScan, ['GET']],
@@ -416,7 +422,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     const [handler] = entry;
     if (handler === handleOverview) return handler(request, env, url, fetchImpl, projects);
     if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
-    if (handler === handleSearchIndex) return handler(request, env, url, fetchImpl, { projects });
+    if (handler === handleSearchIndex || handler === handleFreshness || handler === handleSchedule) return handler(request, env, url, fetchImpl, { projects });
     if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
     if (handler === handleImageDelete) return handler(request, env, url, fetchImpl, { projects });
     if (handler === handleLinks) return handler(request, env, url, fetchImpl, { projects, assetFetch });

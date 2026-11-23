@@ -168,3 +168,20 @@ export function summarizeInspection(url, r = {}) {
         mobile: r.mobileUsabilityResult?.verdict || null
     };
 }
+
+/** Every sitemap Google knows for the property, with when it was last read and any problems. */
+export async function fetchSitemaps(env, fetchImpl = fetch) {
+    const key = parseServiceAccount(env.GSC_SERVICE_ACCOUNT);
+    if (!key) return [];
+    const token = await accessToken(key, fetchImpl);
+    const site = env.GSC_SITE || 'sc-domain:ryanmarch.me';
+    const res = await fetchImpl(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/sitemaps`, { headers: { Authorization: `Bearer ${token}` } });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error?.message || `HTTP ${res.status}`);
+    return (body.sitemap || []).map(m => ({
+        path: m.path, lastSubmitted: m.lastSubmitted || null, lastDownloaded: m.lastDownloaded || null, pending: Boolean(m.isPending),
+        errors: Number(m.errors || 0), warnings: Number(m.warnings || 0),
+        submitted: (m.contents || []).reduce((n, c) => n + Number(c.submitted || 0), 0),
+        indexed: (m.contents || []).reduce((n, c) => n + Number(c.indexed || 0), 0)
+    }));
+}

@@ -26,7 +26,8 @@ export const filesToMinify = [
   { path: 'assets/js/video-player.js', loader: 'js' },
   { path: 'assets/js/video-mini-player.js', loader: 'js' },
   { path: 'assets/js/lightbox.js', loader: 'js' },
-  { path: 'assets/js/brochure.js', loader: 'js' }
+  { path: 'assets/js/brochure.js', loader: 'js' },
+  { path: 'assets/js/events.js', loader: 'js' }
 ];
 
 // HTML shells that reference the assets above and need their ?v= query
