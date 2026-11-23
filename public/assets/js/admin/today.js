@@ -44,7 +44,7 @@ export function todayItems({ overview, health, notfound, search, analytics, inde
 
 export function todayHtml(items, { best = null } = {}) {
     const body = items.length
-        ? `<ul class="rows today">${items.map(i => `<li><span class="label wrap"><span class="sev sev-${i.level === 'info' ? 'info' : i.level}">${i.level === 'error' ? 'Error' : i.level === 'warning' ? 'Warning' : 'Idea'}</span> ${esc(i.text)}</span><a class="value" href="${esc(i.href)}">${esc(i.action)}</a></li>`).join('')}</ul>`
+        ? `<ul class="rows today">${items.map(i => `<li><span class="label wrap"><span class="sev sev-${i.level === 'info' ? 'info' : i.level}">${i.level === 'error' ? 'Error' : i.level === 'warning' ? 'Warning' : 'Idea'}</span> <span class="today-text">${esc(i.text)}</span></span><a class="value" href="${esc(i.href)}">${esc(i.action)}</a></li>`).join('')}</ul>`
         : `<p class="empty-note">Nothing needs attention.${best ? ` ${esc(best)} was your most-read project this week.` : ''} Good time to write something new.</p>`;
     return `<section class="panel dash-today"><header><h2>Worth doing</h2><span class="meta">worked out from your own data</span></header>${body}</section>`;
 }
