@@ -7,7 +7,7 @@ const VIEWS = {
     media: { group: 'Content', title: 'Media', load: () => import('./media.js') },
     embeds: { group: 'Content', title: 'Embeds', load: () => import('./embeds.js') },
     settings: { group: 'System', title: 'Settings', load: () => import('./settings.js') },
-    health: { group: 'Content', title: 'Content health', load: () => import('./health.js') },
+    health: { group: 'Content', title: 'Content Health', load: () => import('./health.js') },
     seo: { group: 'Content', title: 'Redirects & SEO', load: () => import('./seo.js') },
     projects: { group: 'Content', title: 'Projects', load: null } // markup + logic live in admin.html / editor.js
 };

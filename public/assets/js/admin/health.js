@@ -49,16 +49,16 @@ export async function render(root) {
     let mode = 'quick'; // quick = data only, full = reads deployed files
     let running = false;
 
-    root.innerHTML = `
+    root.innerHTML = /*html*/ `
         <div class="view-head">
-            <div><h1>Content health</h1><p>Checks the deployed site: SEO text, images, alt text, redirects and the sitemap.</p></div>
+            <div><h1>Content Health</h1><p>Checks the deployed site: SEO text, images, alt text, redirects and the sitemap.</p></div>
             <div class="head-actions">
                 <div class="seg" role="group" aria-label="Show">
                     <button type="button" data-filter="all" aria-pressed="true">All</button>
                     <button type="button" data-filter="error" aria-pressed="false">Errors</button>
                     <button type="button" data-filter="warning" aria-pressed="false">Warnings</button>
                 </div>
-                <button type="button" class="btn btn-secondary" id="export-report" title="A Markdown report you can hand to an agent to fix the issues">Export report</button>
+                <button type="button" class="btn btn-secondary" id="export-report" title="Runs the full audit if needed, then downloads a Markdown report you can hand to an agent">Export report</button>
                 <button type="button" class="btn" id="run-audit">Run full audit</button>
             </div>
         </div>
@@ -68,6 +68,7 @@ export async function render(root) {
     const body = root.querySelector('#health-body');
     const status = root.querySelector('#health-status');
     const runBtn = root.querySelector('#run-audit');
+    const exportBtn = root.querySelector('#export-report');
 
     const paint = () => {
         body.innerHTML = countsHtml(summarize(findings), mode === 'quick' ? 'quick check' : 'full audit')
@@ -81,35 +82,46 @@ export async function render(root) {
     status.textContent = 'Quick check done. Run the full audit to also read each write-up and image.';
     paint();
 
-    runBtn.addEventListener('click', async () => {
-        if (running) return;
+    // Reads every write-up and image on top of the quick data checks. Resolves when the findings are updated.
+    const runFull = async () => {
+        if (running) return false;
         running = true;
         runBtn.disabled = true;
-        const site = await api('/api/admin/health?scope=site');
-        if (!site.ok) { status.textContent = apiProblem(site); runBtn.disabled = false; running = false; return; }
-        const all = [...site.body.findings];
-        const queue = projects.filter(p => p.hasExtendedContent || p.image).map(p => p.id);
-        let done = 0, failed = 0;
-        const worker = async () => {
-            while (queue.length) {
-                const id = queue.shift();
-                const res = await api(`/api/admin/health?project=${encodeURIComponent(id)}`);
-                if (res.ok) all.push(...res.body.findings); else failed += 1;
-                done += 1;
-                status.textContent = `Auditing ${done} of ${done + queue.length}…`;
-            }
-        };
-        const total = queue.length;
-        await Promise.all([worker(), worker(), worker(), worker()]);
-        findings = sortFindings(all);
-        mode = 'full';
-        status.textContent = `Audited ${total - failed} of ${plural(total, 'project')}${failed ? `; ${failed} could not be read` : ''}.`;
-        paint();
-        runBtn.disabled = false;
-        running = false;
-    });
+        exportBtn.disabled = true;
+        try {
+            const site = await api('/api/admin/health?scope=site');
+            if (!site.ok) { status.textContent = apiProblem(site); return false; }
+            const all = [...site.body.findings];
+            const queue = projects.filter(p => p.hasExtendedContent || p.image).map(p => p.id);
+            let done = 0, failed = 0;
+            const worker = async () => {
+                while (queue.length) {
+                    const id = queue.shift();
+                    const res = await api(`/api/admin/health?project=${encodeURIComponent(id)}`);
+                    if (res.ok) all.push(...res.body.findings); else failed += 1;
+                    done += 1;
+                    status.textContent = `Auditing ${done} of ${done + queue.length}…`;
+                }
+            };
+            const total = queue.length;
+            await Promise.all([worker(), worker(), worker(), worker()]);
+            findings = sortFindings(all);
+            mode = 'full';
+            status.textContent = `Audited ${total - failed} of ${plural(total, 'project')}${failed ? `; ${failed} could not be read` : ''}.`;
+            paint();
+            return true;
+        } finally {
+            runBtn.disabled = false;
+            exportBtn.disabled = false;
+            running = false;
+        }
+    };
 
-    root.querySelector('#export-report').addEventListener('click', async () => {
+    runBtn.addEventListener('click', runFull);
+
+    exportBtn.addEventListener('click', async () => {
+        // A report should match what the full audit finds, so run it first if only the quick check has run.
+        if (mode !== 'full' && !(await runFull())) return;
         const text = buildReport({ findings, projects, mode, filter });
         const blob = new Blob([text], { type: 'text/markdown' });
         const a = document.createElement('a');
@@ -121,7 +133,7 @@ export async function render(root) {
         setTimeout(() => URL.revokeObjectURL(a.href), 1000);
         let copied = false;
         try { await navigator.clipboard.writeText(text); copied = true; } catch { /* clipboard blocked */ }
-        status.textContent = `Report downloaded${copied ? ' and copied to the clipboard' : ''}. ${mode === 'quick' ? 'It is from the quick check; run the full audit first for a complete one.' : ''}`.trim();
+        status.textContent = `Report downloaded${copied ? ' and copied to the clipboard' : ''}, from the full audit.`;
     });
 
     root.querySelector('.seg').addEventListener('click', e => {
