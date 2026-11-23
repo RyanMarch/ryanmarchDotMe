@@ -1,4 +1,4 @@
-import { api, esc } from './util.js';
+import { api, esc, send } from './util.js';
 import { go, href } from './router.js';
 import { confirmDialog, toast } from './ui.js';
 import { reorderProjects, setUnpublished } from './project-order.js';
@@ -24,11 +24,6 @@ async function statusPanel(el) {
         const word = i.invert ? (i.ok ? 'OK' : 'Review') : i.ok ? 'Connected' : i.optional ? 'Not set' : 'Missing';
         return `<li><span class="label wrap">${esc(i.label)}<span class="sub">${esc(i.detail)}${i.host && i.ok ? ` · ${esc(i.host)}` : ''}</span></span><span class="value"><span class="sev sev-${i.invert && !i.ok ? 'warning' : cls}">${word}</span></span></li>`;
     }).join('')}</ul>`;
-}
-
-async function send(path, method, payload) {
-    const res = await fetch(path, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(window.getAuthHeaders?.() || {}) }, body: payload ? JSON.stringify(payload) : undefined });
-    return { ok: res.ok, body: await res.json().catch(() => ({})) };
 }
 
 const WHEN = iso => new Date(iso).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });

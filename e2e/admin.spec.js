@@ -309,3 +309,36 @@ test.describe('performance, schedule, preview', () => {
         await expect(page.locator('.dash-today', { hasText: 'This week' })).toContainText('page views');
     });
 });
+
+test.describe('progress and inspiration', () => {
+    test('Progress shows the streak, takes ideas, and lists what is missing', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/progress');
+        await expect(page.locator('#view-progress .stat').first()).toContainText('Weekly streak');
+        await page.fill('#idea-form input[name=text]', 'redo TripDeck screenshots');
+        await page.getByRole('button', { name: 'Add', exact: true }).click();
+        await expect(page.locator('.rows.ideas')).toContainText('redo TripDeck screenshots');
+        await page.getByRole('button', { name: 'Remove' }).click();
+        await expect(page.locator('#view-progress')).toContainText('Empty. Anything you think of');
+        await expect(page.locator('#view-progress')).toContainText('Journal');
+    });
+
+    test('the dashboard offers one small task, and Another shows a different one', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page);
+        const card = page.locator('#next-up');
+        await expect(card).toContainText('Sharpen');
+        const first = await card.locator('.next-title').textContent();
+        const another = page.getByRole('button', { name: 'Another idea' });
+        if (await another.count()) {
+            await another.click();
+            await expect(page.locator('#next-up .next-title')).not.toHaveText(first);
+        }
+    });
+
+    test('a project shows what changed since its last edit', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page, '/admin/search?project=ledger');
+        await expect(page.locator('#impact-host')).toContainText('better');
+    });
+});

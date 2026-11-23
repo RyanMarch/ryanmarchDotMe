@@ -1,4 +1,4 @@
-import { apiProblem, esc, fmt, hasCached, relativeTime, swr } from './util.js';
+import { api, apiProblem, esc, fmt, hasCached, relativeTime, swr } from './util.js';
 import { deltaHtml, sparkSvg } from './analytics.js';
 import { go, href, onPop, parse } from './router.js';
 
@@ -16,6 +16,23 @@ export function pageCell(url) {
     const m = path.match(/^\/project\/([^/]+)\/?$/i);
     const title = m && titleFor(m[1].toLowerCase());
     return `<a href="${esc(path)}" target="_blank" rel="noopener">${esc(title || path)}</a>${title ? `<span class="sub">${esc(path)}</span>` : ''}`;
+}
+
+/** Before and after a project's newest edit, in equal windows either side of it. */
+export function impactHtml(d) {
+    if (!d.ready) return `<p class="muted">${esc(d.reason || 'Not enough data yet.')}</p>`;
+    const row = (label, b, a, fmtFn, lowerBetter = false) => {
+        const diff = a - b;
+        const good = lowerBetter ? diff < 0 : diff > 0;
+        const word = Math.abs(diff) < (lowerBetter ? 0.05 : 0.5) ? 'no change' : good ? 'better' : 'worse';
+        return `<tr><td data-label="">${label}</td><td data-label="Before" class="num">${fmtFn(b)}</td><td data-label="After" class="num">${fmtFn(a)}</td><td data-label="" class="num">${word}</td></tr>`;
+    };
+    return `<p class="muted small">${d.days} days before and after the edit on ${esc(d.edited.slice(0, 10))}. Other things change too, so read this as a hint, not proof.</p>
+        ${table(['', 'Before', 'After', ''], [
+            row('Clicks', d.before.clicks, d.after.clicks, fmt),
+            row('Impressions', d.before.impressions, d.after.impressions, fmt),
+            row('Average position', d.before.position, d.after.position, v => (v ? pos(v) : '–'), true)
+        ].join(''), '')}`;
 }
 
 /** What to try for a query that shows up but doesn't get clicked. */
@@ -113,8 +130,17 @@ export async function render(root, route = parse()) {
                 ${stat('Average position', m?.impressions ? pos(m.position) : '–', '<span class="delta">lower is better</span>')}
             </div>
             <section class="panel"><header><h2>In Google's index</h2><button type="button" class="linklike" id="inspect-one">${r ? 'Check again' : 'Check now'}</button></header><div class="panel-body" id="inspect-detail">${detail}</div></section>
+            <h2 class="sec-title">Since your last edit</h2><div id="impact-host"><p class="muted small">Loading…</p></div>
             <h2 class="sec-title">Phrases that found this page</h2>
             ${table(['Search phrase', 'Clicks', 'Impressions', 'Position'], phrases.slice(0, 50).map(x => `<tr><td data-label="Phrase">${esc(x.query)}</td><td data-label="Clicks" class="num">${fmt(x.clicks)}</td><td data-label="Impressions" class="num">${fmt(x.impressions)}</td><td data-label="Position" class="num">${pos(x.position)}</td></tr>`).join(''), 'No phrases reported for this page in this range. Google only lists phrases that enough people searched.')}`;
+    };
+
+    const fillImpact = async () => {
+        const host = body.querySelector('#impact-host');
+        const id = project;
+        const res = await api(`/api/admin/search/impact?project=${encodeURIComponent(id)}`);
+        if (!host?.isConnected || id !== project) return;
+        host.innerHTML = res.ok ? impactHtml(res.body) : `<p class="muted small">${esc(res.body?.message || apiProblem(res))}</p>`;
     };
 
     const paintOverview = () => {
@@ -163,7 +189,7 @@ export async function render(root, route = parse()) {
             <p class="muted small">${esc(d.range.start)} to ${esc(d.range.end)} · property ${esc(d.site)}</p>`;
     };
 
-    const paint = () => (project ? paintProject() : paintOverview());
+    const paint = () => { if (project) { paintProject(); fillImpact(); } else paintOverview(); };
 
     let controller;
     const load = async () => {
