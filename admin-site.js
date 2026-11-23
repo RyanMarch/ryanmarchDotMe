@@ -3,6 +3,7 @@
  * embed scans, the media library (repo images + R2), repo activity, and a
  * configuration status page. Routed from admin-api.js.
  */
+import { KEY as NOT_FOUND_KEY, normalizeNotFound } from './not-found.js';
 import { adminEmail, ghJson, jsonResponse, safeBranch, withEditor } from './admin-http.js';
 import { audioSignature, imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
 
@@ -171,6 +172,31 @@ export async function handleBuild(request, env, url, fetchImpl) {
         const denied = /GitHub (401|403|404)/.test(err.message);
         return jsonResponse({ error: denied ? 'needs_checks_permission' : 'github_error', message: denied ? 'The GitHub token needs Checks (read) access.' : err.message }, denied ? 403 : 502);
     }
+}
+
+/* ───────────── /notfound (addresses people asked for that don't exist) ───────────── */
+
+export async function handleNotFound(request, env, url, fetchImpl, ctx = {}) {
+    if (!env.ADMIN_KV) return jsonResponse({ available: false, items: [], message: 'The ADMIN_KV binding is not configured.' });
+    const index = (await env.ADMIN_KV.get(NOT_FOUND_KEY, 'json')) || { since: null, items: {} };
+
+    if (request.method === 'DELETE') {
+        const path = normalizeNotFound(url.searchParams.get('path') || '');
+        if (!index.items[path]) return jsonResponse({ error: 'not_found', message: 'That address is not in the list.' }, 404);
+        delete index.items[path];
+        await env.ADMIN_KV.put(NOT_FOUND_KEY, JSON.stringify(index), { expirationTtl: 60 * 60 * 24 * 60 });
+        return jsonResponse({ removed: path });
+    }
+
+    // Leave out addresses that already redirect, or that are real project pages by now.
+    const redirected = new Set((ctx.redirects || []).map(r => normalizeNotFound(r.source)));
+    const live = new Set((ctx.projects || []).filter(p => !p.unpublished && p.hasExtendedContent).map(p => `/project/${p.id.toLowerCase()}`));
+    const items = Object.entries(index.items)
+        .filter(([path]) => !redirected.has(path) && !live.has(path))
+        .map(([path, v]) => ({ path, count: v.n, first: v.first, last: v.last, referrer: v.ref || '' }))
+        .sort((a, b) => b.count - a.count || b.last - a.last)
+        .slice(0, 100);
+    return jsonResponse({ available: true, since: index.since, items });
 }
 
 const R2_TYPES = { mp3: 'audio/mpeg', m4a: 'audio/mp4', zip: 'application/zip', aup3: 'application/octet-stream' };

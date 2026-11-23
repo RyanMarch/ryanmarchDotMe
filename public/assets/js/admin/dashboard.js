@@ -12,9 +12,9 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary'];
+    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound'];
 
-    const paint = ([overview, analytics, health]) => {
+    const paint = ([overview, analytics, health, notfound]) => {
         const parts = [];
         const a = analytics.ok ? analytics.body : null;
         const o = overview.ok ? overview.body : null;
@@ -46,7 +46,12 @@ export async function render(root) {
                 : `<p class="panel-body muted">${esc(apiProblem(health))}</p>`}
         </section>`);
 
-        parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="/admin/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
+        const nf = notfound?.ok && notfound.body.available ? notfound.body.items.slice(0, 5) : null;
+    parts.push(/*html*/`<section class="panel"><header><h2>Broken links people hit</h2><a href="/admin/seo?tab=404" class="meta">${nf && nf.length ? 'Fix them' : 'All'}</a></header>
+        ${nf === null ? '<p class="empty-note">Not recording yet.</p>' : nf.length ? `<ul class="rows">${nf.map(i => `<li><span class="label"><code>${esc(i.path)}</code></span><span class="value">${i.count}</span></li>`).join('')}</ul>` : '<p class="empty-note">Nobody has hit a missing page lately.</p>'}
+    </section>`);
+
+    parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="/admin/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
             <section class="panel"><header><h2>Recent commits</h2><span class="meta">${esc(o?.branch || branch)}</span></header>${commitList}</section>
         <section class="panel dash-quick"><header><h2>Quick actions</h2></header>
             <div class="quick">

@@ -146,7 +146,7 @@ document.addEventListener('click', e => {
 // Hovering, focusing or touching a sidebar link starts loading that page: its code, and the data it will ask for.
 const branchNow = () => encodeURIComponent((typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main');
 const WARM = {
-    dashboard: () => [`/api/admin/overview?branch=${branchNow()}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary'],
+    dashboard: () => [`/api/admin/overview?branch=${branchNow()}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound'],
     analytics: () => ['/api/admin/analytics?days=30'],
     activity: () => ['/api/admin/activity?branch=main'],
     media: () => [`/api/admin/media?branch=${branchNow()}`]

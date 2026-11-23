@@ -1101,3 +1101,9 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
     .main .panel, .main .stats, .main .modebar, .main .notice { animation: none; }
 }
+
+/* 404s people hit */
+.rows li.nf-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.nf-row code { font-size: 0.9rem; overflow-wrap: anywhere; }
+.nf-actions { display: flex; align-items: center; gap: 0.9rem; white-space: nowrap; }
+.nf-actions .btn { min-height: 34px; padding: 0 0.85rem; font-size: 0.85rem; text-decoration: none; display: inline-flex; align-items: center; }
