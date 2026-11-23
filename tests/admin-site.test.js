@@ -3,9 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleAdminApi, sameOrigin } from '../admin-api.js';
-import { normalizeCheck, probeAudio } from '../admin-site.js';
+import { normalizeCheck, normalizeRestCheck, probeAudio } from '../admin-site.js';
+import { adminEmail, adminRepoPath, withEditor } from '../admin-http.js';
 import { checksState, flag } from '../public/assets/js/admin/activity.js';
-import { audioSignature, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
+import { audioSignature, classifyLink, externalLinks, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
 import { audioState, summarizeEmbeds, videoState } from '../public/assets/js/admin/embeds.js';
@@ -147,7 +148,7 @@ describe('/api/admin/media', () => {
 });
 
 describe('/api/admin/media/r2', () => {
-    const bucket = () => ({ head: vi.fn(async () => null), put: vi.fn(), delete: vi.fn() });
+    const bucket = () => ({ head: vi.fn(async () => null), get: vi.fn(async () => null), put: vi.fn(), delete: vi.fn() });
     const put = (qs, env, extra = {}) => call(`/api/admin/media/r2?${qs}`, env, { method: 'PUT', body: 'abc', headers: { 'content-length': '3' }, ...extra });
 
     it('uploads allowed types, refusing to overwrite unless asked', async () => {
@@ -165,11 +166,12 @@ describe('/api/admin/media/r2', () => {
         expect((await put('key=a.mp3', { ...env0, MEDIA }, { headers: { 'content-length': String(200 * 1024 * 1024) } })).status).toBe(413);
         expect(MEDIA.put).not.toHaveBeenCalled();
     });
-    it('deletes existing objects and 404s on missing ones', async () => {
+    it('deletes existing objects and 404s on missing ones (no trash bucket: gone for good)', async () => {
         const MEDIA = bucket();
         expect((await call('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA }, { method: 'DELETE' })).status).toBe(404);
-        MEDIA.head.mockResolvedValue({});
-        expect((await call('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA }, { method: 'DELETE' })).status).toBe(200);
+        MEDIA.get.mockResolvedValue({ body: null });
+        const res = await call('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA }, { method: 'DELETE' });
+        expect(await res.json()).toEqual({ deleted: 'a.mp3', trashed: false });
         expect(MEDIA.delete).toHaveBeenCalledWith('a.mp3');
     });
     it('is unavailable without the binding, and blocks cross-origin writes', async () => {
@@ -256,7 +258,7 @@ describe('/api/admin/media/image (delete)', () => {
         const calls = [];
         const res = await del('content/demo/images/extra.png', { fetchImpl: gh(calls) });
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ deleted: 'content/demo/images/extra.png', branch: 'develop' });
+        expect(await res.json()).toEqual({ deleted: 'content/demo/images/extra.png', branch: 'develop', commit: null });
         expect(calls[0][0]).toContain('/contents/public/content/demo/images/extra.png?ref=develop');
         expect(calls[1][1]).toBe('DELETE');
     });
@@ -383,5 +385,193 @@ describe('activity row flags', () => {
         expect(flag(null)).toBe('');
         expect(flag([ok, bad])).toContain('Tests failed');
         expect(flag([ok, wait])).toContain('Build running');
+    });
+});
+
+describe('commit attribution', () => {
+    const jwt = payload => `x.${btoa(JSON.stringify(payload)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')}.y`;
+    const req = headers => new Request('https://ryanmarch.me/api/admin/file', { headers });
+    it('reads the email from the Access token, then from the Access header', () => {
+        expect(adminEmail(req({ 'cf-access-jwt-assertion': jwt({ email: 'me@example.com' }) }))).toBe('me@example.com');
+        expect(adminEmail(req({ 'cf-access-authenticated-user-email': 'you@example.com' }))).toBe('you@example.com');
+    });
+    it('returns null for the local password or anything malformed', () => {
+        expect(adminEmail(req({ Authorization: 'Bearer pw' }))).toBeNull();
+        expect(adminEmail(req({ 'cf-access-jwt-assertion': 'garbage' }))).toBeNull();
+        expect(adminEmail(req({ 'cf-access-authenticated-user-email': 'not an email' }))).toBeNull();
+        expect(adminEmail(req({ 'cf-access-jwt-assertion': jwt({ email: '<b>x</b>' }) }))).toBeNull();
+    });
+    it('adds a trailer below the first line, so the "admin:" prefix still leads', () => {
+        expect(withEditor('admin: update x', 'me@example.com')).toBe('admin: update x\n\nEdited-by: me@example.com');
+        expect(withEditor('admin: update x', null)).toBe('admin: update x');
+        expect(withEditor('admin: update x', 'me@example.com').split('\n')[0]).toBe('admin: update x');
+    });
+});
+
+describe('/api/admin/build', () => {
+    const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 't' };
+    const run = (name, status, conclusion, app = 'GitHub Actions') => ({ name, status, conclusion, html_url: 'https://g/r', app: { name: app } });
+    const reply = runs => vi.fn(async () => new Response(JSON.stringify({ check_runs: runs })));
+    const get = (sha, fetchImpl) => call(`/api/admin/build?sha=${sha}`, env, { fetchImpl });
+
+    it('summarises a commit\'s checks: pending, ok, failed, none', async () => {
+        const ok = await (await get('abc1234', reply([run('test', 'completed', 'success'), run('Workers Builds: x', 'completed', 'success', 'Cloudflare Workers and Pages')]))).json();
+        expect(ok).toMatchObject({ state: 'ok', sha: 'abc1234' });
+        expect(ok.checks.map(c => c.name)).toEqual(['Tests', 'Build']);
+        expect((await (await get('abc1234', reply([run('test', 'completed', 'success'), run('Workers Builds: x', 'in_progress', null, 'Cloudflare Workers and Pages')]))).json()).state).toBe('pending');
+        expect((await (await get('abc1234', reply([run('Workers Builds: x', 'completed', 'failure', 'Cloudflare Workers and Pages')]))).json()).state).toBe('failed');
+        expect((await (await get('abc1234', reply([]))).json()).state).toBe('none');
+    });
+    it('rejects a malformed commit id and reports a token that cannot read checks', async () => {
+        expect((await get('not-a-sha', reply([]))).status).toBe(400);
+        const denied = await get('abc1234', vi.fn(async () => new Response('no', { status: 403 })));
+        expect(denied.status).toBe(403);
+        expect((await denied.json()).error).toBe('needs_checks_permission');
+    });
+    it('maps REST check runs like GraphQL ones', () => {
+        expect(normalizeRestCheck(run('test', 'completed', 'cancelled')).state).toBe('failed');
+        expect(normalizeRestCheck(run('test', 'queued', null)).state).toBe('pending');
+    });
+});
+
+describe('R2 trash', () => {
+    const store = (initial = {}) => {
+        const m = new Map(Object.entries(initial));
+        return {
+            m,
+            head: vi.fn(async k => (m.has(k) ? { key: k } : null)),
+            get: vi.fn(async k => (m.has(k) ? { body: m.get(k).body, httpMetadata: m.get(k).httpMetadata, customMetadata: m.get(k).customMetadata } : null)),
+            put: vi.fn(async (k, body, opts = {}) => { m.set(k, { body, ...opts }); }),
+            delete: vi.fn(async k => { m.delete(k); }),
+            list: vi.fn(async () => ({ objects: [...m].map(([key, v]) => ({ key, size: 3, uploaded: '2026-01-01', customMetadata: v.customMetadata })) }))
+        };
+    };
+    const api = (p, env, method = 'GET', headers = {}) => call(p, env, { method, headers });
+
+    it('moves a deleted file to the trash bucket with who and when, instead of destroying it', async () => {
+        const MEDIA = store({ 'a.mp3': { body: 'DATA', httpMetadata: { contentType: 'audio/mpeg' } } });
+        const MEDIA_TRASH = store();
+        const res = await api('/api/admin/media/r2?key=a.mp3', { ...env0, MEDIA, MEDIA_TRASH }, 'DELETE', { 'cf-access-authenticated-user-email': 'me@example.com' });
+        const body = await res.json();
+        expect(body).toMatchObject({ deleted: 'a.mp3', trashed: true });
+        expect(MEDIA.m.has('a.mp3')).toBe(false);
+        const kept = MEDIA_TRASH.m.get(body.trashKey);
+        expect(kept.body).toBe('DATA');
+        expect(kept.customMetadata).toMatchObject({ originalKey: 'a.mp3', deletedBy: 'me@example.com' });
+    });
+    it('lists the trash, newest first', async () => {
+        const MEDIA_TRASH = store({ '1-old.mp3': { customMetadata: { originalKey: 'old.mp3', deletedAt: '2026-01-01T00:00:00Z' } }, '2-new.mp3': { customMetadata: { originalKey: 'new.mp3', deletedAt: '2026-02-01T00:00:00Z' } } });
+        const body = await (await api('/api/admin/media/trash', { ...env0, MEDIA_TRASH })).json();
+        expect(body.objects.map(o => o.key)).toEqual(['new.mp3', 'old.mp3']);
+        expect(body.objects[0].trashKey).toBe('2-new.mp3');
+    });
+    it('restores a file under its original name, and will not overwrite one that exists', async () => {
+        const MEDIA = store();
+        const MEDIA_TRASH = store({ '5-a.mp3': { body: 'DATA', customMetadata: { originalKey: 'a.mp3' } } });
+        expect((await (await api('/api/admin/media/trash?key=5-a.mp3', { ...env0, MEDIA, MEDIA_TRASH }, 'POST')).json())).toEqual({ restored: 'a.mp3' });
+        expect(MEDIA.m.get('a.mp3').body).toBe('DATA');
+        expect(MEDIA_TRASH.m.has('5-a.mp3')).toBe(false);
+
+        const taken = store({ 'a.mp3': { body: 'NEW' } });
+        const trash2 = store({ '6-a.mp3': { body: 'OLD', customMetadata: { originalKey: 'a.mp3' } } });
+        const res = await api('/api/admin/media/trash?key=6-a.mp3', { ...env0, MEDIA: taken, MEDIA_TRASH: trash2 }, 'POST');
+        expect(res.status).toBe(409);
+        expect(trash2.m.has('6-a.mp3')).toBe(true);
+        expect(taken.m.get('a.mp3').body).toBe('NEW');
+    });
+    it('deletes for good only on request, rejects odd keys, and is optional', async () => {
+        const MEDIA_TRASH = store({ '7-b.mp3': { body: 'X' } });
+        expect((await api('/api/admin/media/trash?key=../x', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(400);
+        expect((await api('/api/admin/media/trash?key=9-missing.mp3', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(404);
+        expect((await api('/api/admin/media/trash?key=7-b.mp3', { ...env0, MEDIA_TRASH }, 'DELETE')).status).toBe(200);
+        expect(MEDIA_TRASH.m.size).toBe(0);
+        expect((await (await api('/api/admin/media/trash', env0)).json()).available).toBe(false);
+    });
+});
+
+describe('externalLinks / classifyLink', () => {
+    const html = `
+        <!-- <a href="https://commented.example/x">no</a> -->
+        <a href="https://example.com/a#top">one</a> <a href="https://example.com/a">same page</a>
+        <a href='http://other.example/b?x=1&amp;y=2'>two</a>
+        <a href="https://ryanmarch.me/about">ours</a> <a href="https://media.ryanmarch.me/x.mp3">ours too</a>
+        <a href="https://filenamer.ryanmarch.me/docs/">another of my apps</a>
+        <a href="mailto:me@example.com">mail</a> <a href="/project/x/">local</a> <a href="#frag">frag</a>
+        <a href="http://localhost:8787/x">private</a> <a href="http://192.168.1.5/">private</a> <a>no href</a>`;
+    it('keeps distinct outside http(s) links and ignores everything else', () => {
+        expect(externalLinks(html)).toEqual(['https://example.com/a', 'http://other.example/b?x=1&y=2', 'https://filenamer.ryanmarch.me/docs/']);
+    });
+    it('stops at the limit', () => {
+        const many = Array.from({ length: 10 }, (_, i) => `<a href="https://e${i}.example/">x</a>`).join('');
+        expect(externalLinks(many, 3)).toHaveLength(3);
+    });
+    it('calls a link ok, broken or unverified', () => {
+        expect([200, 301, 302].map(classifyLink)).toEqual(['ok', 'ok', 'ok']);
+        expect([404, 410, 0].map(classifyLink)).toEqual(['broken', 'broken', 'broken']);
+        expect([401, 403, 429, 999, 500, 503].map(classifyLink)).toEqual(Array(6).fill('unverified'));
+    });
+});
+
+describe('/api/admin/links', () => {
+    const projects = [{ id: 'demo', hasExtendedContent: true }, { id: 'link', hasExtendedContent: false }];
+    const page = '<a href="https://good.example/">g</a><a href="https://gone.example/">x</a><a href="https://picky.example/">p</a><a href="https://down.example/">d</a>';
+    const assetFetch = vi.fn(async () => new Response(page));
+    const fetchImpl = vi.fn(async (u, init = {}) => {
+        const host = new URL(String(u)).hostname;
+        if (host === 'down.example') throw new Error('dns');
+        if (host === 'gone.example') return new Response('', { status: 404 });
+        if (host === 'picky.example') return new Response('', { status: init.method === 'HEAD' ? 405 : 403 }); // refuses HEAD, then refuses the ranged GET
+        return new Response('', { status: 200 });
+    });
+    it('checks each outside link and sorts them into ok, broken and unverified', async () => {
+        const body = await (await call('/api/admin/links?project=demo', env0, { projects, assetFetch, fetchImpl })).json();
+        const by = Object.fromEntries(body.links.map(l => [new URL(l.url).hostname, l]));
+        expect(by['good.example']).toMatchObject({ status: 200, state: 'ok' });
+        expect(by['gone.example']).toMatchObject({ status: 404, state: 'broken' });
+        expect(by['down.example']).toMatchObject({ status: 0, state: 'broken' });
+        expect(by['picky.example']).toMatchObject({ status: 403, state: 'unverified' });
+    });
+    it('falls back to a one-byte GET when a site refuses HEAD', async () => {
+        const seen = [];
+        const f = vi.fn(async (u, init = {}) => { seen.push(init.method); return new Response('', { status: init.method === 'HEAD' ? 405 : 206 }); });
+        const body = await (await call('/api/admin/links?project=demo', env0, { projects, assetFetch: vi.fn(async () => new Response('<a href="https://x.example/">x</a>')), fetchImpl: f })).json();
+        expect(seen).toEqual(['HEAD', 'GET']);
+        expect(body.links[0]).toMatchObject({ status: 206, state: 'ok' });
+    });
+    it('returns nothing for a link-only project and 404s an unknown one', async () => {
+        expect((await (await call('/api/admin/links?project=link', env0, { projects, assetFetch, fetchImpl })).json()).links).toEqual([]);
+        expect((await call('/api/admin/links?project=zzz', env0, { projects, assetFetch, fetchImpl })).status).toBe(404);
+    });
+});
+
+describe('adminRepoPath', () => {
+    it('maps editable files to their place in the repo', () => {
+        expect(adminRepoPath('content/ledger/index.html')).toBe('public/content/ledger/index.html');
+        expect(adminRepoPath('assets/js/project-data.js')).toBe('public/assets/js/project-data.js');
+        expect(adminRepoPath('redirects.json')).toBe('config/redirects.json');
+    });
+    it('refuses anything else', () => {
+        for (const p of ['worker.js', '../secrets', 'content/../worker.js', 'package.json', '', null, undefined]) expect(adminRepoPath(p), String(p)).toBeNull();
+    });
+});
+
+describe('/api/admin/history', () => {
+    const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 't' };
+    const commit = (sha, msg, name = 'Ryan') => ({ sha, html_url: `https://g/${sha}`, commit: { message: msg, author: { name, date: '2026-01-02T03:04:05Z' } } });
+    it('lists the commits that changed one file, newest first, with who made admin edits', async () => {
+        const calls = [];
+        const fetchImpl = vi.fn(async u => { calls.push(String(u)); return new Response(JSON.stringify([commit('a'.repeat(40), 'admin: update content/x/index.html\n\nEdited-by: me@example.com'), commit('b'.repeat(40), 'Fix typo')])); });
+        const body = await (await call('/api/admin/history?path=content/x/index.html&branch=develop', env, { fetchImpl })).json();
+        expect(body.commits.map(c => c.short)).toEqual(['aaaaaaa', 'bbbbbbb']);
+        expect(body.commits[0]).toMatchObject({ message: 'admin: update content/x/index.html', by: 'me@example.com', author: 'Ryan' });
+        expect(body.commits[1].by).toBe('');
+        expect(calls[0]).toContain('path=public%2Fcontent%2Fx%2Findex.html');
+        expect(calls[0]).toContain('sha=develop');
+    });
+    it('only answers for files the admin edits, and needs GitHub configured', async () => {
+        const fetchImpl = vi.fn();
+        expect((await call('/api/admin/history?path=worker.js', env, { fetchImpl })).status).toBe(400);
+        expect(fetchImpl).not.toHaveBeenCalled();
+        expect((await call('/api/admin/history?path=content/x/index.html', env0, { fetchImpl })).status).toBe(501);
     });
 });

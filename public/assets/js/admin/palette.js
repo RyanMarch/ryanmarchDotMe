@@ -25,6 +25,8 @@ export function initPalette(nav) {
             document.getElementById('new-project-title')?.focus();
         } },
         { label: 'View site', hint: 'Action', go: () => window.open('/', '_blank', 'noopener') },
+        { label: 'Change theme', hint: 'Action', go: async () => (await import('./chrome.js')).cycleTheme() },
+        { label: 'Keyboard shortcuts', hint: 'Action', go: async () => (await import('./chrome.js')).showShortcuts() },
         ...(globalThis.myProjects || []).map(p => ({ label: p.title, hint: `Edit · ${p.id}`, go: () => {
             const file = `content/${p.id}/index.html`;
             if (parse().view === 'projects') window.adminEnsureEditor?.().then(() => window.loadFile(file));

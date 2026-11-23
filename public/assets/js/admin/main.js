@@ -6,6 +6,7 @@ import { warm } from './util.js';
 const VIEWS = {
     dashboard: { group: 'Site', title: 'Dashboard', load: () => import('./dashboard.js') },
     analytics: { group: 'Site', title: 'Analytics', load: () => import('./analytics.js') },
+    search: { group: 'Site', title: 'Search', load: () => import('./search.js') },
     activity: { group: 'Site', title: 'Activity', load: () => import('./activity.js') },
     media: { group: 'Content', title: 'Media', load: () => import('./media.js') },
     embeds: { group: 'Content', title: 'Embeds', load: () => import('./embeds.js') },
@@ -75,6 +76,7 @@ async function route(r = parse(), kind = 'push', quiet = false) {
         document.getElementById('topbar-title').textContent = view.title;
         document.getElementById('topbar-group').textContent = view.group;
         document.title = `${view.title} | Admin | Ryan March`;
+        announce(`${view.title} page`);
         setDrawer(false);
         document.querySelectorAll('[data-view]').forEach(section => { section.hidden = section.dataset.view !== name; });
         // render() puts the page's skeleton in place synchronously, then fetches; don't wait for the data here.
@@ -99,6 +101,14 @@ async function route(r = parse(), kind = 'push', quiet = false) {
         main.focus({ preventScroll: true });
     }
     firstRender = false;
+}
+
+// Screen readers hear a page change: a client-side route does not announce itself the way a page load does.
+function announce(text) {
+    const box = document.getElementById('route-announcer');
+    if (!box) return;
+    box.textContent = '';
+    setTimeout(() => { box.textContent = text; }, 50);
 }
 
 function restoreScroll() {
@@ -146,8 +156,9 @@ document.addEventListener('click', e => {
 // Hovering, focusing or touching a sidebar link starts loading that page: its code, and the data it will ask for.
 const branchNow = () => encodeURIComponent((typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main');
 const WARM = {
-    dashboard: () => [`/api/admin/overview?branch=${branchNow()}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary'],
+    dashboard: () => [`/api/admin/overview?branch=${branchNow()}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound'],
     analytics: () => ['/api/admin/analytics?days=30'],
+    search: () => ['/api/admin/search?days=28'],
     activity: () => ['/api/admin/activity?branch=main'],
     media: () => [`/api/admin/media?branch=${branchNow()}`]
 };
@@ -189,3 +200,4 @@ const env = document.getElementById('env-label');
 if (env) { env.classList.toggle('is-local', local); env.querySelector('span').textContent = local ? 'Local' : 'Production'; }
 
 import('./palette.js').then(m => m.initPalette(NAV));
+import('./chrome.js').then(m => m.initChrome());

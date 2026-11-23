@@ -2,7 +2,7 @@
 // Every place you can "go" to is a history entry, so Back and swipe-back return to where you were.
 
 export const BASE = '/admin';
-export const VIEW_IDS = ['dashboard', 'analytics', 'activity', 'projects', 'media', 'embeds', 'health', 'seo', 'settings'];
+export const VIEW_IDS = ['dashboard', 'analytics', 'search', 'activity', 'projects', 'media', 'embeds', 'health', 'seo', 'settings'];
 
 /** Splits a location into { view, rest, query }. Unknown paths fall back to the dashboard. */
 export function parse(loc = globalThis.location) {

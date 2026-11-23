@@ -1,5 +1,6 @@
 import { api, esc } from './util.js';
 import { go, href } from './router.js';
+import { confirmDialog, toast } from './ui.js';
 import { reorderProjects, setUnpublished } from './project-order.js';
 import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
 import { b64ToText, textToB64 } from './seo.js';
@@ -37,6 +38,7 @@ async function orderPanel(el) {
     let saved = projects.map(p => ({ ...p })); // what GitHub has right now
     let original = signature();
     let moved = null;
+    let skipConfirm = false; // set by Undo, which should not ask again
 
     const draw = () => {
         const dirty = signature() !== original;
@@ -83,7 +85,14 @@ async function orderPanel(el) {
         if (save && !save.disabled) {
             const status = el.querySelector('#order-status');
             const nowOff = projects.filter(p => p.unpublished && !saved.find(s => s.id === p.id)?.unpublished);
-            if (nowOff.length && !confirm(`Unpublish ${nowOff.map(p => p.title).join(', ')}?\n\nAfter the next deploy it disappears from the homepage and its page returns a 404. Nothing is deleted; you can publish it again here.`)) return;
+            if (nowOff.length && !skipConfirm && !(await confirmDialog({
+                title: `Unpublish ${nowOff.map(p => p.title).join(', ')}?`,
+                message: 'After the next deploy it disappears from the homepage and its page returns a 404. Nothing is deleted; you can publish it again here.',
+                confirmLabel: 'Unpublish'
+            }))) return;
+            const wasUndo = skipConfirm;
+            skipConfirm = false;
+            const before = saved.map(p => ({ ...p })); // what to go back to if the person taps Undo
             save.disabled = true;
             status.textContent = 'Saving…';
             try {
@@ -110,13 +119,34 @@ async function orderPanel(el) {
                     body: JSON.stringify({ path: 'assets/js/project-data.js', branch: branch(), sha, content: textToB64(next), message: `admin: ${parts.join('; ')}` })
                 });
                 if (!r.ok) throw new Error(r.status === 409 ? 'The file changed on GitHub; reload and try again.' : `GitHub returned ${r.status}.`);
-                sha = (await r.json()).sha;
+                const result = await r.json();
+                sha = result.sha;
                 source = next;
                 saved = projects.map(p => ({ ...p }));
                 original = signature();
                 moved = null;
                 draw();
-                el.querySelector('#order-status').textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
+                const statusEl = el.querySelector('#order-status');
+                statusEl.textContent = `Saved to ${branch()}. Checking the build…`;
+                window.adminTrackDeploy?.({ branch: branch(), commit: result.commit }, s => { if (statusEl.isConnected) statusEl.textContent = s.text; });
+                const changes = [nowOff.length && `Unpublished ${nowOff.map(p => p.title).join(', ')}`, nowOn.length && `Published ${nowOn.map(p => p.title).join(', ')}`, reordered && !nowOff.length && !nowOn.length && 'Homepage order saved'].filter(Boolean);
+                if (wasUndo) toast('Change undone.', { type: 'success' });
+                else if (changes.length) {
+                    toast(`${changes.join('. ')}.`, {
+                        type: 'success',
+                        duration: 10000,
+                        action: {
+                            label: 'Undo',
+                            onClick: () => {
+                                projects = before.map(p => ({ ...p }));
+                                moved = null;
+                                draw();
+                                skipConfirm = true;
+                                el.querySelector('#save-order')?.click();
+                            }
+                        }
+                    });
+                }
             } catch (err) {
                 status.textContent = `Not saved: ${err.message}`;
                 save.disabled = false;
@@ -130,10 +160,11 @@ export async function render(root) {
     root.innerHTML = `
         <div class="view-head"><div><h1>Settings</h1><p>What this admin is connected to, which projects are published and in what order, and the site's core files.</p></div></div>
         <div class="settings-grid">
+        <div class="settings-side">
         <section class="panel s-conn"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
-        <section class="panel s-order"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
         <section class="panel s-files"><header><h2>Site files</h2></header>
-            <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section></div>`;
+            <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section></div>
+        <section class="panel s-order"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section></div>`;
 
     statusPanel(root.querySelector('#status-panel'));
     orderPanel(root.querySelector('#order-panel'));

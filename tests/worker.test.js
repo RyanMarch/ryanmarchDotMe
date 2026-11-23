@@ -173,6 +173,13 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         expect(slash.headers.get('Location')).toBe('https://ryanmarch.me/admin/media');
     });
 
+    it('answers a missing asset with a real 404 instead of the SPA fallback page', async () => {
+        mockEnv.ASSETS.fetch.mockImplementation(() => Promise.resolve(new Response('<html>fallback</html>', { headers: { 'Content-Type': 'text/html; charset=utf-8' } })));
+        const res = await worker.fetch(new Request('https://ryanmarch.me/assets/img/gone.png'), mockEnv);
+        expect(res.status).toBe(404);
+        expect(res.headers.get('Content-Type')).toContain('text/plain');
+    });
+
     it('should route invalid paths to the custom 404 page', async () => {
         const req = new Request('https://ryanmarch.me/random-non-existent-page');
         const res = await worker.fetch(req, mockEnv);
