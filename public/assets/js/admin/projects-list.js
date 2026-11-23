@@ -215,7 +215,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // Production: Cloudflare Access already authenticated — skip the password screen
-    // (CF Access gates /admin.html at the edge; if this page loads, the user passed auth)
+    // (CF Access gates /admin at the edge; if this page loads, the user passed auth)
     if (!isLocal) {
         document.getElementById('auth-view').classList.add('hidden');
         document.getElementById('admin-view').classList.remove('hidden');

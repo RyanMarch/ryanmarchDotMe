@@ -144,20 +144,21 @@ describe('Cloudflare Worker Router & Redirect Tests', () => {
         expect(res.headers.get('Location')).toBe('https://ryanmarch.me/project/icon-studio/');
     });
 
-    it('should redirect /admin and /admin/ to /admin.html with noindex headers', async () => {
-        const req = new Request('https://ryanmarch.me/admin');
-        const res = await worker.fetch(req, mockEnv);
-        expect(res.status).toBe(301);
-        expect(res.headers.get('Location')).toBe('https://ryanmarch.me/admin.html');
-        expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
-    });
-
-    it('should serve /admin.html with X-Robots-Tag noindex header', async () => {
-        const req = new Request('https://ryanmarch.me/admin.html');
-        const res = await worker.fetch(req, mockEnv);
+    it('should serve the admin at /admin with noindex and no-store headers', async () => {
+        const res = await worker.fetch(new Request('https://ryanmarch.me/admin'), mockEnv);
         expect(res.status).toBe(200);
+        expect(await res.text()).toBe('Admin HTML');
         expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
         expect(res.headers.get('Cache-Control')).toBe('no-store');
+    });
+
+    it('should redirect /admin.html and /admin/ to /admin, keeping the query string', async () => {
+        for (const from of ['https://ryanmarch.me/admin.html', 'https://ryanmarch.me/admin/', 'https://ryanmarch.me/admin.html?x=1']) {
+            const res = await worker.fetch(new Request(from), mockEnv);
+            expect(res.status, from).toBe(301);
+            expect(res.headers.get('Location'), from).toBe(`https://ryanmarch.me/admin${from.includes('?') ? '?x=1' : ''}`);
+            expect(res.headers.get('X-Robots-Tag')).toBe('noindex, nofollow');
+        }
     });
 
     it('should route invalid paths to the custom 404 page', async () => {

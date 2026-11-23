@@ -221,12 +221,12 @@ export default {
 
             const cleanPath = normalizePath(path);
 
-            // Redirect /admin or /admin/ to /admin.html
-            if (cleanPath === '/admin') {
+            // The admin lives at /admin. The old /admin.html and /admin/ forms redirect to it.
+            if (cleanPath === '/admin.html' || (cleanPath === '/admin' && path !== '/admin')) {
                 return new Response(null, {
                     status: 301,
                     headers: {
-                        'Location': `${redirectOrigin}/admin.html${url.search}`,
+                        'Location': `${redirectOrigin}/admin${url.search}`,
                         'X-Robots-Tag': 'noindex, nofollow'
                     }
                 });
@@ -402,7 +402,7 @@ export default {
                     '/404.html',
                     '/404',
                     '/index.html',
-                    '/admin.html'
+                    '/admin'
                 ].includes(cleanPath.toLowerCase());
 
             const projectMatch = cleanPath.match(/^\/project\/([^/]+)$/i);
@@ -496,8 +496,8 @@ export default {
                 return rewriter.transform(response);
             }
 
-            if (cleanPath === '/admin.html') {
-                // Fetch the asset using '/admin' internally to bypass Workers Assets' clean URL redirect (.html -> extensionless)
+            if (cleanPath === '/admin') {
+                // Serve admin.html at the clean /admin path (Workers Assets maps /admin to admin.html).
                 // We use the hostname inside assetHost to prevent recursion loops
                 const rewrittenRequest = new Request(`${assetHost}/admin`, request);
                 const assetResponse = await env.ASSETS.fetch(rewrittenRequest);
