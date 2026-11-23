@@ -23,7 +23,7 @@ export function findingsHtml(findings, projects, filter = 'all') {
         if (!groups.has(f.id)) groups.set(f.id, []);
         groups.get(f.id).push(f);
     }
-    return [...groups].map(([id, items]) => {
+    return `<div class="panel-grid">${[...groups].map(([id, items]) => {
         const counts = summarize(items);
         const meta = [counts.error && plural(counts.error, 'error'), counts.warning && plural(counts.warning, 'warning'), counts.info && plural(counts.info, 'note')].filter(Boolean).join(' · ');
         return `<section class="panel">
@@ -31,7 +31,7 @@ export function findingsHtml(findings, projects, filter = 'all') {
             <ul class="rows">${items.map(f => `<li><span class="label wrap"><span class="sev sev-${f.severity}">${SEV_LABEL[f.severity]}</span> ${esc(f.message)}</span></li>`).join('')}</ul>
             ${names.has(id) ? `<div class="panel-foot"><button type="button" class="linklike" data-open="${esc(id)}">Open write-up in editor</button></div>` : ''}
         </section>`;
-    }).join('');
+    }).join('')}</div>`;
 }
 
 export function countsHtml(c, note = '') {

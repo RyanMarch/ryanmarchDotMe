@@ -128,10 +128,11 @@ async function orderPanel(el) {
 export async function render(root) {
     root.innerHTML = `
         <div class="view-head"><div><h1>Settings</h1><p>What this admin is connected to, which projects are published and in what order, and the site's core files.</p></div></div>
-        <section class="panel"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
-        <section class="panel"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
-        <section class="panel"><header><h2>Site files</h2></header>
-            <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section>`;
+        <div class="settings-grid">
+        <section class="panel s-conn"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
+        <section class="panel s-order"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
+        <section class="panel s-files"><header><h2>Site files</h2></header>
+            <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section></div>`;
 
     statusPanel(root.querySelector('#status-panel'));
     orderPanel(root.querySelector('#order-panel'));

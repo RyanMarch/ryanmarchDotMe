@@ -78,6 +78,7 @@ function imagesTab(panel, media, projects, reload) {
             // Top level: the folders.
             crumbs.innerHTML = '<span class="crumb-here">All folders</span>';
             tools.hidden = true;
+            list.className = 'rows panel-list is-grid cells-folder';
             list.innerHTML = folders.map(f => `<li class="frow"><button type="button" class="folder-btn" data-folder="${esc(f.dir)}">
                 ${FOLDER_ICON}<span class="fname-col"><strong>${esc(f.title)}</strong><span class="sub">${esc(f.dir)}</span></span>
                 <span class="fmeta">${f.missingAvif ? `<span class="sev sev-warning">${f.missingAvif} missing AVIF</span>` : ''}<span class="num">${fmt(f.images)} image${f.images === 1 ? '' : 's'} · ${bytes(f.bytes)}</span></span></button></li>`).join('');
@@ -95,6 +96,7 @@ function imagesTab(panel, media, projects, reload) {
             ? '<button type="button" class="linklike" data-up>All folders</button><span class="crumb-sep" aria-hidden="true">/</span><span class="crumb-here">Search results</span>'
             : `<button type="button" class="linklike" data-up>All folders</button><span class="crumb-sep" aria-hidden="true">/</span><span class="crumb-here">${esc(folderTitle(folder, projects))}</span><span class="sub crumb-path">${esc(folder)}</span>`;
         tools.hidden = false;
+        list.className = 'rows panel-list is-grid cells-set';
         list.innerHTML = sets.slice(0, LIMIT).map(s => setRow(s, Boolean(q))).join('') || '<li class="empty muted">Nothing matches.</li>';
         count.textContent = `${sets.length > LIMIT ? `${LIMIT} of ` : ''}${fmt(sets.length)} picture${sets.length === 1 ? '' : 's'}`;
     };

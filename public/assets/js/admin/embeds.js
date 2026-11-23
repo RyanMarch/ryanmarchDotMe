@@ -70,7 +70,7 @@ export async function render(root) {
             <div class="stat"><dt>Audio players</dt><dd>${c.audio}<span class="delta">&nbsp;</span></dd></div>
             <div class="stat"><dt>YouTube videos</dt><dd>${c.videos}<span class="delta">&nbsp;</span></dd></div>
             <div class="stat"><dt>Problems</dt><dd>${c.problems}<span class="delta">${c.problems ? 'need attention' : 'all good'}</span></dd></div></dl>
-            ${rows || '<div class="panel"><div class="panel-body muted">Nothing to show.</div></div>'}`;
+            ${rows ? `<div class="panel-grid">${rows}</div>` : '<div class="panel"><div class="panel-body muted">Nothing to show.</div></div>'}`;
     };
 
     const run = async () => {

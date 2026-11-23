@@ -16,6 +16,11 @@ function rate(key, value) {
 }
 const ms = v => (v === null || v === undefined ? '–' : v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${v} ms`);
 
+/** Referrer host → readable label. The site's own host means in-site navigation, not a visit from elsewhere. */
+export function referrerLabel(host, own = 'ryanmarch.me') {
+    return host === own ? 'This site (in-site navigation)' : host;
+}
+
 /** Country code → readable name. Cloudflare uses T1 for the Tor network and XX when it can't tell. */
 export function countryLabel(code) {
     if (code === 'T1') return 'Tor network';
@@ -66,10 +71,13 @@ const niceMax = n => {
 
 const dayLabel = (date, opts) => new Date(date + 'T00:00:00Z').toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' });
 export const CHART = { H: 240, L: 42, R: 8, T: 10, B: 26 };
+/** Taller plot when the chart is wide, so it doesn't turn into a thin strip on a big monitor. */
+export const chartHeight = W => (W >= 1000 ? 340 : W >= 700 ? 280 : CHART.H);
 
 /** Line chart of one metric, with an optional dashed previous-period line and one hit column per day. */
 export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}) {
-    const { H, L, R, T, B } = CHART;
+    const { L, R, T, B } = CHART;
+    const H = chartHeight(W);
     const val = s => s[metric] || 0;
     const max = niceMax(Math.max(...series.map(val), ...(prev || []).map(val), 1));
     const step = (W - L - R) / series.length;
@@ -84,7 +92,7 @@ export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}
     const area = `M${x(0).toFixed(1)},${y(0).toFixed(1)} L${line.join(' L')} L${x(series.length - 1).toFixed(1)},${y(0).toFixed(1)} Z`;
     const prevLine = prev ? `<polyline class="line-prev" points="${pts(prev).join(' ')}"/>` : '';
     const every = Math.max(1, Math.ceil(series.length / Math.max(2, Math.floor((W - L) / 84))));
-    const xl = series.map((s, i) => (i % every === 0 || i === series.length - 1) && (series.length - 1 - i >= every / 2 || i === series.length - 1)
+    const xl = series.map((s, i) => (i % every === 0 || i === series.length - 1) && (series.length - 1 - i >= every || i === series.length - 1)
         ? `<text x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle'}">${dayLabel(s.date, { month: 'short', day: 'numeric' })}</text>` : '').join('');
     const hits = series.map((s, i) => `<rect class="hit" data-i="${i}" x="${(L + i * step).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${H - T - B}"/>`).join('');
     return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}<path class="area" d="${area}"/>${prevLine}<polyline class="line" points="${line.join(' ')}"/><line class="cursor" y1="${T}" y2="${H - B}" x1="-10" x2="-10"/><circle class="dot" r="4" cx="-10" cy="-10"/>${xl}${hits}</svg>`;
@@ -122,7 +130,8 @@ function attachChart(root, state) {
         const cx = Number(hit.getAttribute('x')) + Number(hit.getAttribute('width')) / 2;
         const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
         const v = s[state.metric] || 0;
-        const { H, T, B } = CHART;
+        const { T, B } = CHART;
+        const H = svg.viewBox.baseVal.height;
         const max = niceMax(Math.max(...state.series.map(r => r[state.metric] || 0), ...(state.prev || []).map(r => r[state.metric] || 0), 1));
         const cy = T + (H - T - B) * (1 - v / max);
         svg.querySelector('.cursor').setAttribute('x1', cx);
@@ -167,14 +176,14 @@ export function deltaHtml(c, p, days) {
 
 function statsHtml(d, series, metric) {
     const cur = d.totals.current, prev = d.totals.previous;
-    const ppv = cur.visits ? (cur.views / cur.visits).toFixed(2) : '–';
+    const human = d.filters?.torHidden ? cur.views : Math.max(0, cur.views - (d.torLoads || 0));
     const delta = (c, p) => deltaHtml(c, p, d.days);
     const pick = (m, label, c, p) => `<button type="button" class="stat stat-pick" data-metric="${m}" aria-pressed="${metric === m}" ${c === null ? 'disabled' : ''}>
         <span class="k">${label}</span><span class="v">${fmt(c)}</span>${delta(c, p)}${c === null ? '' : sparkSvg(series, m)}</button>`;
     return `<div class="stats" role="group" aria-label="Summary">
         ${pick('views', 'Page views', cur.views, prev.views)}
         ${pick('visits', 'Visits', cur.visits, prev.visits)}
-        <div class="stat"><span class="k">Pages per visit</span><span class="v">${ppv}</span><span class="delta">&nbsp;</span></div>
+        <div class="stat"><span class="k">Views excluding Tor</span><span class="v">${fmt(human)}</span><span class="delta">${d.filters?.torHidden ? 'Tor traffic is hidden' : d.torLoads ? `${fmt(d.torLoads)} came from Tor` : 'no Tor traffic'}</span></div>
         <div class="stat"><span class="k">Largest contentful paint</span><span class="v">${ms(d.vitals.lcp_ms)}</span><span class="delta ${rate('lcp_ms', d.vitals.lcp_ms).cls}">${esc(rate('lcp_ms', d.vitals.lcp_ms).text)}</span></div>
     </div>`;
 }
@@ -205,10 +214,10 @@ function vitalsHtml(v) {
 
 function sourcesHtml(d) {
     const tabs = [['referrers', 'Referrers', 'Source'], ['countries', 'Countries', 'Country'], ['devices', 'Devices', 'Device']];
-    return `<section class="panel">
+    return `<section class="panel a-src">
         <header><div class="tabs-inline" role="tablist" aria-label="Traffic breakdown">${tabs.map(([k, label], i) =>
             `<button type="button" role="tab" id="src-tab-${k}" data-src="${k}" aria-selected="${i === 0}" aria-controls="src-panel" tabindex="${i === 0 ? 0 : -1}">${label}</button>`).join('')}</div></header>
-        <div id="src-panel" role="tabpanel" aria-labelledby="src-tab-referrers">${dataTable(d.referrers, { head: tabs[0][2], total: d.totals.current.views })}</div>
+        <div id="src-panel" role="tabpanel" aria-labelledby="src-tab-referrers">${dataTable(d.referrers, { head: tabs[0][2], total: d.totals.current.views, render: i => esc(referrerLabel(i.label, d.host)) })}</div>
     </section>`;
 }
 
@@ -255,7 +264,8 @@ export async function render(root) {
         body.innerHTML = `
             <div id="stats-host">${statsHtml(d, series, state.metric)}</div>
             ${trafficNote(d) ? `<div class="modebar"><span class="muted">${esc(trafficNote(d))}</span></div>` : ''}
-            <section class="panel" aria-label="Traffic over time">
+            <div class="a-grid">
+            <section class="panel a-chart" aria-label="Traffic over time">
                 <header>
                     <h2 id="chart-title">Page views per day</h2>
                     <span class="legend"><span class="sw sw-cur"></span>This period${prevSeries ? '<span class="sw sw-prev"></span>Previous period' : ''}</span>
@@ -266,14 +276,13 @@ export async function render(root) {
                 <div class="chart-foot"><span class="chart-readout" aria-live="polite">Hover or tap the chart for a day's count.</span><span class="meta">${esc(d.host)}${d.cached ? ' · cached' : ''}</span></div>
                 <p class="chart-note">These are estimates. Cloudflare samples page loads on a site this size, so counts come in steps of about 10 and a single day can shift between refreshes. Trust the totals and the trend over any one day.</p>
             </section>
-            <div class="split">
-                <section class="panel"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
-                ${sourcesHtml(d)}
-            </div>
-            <section class="panel">
+            <section class="panel a-top"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
+            ${sourcesHtml(d)}
+            <section class="panel a-vitals">
                 <header><h2>Core Web Vitals</h2><span class="meta">${fmt(d.vitals.samples)} samples · averages, ${d.days} days</span></header>
                 ${vitalsHtml(d.vitals)}
-            </section>`;
+            </section>
+            </div>`;
         attachChart(body, state);
 
         body.querySelector('#stats-host').addEventListener('click', e => {
@@ -292,7 +301,7 @@ export async function render(root) {
             const panel = body.querySelector('#src-panel');
             panel.setAttribute('aria-labelledby', btn.id);
             const head = { referrers: 'Source', countries: 'Country', devices: 'Device' }[k];
-            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views, ...(k === 'countries' ? { render: i => esc(countryLabel(i.label)) } : {}) });
+            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views, ...(k === 'countries' ? { render: i => esc(countryLabel(i.label)) } : {}), ...(k === 'referrers' ? { render: i => esc(referrerLabel(i.label, d.host)) } : {}) });
         };
         srcTabs.addEventListener('click', e => { const b = e.target.closest('button[data-src]'); if (b) showSource(b); });
         srcTabs.addEventListener('keydown', e => {

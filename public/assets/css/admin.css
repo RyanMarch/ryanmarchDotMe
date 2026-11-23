@@ -144,7 +144,7 @@ dl.stats { margin: 0 0 1.25rem; }
 .rows li { position: relative; display: flex; justify-content: space-between; gap: 1rem; padding: 0.5rem 1rem; border-top: 1px solid var(--rule); font-size: 0.9rem; min-height: 38px; align-items: center; }
 .rows li:first-child { border-top: 0; }
 .rows .label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; position: relative; }
-.rows .value { font-variant-numeric: tabular-nums; color: var(--text-secondary); position: relative; }
+.rows .value { white-space: nowrap; font-variant-numeric: tabular-nums; color: var(--text-secondary); position: relative; }
 .rows .bar { position: absolute; inset: 3px auto 3px 0; background: rgba(var(--accent-rgb), 0.13); pointer-events: none; }
 .rows a { color: inherit; text-decoration: none; }
 .rows a:hover { text-decoration: underline; }
@@ -929,6 +929,8 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     .main .panel, .main .stats, .main section > .card { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
     .loading::before, .loading::after { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
     .loading::before { margin-bottom: 1.25rem; }
+    /* Panels inside layout grids bleed to the edges through their grid instead of their own margins. */
+    .main .a-grid, .main .dash-grid, .main .settings-grid, .main .panel-grid { margin-left: -1rem; margin-right: -1rem; }
     .main .panel > header, .main .stat { padding-left: calc(1rem + env(safe-area-inset-left, 0px)); }
     .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -978,4 +980,58 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
 
 @media (prefers-reduced-motion: reduce) {
     .sidebar { transition: none; }
+}
+
+/* ── Wide displays ─────────────────────────────────────────
+   The content area is a size container, so layouts react to the room the page
+   actually has (the sidebar included), not to the window width. */
+.main { max-width: 2200px; margin: 0 auto; container-type: inline-size; container-name: main; }
+.view-head p { max-width: 90ch; }
+
+.a-grid, .dash-grid, .settings-grid { display: grid; gap: 1.25rem; grid-template-columns: minmax(0, 1fr); align-items: start; }
+.a-grid > .panel, .dash-grid > .panel, .settings-grid > .panel, .panel-grid > .panel { margin: 0; }
+.panel-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); align-items: start; }
+
+/* Hairline-divided grids of rows (media folders and pictures). */
+.rows.is-grid { display: grid; gap: 1px; background: var(--rule); overflow: hidden; }
+.rows.is-grid > li { background: var(--surface); border: 0; }
+.rows.is-grid > li.empty { grid-column: 1 / -1; }
+.rows.is-grid.cells-folder { grid-template-columns: repeat(auto-fill, minmax(min(100%, 380px), 1fr)); }
+.rows.is-grid.cells-set { grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); }
+
+@container main (min-width: 1100px) {
+    .a-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .a-chart, .a-vitals { grid-column: 1 / -1; }
+    .a-top { grid-column: span 7; }
+    .a-src { grid-column: span 5; }
+    .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dash-health, .dash-quick { grid-column: 1 / -1; }
+    .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .s-conn, .s-files { grid-column: 1; }
+    .s-order { grid-column: 2; grid-row: 1 / span 2; }
+}
+
+@container main (min-width: 1500px) {
+    /* The editor gets the wide column; the file picker and tools sit beside it. */
+    #view-projects { display: grid; grid-template-columns: minmax(380px, 440px) minmax(0, 1fr); column-gap: 1.25rem; align-items: start; }
+    #view-projects > .view-head { grid-column: 1 / -1; }
+    #view-projects > .card { grid-column: 1; }
+    #view-projects > #editor-card { grid-column: 2; grid-row: 2 / span 8; margin-bottom: 0; }
+    #view-projects:not(:has(#editor-card:not(.hidden)))::after { content: "Choose a file on the left to edit it here."; grid-column: 2; grid-row: 2 / span 3; display: grid; place-items: center; min-height: 360px; border: 1px dashed var(--rule-strong); border-radius: var(--radius); color: var(--text-muted); }
+}
+
+@container main (min-width: 1700px) {
+    .a-chart { grid-column: 1 / 9; grid-row: 1; }
+    .a-vitals { grid-column: 9 / -1; grid-row: 1; }
+    .a-top { grid-column: 1 / 9; grid-row: 2; }
+    .a-src { grid-column: 9 / -1; grid-row: 2; }
+    .a-vitals .vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .a-vitals .vital:nth-child(odd) { border-left: 0; }
+    .a-vitals .vital:nth-child(n + 3) { border-top: 1px solid var(--rule); }
+    .dash-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .dash-health { grid-column: auto; }
+    .rows.timeline { column-count: 2; column-gap: 0; }
+    .rows.timeline > li { break-inside: avoid; }
+    .rows.timeline > li.day { break-after: avoid; }
+    ul.rrows { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; }
 }
