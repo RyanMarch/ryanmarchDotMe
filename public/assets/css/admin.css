@@ -1003,9 +1003,8 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     .a-src { grid-column: span 5; }
     .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .dash-health, .dash-quick { grid-column: 1 / -1; }
-    .settings-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .s-conn, .s-files { grid-column: 1; }
-    .s-order { grid-column: 2; grid-row: 1 / span 2; }
+    /* A narrow stack on the left (connections, then site files, with no gap between), the project list wide on the right. */
+    .settings-grid { grid-template-columns: minmax(300px, 380px) minmax(0, 1fr); }
 }
 
 @container main (min-width: 1500px) {
@@ -1217,3 +1216,6 @@ table.rt tr.row-notes-row:hover { background: none; }
     table.rt tr.row-notes-row { padding: 0 1rem 0.6rem; border: 0; }
     table.rt .rt-act { padding-top: 0.4rem !important; }
 }
+
+.settings-side { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+.settings-side > .panel { margin: 0; }
