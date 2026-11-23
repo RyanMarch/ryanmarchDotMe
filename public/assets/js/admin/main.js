@@ -40,6 +40,17 @@ document.addEventListener('keydown', e => {
 });
 mobile.addEventListener('change', () => setDrawer(false));
 
+// A request was redirected to the Access login: this device has no sign-in. Offer one (top-level, so Access can run its login).
+window.addEventListener('admin:signed-out', () => {
+    if (document.getElementById('signed-out')) return;
+    const box = document.createElement('div');
+    box.id = 'signed-out';
+    box.className = 'notice';
+    box.setAttribute('role', 'alert');
+    box.innerHTML = '<strong>You are signed out.</strong>This device has no active sign-in, so nothing can load. <a class="btn" href="/admin.html">Sign in</a>';
+    main.prepend(box);
+});
+
 let renderToken = 0;
 let firstRender = true;
 let shown = ''; // the view currently on screen

@@ -342,3 +342,17 @@ test.describe('progress and inspiration', () => {
         await expect(page.locator('#impact-host')).toContainText('better');
     });
 });
+
+test.describe('signed out', () => {
+    test('a redirect to the login shows a Sign in button instead of "Load failed"', async ({ page }) => {
+        await mockAdminApi(page);
+        await signIn(page);
+        // From here on, every API call is redirected to another domain, as Access does without a session.
+        await page.unroute('**/api/admin/**');
+        await page.route('**/api/admin/**', route => route.fulfill({ status: 302, headers: { location: 'http://127.0.0.1:9/login' } }));
+        await page.click('[data-nav=analytics]');
+        const banner = page.locator('#signed-out');
+        await expect(banner).toContainText('You are signed out');
+        await expect(banner.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/admin.html');
+    });
+});
