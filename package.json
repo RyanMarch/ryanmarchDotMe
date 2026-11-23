@@ -13,7 +13,6 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 8787",
-    "dev:static": "python3 dev/serve.py",
     "build": "npm run test && node scripts/build.js",
     "create-project": "node dev/create-project.js",
     "image-variants": "node dev/make-image-variants.mjs",
