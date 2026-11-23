@@ -1,5 +1,27 @@
 export const myProjects = [
     {
+        id: "ledger",
+        title: "Ledger",
+        subtitle: "Private, local-first personal finance tracker for one person or a couple.",
+        seoTitle: "Ledger - Private Personal Finance Tracker for Individuals & Couples",
+        seoDescription: "Track net worth, spending pace, budgets, investments, and retirement plans in an encrypted browser vault. Pull in bank transactions automatically and view household finances together.",
+        tags: [
+            { label: "Recently Updated", color: "gold" },
+            { label: "Finance", color: "purple" },
+            { label: "Project", color: "gray" },
+            { label: "Web App", color: "teal", priority: "low" }
+        ],
+        image: "content/ledger/images/card.avif",
+        imageWidth: 1200,
+        imageHeight: 779,
+        imageWidths: [360, 640, 1200],
+        ogImage: "content/ledger/images/og.jpg",
+        actionText: "Try Live Demo",
+        actionUrl: "https://ledgerdemo.ryanmarch.me/",
+        hasExtendedContent: true,
+        showLaunchButton: true
+    },
+    {
         id: "spindex",
         title: "Spindex",
         subtitle: "Browse your record collection like flipping through a real crate.",
@@ -21,28 +43,6 @@ export const myProjects = [
         actionText: "Launch Spindex",
         actionUrl: "https://spindex.ryanmarch.me",
         sourceUrl: "https://github.com/RyanMarch/spindex",
-        hasExtendedContent: true,
-        showLaunchButton: true
-    },
-    {
-        id: "ledger",
-        title: "Ledger",
-        subtitle: "Private, local-first personal finance tracker for one person or a couple.",
-        seoTitle: "Ledger - Private Personal Finance Tracker for Individuals & Couples",
-        seoDescription: "Track net worth, spending pace, budgets, investments, and retirement plans in an encrypted browser vault. Pull in bank transactions automatically and view household finances together.",
-        tags: [
-            { label: "Recently Updated", color: "gold" },
-            { label: "Finance", color: "purple" },
-            { label: "Project", color: "gray" },
-            { label: "Web App", color: "teal", priority: "low" }
-        ],
-        image: "content/ledger/images/card.avif",
-        imageWidth: 1200,
-        imageHeight: 779,
-        imageWidths: [360, 640, 1200],
-        ogImage: "content/ledger/images/og.jpg",
-        actionText: "Try Live Demo",
-        actionUrl: "https://ledgerdemo.ryanmarch.me/",
         hasExtendedContent: true,
         showLaunchButton: true
     },
