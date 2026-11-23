@@ -1,0 +1,19 @@
+# Local secrets for `npm run dev:worker` (wrangler loads .dev.vars automatically).
+# Copy to .dev.vars (gitignored) and fill in. Never commit real values.
+# Slinky users: skip this file and run `npm run dev:admin` through `slinky run` instead.
+
+# Local sign-in password for /admin on localhost
+ADMIN_PASSWORD=
+
+# Analytics (Cloudflare API token with Account Analytics: Read, plus your account ID)
+CF_API_TOKEN=
+CF_ACCOUNT_ID=
+CF_ANALYTICS_HOST=ryanmarch.me
+
+# Editor, Activity, Media images, Redirects & SEO (GitHub fine-grained token on this repo:
+# Contents read/write, Actions read, Checks read)
+GITHUB_REPO=RyanMarch/ryanmarchDotMe
+GITHUB_PAT=
+
+# Optional: deployments list on Activity (token also needs Workers Scripts: Read)
+# CF_WORKER_NAME=ryanmarchdotme
