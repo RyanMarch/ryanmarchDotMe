@@ -42,14 +42,29 @@ export function todayItems({ overview, health, notfound, search, analytics, inde
     return items.sort((a, b) => RANK[a.level] - RANK[b.level]).slice(0, 8);
 }
 
-export function todayHtml(items) {
+export function todayHtml(items, { best = null } = {}) {
     const body = items.length
         ? `<ul class="rows today">${items.map(i => `<li><span class="label wrap"><span class="sev sev-${i.level === 'info' ? 'info' : i.level}">${i.level === 'error' ? 'Error' : i.level === 'warning' ? 'Warning' : 'Idea'}</span> ${esc(i.text)}</span><a class="value" href="${esc(i.href)}">${esc(i.action)}</a></li>`).join('')}</ul>`
-        : '<p class="empty-note">Nothing needs attention. Good time to write something new.</p>';
+        : `<p class="empty-note">Nothing needs attention.${best ? ` ${esc(best)} was your most-read project this week.` : ''} Good time to write something new.</p>`;
     return `<section class="panel dash-today"><header><h2>Worth doing</h2><span class="meta">worked out from your own data</span></header>${body}</section>`;
 }
 
 export function digestHtml(lines) {
     if (!lines.length) return '';
     return `<section class="panel dash-today"><header><h2>This week</h2><span class="meta">from analytics, Google and the repo</span></header><ul class="rows">${lines.map(l => `<li><span class="label wrap">${l}</span></li>`).join('')}</ul></section>`;
+}
+
+/** One small task at a time. `index` rotates through the list ("Another"). */
+export function nextUpHtml(tasks, index = 0) {
+    if (!tasks.length) return '';
+    const t = tasks[index % tasks.length];
+    return `<section class="panel dash-today" id="next-up"><header><h2>Next up</h2><span class="meta">about ${t.minutes} minutes</span></header>
+        <div class="panel-body"><p class="next-title">${esc(t.title)}</p><p class="muted">${esc(t.why)}</p>
+        <div class="actions"><a class="btn" href="${esc(t.href)}">${esc(t.cta)}</a>${tasks.length > 1 ? '<button type="button" class="btn btn-secondary" data-another>Another idea</button>' : ''}</div></div></section>`;
+}
+
+export function milestoneHtml(list) {
+    if (!list.length) return '';
+    return `<section class="panel dash-today" id="milestone-card"><header><h2>New milestone${list.length === 1 ? '' : 's'}</h2><button type="button" class="linklike" data-dismiss-milestones>Nice, dismiss</button></header>
+        <ul class="rows">${list.map(m => `<li><span class="label wrap">${esc(m.title)}</span></li>`).join('')}</ul></section>`;
 }
