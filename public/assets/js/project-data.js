@@ -381,6 +381,7 @@ export const myProjects = [
         featured: false,
         size: "large",
         image: "",
+        ogImage: "content/rentpress-data-hub/images/og.jpg",
         symbol: "hub",
         imageClass: "destination-icon",
         actionText: "Read More",
