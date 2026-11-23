@@ -2,8 +2,11 @@ import { esc } from './util.js';
 import { cachedScan, scanAll } from './scan-client.js';
 import { openInEditor } from './health.js';
 
-const audioState = s => (s >= 200 && s < 300 ? ['ok', 'Playing'] : s === 0 ? ['warning', 'Unreachable'] : ['error', `Missing (${s})`]);
-const videoState = s => (s >= 200 && s < 300 ? ['ok', 'Available'] : s === 0 ? ['warning', 'Unreachable'] : ['error', `Unavailable (${s})`]);
+export const audioState = s => (s >= 200 && s < 300 ? ['ok', 'Found'] : s === 0 ? ['warning', 'Unreachable'] : ['error', `Missing (${s})`]);
+// YouTube's oEmbed answers by the video's real state: 401 when the owner disabled embedding (or the video is private),
+// 403 when it is restricted, 404 when it was removed, and 400 for an ID that was never valid.
+const VIDEO_PROBLEMS = { 400: 'Invalid video ID', 401: 'Embedding disabled or private', 403: 'Restricted', 404: 'Removed' };
+export const videoState = s => (s >= 200 && s < 300 ? ['ok', 'Available'] : s === 0 ? ['warning', 'Unreachable'] : ['error', VIDEO_PROBLEMS[s] || `Unavailable (${s})`]);
 const chip = ([cls, text]) => `<span class="sev sev-${cls === 'ok' ? 'ok' : cls}">${esc(text)}</span>`;
 
 export function summarizeEmbeds(scans) {

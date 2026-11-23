@@ -6,7 +6,7 @@ import { handleAdminApi, sameOrigin } from '../admin-api.js';
 import { imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
-import { summarizeEmbeds } from '../public/assets/js/admin/embeds.js';
+import { audioState, summarizeEmbeds, videoState } from '../public/assets/js/admin/embeds.js';
 import { bytes, sanitizeKey } from '../public/assets/js/admin/media.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -279,4 +279,17 @@ describe('setUnpublished', () => {
         expect(re.find(p => p.id === id).unpublished).toBe(true);
     });
     it('rejects an unknown project', () => expect(() => setUnpublished(src, 'nope', true)).toThrow(/No project/));
+});
+
+describe('embed status labels', () => {
+    it('names audio and video results', () => {
+        expect(audioState(200)).toEqual(['ok', 'Found']);
+        expect(audioState(404)).toEqual(['error', 'Missing (404)']);
+        expect(audioState(0)[1]).toBe('Unreachable');
+        expect(videoState(200)).toEqual(['ok', 'Available']);
+        expect(videoState(401)).toEqual(['error', 'Embedding disabled or private']);
+        expect(videoState(404)).toEqual(['error', 'Removed']);
+        expect(videoState(400)[1]).toBe('Invalid video ID');
+        expect(videoState(500)[1]).toBe('Unavailable (500)');
+    });
 });
