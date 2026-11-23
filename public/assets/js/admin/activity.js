@@ -88,17 +88,27 @@ export async function render(root, route = parse()) {
         let lastDay = '';
         for (const c of shown) {
             const day = dayLabel(c.date);
-            if (day !== lastDay) { rows += `<li class="day">${esc(day)}</li>`; lastDay = day; }
+            if (day !== lastDay) { rows += `<tr class="day-row"><th colspan="5" scope="colgroup">${esc(day)}</th></tr>`; lastDay = day; }
             const flagged = flag(c.checks);
-            rows += `<li><span class="label wrap"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}${flagged ? ` · ${flagged}` : ''}</span></span><span class="value muted">${esc(clock(c.date))}</span></li>`;
+            rows += `<tr>
+                <td class="at-time num">${esc(clock(c.date))}</td>
+                <td class="at-msg"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a></td>
+                <td class="at-sha"><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.sha)}</a></td>
+                <td class="at-author">${esc(c.author)}</td>
+                <td class="at-flag">${flagged}</td></tr>`;
         }
         const deploys = d.deploys
             ? `<section class="panel"><header><h2>Deploys</h2></header><ul class="rows">${d.deploys.map(x => `<li><span class="label">${esc(x.message || x.source || 'Deployment')}<span class="sub">${esc(x.id)}</span></span><span class="value">${esc(relativeTime(x.created))}</span></li>`).join('')}</ul></section>`
             : (d.deploysError ? `<p class="muted small">Deployments: ${esc(d.deploysError)}</p>` : '');
 
         body.innerHTML = `${strip}${alert}
-            <section class="panel"><header><h2>Commits on ${esc(d.branch)}</h2><span class="meta">${shown.length} shown · failing or running checks are flagged</span></header>
-                <ul class="rows timeline">${rows || '<li class="empty muted">Nothing matches.</li>'}</ul></section>
+            <div class="table-wrap">
+                <div class="table-head"><h2>Commits on ${esc(d.branch)}</h2><span class="meta">${shown.length} shown · failing or running checks are flagged</span></div>
+                <table class="dt at">
+                    <thead><tr><th scope="col">Time</th><th scope="col">Commit</th><th scope="col">Id</th><th scope="col">Author</th><th scope="col">Checks</th></tr></thead>
+                    <tbody>${rows || '<tr><td colspan="5" class="empty-note">Nothing matches.</td></tr>'}</tbody>
+                </table>
+            </div>
             ${deploys}${note}`;
     };
 
