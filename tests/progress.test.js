@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { completeness, highest, journalMonths, milestones, nextUp, streak, topicIdeas, weekKey } from '../public/assets/js/admin/progress-data.js';
+import { completeness, highest, journalMonths, milestones, plainMessage, nextUp, streak, topicIdeas, weekKey } from '../public/assets/js/admin/progress-data.js';
 import { handleIdeas, handleImpact, handleJournal } from '../admin-extra.js';
 import { impactHtml } from '../public/assets/js/admin/search.js';
 import { nextUpHtml, todayHtml } from '../public/assets/js/admin/today.js';
@@ -22,7 +22,17 @@ describe('streak and journal', () => {
     it('groups the journal by month, newest first', () => {
         const months = journalMonths([c('2026-11-02T00:00:00Z', 'admin: save Ledger'), c('2026-10-02T00:00:00Z'), c('2026-11-03T00:00:00Z', 'Merge branch x')]);
         expect(months.map(m => m.key)).toEqual(['2026-11', '2026-10']);
-        expect(months[0]).toMatchObject({ count: 1, highlights: ['save Ledger'], label: 'November 2026' });
+        expect(months[0]).toMatchObject({ count: 1, entries: [{ date: '2026-11-02T00:00:00Z', text: 'Save Ledger' }], label: 'November 2026' });
+    });
+});
+
+describe('plain journal messages', () => {
+    const t = id => ({ ledger: 'Ledger' })[id] || id;
+    it('turns admin commits into plain words', () => {
+        expect(plainMessage('admin: update content/ledger/index.html', t)).toBe('Edited the Ledger write-up');
+        expect(plainMessage('admin: upload content/ledger/images/a.png', t)).toBe('Added an image to Ledger');
+        expect(plainMessage('admin: unpublish ledger', t)).toBe('Unpublished Ledger');
+        expect(plainMessage('update ledger writeup', t)).toBe('Update ledger writeup');
     });
 });
 
