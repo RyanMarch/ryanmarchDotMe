@@ -601,7 +601,11 @@ async function saveFile() {
         localStorage.removeItem(`draft_${currentFile.path}`);
 
         updateDraftStatus('Synced');
-        showAlert(alertEl, 'Changes saved successfully! Deploying to live site (takes ~1 min)...', 'success');
+        showAlert(alertEl, 'Changes saved. Checking the build…', 'success');
+        window.adminTrackDeploy?.({ branch: window.getSelectedBranch(), commit: data.commit }, s => {
+            const link = s.url ? ` <a href="${s.url}" target="_blank" rel="noopener">See why</a>` : '';
+            showAlert(alertEl, `${s.text}${link}`, s.state === 'failed' ? 'error' : 'success');
+        });
     } catch (err) {
         showAlert(alertEl, `Error saving changes: ${err.message}`, 'error');
     } finally {

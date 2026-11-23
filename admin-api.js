@@ -24,7 +24,7 @@ import {
 } from './public/assets/js/admin/audit.js';
 
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
-import { handleActivity, handleImageDelete, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
+import { handleActivity, handleBuild, handleImageDelete, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
 export { jsonResponse };
 
@@ -356,6 +356,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
         '/api/admin/media/r2': [handleR2, ['PUT', 'DELETE']],
         '/api/admin/media/image': [handleImageDelete, ['DELETE']],
         '/api/admin/activity': [handleActivity, ['GET']],
+        '/api/admin/build': [handleBuild, ['GET']],
         '/api/admin/status': [handleStatus, ['GET']]
     };
     const entry = routes[cleanPath];

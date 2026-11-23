@@ -3,7 +3,7 @@
  * embed scans, the media library (repo images + R2), repo activity, and a
  * configuration status page. Routed from admin-api.js.
  */
-import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
+import { adminEmail, ghJson, jsonResponse, safeBranch, withEditor } from './admin-http.js';
 import { audioSignature, imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
 
 const ID_PATTERN = /^[a-z0-9_-]+$/i;
@@ -139,10 +139,38 @@ export async function handleImageDelete(request, env, url, fetchImpl, ctx = {}) 
     const res = await fetchImpl(api, {
         method: 'DELETE',
         headers: { ...headers, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `admin: delete image ${path}`, sha, branch })
+        body: JSON.stringify({ message: withEditor(`admin: delete image ${path}`, adminEmail(request)), sha, branch })
     });
     if (!res.ok) return jsonResponse({ error: 'github_error', message: `GitHub returned ${res.status}.` }, res.status === 403 ? 403 : 502);
-    return jsonResponse({ deleted: path, branch });
+    const done = await res.json().catch(() => ({}));
+    return jsonResponse({ deleted: path, branch, commit: done.commit?.sha || null });
+}
+
+/* ───────────── GET /build?sha= (is a commit built and live?) ───────────── */
+
+/** A REST check-run in the same shape GraphQL gives, so one normaliser serves both. */
+export const normalizeRestCheck = c => normalizeCheck({
+    __typename: 'CheckRun',
+    name: c.name,
+    status: String(c.status || '').toUpperCase(),
+    conclusion: String(c.conclusion || '').toUpperCase(),
+    detailsUrl: c.html_url || c.details_url || '',
+    checkSuite: { app: { name: c.app?.name || '' } }
+});
+
+export async function handleBuild(request, env, url, fetchImpl) {
+    if (!env.GITHUB_REPO || !env.GITHUB_PAT) return jsonResponse({ error: 'not_configured', message: 'GitHub access is not configured.' }, 501);
+    const sha = url.searchParams.get('sha') || '';
+    if (!/^[0-9a-f]{7,40}$/i.test(sha)) return jsonResponse({ error: 'bad_sha', message: 'A commit id is required.' }, 400);
+    try {
+        const data = await ghJson(env, `commits/${sha}/check-runs?per_page=30`, fetchImpl);
+        const checks = (data.check_runs || []).map(normalizeRestCheck);
+        const state = !checks.length ? 'none' : checks.some(c => c.state === 'failed') ? 'failed' : checks.some(c => c.state === 'pending') ? 'pending' : 'ok';
+        return jsonResponse({ sha: sha.slice(0, 7), state, checks });
+    } catch (err) {
+        const denied = /GitHub (401|403|404)/.test(err.message);
+        return jsonResponse({ error: denied ? 'needs_checks_permission' : 'github_error', message: denied ? 'The GitHub token needs Checks (read) access.' : err.message }, denied ? 403 : 502);
+    }
 }
 
 const R2_TYPES = { mp3: 'audio/mpeg', m4a: 'audio/mp4', zip: 'application/zip', aup3: 'application/octet-stream' };

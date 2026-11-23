@@ -110,13 +110,16 @@ async function orderPanel(el) {
                     body: JSON.stringify({ path: 'assets/js/project-data.js', branch: branch(), sha, content: textToB64(next), message: `admin: ${parts.join('; ')}` })
                 });
                 if (!r.ok) throw new Error(r.status === 409 ? 'The file changed on GitHub; reload and try again.' : `GitHub returned ${r.status}.`);
-                sha = (await r.json()).sha;
+                const result = await r.json();
+                sha = result.sha;
                 source = next;
                 saved = projects.map(p => ({ ...p }));
                 original = signature();
                 moved = null;
                 draw();
-                el.querySelector('#order-status').textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
+                const statusEl = el.querySelector('#order-status');
+                statusEl.textContent = `Saved to ${branch()}. Checking the build…`;
+                window.adminTrackDeploy?.({ branch: branch(), commit: result.commit }, s => { if (statusEl.isConnected) statusEl.textContent = s.text; });
             } catch (err) {
                 status.textContent = `Not saved: ${err.message}`;
                 save.disabled = false;

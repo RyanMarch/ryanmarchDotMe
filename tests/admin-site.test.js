@@ -3,7 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleAdminApi, sameOrigin } from '../admin-api.js';
-import { normalizeCheck, probeAudio } from '../admin-site.js';
+import { normalizeCheck, normalizeRestCheck, probeAudio } from '../admin-site.js';
+import { adminEmail, withEditor } from '../admin-http.js';
 import { checksState, flag } from '../public/assets/js/admin/activity.js';
 import { audioSignature, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
@@ -256,7 +257,7 @@ describe('/api/admin/media/image (delete)', () => {
         const calls = [];
         const res = await del('content/demo/images/extra.png', { fetchImpl: gh(calls) });
         expect(res.status).toBe(200);
-        expect(await res.json()).toEqual({ deleted: 'content/demo/images/extra.png', branch: 'develop' });
+        expect(await res.json()).toEqual({ deleted: 'content/demo/images/extra.png', branch: 'develop', commit: null });
         expect(calls[0][0]).toContain('/contents/public/content/demo/images/extra.png?ref=develop');
         expect(calls[1][1]).toBe('DELETE');
     });
@@ -383,5 +384,51 @@ describe('activity row flags', () => {
         expect(flag(null)).toBe('');
         expect(flag([ok, bad])).toContain('Tests failed');
         expect(flag([ok, wait])).toContain('Build running');
+    });
+});
+
+describe('commit attribution', () => {
+    const jwt = payload => `x.${btoa(JSON.stringify(payload)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')}.y`;
+    const req = headers => new Request('https://ryanmarch.me/api/admin/file', { headers });
+    it('reads the email from the Access token, then from the Access header', () => {
+        expect(adminEmail(req({ 'cf-access-jwt-assertion': jwt({ email: 'me@example.com' }) }))).toBe('me@example.com');
+        expect(adminEmail(req({ 'cf-access-authenticated-user-email': 'you@example.com' }))).toBe('you@example.com');
+    });
+    it('returns null for the local password or anything malformed', () => {
+        expect(adminEmail(req({ Authorization: 'Bearer pw' }))).toBeNull();
+        expect(adminEmail(req({ 'cf-access-jwt-assertion': 'garbage' }))).toBeNull();
+        expect(adminEmail(req({ 'cf-access-authenticated-user-email': 'not an email' }))).toBeNull();
+        expect(adminEmail(req({ 'cf-access-jwt-assertion': jwt({ email: '<b>x</b>' }) }))).toBeNull();
+    });
+    it('adds a trailer below the first line, so the "admin:" prefix still leads', () => {
+        expect(withEditor('admin: update x', 'me@example.com')).toBe('admin: update x\n\nEdited-by: me@example.com');
+        expect(withEditor('admin: update x', null)).toBe('admin: update x');
+        expect(withEditor('admin: update x', 'me@example.com').split('\n')[0]).toBe('admin: update x');
+    });
+});
+
+describe('/api/admin/build', () => {
+    const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 't' };
+    const run = (name, status, conclusion, app = 'GitHub Actions') => ({ name, status, conclusion, html_url: 'https://g/r', app: { name: app } });
+    const reply = runs => vi.fn(async () => new Response(JSON.stringify({ check_runs: runs })));
+    const get = (sha, fetchImpl) => call(`/api/admin/build?sha=${sha}`, env, { fetchImpl });
+
+    it('summarises a commit\'s checks: pending, ok, failed, none', async () => {
+        const ok = await (await get('abc1234', reply([run('test', 'completed', 'success'), run('Workers Builds: x', 'completed', 'success', 'Cloudflare Workers and Pages')]))).json();
+        expect(ok).toMatchObject({ state: 'ok', sha: 'abc1234' });
+        expect(ok.checks.map(c => c.name)).toEqual(['Tests', 'Build']);
+        expect((await (await get('abc1234', reply([run('test', 'completed', 'success'), run('Workers Builds: x', 'in_progress', null, 'Cloudflare Workers and Pages')]))).json()).state).toBe('pending');
+        expect((await (await get('abc1234', reply([run('Workers Builds: x', 'completed', 'failure', 'Cloudflare Workers and Pages')]))).json()).state).toBe('failed');
+        expect((await (await get('abc1234', reply([]))).json()).state).toBe('none');
+    });
+    it('rejects a malformed commit id and reports a token that cannot read checks', async () => {
+        expect((await get('not-a-sha', reply([]))).status).toBe(400);
+        const denied = await get('abc1234', vi.fn(async () => new Response('no', { status: 403 })));
+        expect(denied.status).toBe(403);
+        expect((await denied.json()).error).toBe('needs_checks_permission');
+    });
+    it('maps REST check runs like GraphQL ones', () => {
+        expect(normalizeRestCheck(run('test', 'completed', 'cancelled')).state).toBe('failed');
+        expect(normalizeRestCheck(run('test', 'queued', null)).state).toBe('pending');
     });
 });

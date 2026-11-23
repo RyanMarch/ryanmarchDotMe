@@ -2,6 +2,7 @@ import { myProjects } from './public/assets/js/project-data.js';
 import { buildImageSrcset } from './public/assets/js/image-utils.js';
 import redirects from './config/redirects.json';
 import { handleAdminApi, isAdminRequest, sameOrigin } from './admin-api.js';
+import { adminEmail, withEditor } from './admin-http.js';
 
 /**
  * Cloudflare Worker for Ryan March | Product & Technology
@@ -326,7 +327,7 @@ export default {
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            message: body.message || `admin: update ${filePath}`,
+                            message: withEditor(body.message || `admin: update ${filePath}`, adminEmail(request)),
                             content: body.content, // base64 encoded content
                             sha: body.sha, // required if updating existing file
                             branch: branch
@@ -338,7 +339,8 @@ export default {
                     const data = await ghRes.json();
                     return new Response(JSON.stringify({
                         success: true,
-                        sha: data.content.sha
+                        sha: data.content.sha,
+                        commit: data.commit?.sha || null
                     }), {
                         status: 200,
                         headers: { 'Content-Type': 'application/json' }

@@ -117,10 +117,13 @@ async function renderRedirects(panel) {
                     body: JSON.stringify({ path: 'redirects.json', branch: branch(), sha, content: textToB64(text), message: 'admin: update redirects' })
                 });
                 if (!r.ok) throw new Error(r.status === 409 ? 'The file changed on GitHub; reload and try again.' : `GitHub returned ${r.status}.`);
-                sha = (await r.json()).sha;
+                const saved = await r.json();
+                sha = saved.sha;
                 baseline = JSON.stringify(list);
                 draw();
-                panel.querySelector('#redirect-status').textContent = `Saved to ${branch()}. It goes live with the next deploy.`;
+                const statusEl = panel.querySelector('#redirect-status');
+                statusEl.textContent = `Saved to ${branch()}. Checking the build…`;
+                window.adminTrackDeploy?.({ branch: branch(), commit: saved.commit }, s => { if (statusEl.isConnected) statusEl.textContent = s.text; });
                 return;
             } catch (err) {
                 status.textContent = `Save failed: ${err.message}`;
