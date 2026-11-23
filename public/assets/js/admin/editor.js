@@ -5,18 +5,7 @@ let currentFile = {
     originalContent: ''
 };
 let jar;
-let adminPasscode = '';
-const LOCAL_PASS_KEY = 'admin_local_pass';
-// True when running via local dev server (serve.py), not Cloudflare edge
-const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
-// Returns an Authorization header object for local dev Bearer auth.
-// In production, the CF_Authorization cookie is sent automatically by the browser
-// and Cloudflare Access validates it at the edge — no explicit header needed.
-function getAuthHeaders() {
-    const passcode = getPasscode();
-    return passcode ? { 'Authorization': `Bearer ${passcode}` } : {};
-}
+// Sign-in, getAuthHeaders(), the selected branch and the project list live in core.js (loaded on every page).
 
 // Update Draft Status Helper (Green for Synced, Amber for Warnings/Unsaved)
 function updateDraftStatus(text, isWarning = false, isRawHTML = false) {
@@ -38,7 +27,8 @@ function updateDraftStatus(text, isWarning = false, isRawHTML = false) {
     }
 }
 
-window.addEventListener('load', () => {
+// The editor loads lazily (after the page's load event), so set up CodeJar right away.
+function initCodeEditor() {
     const editorEl = document.getElementById('editor-textarea');
     if (window.CodeJar && window.Prism) {
         const highlight = editor => {
@@ -60,15 +50,27 @@ window.addEventListener('load', () => {
             }
         });
     }
+}
+initCodeEditor();
 
-    // Local dev only: keep the sign-in across refreshes for this tab (production uses Cloudflare Access).
-    if (isLocal) {
-        let saved = '';
-        try { saved = sessionStorage.getItem(LOCAL_PASS_KEY) || ''; } catch { /* storage blocked */ }
-        if (saved) {
-            document.getElementById('passcode-input').value = saved;
-            checkAuth();
-        }
+// Signing out clears the editor; switching branch offers to reload the open file (events from core.js).
+document.addEventListener('admin:logout', () => {
+    currentFile = { path: '', sha: '', originalContent: '' };
+    ['editor-card'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    const search = document.getElementById('file-search');
+    if (search) search.value = '';
+    document.getElementById('file-search-clear')?.classList.add('hidden');
+    const label = document.getElementById('active-file-label');
+    if (label) label.textContent = '';
+    if (window.setFileListOpen) window.setFileListOpen(true);
+    if (window.filterSearchResults) window.filterSearchResults();
+});
+document.addEventListener('admin:branch-changed', e => {
+    const branch = e.detail.branch;
+    if (currentFile && currentFile.path
+        && confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
+        localStorage.removeItem(`draft_${currentFile.path}`);
+        loadFile(currentFile.path);
     }
 });
 
@@ -81,110 +83,6 @@ function b64DecodeUnicode(str) {
 function b64EncodeUnicode(str) {
     return btoa(Array.from(new TextEncoder().encode(str), b => String.fromCharCode(b)).join(''));
 }
-
-// Retrieve passcode
-function getPasscode() {
-    return adminPasscode;
-}
-
-// Authentication Handler
-async function checkAuth() {
-    const passcode = document.getElementById('passcode-input').value.trim();
-    const alertEl = document.getElementById('auth-alert');
-    const loginBtn = document.getElementById('login-btn');
-
-    if (!passcode) {
-        showAlert(alertEl, 'Please enter a password.', 'error');
-        return;
-    }
-
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<span class="spinner"></span> Validating...';
-    alertEl.classList.add('hidden');
-
-    try {
-        // Test authentication by attempting to read a lightweight metadata file (e.g. robots.txt)
-        const res = await fetch('/api/admin/file?path=robots.txt', {
-            headers: {
-                'Authorization': `Bearer ${passcode}`
-            }
-        });
-
-        if (res.ok) {
-            // Save validated passcode in memory
-            adminPasscode = passcode;
-            if (isLocal) { try { sessionStorage.setItem(LOCAL_PASS_KEY, passcode); } catch { /* storage blocked */ } }
-
-            // Toggle views
-            document.getElementById('auth-view').classList.add('hidden');
-            document.getElementById('admin-view').classList.remove('hidden');
-            document.getElementById('logout-btn').classList.remove('hidden');
-
-            if (window.syncProjectsForBranch) {
-                window.syncProjectsForBranch(window.getSelectedBranch());
-            }
-        } else {
-            const text = await res.text();
-            showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid password' : text}`, 'error');
-            adminPasscode = '';
-            try { sessionStorage.removeItem(LOCAL_PASS_KEY); } catch { /* storage blocked */ }
-        }
-    } catch (err) {
-        showAlert(alertEl, `Error connecting to API: ${err.message}`, 'error');
-    } finally {
-        loginBtn.disabled = document.getElementById('passcode-input').value.trim() === '';
-        loginBtn.textContent = 'Authenticate';
-    }
-}
-
-// Logout
-function logout() {
-    if (!isLocal) {
-        // Invalidate the Cloudflare Access session, then return to homepage
-        const returnUrl = encodeURIComponent(window.location.origin + '/');
-        window.location.href = `/cdn-cgi/access/logout?returnTo=${returnUrl}`;
-        return;
-    }
-    adminPasscode = '';
-    try { sessionStorage.removeItem(LOCAL_PASS_KEY); } catch { /* storage blocked */ }
-    currentFile = { path: '', sha: '', originalContent: '' };
-    document.getElementById('passcode-input').value = '';
-    document.getElementById('auth-view').classList.remove('hidden');
-    document.getElementById('admin-view').classList.add('hidden');
-    document.getElementById('logout-btn').classList.add('hidden');
-    document.getElementById('editor-card').classList.add('hidden');
-    document.getElementById('file-search').value = '';
-    const clearBtn = document.getElementById('file-search-clear');
-    if (clearBtn) clearBtn.classList.add('hidden');
-    document.getElementById('active-file-label').textContent = '';
-    if (window.setFileListOpen) window.setFileListOpen(true);
-    if (window.filterSearchResults) window.filterSearchResults();
-}
-
-// Target Branch Helpers
-window.getSelectedBranch = function() {
-    const select = document.getElementById('branch-select');
-    return select ? select.value : (localStorage.getItem('admin_selected_branch') || 'main');
-};
-
-window.changeBranch = async function() {
-    const select = document.getElementById('branch-select');
-    if (!select) return;
-    const branch = select.value;
-    localStorage.setItem('admin_selected_branch', branch);
-
-    if (window.syncProjectsForBranch) {
-        await window.syncProjectsForBranch(branch);
-    }
-
-    // If there's an active file being edited, reload it from the new branch
-    if (currentFile && currentFile.path) {
-        if (confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
-            localStorage.removeItem(`draft_${currentFile.path}`);
-            loadFile(currentFile.path);
-        }
-    }
-};
 
 // File Loader
 async function loadFile(filePath) {

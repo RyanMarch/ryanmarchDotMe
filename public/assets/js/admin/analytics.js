@@ -1,4 +1,5 @@
-import { api, apiProblem, dataTable, esc, fmt, setupNotice } from './util.js';
+import { apiProblem, dataTable, esc, fmt, hasCached, setupNotice, swr } from './util.js';
+import { go, href, onPop, parse } from './router.js';
 
 const RANGES = [7, 30, 90];
 // Project titles come from window.myProjects (set by projects-list.js and
@@ -15,6 +16,30 @@ function rate(key, value) {
     return { text: 'poor', cls: 'r-poor' };
 }
 const ms = v => (v === null || v === undefined ? '–' : v >= 1000 ? `${(v / 1000).toFixed(2)} s` : `${v} ms`);
+
+/** Referrer host → readable label. The site's own host means in-site navigation, not a visit from elsewhere. */
+export function referrerLabel(host, own = 'ryanmarch.me') {
+    return host === own ? 'This site (in-site navigation)' : host;
+}
+
+/** Country code → readable name. Cloudflare uses T1 for the Tor network and XX when it can't tell. */
+export function countryLabel(code) {
+    if (code === 'T1') return 'Tor network';
+    if (!code || code === 'XX' || code === 'Unknown') return 'Unknown';
+    try { return new Intl.DisplayNames(['en'], { type: 'region' }).of(code) || code; } catch { return code; }
+}
+
+/** One plain sentence about what the numbers exclude, plus a heads-up when most traffic is Tor. */
+export function trafficNote(d) {
+    const parts = [];
+    if (d.filters?.botsExcluded) parts.push(`Bots are excluded${d.botLoads ? ` (${fmt(d.botLoads)} flagged loads in this range)` : ''}, the same as Cloudflare's own dashboard.`);
+    if (d.filters?.torHidden) parts.push('Tor traffic is hidden.');
+    else if (d.torLoads && d.totals.current.views) {
+        const pct = Math.round((d.torLoads / d.totals.current.views) * 100);
+        if (pct >= 20) parts.push(`${fmt(d.torLoads)} of ${fmt(d.totals.current.views)} views (${pct}%) come from the Tor network, which is mostly automated traffic. Hide it to see the rest.`);
+    }
+    return parts.join(' ');
+}
 
 export function pageLabel(path) {
     const m = path.match(/^\/project\/([^/]+)\/?$/i);
@@ -47,10 +72,13 @@ const niceMax = n => {
 
 const dayLabel = (date, opts) => new Date(date + 'T00:00:00Z').toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' });
 export const CHART = { H: 240, L: 42, R: 8, T: 10, B: 26 };
+/** Taller plot when the chart is wide, so it doesn't turn into a thin strip on a big monitor. */
+export const chartHeight = W => (W >= 1000 ? 340 : W >= 700 ? 280 : CHART.H);
 
 /** Line chart of one metric, with an optional dashed previous-period line and one hit column per day. */
 export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}) {
-    const { H, L, R, T, B } = CHART;
+    const { L, R, T, B } = CHART;
+    const H = chartHeight(W);
     const val = s => s[metric] || 0;
     const max = niceMax(Math.max(...series.map(val), ...(prev || []).map(val), 1));
     const step = (W - L - R) / series.length;
@@ -65,7 +93,7 @@ export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}
     const area = `M${x(0).toFixed(1)},${y(0).toFixed(1)} L${line.join(' L')} L${x(series.length - 1).toFixed(1)},${y(0).toFixed(1)} Z`;
     const prevLine = prev ? `<polyline class="line-prev" points="${pts(prev).join(' ')}"/>` : '';
     const every = Math.max(1, Math.ceil(series.length / Math.max(2, Math.floor((W - L) / 84))));
-    const xl = series.map((s, i) => (i % every === 0 || i === series.length - 1) && (series.length - 1 - i >= every / 2 || i === series.length - 1)
+    const xl = series.map((s, i) => (i % every === 0 || i === series.length - 1) && (series.length - 1 - i >= every || i === series.length - 1)
         ? `<text x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle'}">${dayLabel(s.date, { month: 'short', day: 'numeric' })}</text>` : '').join('');
     const hits = series.map((s, i) => `<rect class="hit" data-i="${i}" x="${(L + i * step).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${H - T - B}"/>`).join('');
     return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}<path class="area" d="${area}"/>${prevLine}<polyline class="line" points="${line.join(' ')}"/><line class="cursor" y1="${T}" y2="${H - B}" x1="-10" x2="-10"/><circle class="dot" r="4" cx="-10" cy="-10"/>${xl}${hits}</svg>`;
@@ -103,7 +131,8 @@ function attachChart(root, state) {
         const cx = Number(hit.getAttribute('x')) + Number(hit.getAttribute('width')) / 2;
         const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
         const v = s[state.metric] || 0;
-        const { H, T, B } = CHART;
+        const { T, B } = CHART;
+        const H = svg.viewBox.baseVal.height;
         const max = niceMax(Math.max(...state.series.map(r => r[state.metric] || 0), ...(state.prev || []).map(r => r[state.metric] || 0), 1));
         const cy = T + (H - T - B) * (1 - v / max);
         svg.querySelector('.cursor').setAttribute('x1', cx);
@@ -148,14 +177,14 @@ export function deltaHtml(c, p, days) {
 
 function statsHtml(d, series, metric) {
     const cur = d.totals.current, prev = d.totals.previous;
-    const ppv = cur.visits ? (cur.views / cur.visits).toFixed(2) : '–';
+    const human = d.filters?.torHidden ? cur.views : Math.max(0, cur.views - (d.torLoads || 0));
     const delta = (c, p) => deltaHtml(c, p, d.days);
     const pick = (m, label, c, p) => `<button type="button" class="stat stat-pick" data-metric="${m}" aria-pressed="${metric === m}" ${c === null ? 'disabled' : ''}>
         <span class="k">${label}</span><span class="v">${fmt(c)}</span>${delta(c, p)}${c === null ? '' : sparkSvg(series, m)}</button>`;
     return `<div class="stats" role="group" aria-label="Summary">
         ${pick('views', 'Page views', cur.views, prev.views)}
         ${pick('visits', 'Visits', cur.visits, prev.visits)}
-        <div class="stat"><span class="k">Pages per visit</span><span class="v">${ppv}</span><span class="delta">&nbsp;</span></div>
+        <div class="stat"><span class="k">Views excluding Tor</span><span class="v">${fmt(human)}</span><span class="delta">${d.filters?.torHidden ? 'Tor traffic is hidden' : d.torLoads ? `${fmt(d.torLoads)} came from Tor` : 'no Tor traffic'}</span></div>
         <div class="stat"><span class="k">Largest contentful paint</span><span class="v">${ms(d.vitals.lcp_ms)}</span><span class="delta ${rate('lcp_ms', d.vitals.lcp_ms).cls}">${esc(rate('lcp_ms', d.vitals.lcp_ms).text)}</span></div>
     </div>`;
 }
@@ -186,38 +215,36 @@ function vitalsHtml(v) {
 
 function sourcesHtml(d) {
     const tabs = [['referrers', 'Referrers', 'Source'], ['countries', 'Countries', 'Country'], ['devices', 'Devices', 'Device']];
-    return `<section class="panel">
+    return `<section class="panel a-src">
         <header><div class="tabs-inline" role="tablist" aria-label="Traffic breakdown">${tabs.map(([k, label], i) =>
             `<button type="button" role="tab" id="src-tab-${k}" data-src="${k}" aria-selected="${i === 0}" aria-controls="src-panel" tabindex="${i === 0 ? 0 : -1}">${label}</button>`).join('')}</div></header>
-        <div id="src-panel" role="tabpanel" aria-labelledby="src-tab-referrers">${dataTable(d.referrers, { head: tabs[0][2], total: d.totals.current.views })}</div>
+        <div id="src-panel" role="tabpanel" aria-labelledby="src-tab-referrers">${dataTable(d.referrers, { head: tabs[0][2], total: d.totals.current.views, render: i => esc(referrerLabel(i.label, d.host)) })}</div>
     </section>`;
 }
 
-export async function render(root) {
-    let days = Number(sessionStorage.getItem('admin_range')) || 30;
-    if (!RANGES.includes(days)) days = 30;
+export async function render(root, route = parse()) {
+    // The range and the Tor filter live in the URL (?days=7&tor=hide), so Back steps through them.
+    const daysFrom = r => (RANGES.includes(Number(r.query.get('days'))) ? Number(r.query.get('days')) : 30);
+    let days = daysFrom(route);
     let controller;
+    let hideTor = route.query.get('tor') === 'hide';
+    const record = () => go(href('analytics', [], { days: days === 30 ? '' : days, tor: hideTor ? 'hide' : '' }), { quiet: true });
 
     root.innerHTML = `
         <div class="view-head">
             <div><h1>Analytics</h1><p>Cloudflare Web Analytics for ryanmarch.me. Privacy-friendly: no cookies, no personal data.</p></div>
-            <div class="seg" role="group" aria-label="Date range">
-                ${RANGES.map(r => `<button type="button" data-days="${r}" aria-pressed="${r === days}">${r} days</button>`).join('')}
+            <div class="head-actions">
+                <label class="check-line inline"><input type="checkbox" id="hide-tor" ${hideTor ? 'checked' : ''}> Hide Tor traffic</label>
+                <div class="seg" role="group" aria-label="Date range">
+                    ${RANGES.map(r => `<button type="button" data-days="${r}" aria-pressed="${r === days}">${r} days</button>`).join('')}
+                </div>
             </div>
         </div>
         <div id="analytics-body" aria-live="polite"><div class="loading">Loading analytics…</div></div>`;
 
     const body = root.querySelector('#analytics-body');
 
-    async function load() {
-        controller?.abort();
-        controller = new AbortController();
-        body.innerHTML = '<div class="loading">Loading analytics…</div>';
-        let result;
-        try {
-            result = await api(`/api/admin/analytics?days=${days}`, { signal: controller.signal });
-        } catch { return; /* superseded by a newer request */ }
-
+    function showResult(result) {
         if (result.status === 501) { body.innerHTML = setupNotice(); return; }
         if (!result.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't load analytics.</strong>${esc(apiProblem(result))}</div>`; return; }
 
@@ -230,7 +257,9 @@ export async function render(root) {
 
         body.innerHTML = `
             <div id="stats-host">${statsHtml(d, series, state.metric)}</div>
-            <section class="panel" aria-label="Traffic over time">
+            ${trafficNote(d) ? `<div class="modebar"><span class="muted">${esc(trafficNote(d))}</span></div>` : ''}
+            <div class="a-grid">
+            <section class="panel a-chart" aria-label="Traffic over time">
                 <header>
                     <h2 id="chart-title">Page views per day</h2>
                     <span class="legend"><span class="sw sw-cur"></span>This period${prevSeries ? '<span class="sw sw-prev"></span>Previous period' : ''}</span>
@@ -239,15 +268,15 @@ export async function render(root) {
                     <div class="svg-host"></div><div class="tip" hidden></div>
                 </div>
                 <div class="chart-foot"><span class="chart-readout" aria-live="polite">Hover or tap the chart for a day's count.</span><span class="meta">${esc(d.host)}${d.cached ? ' · cached' : ''}</span></div>
+                <p class="chart-note">These are estimates. Cloudflare samples page loads on a site this size, so counts come in steps of about 10 and a single day can shift between refreshes. Trust the totals and the trend over any one day.</p>
             </section>
-            <div class="split">
-                <section class="panel"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
-                ${sourcesHtml(d)}
-            </div>
-            <section class="panel">
+            <section class="panel a-top"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
+            ${sourcesHtml(d)}
+            <section class="panel a-vitals">
                 <header><h2>Core Web Vitals</h2><span class="meta">${fmt(d.vitals.samples)} samples · averages, ${d.days} days</span></header>
                 ${vitalsHtml(d.vitals)}
-            </section>`;
+            </section>
+            </div>`;
         attachChart(body, state);
 
         body.querySelector('#stats-host').addEventListener('click', e => {
@@ -266,7 +295,7 @@ export async function render(root) {
             const panel = body.querySelector('#src-panel');
             panel.setAttribute('aria-labelledby', btn.id);
             const head = { referrers: 'Source', countries: 'Country', devices: 'Device' }[k];
-            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views });
+            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views, ...(k === 'countries' ? { render: i => esc(countryLabel(i.label)) } : {}), ...(k === 'referrers' ? { render: i => esc(referrerLabel(i.label, d.host)) } : {}) });
         };
         srcTabs.addEventListener('click', e => { const b = e.target.closest('button[data-src]'); if (b) showSource(b); });
         srcTabs.addEventListener('keydown', e => {
@@ -278,12 +307,34 @@ export async function render(root) {
         });
     }
 
+    async function load() {
+        controller?.abort();
+        controller = new AbortController();
+        const path = `/api/admin/analytics?days=${days}${hideTor ? '&tor=exclude' : ''}`;
+        if (!hasCached(path)) body.innerHTML = '<div class="loading">Loading analytics…</div>';
+        await swr([path], ([result]) => showResult(result), { signal: controller.signal });
+    }
+
+    root.querySelector('#hide-tor').addEventListener('change', e => {
+        hideTor = e.target.checked;
+        record();
+        load();
+    });
+
     root.querySelector('.seg').addEventListener('click', e => {
         const btn = e.target.closest('button[data-days]');
         if (!btn) return;
         days = Number(btn.dataset.days);
-        try { sessionStorage.setItem('admin_range', String(days)); } catch { /* private mode */ }
         root.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+        record();
+        load();
+    });
+
+    onPop(r => {
+        days = daysFrom(r);
+        hideTor = r.query.get('tor') === 'hide';
+        root.querySelector('#hide-tor').checked = hideTor;
+        root.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.days) === days)));
         load();
     });
 

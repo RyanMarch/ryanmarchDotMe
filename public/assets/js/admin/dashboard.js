@@ -1,4 +1,4 @@
-import { api, apiProblem, dataTable, esc, fmt, relativeTime, setupNotice } from './util.js';
+import { apiProblem, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
 import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
 function statBox(label, value, sub, spark = '') {
@@ -12,72 +12,70 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const [overview, analytics, health] = await Promise.all([
-        api(`/api/admin/overview?branch=${encodeURIComponent(branch)}`),
-        api('/api/admin/analytics?days=7'),
-        api('/api/admin/health?scope=summary')
-    ]);
+    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary'];
 
-    const parts = [];
-    const a = analytics.ok ? analytics.body : null;
-    const o = overview.ok ? overview.body : null;
+    const paint = ([overview, analytics, health]) => {
+        const parts = [];
+        const a = analytics.ok ? analytics.body : null;
+        const o = overview.ok ? overview.body : null;
 
-    if (analytics.status === 501) parts.push(setupNotice());
-    else if (!analytics.ok) parts.push(`<div class="notice"><strong>Analytics unavailable.</strong>${esc(apiProblem(analytics))}</div>`);
+        if (analytics.status === 501) parts.push(setupNotice());
+        else if (!analytics.ok) parts.push(`<div class="notice"><strong>Analytics unavailable.</strong>${esc(apiProblem(analytics))}</div>`);
 
-    const cur = a?.totals.current, prev = a?.totals.previous;
-    const pending = o?.pending;
-    const series = a ? fillDays(a.rows, a.days) : null;
-    parts.push(`<div class="stats">
-        ${statBox('Page views', a ? fmt(cur.views) : '–', a ? deltaHtml(cur.views, prev.views, 7) : '<span class="delta">unavailable</span>', series ? sparkSvg(series, 'views') : '')}
-        ${statBox('Visits', a ? fmt(cur.visits) : '–', a ? deltaHtml(cur.visits, prev.visits, 7) : '<span class="delta">unavailable</span>', series && cur.visits !== null ? sparkSvg(series, 'visits') : '')}
-        ${statBox('Projects', o ? fmt(o.projects.total) : fmt((window.myProjects || []).filter(p => !p.unpublished).length), `<span class="delta">${o ? `${fmt(o.projects.withWriteup)} with write-ups${o.projects.unpublished ? ` · ${fmt(o.projects.unpublished)} unpublished` : ''}` : '&nbsp;'}</span>`)}
-        ${statBox('Unreleased', pending ? fmt(pending.ahead) : '–', `<span class="delta">${pending ? (pending.ahead ? 'commits on develop not in main' : 'develop matches main') : 'branch status unavailable'}</span>`)}
-    </div>`);
+        const cur = a?.totals.current, prev = a?.totals.previous;
+        const pending = o?.pending;
+        const series = a ? fillDays(a.rows, a.days) : null;
+        parts.push(`<div class="stats">
+            ${statBox('Page views', a ? fmt(cur.views) : '–', a ? deltaHtml(cur.views, prev.views, 7) : '<span class="delta">unavailable</span>', series ? sparkSvg(series, 'views') : '')}
+            ${statBox('Visits', a ? fmt(cur.visits) : '–', a ? deltaHtml(cur.visits, prev.visits, 7) : '<span class="delta">unavailable</span>', series && cur.visits !== null ? sparkSvg(series, 'visits') : '')}
+            ${statBox('Projects', o ? fmt(o.projects.total) : fmt((window.myProjects || []).filter(p => !p.unpublished).length), `<span class="delta">${o ? `${fmt(o.projects.withWriteup)} with write-ups${o.projects.unpublished ? ` · ${fmt(o.projects.unpublished)} unpublished` : ''}` : '&nbsp;'}</span>`)}
+            ${statBox('Unreleased', pending ? fmt(pending.ahead) : '–', `<span class="delta">${pending ? (pending.ahead ? 'commits on develop not in main' : 'develop matches main') : 'branch status unavailable'}</span>`)}
+        </div>`);
 
-    const commits = o?.commits;
-    const commitList = commits
-        ? `<ul class="rows">${commits.map(c => `<li><span class="label"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}</span></span><span class="value">${esc(relativeTime(c.date))}</span></li>`).join('')}</ul>`
-        : `<ul class="rows"><li class="empty">${esc(o?.commitsError ? `GitHub: ${o.commitsError}` : 'GitHub access is not configured for this environment.')}</li></ul>`;
+        const commits = o?.commits;
+        const commitList = commits
+            ? `<ul class="rows">${commits.map(c => `<li><span class="label"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}</span></span><span class="value">${esc(relativeTime(c.date))}</span></li>`).join('')}</ul>`
+            : `<ul class="rows"><li class="empty">${esc(o?.commitsError ? `GitHub: ${o.commitsError}` : 'GitHub access is not configured for this environment.')}</li></ul>`;
 
-    const hc = health.ok ? health.body.counts : null;
-    const top = health.ok ? health.body.findings.filter(f => f.severity !== 'info').slice(0, 5) : [];
-    parts.push(`<section class="panel"><header><h2>Content health</h2><a href="#/health" class="meta">Full audit</a></header>
-        ${hc
-            ? `<p class="panel-body health-line">${hc.error ? `<strong>${hc.error} error${hc.error === 1 ? '' : 's'}</strong>` : 'No errors'}, ${hc.warning} warning${hc.warning === 1 ? '' : 's'}, ${hc.info} note${hc.info === 1 ? '' : 's'} <span class="muted">(quick check; the full audit also reads write-ups and images)</span></p>
-               ${top.length ? `<ul class="rows">${top.map(f => `<li><span class="label wrap"><span class="sev sev-${f.severity}">${f.severity === 'error' ? 'Error' : 'Warning'}</span> <strong>${esc(f.id)}</strong>: ${esc(f.message)}</span></li>`).join('')}</ul>` : ''}`
-            : `<p class="panel-body muted">${esc(apiProblem(health))}</p>`}
-    </section>`);
+        const hc = health.ok ? health.body.counts : null;
+        const top = health.ok ? health.body.findings.filter(f => f.severity !== 'info').slice(0, 5) : [];
+        parts.push( /*html*/`<div class="dash-grid"><section class="panel dash-health"><header><h2>Content Health</h2><a href="/admin/health" class="meta">Full audit</a></header>
+            ${hc
+                ? `<p class="panel-body health-line">${hc.error ? `<strong>${hc.error} error${hc.error === 1 ? '' : 's'}</strong>` : 'No errors'}, ${hc.warning} warning${hc.warning === 1 ? '' : 's'}, ${hc.info} note${hc.info === 1 ? '' : 's'} <span class="muted">(quick check; the full audit also reads write-ups and images)</span></p>
+                   ${top.length ? `<ul class="rows">${top.map(f => `<li><span class="label wrap"><span class="sev sev-${f.severity}">${f.severity === 'error' ? 'Error' : 'Warning'}</span> <strong>${esc(f.id)}</strong>: ${esc(f.message)}</span></li>`).join('')}</ul>` : ''}`
+                : `<p class="panel-body muted">${esc(apiProblem(health))}</p>`}
+        </section>`);
 
-    parts.push(`<div class="cols">
-        <section class="panel"><header><h2>Top pages</h2><a href="#/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
-        <section class="panel"><header><h2>Recent commits</h2><span class="meta">${esc(o?.branch || branch)}</span></header>${commitList}</section>
-    </div>
-    <section class="panel"><header><h2>Quick actions</h2></header>
-        <div class="quick">
-            <a class="btn" href="#/projects" data-action="new-project">New project</a>
-            <a class="btn btn-secondary" href="#/projects" data-action="upload-image">Upload image</a>
-            <a class="btn btn-secondary" href="/" target="_blank" rel="noopener">View site</a>
-        </div>
-    </section>`);
+        parts.push(/*html*/`<section class="panel"><header><h2>Top pages</h2><a href="/admin/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
+            <section class="panel"><header><h2>Recent commits</h2><span class="meta">${esc(o?.branch || branch)}</span></header>${commitList}</section>
+        <section class="panel dash-quick"><header><h2>Quick actions</h2></header>
+            <div class="quick">
+                <a class="btn" href="/admin/projects" data-action="new-project">New project</a>
+                <a class="btn btn-secondary" href="/admin/projects" data-action="upload-image">Upload image</a>
+                <a class="btn btn-secondary" href="/" target="_blank" rel="noopener">View site</a>
+            </div>
+        </section></div>`);
 
-    body.innerHTML = parts.join('');
+        body.innerHTML = parts.join('');
 
-    body.querySelector('.quick').addEventListener('click', e => {
-        const action = e.target.closest('[data-action]')?.dataset.action;
-        if (!action) return;
-        // The projects view mounts on hashchange; give it a tick, then open the right panel.
-        setTimeout(() => {
-            if (action === 'new-project' && typeof window.toggleNewProjectForm === 'function') {
-                const form = document.getElementById('new-project-form');
-                if (form && form.classList.contains('hidden')) window.toggleNewProjectForm();
-                document.getElementById('new-project-title')?.focus();
-            }
-            if (action === 'upload-image') {
-                const bodyEl = document.getElementById('uploader-body');
-                if (bodyEl && bodyEl.classList.contains('hidden') && typeof window.toggleUploader === 'function') window.toggleUploader();
-                document.getElementById('uploader-card')?.scrollIntoView({ block: 'start' });
-            }
-        }, 50);
-    });
+        body.querySelector('.quick').addEventListener('click', e => {
+            const action = e.target.closest('[data-action]')?.dataset.action;
+            if (!action) return;
+            // The link takes you to Projects; wait for the editor to load, then open the right panel.
+            window.adminEnsureEditor?.().then(() => {
+                if (action === 'new-project' && typeof window.toggleNewProjectForm === 'function') {
+                    const form = document.getElementById('new-project-form');
+                    if (form && form.classList.contains('hidden')) window.toggleNewProjectForm();
+                    document.getElementById('new-project-title')?.focus();
+                }
+                if (action === 'upload-image') {
+                    const bodyEl = document.getElementById('uploader-body');
+                    if (bodyEl && bodyEl.classList.contains('hidden') && typeof window.toggleUploader === 'function') window.toggleUploader();
+                    document.getElementById('uploader-card')?.scrollIntoView({ block: 'start' });
+                }
+            });
+        });
+    };
+
+    await swr(paths, paint);
 }

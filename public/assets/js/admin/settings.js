@@ -1,4 +1,5 @@
 import { api, esc } from './util.js';
+import { go, href } from './router.js';
 import { reorderProjects, setUnpublished } from './project-order.js';
 import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
 import { b64ToText, textToB64 } from './seo.js';
@@ -128,17 +129,17 @@ async function orderPanel(el) {
 export async function render(root) {
     root.innerHTML = `
         <div class="view-head"><div><h1>Settings</h1><p>What this admin is connected to, which projects are published and in what order, and the site's core files.</p></div></div>
-        <section class="panel"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
-        <section class="panel"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
-        <section class="panel"><header><h2>Site files</h2></header>
-            <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section>`;
+        <div class="settings-grid">
+        <section class="panel s-conn"><header><h2>Connections</h2></header><div id="status-panel"><div class="loading">Checking…</div></div></section>
+        <section class="panel s-order"><header><h2>Projects: order and visibility</h2></header><div id="order-panel" class="panel-body"></div></section>
+        <section class="panel s-files"><header><h2>Site files</h2></header>
+            <ul class="rows">${SITE_FILES.map(([path, name, note]) => `<li><span class="label wrap">${esc(name)}<span class="sub">${esc(note)}</span></span><span class="value"><button type="button" class="linklike" data-file="${esc(path)}">Edit</button></span></li>`).join('')}</ul></section></div>`;
 
     statusPanel(root.querySelector('#status-panel'));
     orderPanel(root.querySelector('#order-panel'));
     root.addEventListener('click', e => {
         const f = e.target.closest('[data-file]');
         if (!f) return;
-        location.hash = '#/projects';
-        setTimeout(() => { if (typeof window.loadFile === 'function') window.loadFile(f.dataset.file); }, 60);
+        go(href('projects', [], { file: f.dataset.file }));
     });
 }

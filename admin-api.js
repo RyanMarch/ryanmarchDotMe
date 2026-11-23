@@ -99,9 +99,10 @@ async function cached(env, key, ttl, producer) {
 
 const toMs = v => (v === undefined || v === null || v < 0 ? null : Math.round(v > 1000 ? v / 1000 : v));
 
-function analyticsQuery(withVisits) {
+// `extra` narrows every dataset: by default bots are excluded (as in Cloudflare's own dashboard), and Tor (country code T1) can be hidden too.
+export function analyticsQuery(withVisits, extra = ', bot: 0') {
     const sum = withVisits ? 'sum { visits }' : '';
-    const f = 'datetime_geq: $since, datetime_leq: $until, requestHost: $host';
+    const f = `datetime_geq: $since, datetime_leq: $until, requestHost: $host${extra}`;
     const top = (alias, dim) => `
         ${alias}: rumPageloadEventsAdaptiveGroups(limit: 10, filter: { ${f} }, orderBy: [count_DESC]) {
             count
@@ -125,7 +126,13 @@ function analyticsQuery(withVisits) {
                     count
                     ${sum}
                 }
-                previous: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { datetime_geq: $prevSince, datetime_lt: $since, requestHost: $host }) {
+                botLoads: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { datetime_geq: $since, datetime_leq: $until, requestHost: $host, bot: 1 }) {
+                    count
+                }
+                torLoads: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { datetime_geq: $since, datetime_leq: $until, requestHost: $host, bot: 0, countryName: "T1" }) {
+                    count
+                }
+                previous: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { datetime_geq: $prevSince, datetime_lt: $since, requestHost: $host${extra} }) {
                     count
                     ${sum}
                 }
@@ -159,7 +166,7 @@ async function runGraphql(env, query, variables, fetchImpl) {
     return { ok: res.ok && !data.errors, data };
 }
 
-export function shapeAnalytics(account, { days, host }) {
+export function shapeAnalytics(account, { days, host, includeBots = false, hideTor = false }) {
     const group = g => ({ views: g?.count || 0, visits: g?.sum?.visits ?? null });
     const rows = (account.daily || []).map(g => ({
         date: g.dimensions?.date,
@@ -181,6 +188,9 @@ export function shapeAnalytics(account, { days, host }) {
     return {
         days,
         host,
+        filters: { botsExcluded: !includeBots, torHidden: hideTor },
+        botLoads: account.botLoads?.[0]?.count || 0,
+        torLoads: account.torLoads?.[0]?.count || 0,
         totals: { current: group(account.current?.[0]), previous: group(account.previous?.[0]) },
         rows,
         prevRows,
@@ -208,8 +218,11 @@ async function handleAnalytics(request, env, url, fetchImpl) {
     }
     const days = Math.min(Math.max(parseInt(url.searchParams.get('days'), 10) || 30, 1), 365);
     const host = env.CF_ANALYTICS_HOST || 'ryanmarch.me';
+    const includeBots = url.searchParams.get('bots') === 'include';
+    const hideTor = url.searchParams.get('tor') === 'exclude';
+    const extra = `${includeBots ? '' : ', bot: 0'}${hideTor ? ', countryName_neq: "T1"' : ''}`;
 
-    const body = await cached(env, `analytics:${host}:${days}`, 300, async () => {
+    const body = await cached(env, `analytics:${host}:${days}:${includeBots ? 'bots' : 'nobots'}:${hideTor ? 'notor' : 'tor'}`, 300, async () => {
         const now = Date.now();
         const day = 86400 * 1000;
         const vars = {
@@ -220,14 +233,14 @@ async function handleAnalytics(request, env, url, fetchImpl) {
             prevSince: new Date(now - 2 * days * day).toISOString()
         };
         try {
-            let result = await runGraphql(env, analyticsQuery(true), vars, fetchImpl);
+            let result = await runGraphql(env, analyticsQuery(true, extra), vars, fetchImpl);
             // `visits` isn't available on every plan/dataset version; retry without it.
             if (!result.ok && /visits/i.test(JSON.stringify(result.data.errors || ''))) {
-                result = await runGraphql(env, analyticsQuery(false), vars, fetchImpl);
+                result = await runGraphql(env, analyticsQuery(false, extra), vars, fetchImpl);
             }
             if (!result.ok) return { error: 'cloudflare_api_error', details: result.data.errors || result.data };
             const account = result.data?.data?.viewer?.accounts?.[0] || {};
-            return shapeAnalytics(account, { days, host });
+            return shapeAnalytics(account, { days, host, includeBots, hideTor });
         } catch (err) {
             return { error: 'fetch_failed', message: err.message };
         }

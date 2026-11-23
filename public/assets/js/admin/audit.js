@@ -17,7 +17,8 @@ export function auditProjectMeta(project) {
     const id = project.id;
     const hasPage = Boolean(project.hasExtendedContent);
 
-    if (!project.image) out.push(finding('error', 'card-image', id, 'No card image set.'));
+    // A card with `symbol` draws its own icon (see projects.js), so it needs no image file.
+    if (!project.image && !project.symbol) out.push(finding('error', 'card-image', id, 'No card image set.'));
     if (!project.subtitle) out.push(finding('warning', 'subtitle', id, 'No subtitle for the homepage card.'));
 
     if (hasPage) {

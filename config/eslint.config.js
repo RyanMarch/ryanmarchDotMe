@@ -36,7 +36,7 @@ export default [
         files: ['public/assets/js/admin/editor.js'],
         languageOptions: {
             sourceType: 'script',
-            globals: { Prism: 'readonly', CodeJar: 'readonly', syncImageUploader: 'readonly' }
+            globals: { Prism: 'readonly', CodeJar: 'readonly', syncImageUploader: 'readonly', getAuthHeaders: 'readonly', getPasscode: 'readonly', isLocal: 'readonly' }
         },
         rules: {
             'no-unused-vars': 'off',

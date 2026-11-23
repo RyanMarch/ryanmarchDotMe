@@ -19,6 +19,10 @@ describe('auditProjectMeta', () => {
         expect(f).toHaveLength(1);
         expect(f[0]).toMatchObject({ severity: 'error', check: 'card-image' });
     });
+    it('does not ask for a card image when the card draws its own symbol', () => {
+        const f = auditProjectMeta({ id: 'hub', title: 'Hub', subtitle: 's', image: '', symbol: 'hub', hasExtendedContent: false });
+        expect(f).toEqual([]);
+    });
 });
 
 describe('auditProjectHtml', () => {

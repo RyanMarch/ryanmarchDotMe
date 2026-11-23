@@ -3,10 +3,12 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleAdminApi, sameOrigin } from '../admin-api.js';
-import { imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
+import { normalizeCheck, probeAudio } from '../admin-site.js';
+import { checksState, flag } from '../public/assets/js/admin/activity.js';
+import { audioSignature, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
-import { summarizeEmbeds } from '../public/assets/js/admin/embeds.js';
+import { audioState, summarizeEmbeds, videoState } from '../public/assets/js/admin/embeds.js';
 import { bytes, sanitizeKey } from '../public/assets/js/admin/media.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -110,7 +112,7 @@ describe('/api/admin/scan', () => {
     const page = '<img src="content/demo/images/a.png"><div class="custom-audio-player" data-title="T"><audio src="content/demo/audio/t.mp3"></audio></div><iframe src="https://www.youtube-nocookie.com/embed/abcdefghijk"></iframe>';
     it('scans a write-up and checks each embed against its source', async () => {
         const assetFetch = vi.fn(async () => new Response(page));
-        const fetchImpl = vi.fn(async (u, init) => String(u).includes('oembed') ? new Response(JSON.stringify({ title: 'Vid' })) : new Response(null, { status: init?.method === 'HEAD' ? 404 : 200 }));
+        const fetchImpl = vi.fn(async u => String(u).includes('oembed') ? new Response(JSON.stringify({ title: 'Vid' })) : new Response('nope', { status: 404 }));
         const body = await (await call('/api/admin/scan?project=demo', env0, { projects, assetFetch, fetchImpl })).json();
         expect(body.images).toEqual(['content/demo/images/a.png']);
         expect(body.audio[0]).toMatchObject({ key: 't.mp3', status: 404 });
@@ -186,21 +188,49 @@ describe('/api/admin/media/r2', () => {
 });
 
 describe('/api/admin/activity and /status', () => {
-    it('combines GitHub history with Cloudflare deployments, degrading per source', async () => {
-        const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 'x', CF_API_TOKEN: 't', CF_ACCOUNT_ID: 'a' };
-        const fetchImpl = vi.fn(async u => {
-            const s = String(u);
-            if (s.includes('/commits?')) return new Response(JSON.stringify([{ sha: 'abcdef123', html_url: 'u', commit: { message: 'admin: update x\n\nbody', author: { name: 'R', date: '2026-01-01T00:00:00Z' } } }]));
-            if (s.includes('actions/runs')) return new Response(JSON.stringify({ workflow_runs: [{ name: 'CI', status: 'completed', conclusion: 'success', created_at: '2026-01-01', html_url: 'u', head_sha: 'abcdef123' }] }));
-            if (s.includes('check-runs')) return new Response('nope', { status: 500 });
-            return new Response(JSON.stringify({ success: false }), { status: 403 });
-        });
-        const body = await (await call('/api/admin/activity', env, { fetchImpl })).json();
-        expect(body.commits[0]).toMatchObject({ sha: 'abcdef1', message: 'admin: update x' });
-        expect(body.runs[0]).toMatchObject({ name: 'CI', conclusion: 'success' });
-        expect(body.checks).toBeNull();
-        expect(body.checksError).toBeTruthy();
+    const env = { ...env0, GITHUB_REPO: 'o/r', GITHUB_PAT: 'x', CF_API_TOKEN: 't', CF_ACCOUNT_ID: 'a' };
+    const history = nodes => ({ data: { repository: { ref: { target: { history: { nodes } } } } } });
+    const node = (oid, msg, rollup) => ({ oid: oid.padEnd(40, '0'), message: `${msg}\n\nlong body`, committedDate: '2026-01-01T10:00:00Z', url: `https://g/${oid}`, author: { name: 'R' }, statusCheckRollup: rollup });
+    const run = (name, status, conclusion, app = 'GitHub Actions') => ({ __typename: 'CheckRun', name, status, conclusion, detailsUrl: 'u', checkSuite: { app: { name: app } } });
+    const fake = routes => vi.fn(async (u, init = {}) => {
+        const s = String(u);
+        for (const [match, reply] of routes) if (s.includes(match)) return reply(init);
+        return new Response(JSON.stringify({ success: false }), { status: 403 });
+    });
+
+    it('returns commits with their check status in one request, and a develop-ahead count on main', async () => {
+        const fetchImpl = fake([
+            ['/graphql', () => new Response(JSON.stringify(history([
+                node('aaaaaaa', 'Fix thing', { contexts: { nodes: [run('test', 'COMPLETED', 'SUCCESS'), run('Workers Builds: site', 'COMPLETED', 'SUCCESS', 'Cloudflare Workers and Pages')] } }),
+                node('bbbbbbb', 'Break thing', { contexts: { nodes: [run('test', 'COMPLETED', 'FAILURE')] } }),
+                node('ccccccc', 'Old commit', null)
+            ])))],
+            ['compare/main...develop', () => new Response(JSON.stringify({ ahead_by: 3 }))]
+        ]);
+        const body = await (await call('/api/admin/activity?branch=main', env, { fetchImpl })).json();
+        expect(body.commits.map(c => c.sha)).toEqual(['aaaaaaa', 'bbbbbbb', 'ccccccc']);
+        expect(body.commits[0].checks).toEqual([{ name: 'Tests', state: 'ok', url: 'u' }, { name: 'Build', state: 'ok', url: 'u' }]);
+        expect(body.commits[1].checks[0]).toMatchObject({ name: 'Tests', state: 'failed' });
+        expect(body.commits[2].checks).toBeNull();
+        expect(body.checksAvailable).toBe(true);
+        expect(body.pending).toEqual({ ahead: 3 });
         expect(body.deploysError).toContain('Workers Scripts');
+    });
+    it('falls back to plain commits when GraphQL is not available for the token', async () => {
+        const fetchImpl = fake([
+            ['/graphql', () => new Response('nope', { status: 403 })],
+            ['/commits?', () => new Response(JSON.stringify([{ sha: 'abcdef123', html_url: 'u', commit: { message: 'admin: update x\n\nbody', author: { name: 'R', date: '2026-01-01T00:00:00Z' } } }]))]
+        ]);
+        const body = await (await call('/api/admin/activity?branch=develop', env, { fetchImpl })).json();
+        expect(body.commits[0]).toMatchObject({ sha: 'abcdef1', message: 'admin: update x', checks: null });
+        expect(body.checksAvailable).toBe(false);
+        expect(body.pending).toBeNull(); // only asked for on main
+    });
+    it('treats pending and unfinished runs, and old-style statuses, correctly', () => {
+        expect(normalizeCheck(run('test', 'IN_PROGRESS', null)).state).toBe('pending');
+        expect(normalizeCheck(run('test', 'COMPLETED', 'SKIPPED')).state).toBe('ok');
+        expect(normalizeCheck(run('test', 'COMPLETED', 'CANCELLED')).state).toBe('failed');
+        expect(normalizeCheck({ __typename: 'StatusContext', context: 'ci/x', state: 'PENDING' })).toMatchObject({ name: 'ci/x', state: 'pending' });
     });
     it('reports configuration without exposing values', async () => {
         const body = await (await call('/api/admin/status', { ...env0, CF_API_TOKEN: 'secret-token', CF_ACCOUNT_ID: 'a' })).json();
@@ -279,4 +309,79 @@ describe('setUnpublished', () => {
         expect(re.find(p => p.id === id).unpublished).toBe(true);
     });
     it('rejects an unknown project', () => expect(() => setUnpublished(src, 'nope', true)).toThrow(/No project/));
+});
+
+describe('embed status labels', () => {
+    it('names audio and video results', () => {
+        expect(audioState(200)).toEqual(['ok', 'Found']);
+        expect(audioState(404)).toEqual(['error', 'Missing (404)']);
+        expect(audioState(0)[1]).toBe('Unreachable');
+        const good = { status: 206, type: 'audio/mpeg', ranges: true, bytes: 5000, signature: 'mp3' };
+        expect(audioState(good)).toEqual(['ok', 'Found']);
+        expect(audioState({ ...good, bytes: 0 })[1]).toBe('Empty file');
+        expect(audioState({ ...good, type: 'text/html' })[1]).toBe('Not audio (text/html)');
+        expect(audioState({ ...good, type: 'application/octet-stream' })[0]).toBe('ok');
+        expect(audioState({ ...good, signature: null })[1]).toBe('Not a valid audio file');
+        expect(audioState({ ...good, ranges: false })).toEqual(['warning', "Plays, but can't seek"]);
+        expect(audioState({ status: 200 })[0]).toBe('ok'); // an older cached scan result
+        expect(videoState(200)).toEqual(['ok', 'Available']);
+        expect(videoState(401)).toEqual(['error', 'Embedding disabled or private']);
+        expect(videoState(404)).toEqual(['error', 'Removed']);
+        expect(videoState(400)[1]).toBe('Invalid video ID');
+        expect(videoState(500)[1]).toBe('Unavailable (500)');
+    });
+});
+
+describe('audioSignature', () => {
+    const bytes = (...b) => Uint8Array.from(b);
+    it('recognises common audio headers', () => {
+        expect(audioSignature(bytes(0x49, 0x44, 0x33, 4, 0))).toBe('mp3');
+        expect(audioSignature(bytes(0xFF, 0xFB, 0x90, 0x00))).toBe('mp3');
+        expect(audioSignature(bytes(0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, 0x20))).toBe('m4a');
+        expect(audioSignature(bytes(0x4F, 0x67, 0x67, 0x53))).toBe('ogg');
+        expect(audioSignature(bytes(0x66, 0x4C, 0x61, 0x43))).toBe('flac');
+    });
+    it('rejects HTML error pages and short reads', () => {
+        expect(audioSignature(new TextEncoder().encode('<!DOCTYPE html>'))).toBeNull();
+        expect(audioSignature(bytes(1, 2))).toBeNull();
+    });
+});
+
+describe('probeAudio', () => {
+    const reply = (body, init) => vi.fn(async () => new Response(body, init));
+    const mp3 = Uint8Array.from([0x49, 0x44, 0x33, 4, 0, 0, 0, 0, 0, 0, 0, 0]);
+    it('reports a healthy file: format, size, byte ranges', async () => {
+        const r = await probeAudio(reply(mp3.slice(0, 1) , { status: 206, headers: { 'content-type': 'audio/mpeg', 'content-range': 'bytes 0-0/29690573' } }), 'https://m/x.mp3');
+        expect(r).toMatchObject({ status: 206, type: 'audio/mpeg', ranges: true, bytes: 29690573 });
+    });
+    it('reads the format from the first bytes', async () => {
+        const r = await probeAudio(reply(mp3, { status: 206, headers: { 'content-type': 'audio/mpeg', 'content-range': 'bytes 0-11/500' } }), 'https://m/x.mp3');
+        expect(r.signature).toBe('mp3');
+    });
+    it('flags a server that ignores ranges', async () => {
+        const r = await probeAudio(reply(mp3, { status: 200, headers: { 'content-type': 'audio/mpeg', 'content-length': '500' } }), 'https://m/x.mp3');
+        expect(r).toMatchObject({ status: 200, ranges: false, bytes: 500, signature: 'mp3' });
+    });
+    it('reports a missing file, a network error, and an HTML page served as audio', async () => {
+        expect((await probeAudio(reply('nf', { status: 404 }), 'https://m/x.mp3')).status).toBe(404);
+        expect(await probeAudio(vi.fn(async () => { throw new Error('down'); }), 'https://m/x.mp3')).toEqual({ status: 0 });
+        const html = await probeAudio(reply('<html>oops</html>', { status: 200, headers: { 'content-type': 'text/html' } }), 'https://m/x.mp3');
+        expect(html).toMatchObject({ type: 'text/html', signature: null });
+    });
+});
+
+describe('activity row flags', () => {
+    const ok = { name: 'Tests', state: 'ok' }, bad = { name: 'Tests', state: 'failed' }, wait = { name: 'Build', state: 'pending' };
+    it('summarises a commit\'s checks', () => {
+        expect(checksState(null)).toBeNull();
+        expect(checksState([ok, ok])).toBe('ok');
+        expect(checksState([ok, wait])).toBe('pending');
+        expect(checksState([ok, wait, bad])).toBe('failed');
+    });
+    it('stays quiet for a passing commit and names what failed or is running', () => {
+        expect(flag([ok, ok])).toBe('');
+        expect(flag(null)).toBe('');
+        expect(flag([ok, bad])).toContain('Tests failed');
+        expect(flag([ok, wait])).toContain('Build running');
+    });
 });
