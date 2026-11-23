@@ -1,5 +1,6 @@
 import { api, esc } from './util.js';
 import { go, href } from './router.js';
+import { confirmDialog, toast } from './ui.js';
 import { reorderProjects, setUnpublished } from './project-order.js';
 import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
 import { b64ToText, textToB64 } from './seo.js';
@@ -37,6 +38,7 @@ async function orderPanel(el) {
     let saved = projects.map(p => ({ ...p })); // what GitHub has right now
     let original = signature();
     let moved = null;
+    let skipConfirm = false; // set by Undo, which should not ask again
 
     const draw = () => {
         const dirty = signature() !== original;
@@ -83,7 +85,14 @@ async function orderPanel(el) {
         if (save && !save.disabled) {
             const status = el.querySelector('#order-status');
             const nowOff = projects.filter(p => p.unpublished && !saved.find(s => s.id === p.id)?.unpublished);
-            if (nowOff.length && !confirm(`Unpublish ${nowOff.map(p => p.title).join(', ')}?\n\nAfter the next deploy it disappears from the homepage and its page returns a 404. Nothing is deleted; you can publish it again here.`)) return;
+            if (nowOff.length && !skipConfirm && !(await confirmDialog({
+                title: `Unpublish ${nowOff.map(p => p.title).join(', ')}?`,
+                message: 'After the next deploy it disappears from the homepage and its page returns a 404. Nothing is deleted; you can publish it again here.',
+                confirmLabel: 'Unpublish'
+            }))) return;
+            const wasUndo = skipConfirm;
+            skipConfirm = false;
+            const before = saved.map(p => ({ ...p })); // what to go back to if the person taps Undo
             save.disabled = true;
             status.textContent = 'Saving…';
             try {
@@ -120,6 +129,24 @@ async function orderPanel(el) {
                 const statusEl = el.querySelector('#order-status');
                 statusEl.textContent = `Saved to ${branch()}. Checking the build…`;
                 window.adminTrackDeploy?.({ branch: branch(), commit: result.commit }, s => { if (statusEl.isConnected) statusEl.textContent = s.text; });
+                const changes = [nowOff.length && `Unpublished ${nowOff.map(p => p.title).join(', ')}`, nowOn.length && `Published ${nowOn.map(p => p.title).join(', ')}`, reordered && !nowOff.length && !nowOn.length && 'Homepage order saved'].filter(Boolean);
+                if (wasUndo) toast('Change undone.', { type: 'success' });
+                else if (changes.length) {
+                    toast(`${changes.join('. ')}.`, {
+                        type: 'success',
+                        duration: 10000,
+                        action: {
+                            label: 'Undo',
+                            onClick: () => {
+                                projects = before.map(p => ({ ...p }));
+                                moved = null;
+                                draw();
+                                skipConfirm = true;
+                                el.querySelector('#save-order')?.click();
+                            }
+                        }
+                    });
+                }
             } catch (err) {
                 status.textContent = `Not saved: ${err.message}`;
                 save.disabled = false;

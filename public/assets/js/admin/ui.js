@@ -1,0 +1,94 @@
+// In-app dialogs and toasts, instead of the browser's confirm() and alert() boxes.
+// Exposed on window too (adminConfirm, adminAlert, adminToast) for the classic editor script.
+
+const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; return n; };
+
+function openDialog({ title, message, buttons, focus }) {
+    return new Promise(resolve => {
+        const dlg = el('dialog', 'dlg');
+        dlg.setAttribute('aria-labelledby', 'dlg-title');
+        const form = el('form', 'dlg-body');
+        form.method = 'dialog';
+        form.append(el('h2', 'dlg-title', title));
+        form.lastChild.id = 'dlg-title';
+        if (message) form.append(el('p', 'dlg-message', message));
+        const row = el('div', 'dlg-actions');
+        let answer = false;
+        for (const b of buttons) {
+            const btn = el('button', `btn ${b.primary ? (b.danger ? 'btn-danger' : '') : 'btn-secondary'}`.trim(), b.label);
+            btn.type = 'submit';
+            btn.value = String(b.value);
+            btn.addEventListener('click', () => { answer = b.value; });
+            if (b.id === focus) btn.dataset.autofocus = '1';
+            row.append(btn);
+        }
+        form.append(row);
+        dlg.append(form);
+        dlg.addEventListener('close', () => { dlg.remove(); resolve(answer); });
+        dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); }); // the backdrop
+        document.body.append(dlg);
+        dlg.showModal();
+        (dlg.querySelector('[data-autofocus]') || dlg.querySelector('button'))?.focus();
+    });
+}
+
+/** Resolves true if the person confirms. Esc, the backdrop and Cancel all resolve false. */
+export function confirmDialog({ title = 'Are you sure?', message = '', confirmLabel = 'Confirm', cancelLabel = 'Cancel', danger = false } = {}) {
+    return openDialog({
+        title, message,
+        buttons: [{ id: 'cancel', label: cancelLabel, value: false }, { id: 'ok', label: confirmLabel, value: true, primary: true, danger }],
+        focus: danger ? 'cancel' : 'ok'
+    });
+}
+
+export function alertDialog(message, { title = 'Heads up' } = {}) {
+    return openDialog({ title, message, buttons: [{ id: 'ok', label: 'OK', value: true, primary: true }], focus: 'ok' });
+}
+
+function toastHost() {
+    let host = document.getElementById('toasts');
+    if (!host) {
+        host = el('div', 'toasts');
+        host.id = 'toasts';
+        host.setAttribute('role', 'status');
+        host.setAttribute('aria-live', 'polite');
+        document.body.append(host);
+    }
+    return host;
+}
+
+/**
+ * A short message in the corner. `action` adds a button (for Undo). Stays while hovered or focused.
+ * Returns { dismiss }.
+ */
+export function toast(message, { type = 'info', action = null, duration = 7000 } = {}) {
+    const node = el('div', `toast toast-${type}`);
+    node.append(el('span', 'toast-text', message));
+    let timer;
+    const dismiss = () => { clearTimeout(timer); node.classList.add('leaving'); setTimeout(() => node.remove(), 180); };
+    if (action) {
+        const btn = el('button', 'toast-action', action.label);
+        btn.type = 'button';
+        btn.addEventListener('click', () => { dismiss(); action.onClick(); });
+        node.append(btn);
+    }
+    const close = el('button', 'toast-close', '×');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Dismiss');
+    close.addEventListener('click', dismiss);
+    node.append(close);
+    const arm = () => { clearTimeout(timer); if (duration) timer = setTimeout(dismiss, duration); };
+    node.addEventListener('pointerenter', () => clearTimeout(timer));
+    node.addEventListener('pointerleave', arm);
+    node.addEventListener('focusin', () => clearTimeout(timer));
+    node.addEventListener('focusout', arm);
+    toastHost().append(node);
+    arm();
+    return { dismiss };
+}
+
+if (typeof window !== 'undefined') {
+    window.adminConfirm = (message, opts = {}) => confirmDialog({ message, ...opts });
+    window.adminAlert = (message, opts) => alertDialog(message, opts);
+    window.adminToast = toast;
+}

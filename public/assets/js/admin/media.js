@@ -1,4 +1,5 @@
 import { esc, fmt, relativeTime, swr } from './util.js';
+import { alertDialog, confirmDialog, toast } from './ui.js';
 import { cachedScan, scanAll } from './scan-client.js';
 import { imageStem, referencedStems } from './scan.js';
 import { buildFolders, dirFromSlug, folderSlug, folderTitle, groupSets } from './media-sets.js';
@@ -166,13 +167,13 @@ function imagesTab(panel, media, projects, reload, route) {
         const names = new Map(projects.map(p => [p.id, p.title]));
         const by = scan.scans.filter(sc => (sc.images || []).some(img => imageStem(img) === stem)).map(sc => names.get(sc.project) || sc.project);
         const warn = by.length ? `\n\nIt is used by: ${by.join(', ')}. Those images will break.` : '\n\nNo write-up uses it.';
-        if (!confirm(`Delete ${path} from ${branch()}?\n\nThis commits the deletion to GitHub. It can only be restored from git history, not from this admin.${warn}`)) {
+        if (!(await confirmDialog({ title: 'Delete this image?', message: `${path}\n\nThis commits the deletion to ${branch()} on GitHub. It can only be restored from git history, not from this admin.${warn}`, confirmLabel: 'Delete image', danger: true }))) {
             btn.disabled = false; st.innerHTML = '<span id="media-count"></span>'; paint(); return;
         }
         const res = await fetch(`/api/admin/media/image?path=${encodeURIComponent(path)}&branch=${encodeURIComponent(branch())}`, { method: 'DELETE', headers: authHeaders() });
         if (!res.ok) {
             const msg = (await res.json().catch(() => ({}))).message || `Delete failed (${res.status}).`;
-            alert(msg); btn.disabled = false; st.innerHTML = '<span id="media-count"></span>'; paint(); return;
+            alertDialog(msg, { title: 'Could not delete' }); btn.disabled = false; st.innerHTML = '<span id="media-count"></span>'; paint(); return;
         }
         await reload();
     });
@@ -251,13 +252,11 @@ function r2Tab(panel, media, projects, reload) {
         const key = del.dataset.del;
         const by = used.get(key);
         const warn = by ? `\n\nIt is used by: ${[...new Set(by)].join(', ')}. Those players will break.` : '';
-        const question = media.r2.trash
-            ? `Move ${key} to the trash? It is removed from the site now, and you can restore it for 30 days.${warn}`
-            : `Permanently delete ${key} from the media bucket? This cannot be undone.${warn}`;
-        if (!confirm(question)) return;
+        if (!(await confirmDialog({ title: media.r2.trash ? 'Move to the trash?' : 'Delete this file?', message: `${key}\n\n${media.r2.trash ? 'It comes off the site now, and you can restore it for 30 days.' : 'This cannot be undone.'}${warn}`, confirmLabel: media.r2.trash ? 'Move to trash' : 'Delete', danger: true }))) return;
         del.disabled = true;
         const res = await fetch(`/api/admin/media/r2?key=${encodeURIComponent(key)}`, { method: 'DELETE', headers: authHeaders() });
-        if (!res.ok) { alert((await res.json().catch(() => ({}))).message || `Delete failed (${res.status}).`); del.disabled = false; return; }
+        if (!res.ok) { alertDialog((await res.json().catch(() => ({}))).message || `Delete failed (${res.status}).`, { title: 'Could not delete' }); del.disabled = false; return; }
+        if (media.r2.trash) toast(`${key} moved to the trash.`, { type: 'success' });
         await reload();
     });
 
@@ -283,10 +282,11 @@ async function loadTrash(panel, reload) {
         const purge = e.target.closest('[data-purge]');
         if (!restore && !purge) return;
         const key = (restore || purge).dataset.restore || (restore || purge).dataset.purge;
-        if (purge && !confirm('Delete this file for good? It cannot be restored afterwards.')) return;
+        if (purge && !(await confirmDialog({ title: 'Delete for good?', message: 'This file cannot be restored afterwards.', confirmLabel: 'Delete forever', danger: true }))) return;
         (restore || purge).disabled = true;
         const r = await fetch(`/api/admin/media/trash?key=${encodeURIComponent(key)}`, { method: restore ? 'POST' : 'DELETE', headers: authHeaders() });
-        if (!r.ok) { alert((await r.json().catch(() => ({}))).message || `That did not work (${r.status}).`); (restore || purge).disabled = false; return; }
+        if (!r.ok) { alertDialog((await r.json().catch(() => ({}))).message || `That did not work (${r.status}).`, { title: restore ? 'Could not restore' : 'Could not delete' }); (restore || purge).disabled = false; return; }
+        if (restore) toast('Restored.', { type: 'success' });
         await reload();
     };
 }

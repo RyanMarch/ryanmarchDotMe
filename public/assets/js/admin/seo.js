@@ -3,6 +3,7 @@ import { api, esc } from './util.js';
 import { auditProjectMeta, auditRedirects, SEO_DESCRIPTION, SEO_TITLE, summarize } from './audit.js';
 import { openInEditor } from './health.js';
 import { go, href, onPop, parse } from './router.js';
+import { confirmDialog } from './ui.js';
 import { suggestDestination } from './notfound-suggest.js';
 import { relativeTime } from './util.js';
 
@@ -101,7 +102,7 @@ async function renderRedirects(panel, add = '') {
         const del = e.target.closest('[data-del]');
         if (del) {
             const i = Number(del.dataset.del);
-            if (list[i].source && !confirm(`Delete the redirect from ${list[i].source}?`)) return;
+            if (list[i].source && !(await confirmDialog({ title: 'Remove this redirect?', message: `${list[i].source}\n\nIt is only removed once you save.`, confirmLabel: 'Remove', danger: true }))) return;
             list.splice(i, 1);
             draw();
             return;

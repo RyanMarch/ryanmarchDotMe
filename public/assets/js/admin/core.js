@@ -3,6 +3,7 @@
 // the first time you open Projects, and talks to this file through window.* and events.
 import { myProjects } from '/assets/js/project-data.js';
 import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
+import './ui.js';
 
 window.myProjects = myProjects;
 

@@ -65,10 +65,10 @@ document.addEventListener('admin:logout', () => {
     if (window.setFileListOpen) window.setFileListOpen(true);
     if (window.filterSearchResults) window.filterSearchResults();
 });
-document.addEventListener('admin:branch-changed', e => {
+document.addEventListener('admin:branch-changed', async e => {
     const branch = e.detail.branch;
     if (currentFile && currentFile.path
-        && confirm(`Target branch changed to '${branch}'. Would you like to reload '${currentFile.path}' from this branch? Unsaved changes will be lost.`)) {
+        && await window.adminConfirm(`Reload ${currentFile.path} from ${branch}? Unsaved changes will be lost.`, { title: `Switched to ${branch}`, confirmLabel: 'Reload file', cancelLabel: 'Keep what I have' })) {
         localStorage.removeItem(`draft_${currentFile.path}`);
         loadFile(currentFile.path);
     }
@@ -691,12 +691,12 @@ async function createNewProject() {
     const placement = placementSelect.value;
 
     if (!title) {
-        alert('Please enter a project title/name.');
+        window.adminAlert('Please enter a project title/name.');
         return;
     }
 
     if (!id) {
-        alert('Please enter a valid lowercase project ID/slug.');
+        window.adminAlert('Please enter a valid lowercase project ID/slug.');
         return;
     }
 
@@ -704,7 +704,7 @@ async function createNewProject() {
 
     // Check if project already exists locally
     if (window.myProjects && window.myProjects.some(p => p.id === id)) {
-        alert('Project ID already exists in the database.');
+        window.adminAlert('Project ID already exists in the database.');
         return;
     }
 
@@ -718,7 +718,7 @@ async function createNewProject() {
         imageFile = imageFileInput.files[0];
         imageName = imageNameInput.value.trim().toLowerCase().replace(/[^a-z0-9\._-]/g, '');
         if (!imageName) {
-            alert('Please enter a valid target filename for the preview image.');
+            window.adminAlert('Please enter a valid target filename for the preview image.');
             return;
         }
     }
@@ -938,11 +938,11 @@ hasExtendedContent: ${hasExtendedContent}
             document.getElementById('editor-card').classList.add('hidden');
             document.getElementById('active-file-label').textContent = '';
 
-            alert(`Successfully created link-only project database entry: ${title}!`);
+            window.adminAlert(`Successfully created link-only project database entry: ${title}!`);
         }
 
     } catch (err) {
-        alert(`Error creating project: ${err.message}`);
+        window.adminAlert(`Error creating project: ${err.message}`);
     } finally {
         createBtn.disabled = false;
         createBtn.textContent = 'Create & Edit Template';
@@ -1389,12 +1389,12 @@ async function saveProjectData() {
     let imagePath = imagePathInput.value.trim();
 
     if (!title) {
-        alert('Please enter a project title/name.');
+        window.adminAlert('Please enter a project title/name.');
         return;
     }
 
     if (!newId) {
-        alert('Please enter a valid lowercase project ID/slug.');
+        window.adminAlert('Please enter a valid lowercase project ID/slug.');
         return;
     }
 
@@ -1403,7 +1403,7 @@ async function saveProjectData() {
     // Check if slug already exists (excluding the current editing project)
     if (newId !== window.editingProjectId) {
         if (window.myProjects && window.myProjects.some(p => p.id === newId)) {
-            alert('Project ID already exists in the database.');
+            window.adminAlert('Project ID already exists in the database.');
             return;
         }
     }
