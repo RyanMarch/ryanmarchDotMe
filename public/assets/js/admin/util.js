@@ -30,6 +30,14 @@ export function relativeTime(iso) {
 }
 
 /** GET an admin API route using whatever auth the editor script holds. */
+/** True when an API call is being redirected to a login page (an opaque redirect), as opposed to the network being down. */
+export async function signedOut() {
+    try {
+        const res = await fetch('/api/admin/status', { redirect: 'manual', credentials: 'same-origin', cache: 'no-store' });
+        return res.type === 'opaqueredirect';
+    } catch { return false; }
+}
+
 export async function api(path, { signal } = {}) {
     const headers = typeof window.getAuthHeaders === 'function' ? window.getAuthHeaders() : {};
     let res;
@@ -37,6 +45,11 @@ export async function api(path, { signal } = {}) {
         res = await fetch(path, { headers, signal, credentials: 'same-origin' });
     } catch (err) {
         if (err.name === 'AbortError') throw err;
+        // Behind Cloudflare Access a missing sign-in redirects to another domain, which the browser reports as a bare network error.
+        if (await signedOut()) {
+            window.dispatchEvent(new CustomEvent('admin:signed-out'));
+            return { ok: false, status: 401, body: { error: 'signed_out', message: 'You are signed out. Use the Sign in button above.' } };
+        }
         return { ok: false, status: 0, body: { error: 'network', message: err.message } };
     }
     let body = null;
