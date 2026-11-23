@@ -3,7 +3,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { handleAdminApi, sameOrigin } from '../admin-api.js';
-import { imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
+import { probeAudio } from '../admin-site.js';
+import { audioSignature, imageStem, localPath, r2KeyFromUrl, referencedStems, resolveAudioSrc, scanProjectHtml } from '../public/assets/js/admin/scan.js';
 import { findProjectBlocks, reorderProjects, setUnpublished } from '../public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from '../public/assets/js/admin-project-parser.js';
 import { audioState, summarizeEmbeds, videoState } from '../public/assets/js/admin/embeds.js';
@@ -110,7 +111,7 @@ describe('/api/admin/scan', () => {
     const page = '<img src="content/demo/images/a.png"><div class="custom-audio-player" data-title="T"><audio src="content/demo/audio/t.mp3"></audio></div><iframe src="https://www.youtube-nocookie.com/embed/abcdefghijk"></iframe>';
     it('scans a write-up and checks each embed against its source', async () => {
         const assetFetch = vi.fn(async () => new Response(page));
-        const fetchImpl = vi.fn(async (u, init) => String(u).includes('oembed') ? new Response(JSON.stringify({ title: 'Vid' })) : new Response(null, { status: init?.method === 'HEAD' ? 404 : 200 }));
+        const fetchImpl = vi.fn(async u => String(u).includes('oembed') ? new Response(JSON.stringify({ title: 'Vid' })) : new Response('nope', { status: 404 }));
         const body = await (await call('/api/admin/scan?project=demo', env0, { projects, assetFetch, fetchImpl })).json();
         expect(body.images).toEqual(['content/demo/images/a.png']);
         expect(body.audio[0]).toMatchObject({ key: 't.mp3', status: 404 });
@@ -286,10 +287,56 @@ describe('embed status labels', () => {
         expect(audioState(200)).toEqual(['ok', 'Found']);
         expect(audioState(404)).toEqual(['error', 'Missing (404)']);
         expect(audioState(0)[1]).toBe('Unreachable');
+        const good = { status: 206, type: 'audio/mpeg', ranges: true, bytes: 5000, signature: 'mp3' };
+        expect(audioState(good)).toEqual(['ok', 'Found']);
+        expect(audioState({ ...good, bytes: 0 })[1]).toBe('Empty file');
+        expect(audioState({ ...good, type: 'text/html' })[1]).toBe('Not audio (text/html)');
+        expect(audioState({ ...good, type: 'application/octet-stream' })[0]).toBe('ok');
+        expect(audioState({ ...good, signature: null })[1]).toBe('Not a valid audio file');
+        expect(audioState({ ...good, ranges: false })).toEqual(['warning', "Plays, but can't seek"]);
+        expect(audioState({ status: 200 })[0]).toBe('ok'); // an older cached scan result
         expect(videoState(200)).toEqual(['ok', 'Available']);
         expect(videoState(401)).toEqual(['error', 'Embedding disabled or private']);
         expect(videoState(404)).toEqual(['error', 'Removed']);
         expect(videoState(400)[1]).toBe('Invalid video ID');
         expect(videoState(500)[1]).toBe('Unavailable (500)');
+    });
+});
+
+describe('audioSignature', () => {
+    const bytes = (...b) => Uint8Array.from(b);
+    it('recognises common audio headers', () => {
+        expect(audioSignature(bytes(0x49, 0x44, 0x33, 4, 0))).toBe('mp3');
+        expect(audioSignature(bytes(0xFF, 0xFB, 0x90, 0x00))).toBe('mp3');
+        expect(audioSignature(bytes(0, 0, 0, 0x20, 0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x41, 0x20))).toBe('m4a');
+        expect(audioSignature(bytes(0x4F, 0x67, 0x67, 0x53))).toBe('ogg');
+        expect(audioSignature(bytes(0x66, 0x4C, 0x61, 0x43))).toBe('flac');
+    });
+    it('rejects HTML error pages and short reads', () => {
+        expect(audioSignature(new TextEncoder().encode('<!DOCTYPE html>'))).toBeNull();
+        expect(audioSignature(bytes(1, 2))).toBeNull();
+    });
+});
+
+describe('probeAudio', () => {
+    const reply = (body, init) => vi.fn(async () => new Response(body, init));
+    const mp3 = Uint8Array.from([0x49, 0x44, 0x33, 4, 0, 0, 0, 0, 0, 0, 0, 0]);
+    it('reports a healthy file: format, size, byte ranges', async () => {
+        const r = await probeAudio(reply(mp3.slice(0, 1) , { status: 206, headers: { 'content-type': 'audio/mpeg', 'content-range': 'bytes 0-0/29690573' } }), 'https://m/x.mp3');
+        expect(r).toMatchObject({ status: 206, type: 'audio/mpeg', ranges: true, bytes: 29690573 });
+    });
+    it('reads the format from the first bytes', async () => {
+        const r = await probeAudio(reply(mp3, { status: 206, headers: { 'content-type': 'audio/mpeg', 'content-range': 'bytes 0-11/500' } }), 'https://m/x.mp3');
+        expect(r.signature).toBe('mp3');
+    });
+    it('flags a server that ignores ranges', async () => {
+        const r = await probeAudio(reply(mp3, { status: 200, headers: { 'content-type': 'audio/mpeg', 'content-length': '500' } }), 'https://m/x.mp3');
+        expect(r).toMatchObject({ status: 200, ranges: false, bytes: 500, signature: 'mp3' });
+    });
+    it('reports a missing file, a network error, and an HTML page served as audio', async () => {
+        expect((await probeAudio(reply('nf', { status: 404 }), 'https://m/x.mp3')).status).toBe(404);
+        expect(await probeAudio(vi.fn(async () => { throw new Error('down'); }), 'https://m/x.mp3')).toEqual({ status: 0 });
+        const html = await probeAudio(reply('<html>oops</html>', { status: 200, headers: { 'content-type': 'text/html' } }), 'https://m/x.mp3');
+        expect(html).toMatchObject({ type: 'text/html', signature: null });
     });
 });

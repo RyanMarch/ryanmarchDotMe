@@ -84,3 +84,15 @@ export function referencedStems(projects, scans) {
     for (const s of scans) for (const img of s.images || []) add(img);
     return stems;
 }
+
+/** Names the audio format from a file's first bytes, or null when they match no known audio format. */
+export function audioSignature(b) {
+    if (!b || b.length < 4) return null;
+    if (b[0] === 0x49 && b[1] === 0x44 && b[2] === 0x33) return 'mp3'; // ID3 tag
+    if (b[0] === 0xFF && (b[1] & 0xE0) === 0xE0) return 'mp3'; // MPEG frame sync
+    if (b.length >= 8 && b[4] === 0x66 && b[5] === 0x74 && b[6] === 0x79 && b[7] === 0x70) return 'm4a'; // "ftyp"
+    if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46) return 'wav'; // "RIFF"
+    if (b[0] === 0x4F && b[1] === 0x67 && b[2] === 0x67 && b[3] === 0x53) return 'ogg'; // "OggS"
+    if (b[0] === 0x66 && b[1] === 0x4C && b[2] === 0x61 && b[3] === 0x43) return 'flac'; // "fLaC"
+    return null;
+}

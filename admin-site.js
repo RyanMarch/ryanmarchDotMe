@@ -4,20 +4,41 @@
  * configuration status page. Routed from admin-api.js.
  */
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
-import { imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
+import { audioSignature, imageStem, r2KeyFromUrl, scanProjectHtml } from './public/assets/js/admin/scan.js';
 
 const ID_PATTERN = /^[a-z0-9_-]+$/i;
 const IMAGE_EXT = /\.(avif|webp|png|jpe?g|gif|svg|ico)$/i;
 
 /* ───────────── /scan?project= ───────────── */
 
-async function headStatus(fetchImpl, url) {
+/**
+ * Asks for the first bytes of an audio file and reports what came back: status, content type, total size,
+ * whether byte ranges work (a player needs them to seek), and the format named by the file's own header.
+ * Reads only the first chunk, never the whole file.
+ */
+export async function probeAudio(fetchImpl, url) {
     try {
-        let res = await fetchImpl(url, { method: 'HEAD' });
-        if (res.status === 405 || res.status === 403) res = await fetchImpl(url, { headers: { Range: 'bytes=0-0' } });
-        return res.status;
+        const res = await fetchImpl(url, { headers: { Range: 'bytes=0-11' } });
+        const out = {
+            status: res.status,
+            type: (res.headers.get('content-type') || '').split(';')[0].trim().toLowerCase(),
+            ranges: res.status === 206 || /bytes/i.test(res.headers.get('accept-ranges') || ''),
+            bytes: null
+        };
+        const total = res.headers.get('content-range')?.match(/\/(\d+)$/)?.[1] ?? (res.status === 200 ? res.headers.get('content-length') : null);
+        if (total !== null && total !== undefined && total !== '') out.bytes = Number(total);
+        if (res.ok && res.body) {
+            const reader = res.body.getReader();
+            const { value } = await reader.read();
+            await reader.cancel().catch(() => {});
+            if (value && value.length) out.signature = audioSignature(value);
+            else if (out.bytes === null || out.bytes === 0) out.bytes = 0;
+        } else if (res.body) {
+            await res.body.cancel().catch(() => {});
+        }
+        return out;
     } catch {
-        return 0;
+        return { status: 0 };
     }
 }
 
@@ -34,7 +55,7 @@ export async function handleScan(request, env, url, fetchImpl, ctx) {
 
     // Check each embed against the live source (bounded, to stay inside subrequest limits).
     const audio = await Promise.all(scan.audio.slice(0, 8).map(async a => ({
-        ...a, key: r2KeyFromUrl(a.src), status: await headStatus(fetchImpl, a.src)
+        ...a, key: r2KeyFromUrl(a.src), ...(await probeAudio(fetchImpl, a.src))
     })));
     const videos = await Promise.all(scan.videos.slice(0, 8).map(async v => {
         try {
