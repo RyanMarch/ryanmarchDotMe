@@ -1,8 +1,8 @@
-import { api, apiProblem, dataTable, deltaText, esc, fmt, relativeTime, setupNotice } from './util.js';
-import { pageLabel } from './analytics.js';
+import { api, apiProblem, dataTable, esc, fmt, relativeTime, setupNotice } from './util.js';
+import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
-function statBox(label, value, sub) {
-    return `<div class="stat"><dt>${esc(label)}</dt><dd>${value}<span class="delta">${sub}</span></dd></div>`;
+function statBox(label, value, sub, spark = '') {
+    return `<div class="stat"><span class="k">${esc(label)}</span><span class="v">${value}</span>${sub}${spark}</div>`;
 }
 
 export async function render(root) {
@@ -27,12 +27,13 @@ export async function render(root) {
 
     const cur = a?.totals.current, prev = a?.totals.previous;
     const pending = o?.pending;
-    parts.push(`<dl class="stats">
-        ${statBox('Page views', a ? fmt(cur.views) : '–', a ? esc(deltaText(cur.views, prev.views, 'previous 7 days')) : 'unavailable')}
-        ${statBox('Visits', a ? fmt(cur.visits) : '–', a && cur.visits !== null ? esc(deltaText(cur.visits, prev.visits, 'previous 7 days')) : 'unavailable')}
-        ${statBox('Projects', o ? fmt(o.projects.total) : fmt(window.myProjects?.length), o ? `${fmt(o.projects.withWriteup)} with write-ups` : '&nbsp;')}
-        ${statBox('Unreleased', pending ? fmt(pending.ahead) : '–', pending ? (pending.ahead ? 'commits on develop not in main' : 'develop matches main') : 'branch status unavailable')}
-    </dl>`);
+    const series = a ? fillDays(a.rows, a.days) : null;
+    parts.push(`<div class="stats">
+        ${statBox('Page views', a ? fmt(cur.views) : '–', a ? deltaHtml(cur.views, prev.views, 7) : '<span class="delta">unavailable</span>', series ? sparkSvg(series, 'views') : '')}
+        ${statBox('Visits', a ? fmt(cur.visits) : '–', a ? deltaHtml(cur.visits, prev.visits, 7) : '<span class="delta">unavailable</span>', series && cur.visits !== null ? sparkSvg(series, 'visits') : '')}
+        ${statBox('Projects', o ? fmt(o.projects.total) : fmt(window.myProjects?.length), `<span class="delta">${o ? `${fmt(o.projects.withWriteup)} with write-ups` : '&nbsp;'}</span>`)}
+        ${statBox('Unreleased', pending ? fmt(pending.ahead) : '–', `<span class="delta">${pending ? (pending.ahead ? 'commits on develop not in main' : 'develop matches main') : 'branch status unavailable'}</span>`)}
+    </div>`);
 
     const commits = o?.commits;
     const commitList = commits

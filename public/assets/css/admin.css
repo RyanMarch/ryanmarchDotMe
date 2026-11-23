@@ -746,7 +746,8 @@ input[type="file"] { padding: 0.35rem; }
 }
 
 /* ── Findings, tabs, redirect + SEO rows ───────────────── */
-.sev { display: inline-block; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 0.05rem 0.4rem; border: 1px solid currentColor; border-radius: 3px; vertical-align: 0.05em; }
+.sev { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.78rem; font-weight: 650; white-space: nowrap; }
+.sev::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
 .sev-error { color: var(--admin-error); }
 .sev-warning { color: var(--admin-warning); }
 .sev-info { color: var(--text-muted); }

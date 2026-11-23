@@ -71,7 +71,7 @@ export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}
     return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}<path class="area" d="${area}"/>${prevLine}<polyline class="line" points="${line.join(' ')}"/><line class="cursor" y1="${T}" y2="${H - B}" x1="-10" x2="-10"/><circle class="dot" r="4" cx="-10" cy="-10"/>${xl}${hits}</svg>`;
 }
 
-function sparkSvg(series, metric) {
+export function sparkSvg(series, metric) {
     const W = 100, H = 30, max = Math.max(...series.map(s => s[metric] || 0), 1);
     const pts = series.map((s, i) => `${((i / Math.max(1, series.length - 1)) * W).toFixed(1)},${(H - 2 - (H - 4) * ((s[metric] || 0) / max)).toFixed(1)}`);
     return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts.join(' ')}"/></svg>`;
@@ -137,17 +137,19 @@ function attachChart(root, state) {
     });
 }
 
+export function deltaHtml(c, p, days) {
+    if (c === null || p === null || p === undefined) return '<span class="delta">not reported</span>';
+    if (!p) return `<span class="delta">${c ? 'new' : 'no data'}</span>`;
+    const pct = Math.round(((c - p) / p) * 100);
+    const dir = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+    const mark = pct > 0 ? '▲' : pct < 0 ? '▼' : '–';
+    return `<span class="delta ${dir}"><span aria-hidden="true">${mark}</span> ${Math.abs(pct)}%<span class="vs"> vs previous ${days} days</span></span>`;
+}
+
 function statsHtml(d, series, metric) {
     const cur = d.totals.current, prev = d.totals.previous;
     const ppv = cur.visits ? (cur.views / cur.visits).toFixed(2) : '–';
-    const delta = (c, p) => {
-        if (c === null || p === null || p === undefined) return '<span class="delta">not reported</span>';
-        if (!p) return `<span class="delta">${c ? 'new' : 'no data'}</span>`;
-        const pct = Math.round(((c - p) / p) * 100);
-        const dir = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
-        const mark = pct > 0 ? '▲' : pct < 0 ? '▼' : '–';
-        return `<span class="delta ${dir}"><span aria-hidden="true">${mark}</span> ${Math.abs(pct)}%<span class="vs"> vs previous ${d.days} days</span></span>`;
-    };
+    const delta = (c, p) => deltaHtml(c, p, d.days);
     const pick = (m, label, c, p) => `<button type="button" class="stat stat-pick" data-metric="${m}" aria-pressed="${metric === m}" ${c === null ? 'disabled' : ''}>
         <span class="k">${label}</span><span class="v">${fmt(c)}</span>${delta(c, p)}${c === null ? '' : sparkSvg(series, m)}</button>`;
     return `<div class="stats" role="group" aria-label="Summary">
