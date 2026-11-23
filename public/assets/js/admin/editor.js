@@ -6,6 +6,7 @@ let currentFile = {
 };
 let jar;
 let adminPasscode = '';
+const LOCAL_PASS_KEY = 'admin_local_pass';
 // True when running via local dev server (serve.py), not Cloudflare edge
 const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
@@ -59,6 +60,16 @@ window.addEventListener('load', () => {
             }
         });
     }
+
+    // Local dev only: keep the sign-in across refreshes for this tab (production uses Cloudflare Access).
+    if (isLocal) {
+        let saved = '';
+        try { saved = sessionStorage.getItem(LOCAL_PASS_KEY) || ''; } catch { /* storage blocked */ }
+        if (saved) {
+            document.getElementById('passcode-input').value = saved;
+            checkAuth();
+        }
+    }
 });
 
 // Utility: UTF-8 safe base64 decoding
@@ -102,6 +113,7 @@ async function checkAuth() {
         if (res.ok) {
             // Save validated passcode in memory
             adminPasscode = passcode;
+            if (isLocal) { try { sessionStorage.setItem(LOCAL_PASS_KEY, passcode); } catch { /* storage blocked */ } }
 
             // Toggle views
             document.getElementById('auth-view').classList.add('hidden');
@@ -115,6 +127,7 @@ async function checkAuth() {
             const text = await res.text();
             showAlert(alertEl, `Authentication failed: ${res.status === 401 ? 'Invalid password' : text}`, 'error');
             adminPasscode = '';
+            try { sessionStorage.removeItem(LOCAL_PASS_KEY); } catch { /* storage blocked */ }
         }
     } catch (err) {
         showAlert(alertEl, `Error connecting to API: ${err.message}`, 'error');
@@ -133,6 +146,7 @@ function logout() {
         return;
     }
     adminPasscode = '';
+    try { sessionStorage.removeItem(LOCAL_PASS_KEY); } catch { /* storage blocked */ }
     currentFile = { path: '', sha: '', originalContent: '' };
     document.getElementById('passcode-input').value = '';
     document.getElementById('auth-view').classList.remove('hidden');

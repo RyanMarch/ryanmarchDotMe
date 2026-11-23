@@ -18,6 +18,12 @@
       "bucket_name": "ryanmarchdotme-media"
     }
   ],
+  "kv_namespaces": [
+    {
+      "binding": "ADMIN_KV",
+      "id": "43ab8eb463b442e58867023399ab85ce"
+    }
+  ],
   "compatibility_flags": [
     "nodejs_compat"
   ],
