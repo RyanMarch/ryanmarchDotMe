@@ -45,6 +45,35 @@ export function alertDialog(message, { title = 'Heads up' } = {}) {
     return openDialog({ title, message, buttons: [{ id: 'ok', label: 'OK', value: true, primary: true }], focus: 'ok' });
 }
 
+/** A read-only list of key/description pairs (the shortcuts cheat sheet). */
+export function infoDialog({ title, rows }) {
+    return new Promise(resolve => {
+        const dlg = el('dialog', 'dlg');
+        dlg.setAttribute('aria-labelledby', 'dlg-title');
+        const form = el('form', 'dlg-body');
+        form.method = 'dialog';
+        const h = el('h2', 'dlg-title', title);
+        h.id = 'dlg-title';
+        const list = el('dl', 'kbd-list');
+        for (const [keys, text] of rows) {
+            const dt = el('dt');
+            keys.split(' ').forEach((k, i) => { if (i) dt.append(' then '); dt.append(el('kbd', '', k)); });
+            list.append(dt, el('dd', '', text));
+        }
+        const actions = el('div', 'dlg-actions');
+        const ok = el('button', 'btn', 'Close');
+        ok.type = 'submit';
+        actions.append(ok);
+        form.append(h, list, actions);
+        dlg.append(form);
+        dlg.addEventListener('close', () => { dlg.remove(); resolve(); });
+        dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close(); });
+        document.body.append(dlg);
+        dlg.showModal();
+        ok.focus();
+    });
+}
+
 function toastHost() {
     let host = document.getElementById('toasts');
     if (!host) {

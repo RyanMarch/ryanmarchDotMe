@@ -155,3 +155,50 @@ test.describe('404s people hit', () => {
         await expect(last.locator('[data-f=destination]')).toHaveValue('/project/ledger/');
     });
 });
+
+test.describe('shell extras', () => {
+    test.beforeEach(async ({ page }) => { await mockAdminApi(page); });
+
+    test('g then a jumps to Analytics, and ? lists the shortcuts', async ({ page }) => {
+        await signIn(page);
+        await page.keyboard.press('g');
+        await page.keyboard.press('a');
+        await expect(page).toHaveURL(/\/admin\/analytics$/);
+        await page.keyboard.press('?');
+        await expect(page.locator('dialog.dlg')).toContainText('Keyboard shortcuts');
+        await expect(page.locator('dialog.dlg')).toContainText('Analytics');
+        await page.keyboard.press('Escape');
+        await expect(page.locator('dialog.dlg')).toHaveCount(0);
+    });
+
+    test('shortcuts stay out of the way while typing in a field', async ({ page }) => {
+        await signIn(page, '/admin/media');
+        await page.fill('#media-q', 'ga');
+        await expect(page).not.toHaveURL(/analytics/);
+    });
+
+    test('the theme button cycles System, Light, Dark and remembers it', async ({ page }) => {
+        await signIn(page);
+        const html = page.locator('html');
+        const label = page.locator('#theme-btn span');
+        await expect(label).toHaveText('Theme: System');
+        await page.click('#theme-btn');
+        await expect(label).toHaveText('Theme: Light');
+        await expect(html).toHaveAttribute('data-theme', 'light');
+        await page.click('#theme-btn');
+        await expect(html).toHaveAttribute('data-theme', 'dark');
+        await page.reload();
+        await expect(html).toHaveAttribute('data-theme', 'dark');
+        await page.click('#theme-btn');
+        await expect(html).not.toHaveAttribute('data-theme', /.+/);
+    });
+
+    test('the flag shows where saves go, and the skip link and route announcer exist', async ({ page }) => {
+        await signIn(page);
+        await expect(page.locator('#branch-flag')).toContainText('Saving to main');
+        await expect(page.locator('#branch-flag')).toHaveClass(/is-prod/);
+        await page.click('[data-nav=media]');
+        await expect(page.locator('#route-announcer')).toHaveText('Media page');
+        await expect(page.locator('.skip-link')).toHaveAttribute('href', '#main');
+    });
+});
