@@ -107,7 +107,8 @@ a { color: var(--accent-color); }
 .scrim { display: none; }
 
 .main:focus, .main:focus-visible { outline: none; }
-.main { grid-area: main; min-width: 0; padding: 1.75rem max(2rem, env(safe-area-inset-right, 0px)) calc(4rem + env(safe-area-inset-bottom, 0px)) max(2rem, env(safe-area-inset-left, 0px)); max-width: 1180px; width: 100%; }
+/* style.css centres <main> in a flex column for the public pages; undo that here so short views start at the top. */
+.main { display: block; margin: 0; gap: 0; transition: none; grid-area: main; min-width: 0; padding: 1.75rem max(2rem, env(safe-area-inset-right, 0px)) calc(4rem + env(safe-area-inset-bottom, 0px)) max(2rem, env(safe-area-inset-left, 0px)); max-width: 1180px; width: 100%; }
 .view-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
 .view-head h1 { margin: 0; font-size: 1.4rem; font-weight: 650; line-height: 1.2; letter-spacing: -0.005em; }
 .view-head p { margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.88rem; }
@@ -242,7 +243,13 @@ table.dt .track span { display: block; height: 100%; background: var(--accent-co
 .notice code, code.cmd { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.82rem; background: var(--frame); padding: 0.1rem 0.35rem; border-radius: 3px; }
 .notice pre { margin: 0.5rem 0 0; padding: 0.6rem 0.75rem; background: var(--bg-color); border: 1px solid var(--rule); border-radius: var(--radius); overflow-x: auto; font-size: 0.82rem; }
 
-.loading { color: var(--text-muted); padding: 1rem; font-size: 0.9rem; }
+/* Loading placeholder: the text stays for screen readers, sighted users see blocks where content will land. */
+.loading { font-size: 0; line-height: 0; padding: 0; color: transparent; }
+.loading::before, .loading::after { content: ""; display: block; border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); animation: pulse 1.4s ease-in-out infinite; }
+.loading::before { height: 96px; margin-bottom: 1.25rem; }
+.loading::after { height: 280px; animation-delay: 0.15s; }
+@keyframes pulse { 50% { opacity: 0.5; } }
+@media (prefers-reduced-motion: reduce) { .loading::before, .loading::after { animation: none; } }
 
 .quick { display: flex; flex-wrap: wrap; gap: 0.5rem; padding: 1rem; }
 .quick a { text-decoration: none; }
@@ -881,6 +888,8 @@ input[type="file"] { padding: 0.35rem; }
 @media (max-width: 720px) {
     /* Edge to edge: panels and cards use the full width, with hairlines top and bottom only. */
     .main .panel, .main .stats, .main section > .card { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
+    .loading::before, .loading::after { margin-left: -1rem; margin-right: -1rem; border-left: 0; border-right: 0; border-radius: 0; }
+    .loading::before { margin-bottom: 1.25rem; }
     .main .panel > header, .main .stat { padding-left: calc(1rem + env(safe-area-inset-left, 0px)); }
     .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .stats-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
