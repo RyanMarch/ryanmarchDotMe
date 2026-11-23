@@ -1,4 +1,4 @@
-import { api, esc, fmt } from './util.js';
+import { esc, fmt, swr } from './util.js';
 import { cachedScan, scanAll } from './scan-client.js';
 import { imageStem, referencedStems } from './scan.js';
 import { buildFolders, dirFromSlug, folderSlug, folderTitle, groupSets } from './media-sets.js';
@@ -273,9 +273,16 @@ export async function render(root, route = parse()) {
         <div id="media-panel" role="tabpanel" class="tabpanel"><div class="loading">Loading…</div></div>`;
 
     let media = null;
-    const load = async () => {
-        const res = await api(`/api/admin/media?branch=${encodeURIComponent(branch())}`);
-        media = res.ok ? res.body : { repo: null, repoError: `request failed (${res.status})`, r2: { available: false, objects: [] } };
+    const toMedia = res => (res.ok ? res.body : { repo: null, repoError: `request failed (${res.status})`, r2: { available: false, objects: [] } });
+    const mediaPath = () => `/api/admin/media?branch=${encodeURIComponent(branch())}`;
+    // Loads the data. With an earlier answer on hand it resolves at once and calls `onFresh` if the refresh differs.
+    const load = async onFresh => {
+        let first = true;
+        await swr([mediaPath()], ([res]) => {
+            media = toMedia(res);
+            if (!first) onFresh?.();
+            first = false;
+        });
     };
     const show = () => {
         root.querySelectorAll('[role=tab]').forEach(t => t.setAttribute('aria-selected', String(t.dataset.tab === tab)));
@@ -297,6 +304,6 @@ export async function render(root, route = parse()) {
         const want = r.query.get('tab') === 'audio' ? 'r2' : 'images';
         if (want !== tab) { tab = want; show(); } else imagesApi?.apply(r);
     });
-    await load();
+    await load(() => show());
     show();
 }

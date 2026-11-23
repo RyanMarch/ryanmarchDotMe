@@ -1,4 +1,4 @@
-import { api, apiProblem, esc, relativeTime } from './util.js';
+import { apiProblem, esc, hasCached, relativeTime, swr } from './util.js';
 import { go, href, onPop, parse } from './router.js';
 
 const MERGE = /^Merge (pull request|branch|remote-tracking)/i;
@@ -102,12 +102,17 @@ export async function render(root, route = parse()) {
             ${deploys}${note}`;
     };
 
+    let controller;
     const load = async () => {
-        body.innerHTML = '<div class="loading">Loading…</div>';
-        const res = await api(`/api/admin/activity?branch=${encodeURIComponent(branch)}`);
-        if (!res.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't load activity.</strong>${esc(apiProblem(res))}</div>`; return; }
-        data = res.body;
-        paint();
+        controller?.abort();
+        controller = new AbortController();
+        const path = `/api/admin/activity?branch=${encodeURIComponent(branch)}`;
+        if (!hasCached(path)) body.innerHTML = '<div class="loading">Loading…</div>';
+        await swr([path], ([res]) => {
+            if (!res.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't load activity.</strong>${esc(apiProblem(res))}</div>`; return; }
+            data = res.body;
+            paint();
+        }, { signal: controller.signal });
     };
 
     root.querySelector('#branch-seg').addEventListener('click', e => {

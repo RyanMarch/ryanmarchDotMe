@@ -1,21 +1,10 @@
-import { myProjects } from '/assets/js/project-data.js';
-import { parseProjectDataSource } from '/assets/js/admin-project-parser.js';
-window.myProjects = myProjects;
+// The editor's project list and form wiring. Loaded lazily when Projects is first opened;
+// sign-in, the branch and the project data live in core.js.
 
-// Detect local dev vs production (Cloudflare Access is not active on localhost)
-const isLocal = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
-// Load project lists into UI dropdowns on startup
-window.addEventListener('DOMContentLoaded', () => {
-    // Initialize target branch from localStorage
-    const savedBranch = localStorage.getItem('admin_selected_branch') || 'main';
-    const branchSelect = document.getElementById('branch-select');
-    if (branchSelect) {
-        branchSelect.value = savedBranch;
-    }
-
-    // Initialize bundled list immediately, then refresh from selected branch when authenticated
-    applyProjectsList(myProjects);
+// Wire up the editor's lists and forms. This runs as soon as the file loads (the DOM is long since ready).
+function initProjectsEditor() {
+    // Show whatever project list core.js has (the bundled copy, or the branch's once it has synced).
+    applyProjectsList(window.myProjects || []);
     populateFormTags();
     setFileListOpen(true);
 
@@ -190,39 +179,7 @@ window.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-
-    // Password input listeners for login view
-    const passcodeInput = document.getElementById('passcode-input');
-    const loginBtn = document.getElementById('login-btn');
-
-    if (passcodeInput && loginBtn) {
-        const updateButtonState = () => {
-            loginBtn.disabled = passcodeInput.value.trim() === '';
-        };
-
-        passcodeInput.addEventListener('input', updateButtonState);
-        passcodeInput.addEventListener('change', updateButtonState);
-
-        passcodeInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !loginBtn.disabled) {
-                checkAuth();
-            }
-        });
-
-        // Check initial state (e.g. autofill)
-        updateButtonState();
-        setTimeout(updateButtonState, 100);
-    }
-
-    // Production: Cloudflare Access already authenticated — skip the password screen
-    // (CF Access gates /admin at the edge; if this page loads, the user passed auth)
-    if (!isLocal) {
-        document.getElementById('auth-view').classList.add('hidden');
-        document.getElementById('admin-view').classList.remove('hidden');
-        document.getElementById('logout-btn').classList.remove('hidden');
-        window.syncProjectsForBranch(savedBranch);
-    }
-});
+}
 
 window.newProjectSelectedTags = [];
 window.allAvailableTags = [];
@@ -291,46 +248,6 @@ function applyProjectsList(projects) {
     }
 }
 window.applyProjectsList = applyProjectsList;
-
-let projectSyncSeq = 0;
-window.syncProjectsForBranch = async function (branch = (window.getSelectedBranch ? window.getSelectedBranch() : 'main')) {
-    const seq = ++projectSyncSeq;
-    const statusEl = document.getElementById('projects-sync-status');
-    if (statusEl) {
-        statusEl.classList.remove('is-warning');
-        statusEl.textContent = `Syncing projects from ${branch}...`;
-    }
-
-    try {
-        const headers = window.getAuthHeaders ? window.getAuthHeaders() : {};
-        const res = await fetch(`/api/admin/file?path=assets/js/project-data.js&branch=${encodeURIComponent(branch)}`, {
-            headers,
-            cache: 'no-store'
-        });
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        const decode = window.b64DecodeUnicode || ((str) => new TextDecoder().decode(Uint8Array.from(atob(str), c => c.charCodeAt(0))));
-        const source = decode((data.content || '').replace(/\s/g, ''));
-        const parsedProjects = parseProjectDataSource(source);
-
-        if (seq !== projectSyncSeq) return;
-
-        applyProjectsList(parsedProjects);
-        const projectCount = parsedProjects.filter(p => p && p.hasExtendedContent).length;
-        if (statusEl) {
-            statusEl.classList.remove('is-warning');
-            statusEl.textContent = `Synced ${projectCount} projects from ${branch}`;
-        }
-    } catch {
-        if (seq !== projectSyncSeq) return;
-        if (statusEl) {
-            statusEl.classList.add('is-warning');
-            statusEl.textContent = `Could not refresh from ${branch} (showing bundled list)`;
-        }
-    }
-};
 
 // Render selected tags as badges/pills
 function renderSelectedTags() {
@@ -581,3 +498,6 @@ document.addEventListener('click', (e) => {
         editTagResults.classList.add('hidden');
     }
 });
+
+// Everything above is defined; now wire up the page.
+initProjectsEditor();

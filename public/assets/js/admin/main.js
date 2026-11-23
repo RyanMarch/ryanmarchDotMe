@@ -1,5 +1,7 @@
 // Admin shell: path routing (see router.js), mobile drawer, lazy-loaded views.
 import { clearViewHandlers, fromHash, go, href, notifyViews, parse, start } from './router.js';
+import { ensureEditor, prefetchEditor } from './editor-loader.js';
+import { warm } from './util.js';
 
 const VIEWS = {
     dashboard: { group: 'Site', title: 'Dashboard', load: () => import('./dashboard.js') },
@@ -56,26 +58,38 @@ async function route(r = parse(), kind = 'push', quiet = false) {
     }
 
     const token = ++renderToken;
+
+    // Fetch the page's code first (instant after a hover or a first visit), so the transition below never waits on a download.
+    const mod = view.load ? await view.load() : null;
+    if (token !== renderToken) return;
+
     shown = name;
     clearViewHandlers();
 
-    document.querySelectorAll('[data-nav]').forEach(a => {
-        if (a.dataset.nav === name) a.setAttribute('aria-current', 'page');
-        else a.removeAttribute('aria-current');
-    });
-    document.getElementById('topbar-title').textContent = view.title;
-    document.getElementById('topbar-group').textContent = view.group;
-    document.title = `${view.title} | Admin | Ryan March`;
-    setDrawer(false);
+    let rendering = null;
+    const swap = () => {
+        document.querySelectorAll('[data-nav]').forEach(a => {
+            if (a.dataset.nav === name) a.setAttribute('aria-current', 'page');
+            else a.removeAttribute('aria-current');
+        });
+        document.getElementById('topbar-title').textContent = view.title;
+        document.getElementById('topbar-group').textContent = view.group;
+        document.title = `${view.title} | Admin | Ryan March`;
+        setDrawer(false);
+        document.querySelectorAll('[data-view]').forEach(section => { section.hidden = section.dataset.view !== name; });
+        // render() puts the page's skeleton in place synchronously, then fetches; don't wait for the data here.
+        if (mod) rendering = mod.render(document.getElementById(`view-${name}`), r);
+    };
 
-    document.querySelectorAll('[data-view]').forEach(section => { section.hidden = section.dataset.view !== name; });
+    // The content area crossfades and rises a little; the sidebar and header stay put. Skipped for reduced motion.
+    const animate = !firstRender && typeof document.startViewTransition === 'function' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (animate) await document.startViewTransition(swap).updateCallbackDone.catch(() => {});
+    else swap();
 
-    if (view.load) {
-        const root = document.getElementById(`view-${name}`);
-        const mod = await view.load();
-        if (token !== renderToken) return;
-        await mod.render(root, r);
-    } else if (name === 'projects') {
+    if (rendering) await rendering;
+    else if (name === 'projects') {
+        await ensureEditor();
+        installLoadFileWrapper();
         openProjectFile(r);
     }
 
@@ -98,11 +112,17 @@ function openProjectFile(r) {
     const file = r.query.get('file');
     if (!file) return;
     applyingRoute = true;
-    setTimeout(async () => {
-        try { if (typeof window.loadFile === 'function') await window.loadFile(file); } finally { applyingRoute = false; }
-    }, 80);
+    ensureEditor().then(async () => {
+        installLoadFileWrapper();
+        if (typeof window.loadFile === 'function') await window.loadFile(file);
+    }).finally(() => { applyingRoute = false; });
 }
-if (typeof window.loadFile === 'function') {
+
+// Opening a file in the editor records it in the URL (once the editor has loaded).
+let wrapped = false;
+function installLoadFileWrapper() {
+    if (wrapped || typeof window.loadFile !== 'function') return;
+    wrapped = true;
     const originalLoad = window.loadFile;
     window.loadFile = async function (path, ...rest) {
         const result = await originalLoad.call(this, path, ...rest);
@@ -123,6 +143,25 @@ document.addEventListener('click', e => {
     go(url.pathname + url.search);
 });
 
+// Hovering, focusing or touching a sidebar link starts loading that page: its code, and the data it will ask for.
+const branchNow = () => encodeURIComponent((typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main');
+const WARM = {
+    dashboard: () => [`/api/admin/overview?branch=${branchNow()}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary'],
+    analytics: () => ['/api/admin/analytics?days=30'],
+    activity: () => ['/api/admin/activity?branch=main'],
+    media: () => [`/api/admin/media?branch=${branchNow()}`]
+};
+function warmView(name) {
+    VIEWS[name]?.load?.().catch(() => {}); // download the module (a no-op after the first time)
+    if (name === 'projects') prefetchEditor();
+    WARM[name]?.().forEach(warm);
+}
+for (const link of document.querySelectorAll('[data-nav]')) {
+    for (const ev of ['pointerenter', 'focusin', 'touchstart']) {
+        link.addEventListener(ev, () => warmView(link.dataset.nav), { passive: true });
+    }
+}
+
 // Older links and code that set location.hash (#/media) are rewritten to the real path.
 const fixHash = () => {
     const target = fromHash(location.hash);
@@ -141,6 +180,7 @@ new MutationObserver(() => {
 }).observe(app, { attributes: true, attributeFilter: ['class'] });
 route();
 window.adminGo = go;
+window.adminEnsureEditor = async () => { await ensureEditor(); installLoadFileWrapper(); };
 window.adminHref = href;
 
 // Environment label: local dev vs the deployed site.

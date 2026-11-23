@@ -67,7 +67,8 @@ describe('Admin Project Parser & Mobile Admin Invariants', () => {
 
     it('versions shared assets imported by the admin modules (admin.html, projects-list.js, build.js)', () => {
         const adminHtml = fs.readFileSync(path.join(publicDir, 'admin.html'), 'utf8');
-        const projectsList = fs.readFileSync(path.join(publicDir, 'assets/js/admin/projects-list.js'), 'utf8');
+        const core = fs.readFileSync(path.join(publicDir, 'assets/js/admin/core.js'), 'utf8');
+        const projectsList = core;
 
         expect(projectsList).toContain("from '/assets/js/project-data.js'");
         expect(projectsList).toContain("from '/assets/js/admin-project-parser.js'");
@@ -99,7 +100,7 @@ describe('Admin Project Parser & Mobile Admin Invariants', () => {
     it('keeps mobile safe-area padding, a drawer nav, and in-flow file and tag lists', () => {
         const adminHtml = fs.readFileSync(path.join(publicDir, 'admin.html'), 'utf8');
         const css = fs.readFileSync(path.join(publicDir, 'assets/css/admin.css'), 'utf8');
-        const projectsList = fs.readFileSync(path.join(publicDir, 'assets/js/admin/projects-list.js'), 'utf8');
+        const projectsList = fs.readFileSync(path.join(publicDir, 'assets/js/admin/core.js'), 'utf8');
 
         expect(adminHtml).toContain('viewport-fit=cover');
         expect(adminHtml).toContain('id="menu-btn"');
@@ -114,13 +115,15 @@ describe('Admin Project Parser & Mobile Admin Invariants', () => {
         expect(projectsList).toContain('parseProjectDataSource');
     });
 
-    it('loads the admin scripts in an order that lets the editor globals exist first', () => {
+    it('loads the core before the shell, and leaves the editor stack to load on demand', () => {
         const adminHtml = fs.readFileSync(path.join(publicDir, 'admin.html'), 'utf8');
-        const editor = adminHtml.indexOf('/assets/js/admin/editor.js');
-        const list = adminHtml.indexOf('/assets/js/admin/projects-list.js');
+        const core = adminHtml.indexOf('/assets/js/admin/core.js');
         const main = adminHtml.indexOf('/assets/js/admin/main.js');
-        expect(editor).toBeGreaterThan(-1);
-        expect(editor).toBeLessThan(list);
-        expect(list).toBeLessThan(main);
+        expect(core).toBeGreaterThan(-1);
+        expect(core).toBeLessThan(main);
+        // Nothing for the editor on first load: those download only when Projects is opened.
+        for (const eager of ['editor.js', 'projects-list.js', 'prism', 'codejar']) expect(adminHtml.toLowerCase()).not.toContain(eager);
+        const loader = fs.readFileSync(path.join(publicDir, 'assets/js/admin/editor-loader.js'), 'utf8');
+        for (const piece of ['prism.min.js', 'codejar', '/assets/js/admin/editor.js', "import('./projects-list.js')"]) expect(loader.toLowerCase()).toContain(piece.toLowerCase());
     });
 });

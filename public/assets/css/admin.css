@@ -1083,3 +1083,21 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
 
 /* Upload forms keep a sensible width on big monitors. */
 .upload-form { max-width: 1000px; }
+
+/* ── Motion ────────────────────────────────────────────────
+   Page changes crossfade the content area only (the sidebar and header stay put), and panels ease in.
+   All of it is off for people who ask for reduced motion. */
+.main { view-transition-name: admin-content; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+::view-transition-old(admin-content) { animation: vt-out 0.12s ease both; }
+::view-transition-new(admin-content) { animation: vt-in 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) 0.04s both; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-4px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(8px); } }
+
+.main .panel, .main .stats, .main .modebar, .main .notice { animation: rise 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
+    .main .panel, .main .stats, .main .modebar, .main .notice { animation: none; }
+}

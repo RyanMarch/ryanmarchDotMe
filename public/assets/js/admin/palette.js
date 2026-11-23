@@ -17,18 +17,17 @@ export function initPalette(nav) {
 
     const entries = () => [
         ...nav.map(n => ({ label: n.title, hint: n.group, go: () => { go(href(n.id)); } })),
-        { label: 'New project', hint: 'Action', go: () => {
+        { label: 'New project', hint: 'Action', go: async () => {
             go(href('projects'));
-            setTimeout(() => {
-                const form = document.getElementById('new-project-form');
-                if (form?.classList.contains('hidden') && typeof window.toggleNewProjectForm === 'function') window.toggleNewProjectForm();
-                document.getElementById('new-project-title')?.focus();
-            }, 80);
+            await window.adminEnsureEditor?.();
+            const form = document.getElementById('new-project-form');
+            if (form?.classList.contains('hidden') && typeof window.toggleNewProjectForm === 'function') window.toggleNewProjectForm();
+            document.getElementById('new-project-title')?.focus();
         } },
         { label: 'View site', hint: 'Action', go: () => window.open('/', '_blank', 'noopener') },
         ...(globalThis.myProjects || []).map(p => ({ label: p.title, hint: `Edit · ${p.id}`, go: () => {
             const file = `content/${p.id}/index.html`;
-            if (parse().view === 'projects' && typeof window.loadFile === 'function') window.loadFile(file);
+            if (parse().view === 'projects') window.adminEnsureEditor?.().then(() => window.loadFile(file));
             else go(href('projects', [], { file }));
         } }))
     ];

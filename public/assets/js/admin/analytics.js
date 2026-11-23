@@ -1,4 +1,4 @@
-import { api, apiProblem, dataTable, esc, fmt, setupNotice } from './util.js';
+import { apiProblem, dataTable, esc, fmt, hasCached, setupNotice, swr } from './util.js';
 import { go, href, onPop, parse } from './router.js';
 
 const RANGES = [7, 30, 90];
@@ -244,15 +244,7 @@ export async function render(root, route = parse()) {
 
     const body = root.querySelector('#analytics-body');
 
-    async function load() {
-        controller?.abort();
-        controller = new AbortController();
-        body.innerHTML = '<div class="loading">Loading analytics…</div>';
-        let result;
-        try {
-            result = await api(`/api/admin/analytics?days=${days}${hideTor ? '&tor=exclude' : ''}`, { signal: controller.signal });
-        } catch { return; /* superseded by a newer request */ }
-
+    function showResult(result) {
         if (result.status === 501) { body.innerHTML = setupNotice(); return; }
         if (!result.ok) { body.innerHTML = `<div class="notice"><strong>Couldn't load analytics.</strong>${esc(apiProblem(result))}</div>`; return; }
 
@@ -313,6 +305,14 @@ export async function render(root, route = parse()) {
             const next = btns[(i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length];
             next.focus(); showSource(next); e.preventDefault();
         });
+    }
+
+    async function load() {
+        controller?.abort();
+        controller = new AbortController();
+        const path = `/api/admin/analytics?days=${days}${hideTor ? '&tor=exclude' : ''}`;
+        if (!hasCached(path)) body.innerHTML = '<div class="loading">Loading analytics…</div>';
+        await swr([path], ([result]) => showResult(result), { signal: controller.signal });
     }
 
     root.querySelector('#hide-tor').addEventListener('change', e => {
