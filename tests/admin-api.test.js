@@ -166,7 +166,7 @@ describe('admin frontend helpers', () => {
         const series = fillDays([], 7);
         expect(series).toHaveLength(7);
         expect(series.every(s => s.views === 0)).toBe(true);
-        expect(chartSvg(series).match(/class="bar-rect"/g)).toHaveLength(7);
+        expect(chartSvg(series).match(/class="hit"/g)).toHaveLength(7);
     });
     it('labels project pages with their titles and escapes unknown paths', () => {
         globalThis.myProjects = myProjects;

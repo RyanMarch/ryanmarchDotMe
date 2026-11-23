@@ -1,4 +1,4 @@
-import { api, apiProblem, barRows, deltaText, esc, fmt, setupNotice } from './util.js';
+import { api, apiProblem, dataTable, esc, fmt, setupNotice } from './util.js';
 
 const RANGES = [7, 30, 90];
 // Project titles come from window.myProjects (set by projects-list.js and
@@ -24,104 +24,171 @@ export function pageLabel(path) {
         : `<a href="${esc(path)}" target="_blank" rel="noopener">${esc(path)}</a>`;
 }
 
-/** Fill missing days with zero so the chart's x-axis is continuous. */
-export function fillDays(rows, days) {
+/** Fill missing days with zero so the x-axis is continuous. `offset` shifts the window back (previous period). */
+export function fillDays(rows, days, offset = 0) {
     const byDate = new Map(rows.map(r => [r.date, r]));
     const out = [];
     const today = new Date();
     for (let i = days - 1; i >= 0; i--) {
-        const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - i));
+        const d = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() - i - offset));
         const key = d.toISOString().slice(0, 10);
-        out.push({ date: key, views: byDate.get(key)?.views || 0 });
+        out.push({ date: key, views: byDate.get(key)?.views || 0, visits: byDate.get(key)?.visits ?? 0 });
     }
     return out;
 }
 
+// Pick an axis max so the four grid steps land on round numbers.
 const niceMax = n => {
-    if (n <= 4) return 4;
-    const mag = 10 ** Math.floor(Math.log10(n));
-    return Math.ceil(n / (mag / 2)) * (mag / 2);
+    const raw = Math.max(n, 4) / 4;
+    const mag = 10 ** Math.floor(Math.log10(raw));
+    const step = [1, 2, mag >= 10 ? 2.5 : 2, 5, 10].map(m => m * mag).find(c => c >= raw) || 10 * mag;
+    return step * 4;
 };
 
-export function chartSvg(series, W = 720) {
-    const H = 190, L = 34, B = 22, T = 8;
-    const max = niceMax(Math.max(...series.map(s => s.views), 1));
-    const bw = (W - L) / series.length;
+const dayLabel = (date, opts) => new Date(date + 'T00:00:00Z').toLocaleDateString('en-US', { ...opts, timeZone: 'UTC' });
+export const CHART = { H: 240, L: 42, R: 8, T: 10, B: 26 };
+
+/** Line chart of one metric, with an optional dashed previous-period line and one hit column per day. */
+export function chartSvg(series, W = 720, { prev = null, metric = 'views' } = {}) {
+    const { H, L, R, T, B } = CHART;
+    const val = s => s[metric] || 0;
+    const max = niceMax(Math.max(...series.map(val), ...(prev || []).map(val), 1));
+    const step = (W - L - R) / series.length;
+    const x = i => L + (i + 0.5) * step;
     const y = v => T + (H - T - B) * (1 - v / max);
-    const grid = [0, 0.5, 1].map(f => {
+    const grid = [0, 0.25, 0.5, 0.75, 1].map(f => {
         const v = Math.round(max * f);
-        return `<line class="grid" x1="${L}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${fmt(v)}</text>`;
+        return `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/><text x="${L - 8}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${fmt(v)}</text>`;
     }).join('');
-    const bars = series.map((s, i) => {
-        const h = Math.max(s.views ? 1.5 : 0, (H - T - B) * (s.views / max));
-        return `<rect class="bar-rect" data-i="${i}" x="${(L + i * bw + bw * 0.14).toFixed(2)}" y="${(H - B - h).toFixed(2)}" width="${(bw * 0.72).toFixed(2)}" height="${h.toFixed(2)}"/>`;
-    }).join('');
-    const label = i => new Date(series[i].date + 'T00:00:00Z').toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
-    const mid = Math.floor(series.length / 2);
-    const xl = [[0, 'start'], [mid, 'middle'], [series.length - 1, 'end']].map(([i, a]) =>
-        `<text x="${a === 'start' ? L : a === 'end' ? W : L + (i + 0.5) * bw}" y="${H - 5}" text-anchor="${a}">${label(i)}</text>`).join('');
-    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}${bars}${xl}</svg>`;
+    const pts = arr => arr.map((s, i) => `${x(i).toFixed(1)},${y(val(s)).toFixed(1)}`);
+    const line = pts(series);
+    const area = `M${x(0).toFixed(1)},${y(0).toFixed(1)} L${line.join(' L')} L${x(series.length - 1).toFixed(1)},${y(0).toFixed(1)} Z`;
+    const prevLine = prev ? `<polyline class="line-prev" points="${pts(prev).join(' ')}"/>` : '';
+    const every = Math.max(1, Math.ceil(series.length / Math.max(2, Math.floor((W - L) / 84))));
+    const xl = series.map((s, i) => (i % every === 0 || i === series.length - 1) && (series.length - 1 - i >= every / 2 || i === series.length - 1)
+        ? `<text x="${x(i).toFixed(1)}" y="${H - 6}" text-anchor="${i === 0 ? 'start' : i === series.length - 1 ? 'end' : 'middle'}">${dayLabel(s.date, { month: 'short', day: 'numeric' })}</text>` : '').join('');
+    const hits = series.map((s, i) => `<rect class="hit" data-i="${i}" x="${(L + i * step).toFixed(1)}" y="${T}" width="${step.toFixed(1)}" height="${H - T - B}"/>`).join('');
+    return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">${grid}<path class="area" d="${area}"/>${prevLine}<polyline class="line" points="${line.join(' ')}"/><line class="cursor" y1="${T}" y2="${H - B}" x1="-10" x2="-10"/><circle class="dot" r="4" cx="-10" cy="-10"/>${xl}${hits}</svg>`;
 }
 
-function attachChart(root, series) {
-    const readout = root.querySelector('.chart-readout');
-    const box = root.querySelector('.chart');
-    let rects = [];
+function sparkSvg(series, metric) {
+    const W = 100, H = 30, max = Math.max(...series.map(s => s[metric] || 0), 1);
+    const pts = series.map((s, i) => `${((i / Math.max(1, series.length - 1)) * W).toFixed(1)},${(H - 2 - (H - 4) * ((s[metric] || 0) / max)).toFixed(1)}`);
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts.join(' ')}"/></svg>`;
+}
+
+function attachChart(root, state) {
+    const box = root.querySelector('.chart-plot');
+    const tip = root.querySelector('.tip');
     let cur = -1;
-    // Draw at the container's real width so axis text stays a readable size on phones.
     const draw = () => {
-        const w = Math.max(280, Math.floor(box.clientWidth - 32));
-        box.innerHTML = chartSvg(series, w);
-        rects = [...box.querySelectorAll('.bar-rect')];
-        if (cur >= 0) rects[cur]?.classList.add('on');
+        const w = Math.max(300, Math.floor(box.clientWidth));
+        box.querySelector('.svg-host').innerHTML = chartSvg(state.series, w, { prev: state.prev, metric: state.metric });
+        tip.hidden = true;
+        cur = -1;
     };
+    state.redraw = draw;
     draw();
     let lastW = box.clientWidth;
     new ResizeObserver(() => { if (box.clientWidth !== lastW) { lastW = box.clientWidth; draw(); } }).observe(box);
+
+    const noun = () => (state.metric === 'visits' ? 'visit' : 'page view');
     const show = i => {
-        if (i < 0 || i >= series.length) return;
-        rects.forEach(r => r.classList.remove('on'));
-        rects[i].classList.add('on');
+        if (i < 0 || i >= state.series.length) return;
         cur = i;
-        const d = new Date(series[i].date + 'T00:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
-        readout.textContent = `${d}: ${fmt(series[i].views)} page view${series[i].views === 1 ? '' : 's'}`;
+        const svg = box.querySelector('svg');
+        const s = state.series[i];
+        const p = state.prev?.[i];
+        const hit = svg.querySelector(`.hit[data-i="${i}"]`);
+        const cx = Number(hit.getAttribute('x')) + Number(hit.getAttribute('width')) / 2;
+        const scale = svg.getBoundingClientRect().width / svg.viewBox.baseVal.width;
+        const v = s[state.metric] || 0;
+        const { H, T, B } = CHART;
+        const max = niceMax(Math.max(...state.series.map(r => r[state.metric] || 0), ...(state.prev || []).map(r => r[state.metric] || 0), 1));
+        const cy = T + (H - T - B) * (1 - v / max);
+        svg.querySelector('.cursor').setAttribute('x1', cx);
+        svg.querySelector('.cursor').setAttribute('x2', cx);
+        svg.querySelector('.dot').setAttribute('cx', cx);
+        svg.querySelector('.dot').setAttribute('cy', cy);
+        tip.hidden = false;
+        tip.innerHTML = `<div class="tip-date">${esc(dayLabel(s.date, { weekday: 'short', month: 'short', day: 'numeric' }))}</div>
+            <div class="tip-row"><span class="sw sw-cur"></span>${fmt(v)} ${noun()}${v === 1 ? '' : 's'}</div>
+            ${p ? `<div class="tip-row muted"><span class="sw sw-prev"></span>${fmt(p[state.metric] || 0)} on ${esc(dayLabel(p.date, { month: 'short', day: 'numeric' }))}</div>` : ''}`;
+        const tw = tip.offsetWidth;
+        const left = cx * scale;
+        tip.style.left = `${Math.min(Math.max(left - tw / 2, 4), box.clientWidth - tw - 4)}px`;
+        tip.style.top = '6px';
+        root.querySelector('.chart-readout').textContent = `${dayLabel(s.date, { weekday: 'short', month: 'short', day: 'numeric' })}: ${fmt(v)} ${noun()}${v === 1 ? '' : 's'}`;
     };
     const fromPointer = e => {
-        const r = box.querySelector('svg').getBoundingClientRect();
-        const slot = (r.width - 34) / series.length;
-        show(Math.min(series.length - 1, Math.max(0, Math.floor((e.clientX - r.left - 34) / slot))));
+        const svg = box.querySelector('svg');
+        const r = svg.getBoundingClientRect();
+        const scale = r.width / svg.viewBox.baseVal.width;
+        const L = CHART.L * scale, R = CHART.R * scale;
+        const slot = (r.width - L - R) / state.series.length;
+        show(Math.min(state.series.length - 1, Math.max(0, Math.floor((e.clientX - r.left - L) / slot))));
     };
     box.addEventListener('pointermove', fromPointer);
     box.addEventListener('pointerdown', fromPointer);
+    box.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') { tip.hidden = true; box.querySelector('.cursor')?.setAttribute('x1', -10); box.querySelector('.cursor')?.setAttribute('x2', -10); box.querySelector('.dot')?.setAttribute('cx', -10); } });
     box.addEventListener('keydown', e => {
-        if (e.key === 'ArrowLeft') { show(cur < 0 ? series.length - 1 : cur - 1); e.preventDefault(); }
+        if (e.key === 'ArrowLeft') { show(cur < 0 ? state.series.length - 1 : cur - 1); e.preventDefault(); }
         if (e.key === 'ArrowRight') { show(cur < 0 ? 0 : cur + 1); e.preventDefault(); }
     });
 }
 
-function statsHtml(d) {
+function statsHtml(d, series, metric) {
     const cur = d.totals.current, prev = d.totals.previous;
-    const label = `previous ${d.days} days`;
     const ppv = cur.visits ? (cur.views / cur.visits).toFixed(2) : '–';
-    return `<dl class="stats">
-        <div class="stat"><dt>Page views</dt><dd>${fmt(cur.views)}<span class="delta">${esc(deltaText(cur.views, prev.views, label))}</span></dd></div>
-        <div class="stat"><dt>Visits</dt><dd>${fmt(cur.visits)}<span class="delta">${cur.visits === null ? 'not reported' : esc(deltaText(cur.visits, prev.visits, label))}</span></dd></div>
-        <div class="stat"><dt>Pages per visit</dt><dd>${ppv}<span class="delta">&nbsp;</span></dd></div>
-        <div class="stat"><dt>Largest contentful paint</dt><dd>${ms(d.vitals.lcp_ms)}<span class="delta">${esc(rate('lcp_ms', d.vitals.lcp_ms).text)}</span></dd></div>
-    </dl>`;
+    const delta = (c, p) => {
+        if (c === null || p === null || p === undefined) return '<span class="delta">not reported</span>';
+        if (!p) return `<span class="delta">${c ? 'new' : 'no data'}</span>`;
+        const pct = Math.round(((c - p) / p) * 100);
+        const dir = pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat';
+        const mark = pct > 0 ? '▲' : pct < 0 ? '▼' : '–';
+        return `<span class="delta ${dir}"><span aria-hidden="true">${mark}</span> ${Math.abs(pct)}%<span class="vs"> vs previous ${d.days} days</span></span>`;
+    };
+    const pick = (m, label, c, p) => `<button type="button" class="stat stat-pick" data-metric="${m}" aria-pressed="${metric === m}" ${c === null ? 'disabled' : ''}>
+        <span class="k">${label}</span><span class="v">${fmt(c)}</span>${delta(c, p)}${c === null ? '' : sparkSvg(series, m)}</button>`;
+    return `<div class="stats" role="group" aria-label="Summary">
+        ${pick('views', 'Page views', cur.views, prev.views)}
+        ${pick('visits', 'Visits', cur.visits, prev.visits)}
+        <div class="stat"><span class="k">Pages per visit</span><span class="v">${ppv}</span><span class="delta">&nbsp;</span></div>
+        <div class="stat"><span class="k">Largest contentful paint</span><span class="v">${ms(d.vitals.lcp_ms)}</span><span class="delta ${rate('lcp_ms', d.vitals.lcp_ms).cls}">${esc(rate('lcp_ms', d.vitals.lcp_ms).text)}</span></div>
+    </div>`;
 }
 
 function vitalsHtml(v) {
-    const cell = (k, key, val, text) => {
-        const r = key ? rate(key, val) : { text: '', cls: '' };
-        return `<div class="vital"><div class="k">${k}</div><div class="v">${text}</div><div class="r ${r.cls}">${r.text}</div></div>`;
-    };
-    return `<div class="vitals">
-        ${cell('LCP', 'lcp_ms', v.lcp_ms, ms(v.lcp_ms))}
-        ${cell('INP', 'inp_ms', v.inp_ms, ms(v.inp_ms))}
-        ${cell('CLS', 'cls', v.cls, v.cls ?? '–')}
-        ${cell('FCP', 'fcp_ms', v.fcp_ms, ms(v.fcp_ms))}
-    </div>`;
+    const items = [
+        ['LCP', 'Largest contentful paint', 'lcp_ms', v.lcp_ms, ms(v.lcp_ms)],
+        ['INP', 'Interaction to next paint', 'inp_ms', v.inp_ms, ms(v.inp_ms)],
+        ['CLS', 'Cumulative layout shift', 'cls', v.cls, v.cls ?? '–'],
+        ['FCP', 'First contentful paint', 'fcp_ms', v.fcp_ms, ms(v.fcp_ms)]
+    ];
+    return `<div class="vitals">${items.map(([short, long, key, val, text]) => {
+        const r = rate(key, val);
+        const [good, poor] = THRESHOLDS[key];
+        const top = poor * 1.5;
+        const pos = val === null || val === undefined ? null : Math.min(100, (val / top) * 100);
+        return `<div class="vital">
+            <div class="k"><abbr title="${long}">${short}</abbr></div>
+            <div class="v">${text}</div>
+            <div class="gauge" role="img" aria-label="${long}: ${r.text}">
+                <span class="seg-good" style="width:${(good / top) * 100}%"></span><span class="seg-ok" style="width:${((poor - good) / top) * 100}%"></span><span class="seg-poor"></span>
+                ${pos === null ? '' : `<span class="mark" style="left:${pos}%"></span>`}
+            </div>
+            <div class="r ${r.cls}">${r.text}</div>
+        </div>`;
+    }).join('')}</div>`;
+}
+
+function sourcesHtml(d) {
+    const tabs = [['referrers', 'Referrers', 'Source'], ['countries', 'Countries', 'Country'], ['devices', 'Devices', 'Device']];
+    return `<section class="panel">
+        <header><div class="tabs-inline" role="tablist" aria-label="Traffic breakdown">${tabs.map(([k, label], i) =>
+            `<button type="button" role="tab" id="src-tab-${k}" data-src="${k}" aria-selected="${i === 0}" aria-controls="src-panel" tabindex="${i === 0 ? 0 : -1}">${label}</button>`).join('')}</div></header>
+        <div id="src-panel" role="tabpanel" aria-labelledby="src-tab-referrers">${dataTable(d.referrers, { head: tabs[0][2], total: d.totals.current.views })}</div>
+    </section>`;
 }
 
 export async function render(root) {
@@ -154,27 +221,59 @@ export async function render(root) {
 
         const d = result.body;
         const series = fillDays(d.rows, d.days);
+        const prevSeries = d.prevRows?.length ? fillDays(d.prevRows, d.days, d.days) : null;
+        const state = { series, prev: prevSeries, metric: 'views' };
         const peak = series.reduce((a, b) => (b.views > a.views ? b : a), series[0]);
         const summary = `Daily page views over the last ${d.days} days. Total ${fmt(d.totals.current.views)}. Peak ${fmt(peak.views)} on ${peak.date}.`;
 
         body.innerHTML = `
-            ${statsHtml(d)}
-            <section class="panel" aria-label="Daily page views">
-                <header><h2>Page views per day</h2><span class="meta">${esc(d.host)}${d.cached ? ' · cached' : ''}</span></header>
-                <div class="chart" tabindex="0" role="img" aria-label="${esc(summary)} Use left and right arrow keys to read individual days."></div>
-                <div class="chart-readout" aria-live="polite">Tap or hover a bar for the day's count.</div>
+            <div id="stats-host">${statsHtml(d, series, state.metric)}</div>
+            <section class="panel" aria-label="Traffic over time">
+                <header>
+                    <h2 id="chart-title">Page views per day</h2>
+                    <span class="legend"><span class="sw sw-cur"></span>This period${prevSeries ? '<span class="sw sw-prev"></span>Previous period' : ''}</span>
+                </header>
+                <div class="chart-plot" tabindex="0" role="img" aria-label="${esc(summary)} Use left and right arrow keys to read individual days.">
+                    <div class="svg-host"></div><div class="tip" hidden></div>
+                </div>
+                <div class="chart-foot"><span class="chart-readout" aria-live="polite">Hover or tap the chart for a day's count.</span><span class="meta">${esc(d.host)}${d.cached ? ' · cached' : ''}</span></div>
             </section>
-            <div class="cols">
-                <section class="panel"><header><h2>Top pages</h2></header>${barRows(d.paths, i => pageLabel(i.label))}</section>
-                <section class="panel"><header><h2>Referrers</h2></header>${barRows(d.referrers)}</section>
-                <section class="panel"><header><h2>Countries</h2></header>${barRows(d.countries)}</section>
-                <section class="panel"><header><h2>Devices</h2></header>${barRows(d.devices)}</section>
+            <div class="split">
+                <section class="panel"><header><h2>Top pages</h2></header>${dataTable(d.paths, { head: 'Page', render: i => pageLabel(i.label), total: d.totals.current.views })}</section>
+                ${sourcesHtml(d)}
             </div>
             <section class="panel">
                 <header><h2>Core Web Vitals</h2><span class="meta">${fmt(d.vitals.samples)} samples · averages, ${d.days} days</span></header>
                 ${vitalsHtml(d.vitals)}
             </section>`;
-        attachChart(body, series);
+        attachChart(body, state);
+
+        body.querySelector('#stats-host').addEventListener('click', e => {
+            const btn = e.target.closest('button[data-metric]');
+            if (!btn || btn.disabled) return;
+            state.metric = btn.dataset.metric;
+            body.querySelectorAll('.stat-pick').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+            body.querySelector('#chart-title').textContent = state.metric === 'visits' ? 'Visits per day' : 'Page views per day';
+            state.redraw();
+        });
+
+        const srcTabs = body.querySelector('.tabs-inline');
+        const showSource = btn => {
+            const k = btn.dataset.src;
+            srcTabs.querySelectorAll('button').forEach(b => { b.setAttribute('aria-selected', String(b === btn)); b.tabIndex = b === btn ? 0 : -1; });
+            const panel = body.querySelector('#src-panel');
+            panel.setAttribute('aria-labelledby', btn.id);
+            const head = { referrers: 'Source', countries: 'Country', devices: 'Device' }[k];
+            panel.innerHTML = dataTable(d[k], { head, total: d.totals.current.views });
+        };
+        srcTabs.addEventListener('click', e => { const b = e.target.closest('button[data-src]'); if (b) showSource(b); });
+        srcTabs.addEventListener('keydown', e => {
+            const btns = [...srcTabs.querySelectorAll('button')];
+            const i = btns.indexOf(document.activeElement);
+            if (i < 0 || !['ArrowLeft', 'ArrowRight'].includes(e.key)) return;
+            const next = btns[(i + (e.key === 'ArrowRight' ? 1 : btns.length - 1)) % btns.length];
+            next.focus(); showSource(next); e.preventDefault();
+        });
     }
 
     root.querySelector('.seg').addEventListener('click', e => {

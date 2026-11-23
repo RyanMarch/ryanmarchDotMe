@@ -66,11 +66,13 @@ export function setupNotice() {
     </div>`;
 }
 
-/** Lists of {label, count} as bar rows. `render` may return custom label HTML. */
-export function barRows(items, render = item => esc(item.label)) {
-    if (!items || !items.length) return '<ul class="rows"><li class="empty">No data in this range.</li></ul>';
+/** Ranked table: label, count and share of the total, with a hairline share bar. */
+export function dataTable(items, { render = item => esc(item.label), head = 'Item', unit = 'Views', total } = {}) {
+    if (!items || !items.length) return '<p class="empty-note">No data in this range.</p>';
+    const sum = total || items.reduce((n, i) => n + i.count, 0) || 1;
     const max = Math.max(...items.map(i => i.count), 1);
-    return `<ul class="rows">${items.map(item => `
-        <li><span class="bar" style="width:${Math.max(2, Math.round((item.count / max) * 100))}%"></span>
-            <span class="label">${render(item)}</span><span class="value">${fmt(item.count)}</span></li>`).join('')}</ul>`;
+    return `<table class="dt"><thead><tr><th scope="col">${esc(head)}</th><th scope="col" class="n">${esc(unit)}</th><th scope="col" class="n share-col">Share</th></tr></thead><tbody>${items.map(item => {
+        const pct = (item.count / sum) * 100;
+        return `<tr><td class="lbl"><div class="lbl-text">${render(item)}</div><div class="track"><span style="width:${Math.max(1, Math.round((item.count / max) * 100))}%"></span></div></td><td class="n">${fmt(item.count)}</td><td class="n share-col">${pct < 1 ? '<1' : Math.round(pct)}%</td></tr>`;
+    }).join('')}</tbody></table>`;
 }

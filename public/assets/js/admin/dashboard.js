@@ -1,4 +1,4 @@
-import { api, apiProblem, barRows, deltaText, esc, fmt, relativeTime, setupNotice } from './util.js';
+import { api, apiProblem, dataTable, deltaText, esc, fmt, relativeTime, setupNotice } from './util.js';
 import { pageLabel } from './analytics.js';
 
 function statBox(label, value, sub) {
@@ -49,7 +49,7 @@ export async function render(root) {
     </section>`);
 
     parts.push(`<div class="cols">
-        <section class="panel"><header><h2>Top pages</h2><a href="#/analytics" class="meta">All analytics</a></header>${a ? barRows(a.paths.slice(0, 6), i => pageLabel(i.label)) : '<ul class="rows"><li class="empty">No analytics data.</li></ul>'}</section>
+        <section class="panel"><header><h2>Top pages</h2><a href="#/analytics" class="meta">All analytics</a></header>${a ? dataTable(a.paths.slice(0, 6), { head: 'Page', render: i => pageLabel(i.label), total: a.totals.current.views }) : '<p class="empty-note">No analytics data.</p>'}</section>
         <section class="panel"><header><h2>Recent commits</h2><span class="meta">${esc(o?.branch || branch)}</span></header>${commitList}</section>
     </div>
     <section class="panel"><header><h2>Quick actions</h2></header>

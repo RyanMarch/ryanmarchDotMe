@@ -116,6 +116,11 @@ function analyticsQuery(withVisits) {
                     ${sum}
                     dimensions { date }
                 }
+                prevDaily: rumPageloadEventsAdaptiveGroups(limit: 400, filter: { datetime_geq: $prevSince, datetime_lt: $since, requestHost: $host }, orderBy: [date_ASC]) {
+                    count
+                    ${sum}
+                    dimensions { date }
+                }
                 current: rumPageloadEventsAdaptiveGroups(limit: 1, filter: { ${f} }) {
                     count
                     ${sum}
@@ -161,6 +166,11 @@ export function shapeAnalytics(account, { days, host }) {
         views: g.count || 0,
         visits: g.sum?.visits ?? null
     }));
+    const prevRows = (account.prevDaily || []).map(g => ({
+        date: g.dimensions?.date,
+        views: g.count || 0,
+        visits: g.sum?.visits ?? null
+    }));
     const list = (arr, key, fallback) => (arr || []).map(g => ({
         label: (g.dimensions?.[key] || '').trim() || fallback,
         count: g.count || 0
@@ -173,6 +183,7 @@ export function shapeAnalytics(account, { days, host }) {
         host,
         totals: { current: group(account.current?.[0]), previous: group(account.previous?.[0]) },
         rows,
+        prevRows,
         paths: list(account.paths, 'requestPath', '/'),
         referrers: list(account.referrers, 'refererHost', 'Direct / none'),
         countries: list(account.countries, 'countryName', 'Unknown'),
