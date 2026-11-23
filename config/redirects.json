@@ -23,5 +23,10 @@
     "source": "/projects/bowserstack",
     "destination": "https://bowserstack.ryanmarch.me/",
     "permanent": false
+  },
+  {
+    "source": "/admin-save-test",
+    "destination": "/",
+    "permanent": true
   }
 ]
