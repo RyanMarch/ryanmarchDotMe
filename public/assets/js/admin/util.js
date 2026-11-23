@@ -45,6 +45,12 @@ export async function api(path, { signal } = {}) {
 }
 
 /** One-line explanation for a failed api() result. */
+/** POST/PUT/DELETE to the admin API with the sign-in headers. Resolves { ok, status, body }. */
+export async function send(path, method, payload) {
+    const res = await fetch(path, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json', ...(window.getAuthHeaders?.() || {}) }, body: payload === undefined ? undefined : JSON.stringify(payload) });
+    return { ok: res.ok, status: res.status, body: await res.json().catch(() => ({})) };
+}
+
 export function apiProblem(result) {
     const { status, body } = result;
     if (status === 401) return 'Not authorized. Sign in again.';

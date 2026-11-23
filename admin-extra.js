@@ -6,7 +6,7 @@
 import { adminEmail, ghJson, jsonResponse, safeBranch, withEditor } from './admin-http.js';
 import { setUnpublished } from './public/assets/js/admin/project-order.js';
 import { parseProjectDataSource } from './public/assets/js/admin-project-parser.js';
-import { fetchSitemaps } from './search-console.js';
+import { fetchPageWindow, fetchSitemaps } from './search-console.js';
 
 const ID = /^[a-z0-9][a-z0-9-]{0,59}$/;
 const DATA_FILE = 'public/assets/js/project-data.js';
@@ -169,4 +169,81 @@ export async function handleEvents(request, env, url) {
         }
     }
     return jsonResponse({ available: true, days, since: first, ...out });
+}
+
+/* ───────────── ideas inbox ───────────── */
+
+const IDEAS_KEY = 'ideas:v1';
+const MAX_IDEAS = 100;
+
+export async function handleIdeas(request, env, url) {
+    if (!env.ADMIN_KV) return jsonResponse({ available: false, ideas: [], message: 'The ideas inbox needs the ADMIN_KV binding.' });
+    const ideas = (await env.ADMIN_KV.get(IDEAS_KEY, 'json').catch(() => null)) || [];
+    const save = async list => { await env.ADMIN_KV.put(IDEAS_KEY, JSON.stringify(list)); return jsonResponse({ available: true, ideas: list }); };
+
+    if (request.method === 'GET') return jsonResponse({ available: true, ideas });
+    if (request.method === 'DELETE') return save(ideas.filter(i => i.id !== url.searchParams.get('id')));
+
+    let body;
+    try { body = await request.json(); } catch { return jsonResponse({ error: 'bad_json', message: 'Send JSON.' }, 400); }
+    if (body.id) { // mark done or not
+        return save(ideas.map(i => (i.id === body.id ? { ...i, done: Boolean(body.done) } : i)));
+    }
+    const text = String(body.text || '').trim().slice(0, 200);
+    if (!text) return jsonResponse({ error: 'empty', message: 'Write the idea first.' }, 400);
+    if (ideas.length >= MAX_IDEAS) return jsonResponse({ error: 'full', message: `The inbox holds ${MAX_IDEAS} ideas. Clear some first.` }, 400);
+    return save([{ id: crypto.randomUUID().slice(0, 8), text, created: new Date().toISOString(), done: false }, ...ideas]);
+}
+
+/* ───────────── journal: the last 100 commits on main ───────────── */
+
+export async function handleJournal(request, env, url, fetchImpl) {
+    if (!env.GITHUB_REPO || !env.GITHUB_PAT) return jsonResponse({ available: false, commits: [], message: 'GitHub access is not configured.' });
+    const key = 'journal:v1';
+    if (env.ADMIN_KV) {
+        const hit = await env.ADMIN_KV.get(key, 'json').catch(() => null);
+        if (hit) return jsonResponse({ ...hit, cached: true });
+    }
+    try {
+        const list = await ghJson(env, 'commits?sha=main&per_page=100', fetchImpl);
+        const out = { available: true, commits: list.map(c => ({ date: c.commit.author.date, message: (c.commit.message || '').split('\n')[0], author: c.commit.author.name || '' })) };
+        if (env.ADMIN_KV) await env.ADMIN_KV.put(key, JSON.stringify(out), { expirationTtl: 3600 }).catch(() => {});
+        return jsonResponse(out);
+    } catch (e) {
+        return jsonResponse({ available: false, commits: [], message: `GitHub: ${e.message}` });
+    }
+}
+
+/* ───────────── before and after your last edit ───────────── */
+
+/** Compares a project page's Google numbers in equal windows before and after its newest edit. */
+export async function handleImpact(request, env, url, fetchImpl, { projects = [] } = {}) {
+    if (!env.GSC_SERVICE_ACCOUNT) return jsonResponse({ configured: false, message: 'Set GSC_SERVICE_ACCOUNT to enable Search Console.' }, 501);
+    const id = url.searchParams.get('project');
+    if (!projects.some(p => p.id === id) || !ID.test(id)) return jsonResponse({ error: 'unknown_project', message: 'Unknown project.' }, 404);
+    const key = `impact:v1:${id}`;
+    if (env.ADMIN_KV) {
+        const hit = await env.ADMIN_KV.get(key, 'json').catch(() => null);
+        if (hit) return jsonResponse({ ...hit, cached: true });
+    }
+    try {
+        const commits = await ghJson(env, `commits?sha=main&path=${encodeURIComponent(`public/content/${id}`)}&per_page=1`, fetchImpl);
+        const edited = commits[0]?.commit?.author?.date;
+        if (!edited) return jsonResponse({ ready: false, reason: 'No edits found for this project.' });
+        const day = 86400000;
+        const editDay = Date.parse(edited.slice(0, 10));
+        const afterEnd = Date.now() - 2 * day; // Search Console runs about two days behind
+        const days = Math.min(28, Math.floor((afterEnd - editDay) / day));
+        if (days < 7) return jsonResponse({ ready: false, edited, reason: 'Too soon to compare. Check back a week after the edit.' });
+        const iso = ms => new Date(ms).toISOString().slice(0, 10);
+        const [before, after] = await Promise.all([
+            fetchPageWindow(env, id, iso(editDay - days * day), iso(editDay - day), fetchImpl),
+            fetchPageWindow(env, id, iso(editDay + day), iso(editDay + days * day), fetchImpl)
+        ]);
+        const out = { ready: true, edited, days, before, after };
+        if (env.ADMIN_KV) await env.ADMIN_KV.put(key, JSON.stringify(out), { expirationTtl: 6 * 3600 }).catch(() => {});
+        return jsonResponse(out);
+    } catch (e) {
+        return jsonResponse({ error: 'impact_failed', message: e.message }, 502);
+    }
 }

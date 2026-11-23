@@ -25,7 +25,7 @@ import {
 } from './public/assets/js/admin/audit.js';
 
 import { fetchSearchData, inspectUrl } from './search-console.js';
-import { handleEvents, handleFreshness, handleSchedule, handleSitemaps } from './admin-extra.js';
+import { handleEvents, handleFreshness, handleIdeas, handleImpact, handleJournal, handleSchedule, handleSitemaps } from './admin-extra.js';
 import { ghJson, jsonResponse, safeBranch } from './admin-http.js';
 import { handleActivity, handleBuild, handleHistory, handleImageDelete, handleLinks, handleNotFound, handleTrash, handleMedia, handleR2, handleScan, handleStatus } from './admin-site.js';
 
@@ -398,6 +398,9 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
         '/api/admin/freshness': [handleFreshness, ['GET']],
         '/api/admin/schedule': [handleSchedule, ['GET', 'POST', 'DELETE']],
         '/api/admin/events': [handleEvents, ['GET']],
+        '/api/admin/ideas': [handleIdeas, ['GET', 'POST', 'DELETE']],
+        '/api/admin/journal': [handleJournal, ['GET']],
+        '/api/admin/search/impact': [handleImpact, ['GET']],
         '/api/admin/overview': [handleOverview, ['GET']],
         '/api/admin/health': [handleHealth, ['GET']],
         '/api/admin/scan': [handleScan, ['GET']],
@@ -422,7 +425,7 @@ export async function handleAdminApi(request, env, url, cleanPath, { projects = 
     const [handler] = entry;
     if (handler === handleOverview) return handler(request, env, url, fetchImpl, projects);
     if (handler === handleHealth) return handler(request, env, url, fetchImpl, { projects, redirects, assetFetch });
-    if (handler === handleSearchIndex || handler === handleFreshness || handler === handleSchedule) return handler(request, env, url, fetchImpl, { projects });
+    if (handler === handleSearchIndex || handler === handleFreshness || handler === handleSchedule || handler === handleImpact) return handler(request, env, url, fetchImpl, { projects });
     if (handler === handleScan) return handler(request, env, url, fetchImpl, { projects, assetFetch });
     if (handler === handleImageDelete) return handler(request, env, url, fetchImpl, { projects });
     if (handler === handleLinks) return handler(request, env, url, fetchImpl, { projects, assetFetch });

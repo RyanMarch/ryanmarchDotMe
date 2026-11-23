@@ -185,3 +185,24 @@ export async function fetchSitemaps(env, fetchImpl = fetch) {
         indexed: (m.contents || []).reduce((n, c) => n + Number(c.indexed || 0), 0)
     }));
 }
+
+/** Clicks, impressions and average position for one project's page (any http/www variant) between two dates. */
+export async function fetchPageWindow(env, id, startDate, endDate, fetchImpl = fetch) {
+    const key = parseServiceAccount(env.GSC_SERVICE_ACCOUNT);
+    if (!key) return null;
+    const token = await accessToken(key, fetchImpl);
+    const site = env.GSC_SITE || 'sc-domain:ryanmarch.me';
+    const res = await fetchImpl(`https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(site)}/searchAnalytics/query`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ startDate, endDate, dimensions: ['date'], rowLimit: 500, dimensionFilterGroups: [{ filters: [{ dimension: 'page', operator: 'contains', expression: `/project/${id}/` }] }] })
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error?.message || `HTTP ${res.status}`);
+    const rows = (body.rows || []).map(row);
+    const impressions = rows.reduce((n, r) => n + r.impressions, 0);
+    return {
+        clicks: rows.reduce((n, r) => n + r.clicks, 0), impressions,
+        position: impressions ? rows.reduce((n, r) => n + r.position * r.impressions, 0) / impressions : 0
+    };
+}

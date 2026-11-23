@@ -1,5 +1,6 @@
 import { apiProblem, countUp, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
-import { digestHtml, todayHtml, todayItems } from './today.js';
+import { digestHtml, milestoneHtml, nextUpHtml, todayHtml, todayItems } from './today.js';
+import { highest, milestones, nextUp, readSeen, streak, writeSeen } from './progress-data.js';
 import { digestLines } from './insights.js';
 import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
@@ -14,9 +15,23 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound', '/api/admin/search?days=28', '/api/admin/search/index', '/api/admin/freshness', '/api/admin/schedule', '/api/admin/events?days=7'];
+    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound', '/api/admin/search?days=28', '/api/admin/search/index', '/api/admin/freshness', '/api/admin/schedule', '/api/admin/events?days=7', '/api/admin/ideas', '/api/admin/journal'];
 
-    const paint = ([overview, analytics, health, notfound, search, saved, fresh, schedule, events]) => {
+    let tasks = [];
+    let nextIndex = 0;
+    let pendingMilestones = [];
+    body.addEventListener('click', e => {
+        if (e.target.closest('[data-another]')) {
+            nextIndex++;
+            body.querySelector('#next-up').outerHTML = nextUpHtml(tasks, nextIndex);
+        } else if (e.target.closest('[data-dismiss-milestones]')) {
+            const seen = readSeen();
+            pendingMilestones.forEach(m => seen.add(m.key));
+            writeSeen(seen);
+            body.querySelector('#milestone-card')?.remove();
+        }
+    });
+    const paint = ([overview, analytics, health, notfound, search, saved, fresh, schedule, events, ideas, journal]) => {
         const parts = [];
         const a = analytics.ok ? analytics.body : null;
         const o = overview.ok ? overview.body : null;
@@ -39,12 +54,28 @@ export async function render(root) {
             ? `<ul class="rows">${commits.map(c => `<li><span class="label"><a class="commit-msg" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.message)}</a><span class="sub">${esc(c.sha)} · ${esc(c.author)}</span></span><span class="value">${esc(relativeTime(c.date))}</span></li>`).join('')}</ul>`
             : `<ul class="rows"><li class="empty">${esc(o?.commitsError ? `GitHub: ${o.commitsError}` : 'GitHub access is not configured for this environment.')}</li></ul>`;
 
+        const projectsNow = window.myProjects || [];
+        const bestPath = (a?.paths || []).find(p => /^\/project\//.test(p.label));
+        const bestTitle = bestPath ? projectsNow.find(p => p.id === bestPath.label.split('/')[2]?.toLowerCase())?.title : '';
+        const searchData = search?.ok ? search.body : null;
+        const indexNow = saved?.ok ? saved.body.results : {};
+        const streakNow = streak(journal?.ok ? journal.body.commits || [] : []);
+        const topPage = (searchData?.pages || []).filter(p => /^\/project\//.test(p.page)).sort((x, y) => y.clicks - x.clicks)[0];
+        const topId = topPage?.clicks ? topPage.page.split('/')[2] : null;
+        const fresh_milestones = highest(milestones({
+            search: searchData, projects: projectsNow.filter(p => !p.unpublished && p.hasExtendedContent), index: indexNow, streakWeeks: streakNow.current,
+            topProject: topId ? { id: topId, title: projectsNow.find(p => p.id === topId)?.title || topId } : null
+        })).filter(m => !readSeen().has(m.key));
+        parts.push(milestoneHtml(fresh_milestones));
+        tasks = nextUp({ projects: projectsNow, search: searchData, index: indexNow, edited: fresh?.ok ? fresh.body.edited : {}, ideas: ideas?.ok ? ideas.body.ideas : [] });
+        parts.push(nextUpHtml(tasks, nextIndex));
+        pendingMilestones = fresh_milestones;
         parts.push(todayHtml(todayItems({
             overview: overview.ok ? overview.body : null, health: health.ok ? health.body : null,
-            notfound: notfound?.ok ? notfound.body : null, search: search?.ok ? search.body : null, analytics: a,
+            notfound: notfound?.ok ? notfound.body : null, search: searchData, analytics: a,
             index: saved?.ok ? saved.body.results : null, edited: fresh?.ok ? fresh.body.edited : null,
-            schedule: schedule?.ok ? schedule.body : null, projects: window.myProjects || []
-        })));
+            schedule: schedule?.ok ? schedule.body : null, projects: projectsNow
+        }), { best: bestTitle }));
         parts.push(digestHtml(digestLines({
             analytics: a, search: search?.ok ? search.body : null, overview: o, notfound: notfound?.ok ? notfound.body : null,
             events: events?.ok ? events.body : null, projects: window.myProjects || []
@@ -75,7 +106,6 @@ export async function render(root) {
         </section></div>`);
 
         body.innerHTML = parts.join('');
-
         body.querySelector('.quick').addEventListener('click', e => {
             const action = e.target.closest('[data-action]')?.dataset.action;
             if (!action) return;

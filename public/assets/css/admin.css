@@ -1169,7 +1169,7 @@ kbd { font: inherit; font-size: 0.8rem; padding: 0.05rem 0.4rem; border: 1px sol
 .choose-sub { font-size: 0.8rem; color: var(--text-muted); }
 
 /* ── Table pages (Embeds, Redirects): one wide table in a centred column, easy to read straight down ── */
-#view-embeds, #view-seo, #view-activity, #view-health, #view-search, #view-performance { max-width: 1180px; margin-inline: auto; }
+#view-embeds, #view-seo, #view-activity, #view-health, #view-search, #view-performance, #view-progress { max-width: 1180px; margin-inline: auto; }
 .table-wrap { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); margin-bottom: 1.25rem; overflow: hidden; }
 .table-wrap table.dt { table-layout: fixed; }
 .table-wrap table.dt th { background: rgba(var(--accent-rgb), 0.04); }
@@ -1306,3 +1306,21 @@ table.pf .pf-notes .note-warning { color: var(--warning, #b7791f); }
 .sched-form { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: flex-end; margin-top: 1rem; }
 .sched-form label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; color: var(--text-muted); }
 .sched-form select, .sched-form input { font: inherit; font-size: 0.9rem; padding: 0.4rem 0.5rem; background: var(--surface); color: var(--text-primary); border: 1px solid var(--rule-strong); border-radius: var(--radius); min-height: 36px; }
+
+/* Progress */
+.idea-form { display: flex; gap: 0.6rem; margin: 0.5rem 0 0.75rem; }
+.idea-form input { flex: 1; min-width: 0; font: inherit; font-size: 0.95rem; padding: 0.5rem 0.65rem; background: var(--surface); color: var(--text-primary); border: 1px solid var(--rule-strong); border-radius: var(--radius); min-height: 38px; }
+.rows.ideas .is-done .label span { text-decoration: line-through; color: var(--text-muted); }
+.rows.ideas .label { cursor: pointer; align-items: baseline; gap: 0.5rem; }
+
+.next-title { margin: 0 0 0.25rem; font-size: 1.05rem; font-weight: 650; }
+#next-up .actions { margin-top: 0.75rem; display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+/* Worth doing on a phone: tag, then the sentence, then the action, each on its own line */
+@media (max-width: 720px) {
+    .rows.today li { flex-direction: column; align-items: flex-start; gap: 0.3rem; padding-block: 0.8rem; }
+    .rows.today .label { display: block; width: 100%; }
+    .rows.today .label .sev { display: inline-block; margin-bottom: 0.25rem; }
+    .rows.today .today-text { display: block; font-size: 0.95rem; line-height: 1.4; }
+    .rows.today .value { font-size: 0.88rem; color: var(--accent-color); text-decoration: underline; }
+}

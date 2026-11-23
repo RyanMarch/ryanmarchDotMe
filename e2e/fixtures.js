@@ -28,6 +28,7 @@ const mediaFiles = [
 export async function mockAdminApi(page, overrides = {}) {
     const posts = [];
     const schedule = { items: [], log: [] };
+    const ideas = { list: [] };
     await page.route('**/api/admin/**', async route => {
         const req = route.request();
         const url = new URL(req.url());
@@ -49,6 +50,17 @@ export async function mockAdminApi(page, overrides = {}) {
         if (name === 'media') return reply({ repo: { branch: 'main', files: mediaFiles, truncated: false }, r2: { available: true, trash: false, objects: [] } });
         if (name === 'activity') return reply({ branch: url.searchParams.get('branch') || 'main', commits: [{ sha: 'abc1234', message: 'Update things', author: 'Ryan', date: new Date().toISOString(), url: 'https://example.com/c', checks: [{ name: 'Tests', state: 'ok' }] }], checksAvailable: true, pending: { ahead: 0 }, deploys: null });
         if (name === 'notfound') return reply({ available: true, since: Date.now() - 86400000, items: [{ path: '/project/ledgr', count: 3, first: Date.now() - 1000, last: Date.now() - 1000, referrer: '' }] });
+        if (name === 'ideas') {
+            if (req.method() === 'POST') {
+                const b = JSON.parse(req.postData());
+                if (b.id) ideas.list = ideas.list.map(i => (i.id === b.id ? { ...i, done: b.done } : i));
+                else ideas.list = [{ id: `i${ideas.list.length + 1}`, text: b.text, created: new Date().toISOString(), done: false }, ...ideas.list];
+            }
+            if (req.method() === 'DELETE') ideas.list = ideas.list.filter(i => i.id !== url.searchParams.get('id'));
+            return reply({ available: true, ideas: ideas.list });
+        }
+        if (name === 'journal') return reply({ available: true, commits: [0, 1, 2, 8, 9].map(d => ({ date: new Date(Date.now() - d * 86400000).toISOString(), message: `admin: edit ${d}`, author: 'Ryan' })) });
+        if (name === 'search/impact') return reply({ ready: true, days: 28, edited: '2026-09-01T00:00:00Z', before: { clicks: 2, impressions: 100, position: 12 }, after: { clicks: 9, impressions: 140, position: 8 } });
         if (name === 'freshness') return reply({ available: true, branch: 'main', edited: { ledger: '2024-01-01T00:00:00Z' } });
         if (name === 'events') return reply({ available: true, days: 30, since: '2026-11-01', play: { ledger: 4 }, out: { ledger: 2 } });
         if (name === 'schedule') {
