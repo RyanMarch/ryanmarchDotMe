@@ -997,10 +997,10 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
 .rows.is-grid.cells-set { grid-template-columns: repeat(auto-fill, minmax(min(100%, 620px), 1fr)); }
 
 @container main (min-width: 1100px) {
-    .a-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+    .a-grid { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: stretch; }
     .a-chart, .a-vitals { grid-column: 1 / -1; }
-    .a-top { grid-column: span 7; }
-    .a-src { grid-column: span 5; }
+    .a-top, .a-goals { grid-column: span 6; }
+    .a-src { grid-column: span 4; }
     .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .dash-health, .dash-quick { grid-column: 1 / -1; }
     /* A narrow stack on the left (connections, then site files, with no gap between), the project list wide on the right. */
@@ -1020,7 +1020,8 @@ ul.mfiles { list-style: none; margin: 0.35rem 0 0; padding: 0; }
     .a-chart { grid-column: 1 / 9; grid-row: 1; }
     .a-vitals { grid-column: 9 / -1; grid-row: 1; }
     .a-top { grid-column: 1 / 9; grid-row: 2; }
-    .a-src { grid-column: 9 / -1; grid-row: 2; }
+    .a-goals { grid-column: 9 / -1; grid-row: 2; }
+    .a-src { grid-column: span 4; grid-row: 3; }
     .a-vitals .vitals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .a-vitals .vital:nth-child(odd) { border-left: 0; }
     .a-vitals .vital:nth-child(n + 3) { border-top: 1px solid var(--rule); }
@@ -1324,3 +1325,10 @@ table.pf .pf-notes .note-warning { color: var(--warning, #b7791f); }
     .rows.today .today-text { display: block; font-size: 0.95rem; line-height: 1.4; }
     .rows.today .value { font-size: 0.88rem; color: var(--accent-color); text-decoration: underline; }
 }
+
+/* Progress lists (milestones, ideas, journal) sit in a panel like the tables, with month headings as a band */
+#view-progress .rows { border: 1px solid var(--rule); border-radius: var(--radius); background: var(--surface); overflow: hidden; margin-bottom: 1.25rem; }
+#view-progress .rows .journal-month { background: color-mix(in srgb, var(--text-primary) 5%, var(--surface)); border-top: 1px solid var(--rule); }
+#view-progress .rows .journal-month:first-child { border-top: 0; }
+#view-progress .rows .journal-month strong { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted); }
+#view-progress .rows .journal-month .value { font-size: 0.8rem; color: var(--text-muted); }

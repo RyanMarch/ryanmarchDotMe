@@ -34,19 +34,31 @@ export function streak(commits, now = Date.now()) {
     return { current, best, activeThisWeek: weeks.has(thisWeek) };
 }
 
-/** Commits grouped by month, newest first, with a few of the more telling messages from each. */
-export function journalMonths(commits) {
+/** A commit message in plain words: "admin: update content/ledger/index.html" becomes "Edited the Ledger write-up". */
+export function plainMessage(message, titleOf = id => id) {
+    const m = message.replace(/^admin: /i, '');
+    let r;
+    if ((r = m.match(/^update content\/([\w-]+)\//))) return `Edited the ${titleOf(r[1])} write-up`;
+    if ((r = m.match(/^upload content\/([\w-]+)\//))) return `Added an image to ${titleOf(r[1])}`;
+    if ((r = m.match(/^delete image content\/([\w-]+)\//))) return `Removed an image from ${titleOf(r[1])}`;
+    if ((r = m.match(/^create project for ([\w-]+)/))) return `Started the ${titleOf(r[1])} project`;
+    if ((r = m.match(/^(publish|unpublish|scheduled (?:publish|unpublish) of) ([\w-]+)/))) return `${/un/.test(r[1]) ? 'Unpublished' : 'Published'} ${titleOf(r[2])}`;
+    return m.charAt(0).toUpperCase() + m.slice(1);
+}
+
+/** Content commits grouped by month, newest first, each with its entries (one per line, newest first). */
+export function journalMonths(commits, titleOf) {
     const by = new Map();
     for (const c of commits.filter(real)) {
         const key = c.date.slice(0, 7);
         if (!by.has(key)) by.set(key, []);
-        by.get(key).push(c.message);
+        by.get(key).push({ date: c.date, text: plainMessage(c.message, titleOf) });
     }
-    return [...by].sort((a, b) => b[0].localeCompare(a[0])).map(([key, messages]) => ({
+    return [...by].sort((a, b) => b[0].localeCompare(a[0])).map(([key, entries]) => ({
         key,
         label: new Date(`${key}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }),
-        count: messages.length,
-        highlights: [...new Set(messages.map(m => m.replace(/^admin: /i, '')))].slice(0, 5)
+        count: entries.length,
+        entries: entries.sort((a, b) => b.date.localeCompare(a.date))
     }));
 }
 
