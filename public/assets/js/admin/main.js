@@ -1,17 +1,18 @@
 // Admin shell: hash routing, mobile drawer, lazy-loaded views.
 
 const VIEWS = {
-    dashboard: { title: 'Dashboard', load: () => import('./dashboard.js') },
-    analytics: { title: 'Analytics', load: () => import('./analytics.js') },
-    activity: { title: 'Activity', load: () => import('./activity.js') },
-    media: { title: 'Media', load: () => import('./media.js') },
-    embeds: { title: 'Embeds', load: () => import('./embeds.js') },
-    settings: { title: 'Settings', load: () => import('./settings.js') },
-    health: { title: 'Content health', load: () => import('./health.js') },
-    seo: { title: 'Redirects & SEO', load: () => import('./seo.js') },
-    projects: { title: 'Projects', load: null } // markup + logic live in admin.html / editor.js
+    dashboard: { group: 'Site', title: 'Dashboard', load: () => import('./dashboard.js') },
+    analytics: { group: 'Site', title: 'Analytics', load: () => import('./analytics.js') },
+    activity: { group: 'Site', title: 'Activity', load: () => import('./activity.js') },
+    media: { group: 'Content', title: 'Media', load: () => import('./media.js') },
+    embeds: { group: 'Content', title: 'Embeds', load: () => import('./embeds.js') },
+    settings: { group: 'System', title: 'Settings', load: () => import('./settings.js') },
+    health: { group: 'Content', title: 'Content health', load: () => import('./health.js') },
+    seo: { group: 'Content', title: 'Redirects & SEO', load: () => import('./seo.js') },
+    projects: { group: 'Content', title: 'Projects', load: null } // markup + logic live in admin.html / editor.js
 };
 const DEFAULT_VIEW = 'dashboard';
+export const NAV = Object.entries(VIEWS).map(([id, v]) => ({ id, title: v.title, group: v.group }));
 
 const app = document.getElementById('admin-view');
 const menuBtn = document.getElementById('menu-btn');
@@ -52,6 +53,7 @@ async function route() {
         else a.removeAttribute('aria-current');
     });
     document.getElementById('topbar-title').textContent = view.title;
+    document.getElementById('topbar-group').textContent = view.group;
     document.title = `${view.title} | Admin | Ryan March`;
     setDrawer(false);
 
@@ -81,3 +83,10 @@ new MutationObserver(() => {
     wasHidden = hidden;
 }).observe(app, { attributes: true, attributeFilter: ['class'] });
 route();
+
+// Environment label: local dev vs the deployed site.
+const local = ['localhost', '127.0.0.1'].includes(location.hostname);
+const env = document.getElementById('env-label');
+if (env) { env.classList.toggle('is-local', local); env.querySelector('span').textContent = local ? 'Local' : 'Production'; }
+
+import('./palette.js').then(m => m.initPalette(NAV));
