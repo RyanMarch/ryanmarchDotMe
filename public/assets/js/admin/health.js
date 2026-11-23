@@ -22,7 +22,7 @@ export function findingsHtml(findings, projects, filter = 'all') {
         groups.get(f.id).push(f);
     }
     const rows = [...groups].map(([id, items]) => {
-        const open = names.has(id) ? `<button type="button" class="linklike" data-open="${esc(id)}">Open write-up</button>` : '';
+        const open = names.has(id) ? `<button type="button" class="linklike" data-open="${esc(id)}">Open write-up</button><button type="button" class="linklike" data-search="${esc(id)}">Search results</button>` : '';
         return items.map((f, i) => `<tr${i === 0 ? ' class="first"' : ''}>
             <td data-label="Project" class="ht-project">${i === 0 ? `<strong>${esc(names.get(id) || id)}</strong>${open}` : ''}</td>
             <td data-label="Severity" class="ht-sev"><span class="sev sev-${f.severity}">${SEV_LABEL[f.severity]}</span></td>
@@ -206,7 +206,9 @@ export async function render(root, route = parse()) {
     body.addEventListener('click', e => {
         if (e.target.closest('[data-run-full]')) { runFull(); return; }
         const open = e.target.closest('[data-open]');
-        if (open) openInEditor(open.dataset.open);
+        if (open) { openInEditor(open.dataset.open); return; }
+        const search = e.target.closest('[data-search]');
+        if (search) go(href('search', [], { project: search.dataset.search }));
     });
 
     onPop(r => {

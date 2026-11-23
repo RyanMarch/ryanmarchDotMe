@@ -1,5 +1,6 @@
 import { apiProblem, countUp, dataTable, esc, fmt, relativeTime, setupNotice, swr } from './util.js';
-import { todayHtml, todayItems } from './today.js';
+import { digestHtml, todayHtml, todayItems } from './today.js';
+import { digestLines } from './insights.js';
 import { deltaHtml, fillDays, pageLabel, sparkSvg } from './analytics.js';
 
 function statBox(label, value, sub, spark = '') {
@@ -13,9 +14,9 @@ export async function render(root) {
     const body = root.querySelector('#dash-body');
     const branch = (typeof window.getSelectedBranch === 'function' && window.getSelectedBranch()) || 'main';
 
-    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound', '/api/admin/search?days=28'];
+    const paths = [`/api/admin/overview?branch=${encodeURIComponent(branch)}`, '/api/admin/analytics?days=7', '/api/admin/health?scope=summary', '/api/admin/notfound', '/api/admin/search?days=28', '/api/admin/search/index', '/api/admin/freshness', '/api/admin/schedule', '/api/admin/events?days=7'];
 
-    const paint = ([overview, analytics, health, notfound, search]) => {
+    const paint = ([overview, analytics, health, notfound, search, saved, fresh, schedule, events]) => {
         const parts = [];
         const a = analytics.ok ? analytics.body : null;
         const o = overview.ok ? overview.body : null;
@@ -40,7 +41,13 @@ export async function render(root) {
 
         parts.push(todayHtml(todayItems({
             overview: overview.ok ? overview.body : null, health: health.ok ? health.body : null,
-            notfound: notfound?.ok ? notfound.body : null, search: search?.ok ? search.body : null, analytics: a
+            notfound: notfound?.ok ? notfound.body : null, search: search?.ok ? search.body : null, analytics: a,
+            index: saved?.ok ? saved.body.results : null, edited: fresh?.ok ? fresh.body.edited : null,
+            schedule: schedule?.ok ? schedule.body : null, projects: window.myProjects || []
+        })));
+        parts.push(digestHtml(digestLines({
+            analytics: a, search: search?.ok ? search.body : null, overview: o, notfound: notfound?.ok ? notfound.body : null,
+            events: events?.ok ? events.body : null, projects: window.myProjects || []
         })));
 
         const hc = health.ok ? health.body.counts : null;
