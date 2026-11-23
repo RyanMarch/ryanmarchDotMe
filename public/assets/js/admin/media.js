@@ -81,7 +81,7 @@ function imagesTab(panel, media, projects, reload) {
             list.className = 'rows panel-list is-grid cells-folder';
             list.innerHTML = folders.map(f => `<li class="frow"><button type="button" class="folder-btn" data-folder="${esc(f.dir)}">
                 ${FOLDER_ICON}<span class="fname-col"><strong>${esc(f.title)}</strong><span class="sub">${esc(f.dir)}</span></span>
-                <span class="fmeta">${f.missingAvif ? `<span class="sev sev-warning">${f.missingAvif} missing AVIF</span>` : ''}<span class="num">${fmt(f.images)} image${f.images === 1 ? '' : 's'} · ${bytes(f.bytes)}</span></span></button></li>`).join('');
+                <span class="fissue">${f.missingAvif ? `<span class="sev sev-warning">${f.missingAvif} missing AVIF</span>` : ''}</span><span class="fcount num">${fmt(f.images)} image${f.images === 1 ? '' : 's'}</span><span class="fsize num">${bytes(f.bytes)}</span></button></li>`).join('');
             count.textContent = `${fmt(folders.length)} folders`;
             return;
         }
